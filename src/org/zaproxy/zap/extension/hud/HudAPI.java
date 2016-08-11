@@ -327,7 +327,8 @@ public class HudAPI extends ApiImplementor {
 				if (fileName.toLowerCase().endsWith(".css")) {
 					msg.setResponseHeader(API.getDefaultResponseHeader("text/css; charset=UTF-8"));
 				} else {
-					msg.setResponseHeader(API.getDefaultResponseHeader("text/html; charset=UTF-8"));
+					msg.setResponseHeader(getAllowFramingResponseHeader(
+							"200 OK", "text/html; charset=UTF-8", 0, false));
 				}
 				if (!fileName.equals("zapHudInjectScript.js")) {
 					msg.getResponseHeader().addHeader("Content-Security-Policy", CSP_POLICY);
@@ -354,5 +355,24 @@ public class HudAPI extends ApiImplementor {
 			throw new ApiException(ApiException.Type.BAD_OTHER);
 		}
 	}
+
+    public static String getAllowFramingResponseHeader(String responseStatus, String contentType, int contentLength, boolean canCache) {
+        StringBuilder sb = new StringBuilder(250);
+
+        sb.append("HTTP/1.1 ").append(responseStatus).append("\r\n");
+        if (! canCache) {
+        	sb.append("Pragma: no-cache\r\n");
+        	sb.append("Cache-Control: no-cache\r\n");
+        }
+        sb.append("Access-Control-Allow-Methods: GET,POST,OPTIONS\r\n");
+        sb.append("Access-Control-Allow-Headers: ZAP-Header\r\n");
+        sb.append("X-XSS-Protection: 1; mode=block\r\n");
+        sb.append("X-Content-Type-Options: nosniff\r\n");
+        sb.append("X-Clacks-Overhead: GNU Terry Pratchett\r\n");
+        sb.append("Content-Length: ").append(contentLength).append("\r\n");
+        sb.append("Content-Type: ").append(contentType).append("\r\n");
+
+        return sb.toString();
+    }
 
 }
