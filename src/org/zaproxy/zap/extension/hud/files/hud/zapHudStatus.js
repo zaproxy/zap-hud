@@ -70,6 +70,7 @@ function moveRhsFrame() {
 	// TODO read from configs
 	moveHudElement('hud-spider', 'right')
 	moveHudElement('hud-ascan', 'right')
+	moveHudElement('hud-reveal', 'right')
 	moveHudElement('hud-site-alert-high', 'right')
 	moveHudElement('hud-site-alert-medium', 'right')
 	moveHudElement('hud-site-alert-low', 'right')
@@ -142,8 +143,6 @@ function receiveMessage(e) {
 				moveRhsFrame();
 			}
 		} 
-
-
 	}
 }
 
@@ -369,6 +368,27 @@ function spiderDialog () {
 	parent.postMessage('zapHudData:' + JSON.stringify({'type' : 'spiderDialog', 'op' : op}), parentUrl);
 }
 
+function revealDialog () {
+	var zapXmlHttp = new XMLHttpRequest();
+	
+	zapXmlHttp.onreadystatechange = function() {
+		if (zapXmlHttp.readyState == XMLHttpRequest.DONE) {
+			var isRevealed = JSON.parse(zapXmlHttp.responseText).reveal;
+
+			var op;
+			if (isRevealed == "true") {
+				op = 'stop';
+			} else {
+				op = 'start';
+			}
+			parent.postMessage('zapHudData:' + JSON.stringify({'type' : 'revealDialog', 'op' : op}), parentUrl);
+		}
+	}
+
+	zapXmlHttp.open("GET", "<<ZAP_HUD_API>>JSON/reveal/view/reveal/?zapapiformat=JSON&apikey=<<ZAP_HUD_API_KEY>>");
+	zapXmlHttp.send();
+}
+
 function ascanDialog () {
 	var op;
 	if (! isInScope) {
@@ -383,6 +403,28 @@ function ascanDialog () {
 	parent.postMessage('zapHudData:' + JSON.stringify({'type' : 'ascanDialog', 'op' : op}), parentUrl);
 }
 
+function updateRevealData() {
+	var zapXmlHttp = new XMLHttpRequest();
+	
+	zapXmlHttp.onreadystatechange = function() {
+		if (zapXmlHttp.readyState == XMLHttpRequest.DONE) {
+			var isRevealed = JSON.parse(zapXmlHttp.responseText).reveal;
+
+			if (isRevealed == "true") {
+				document.getElementById("hud-reveal-data").innerText = "On";
+				document.getElementById('hud-reveal-icon').firstChild.setAttribute('src', '<<ZAP_HUD_API>>OTHER/hud/other/image/?name=light-on.png');
+				document.getElementById("hud-reveal-label").innerText = "Hide/Disable";
+			} else {
+				document.getElementById("hud-reveal-data").innerText = "Off";
+				document.getElementById('hud-reveal-icon').firstChild.setAttribute('src', '<<ZAP_HUD_API>>OTHER/hud/other/image/?name=light-off.png');
+				document.getElementById("hud-reveal-label").innerText = "Display/Enable";
+			}
+		}
+	}
+
+	zapXmlHttp.open("GET", "<<ZAP_HUD_API>>JSON/reveal/view/reveal/?zapapiformat=JSON&apikey=<<ZAP_HUD_API_KEY>>");
+	zapXmlHttp.send();
+}
 
 document.addEventListener('DOMContentLoaded', function () {
 	parentUrl = document.location.toString().split("url=")[1];
@@ -472,6 +514,13 @@ document.addEventListener('DOMContentLoaded', function () {
 		document.getElementById('hud-spider-wrapper').addEventListener('mouseout',  function(e) {hideZapLabel('hud-spider-label');}, false);
 		document.getElementById('hud-spider').addEventListener('click',  function(e) {spiderDialog();}, false);
 		document.getElementById('hud-spider-label').style.display = "none";
+	}
+	if (document.getElementById('hud-reveal-wrapper')) {
+		document.getElementById('hud-reveal-wrapper').addEventListener('mouseover', function(e) {showZapLabel('hud-reveal-label');}, false);
+		document.getElementById('hud-reveal-wrapper').addEventListener('mouseout',  function(e) {hideZapLabel('hud-reveal-label');}, false);
+		document.getElementById('hud-reveal').addEventListener('click',  function(e) {revealDialog();}, false);
+		document.getElementById('hud-reveal-label').style.display = "none";
+		updateRevealData();
 	}
 	if (document.getElementById('hud-ascan-wrapper')) {
 		document.getElementById('hud-ascan-wrapper').addEventListener('mouseover', function(e) {showZapLabel('hud-ascan-label');}, false);

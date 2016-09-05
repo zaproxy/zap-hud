@@ -29,6 +29,9 @@ function listener(e) {
 	} else if (data.type == 'ascanDialog') {
 		showAscanDialog(data.op);
 
+	} else if (data.type == 'revealDialog') {
+		showRevealDialog(data.op);
+
 	} else if (data.type == 'config') {
 		aboutDialog();
 
@@ -528,6 +531,69 @@ function stopSpider() {
 	zapXmlHttp.send();
 }
 
+function showRevealDialog(op){
+	var frag = document.createDocumentFragment();
+	var div1 = frag.appendChild(document.createElement("div"));
+	div1.setAttribute("id", "zapHudRevealDialog");
+	div1.setAttribute("title", "Reveal Tool");
+	p = div1.appendChild(document.createElement("p"));
+
+	document.body.appendChild(frag);
+	if (op == 'start') {
+		p.appendChild(document.createTextNode("Display hidden fields and enable disabled ones?"));
+		$( "#zapHudRevealDialog" ).dialog({
+			resizable: false,
+			height:240,
+			modal: true,
+			buttons: {
+				Cancel: function() {
+					$( this ).dialog( "close" );
+				},
+				"Display/Enable": function() {
+					setReveal(true);
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$( "#zapHudRevealDialog" ).remove();
+				hideDisplay();
+			}
+		});
+	} else {
+		p.appendChild(document.createTextNode("Stop displaying hidden fields and re-disable the temporarily enabled fields?"));
+		$( "#zapHudRevealDialog" ).dialog({
+			resizable: false,
+			height:240,
+			modal: true,
+			buttons: {
+				Cancel: function() {
+					$( this ).dialog( "close" );
+				},
+				"Hide/Disable": function() {
+					setReveal(false);
+					$( this ).dialog( "close" );
+				}
+			},
+			close: function() {
+				$( "#zapHudRevealDialog" ).remove();
+				hideDisplay();
+			}
+		});
+	}
+}
+
+function setReveal(isStart) {
+	var zapXmlHttp = new XMLHttpRequest();
+	zapXmlHttp.onreadystatechange = function() {
+		if (zapXmlHttp.readyState == XMLHttpRequest.DONE) {
+			parent.postMessage('refresh', parentUrl);
+		}
+	}
+
+	zapXmlHttp.open("GET", "<<ZAP_HUD_API>>JSON/reveal/action/setReveal/?reveal=" + isStart + "&apikey=<<ZAP_HUD_API_KEY>>", true);
+	zapXmlHttp.send();
+}
+
 function showAscanDialog(op){
 	var frag = document.createDocumentFragment();
 	var div1 = frag.appendChild(document.createElement("div"));
@@ -661,6 +727,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		alert('Got error ' + e);
 		console.log('Got error ' + e);
 	};
+
 	// TODO Need to cope with malicious input!
 	parentUrl = document.location.toString().split("url=")[1];
 	console.log('hud parent url = ' + parentUrl);
