@@ -2,7 +2,7 @@
 var zapHudConfig = {'hudConfig': {'left': {'max':true}, 'right' : {'max':true}}};
 
 function expandZapHudLhs(){
-	document.getElementById('zapItemPaneLhs').style.width = "244px";
+	document.getElementById('zapItemPaneLhs').style.width = "264px";
 	document.getElementById('zapHudStatusDisplayLhs').style.width = "240px";
 	return false;
 }
@@ -90,6 +90,10 @@ function hideZapData() {
 	mainDisplay.style.display = 'none';
 	//var mainDisplayFrame = document.getElementById('zapHudStatusDisplayFrame');
 	//mainDisplayFrame.setAttribute('src', '');
+}
+
+function refresh() {
+	window.location.reload();
 }
 
 function zapHudHighlightErrorFields(data) {
@@ -186,6 +190,8 @@ window.addEventListener('message', function (e) {
 		// TODO how to post back??
 		var rhsDisplayFrame = document.getElementById('zapHudStatusDisplayRhs');
 		rhsDisplayFrame.contentWindow.postMessage(JSON.stringify(zapHudConfig), '<<ZAP_HUD_API>>');
+	} else if (e.data == 'refresh') {
+		refresh();
 	}
 
 });
@@ -224,7 +230,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		var div2 = frag.appendChild(document.createElement("div"));
 		div2.setAttribute("id", "zapItemPaneLhs");
 		div2.style.cssText = "position: absolute; top:30%; overflow: hidden; left: 0px; border: 0px none; width:104px; height:200px; z-index: 2000000000;";
-
 		// All target frames should be on the ZAP API domain
 
 		// The div and iframe used for the controls on the left hand side
@@ -235,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		ifr2.setAttribute("onmouseout", "contractZapHudLhs();");
 		//ifr2.setAttribute("src", "<<ZAP_HUD_API>>zap/OTHER/hud/other/file/?name=zapHudStatus.html");
 		ifr2.setAttribute("src", "<<ZAP_HUD_API>>OTHER/hud/other/file/?name=zapHudStatus.html&url=" + document.location.toString());
-		ifr2.style.cssText = "height: 320px; width: 80px; margin-bottom: 100px; margin-left: 24px; border: 0px none; position:fixed; z-index: 10000;";
+		ifr2.style.cssText = "height: 400px; width: 80px; margin-bottom: 100px; margin-left: 24px; border: 0px none; position:fixed; z-index: 10000;";
 		// This one has a border for testing purposes ;)
 		//ifr2.style.cssText = "height: 280px; width: 80px; margin-bottom: 100px; margin-left: 24px; position:fixed; z-index: 2000000000;";
 /* */
@@ -252,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		//ifr2.setAttribute("src", "<<ZAP_HUD_API>>zap/OTHER/hud/other/file/?name=zapHudStatus.html");
 		ifr3.setAttribute("src", "<<ZAP_HUD_API>>OTHER/hud/other/file/?name=zapHudStatusRhs.html&url=" + document.location.toString());
 		//ifr3.setAttribute("align", "right");
-		ifr3.style.cssText = "height: 280px; width: 80px; margin-bottom: 100px; right: 0px; margin-right: 24px; border: 0px none; position:fixed; z-index: 10000;";
+		ifr3.style.cssText = "height: 400px; width: 80px; margin-bottom: 100px; right: 0px; margin-right: 24px; border: 0px none; position:fixed; z-index: 10000;";
 		// This one has a border for testing purposes ;)
 		//ifr3.style.cssText = "height: 200px; width: 80px; margin-bottom: 100px; margin-right: 24px; position:fixed; z-index: 10000;";
 /* */
