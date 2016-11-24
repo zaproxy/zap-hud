@@ -326,6 +326,8 @@ public class HudAPI extends ApiImplementor {
 			try {
 				if (fileName.toLowerCase().endsWith(".css")) {
 					msg.setResponseHeader(API.getDefaultResponseHeader("text/css; charset=UTF-8"));
+				} else if (fileName.toLowerCase().endsWith(".js")) {
+                    msg.setResponseHeader(API.getDefaultResponseHeader("application/javascript; charset=UTF-8"));
 				} else {
 					msg.setResponseHeader(getAllowFramingResponseHeader(
 							"200 OK", "text/html; charset=UTF-8", 0, false));
