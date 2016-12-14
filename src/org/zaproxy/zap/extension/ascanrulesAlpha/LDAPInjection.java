@@ -17,11 +17,15 @@
  */
 package org.zaproxy.zap.extension.ascanrulesAlpha;
 
+import java.net.UnknownHostException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.httpclient.InvalidRedirectLocationException;
+import org.apache.commons.httpclient.URIException;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.Constant;
@@ -178,6 +182,7 @@ public class LDAPInjection extends AbstractAppParamPlugin {
 	        }
     }
 
+    @Override
     public void scan(HttpMessage msg, NameValuePair originalParam) {
     	/*
     	 * Scan everything _except_ URL path parameters.
@@ -193,6 +198,7 @@ public class LDAPInjection extends AbstractAppParamPlugin {
      * scans the user specified parameter for LDAP injection
      * vulnerabilities. Requires one extra request for each parameter checked
      */
+	@Override
 	public void scan(HttpMessage originalmsg, String paramname, String paramvalue) {
 		
 		//for the purposes of our logic, we can handle a NULL parameter as an empty string. Saves on NPEs.
@@ -343,13 +349,7 @@ public class LDAPInjection extends AbstractAppParamPlugin {
                                 vulnevidence,
                                 getBaseMsg());
 
-                        //and log it
-                        String logMessage = Constant.messages.getString(I18N_PREFIX + "ldapinjection.booleanbased.alert.logmessage",
-                                getBaseMsg().getRequestHeader().getMethod(),
-                                getBaseMsg().getRequestHeader().getURI().getURI(),
-                                paramname,
-                                appendTrueAttack, randomparameterAttack);
-                        log.info(logMessage);
+                        logBoolenInjection(getBaseMsg(), paramname, appendTrueAttack, randomparameterAttack); 
                         
 	                	//all done for this parameter. return.
 	                	return;
@@ -413,13 +413,7 @@ public class LDAPInjection extends AbstractAppParamPlugin {
                                 vulnevidence,
                                 getBaseMsg());
 
-                        //and log it
-                        String logMessage = Constant.messages.getString(I18N_PREFIX + "ldapinjection.booleanbased.alert.logmessage",
-                                getBaseMsg().getRequestHeader().getMethod(),
-                                getBaseMsg().getRequestHeader().getURI().getURI(),
-                                paramname,
-                                hopefullyTrueAttack, randomparameterAttack);
-                        log.info(logMessage);
+                        logBoolenInjection(getBaseMsg(), paramname, hopefullyTrueAttack, randomparameterAttack);
                         
 	                	//all done for this parameter. return.
 	                	return;
@@ -432,11 +426,32 @@ public class LDAPInjection extends AbstractAppParamPlugin {
                 //by using the "*" LDAP expression, to eek out more data from the LDAP directory into the response.
                 //but that's a task for another day.
 
+        } catch (InvalidRedirectLocationException | UnknownHostException | URIException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to send HTTP message, cause: " + e.getMessage());
+            }
         } catch (Exception e) {
             //Do not try to internationalise this.. we need an error message in any event.. 
             //if it's in English, it's still better than not having it at all. 
             log.error("An error occurred checking a url for LDAP Injection issues", e);
         }
+    }
+
+    private static void logBoolenInjection(HttpMessage msg, String parameterName, String attack, String falseAttack) {
+        if (!log.isDebugEnabled()) {
+            return;
+        }
+
+        String logMessage = MessageFormat.format(
+                "A likely LDAP injection vulnerability has been found with [{0}] URL [{1}] "
+                        + "on parameter [{2}], using [{3}] to simulate a logically "
+                        + "equivalent condition, and using [{4}] to simulate a FALSE condition.",
+                msg.getRequestHeader().getMethod(),
+                msg.getRequestHeader().getURI().toString(),
+                parameterName,
+                attack,
+                falseAttack);
+        log.debug(logMessage);
     }
 	
 	/**
@@ -524,16 +539,19 @@ public class LDAPInjection extends AbstractAppParamPlugin {
                         errorPattern.toString(),
                         attackMessage); //use the attack message, rather than the original message.
 
-                //and log it                
-                String logMessage = Constant.messages.getString(I18N_PREFIX + "ldapinjection.alert.logmessage",
-                        getBaseMsg().getRequestHeader().getMethod(),
-                        getBaseMsg().getRequestHeader().getURI().getURI(),
-                        parameterName,
-                        errorAttack, 
-                        LDAP_ERRORS.get(errorPattern), 
-                        errorPattern);
-
-                log.info(logMessage);
+                if (log.isDebugEnabled()) {
+                    String logMessage = MessageFormat.format(
+                            "A likely LDAP injection vulnerability has been found with [{0}] URL [{1}] "
+                                    + "on parameter [{2}], using an attack with LDAP meta-characters [{3}], "
+                                    + "yielding known [{4}] error message [{5}], which was not present in the original response.",
+                            getBaseMsg().getRequestHeader().getMethod(),
+                            getBaseMsg().getRequestHeader().getURI().getURI(),
+                            parameterName,
+                            errorAttack,
+                            LDAP_ERRORS.get(errorPattern),
+                            errorPattern);
+                    log.debug(logMessage);
+                }
 
                 return true;  //threw an alert
             }

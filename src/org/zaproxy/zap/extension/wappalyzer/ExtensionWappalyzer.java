@@ -25,6 +25,7 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,7 @@ import org.parosproxy.paros.extension.SessionChangedListener;
 import org.parosproxy.paros.model.Session;
 import org.parosproxy.paros.model.SiteNode;
 import org.parosproxy.paros.view.View;
+import org.zaproxy.zap.extension.pscan.ExtensionPassiveScan;
 import org.zaproxy.zap.extension.search.ExtensionSearch;
 import org.zaproxy.zap.view.SiteMapListener;
 import org.zaproxy.zap.view.SiteMapTreeCellRenderer;
@@ -79,9 +81,21 @@ public class ExtensionWappalyzer extends ExtensionAdaptor implements SessionChan
 	private static final Logger logger = Logger.getLogger(ExtensionWappalyzer.class);
 
 	/**
+	 * The dependencies of the extension.
+	 */
+	private static final List<Class<?>> EXTENSION_DEPENDENCIES;
+
+	static {
+		List<Class<?>> dependencies = new ArrayList<>(1);
+		dependencies.add(ExtensionPassiveScan.class);
+		EXTENSION_DEPENDENCIES = Collections.unmodifiableList(dependencies);
+	}
+
+	private WappalyzerPassiveScanner passiveScanner;
+
+	/**
 	 * TODO
 	 * Implementaion
-	 * 		Meta tags
 	 * 		Version handling
 	 * 		Confidence handling
 	 * 		Add API calls - need to test for daemon mode (esp revisits)
@@ -92,24 +106,7 @@ public class ExtensionWappalyzer extends ExtensionAdaptor implements SessionChan
 	 */
 	
 	public ExtensionWappalyzer() {
-		super();
-		initialize();
-	}
-
-	/**
-	 * @param name
-	 */
-	public ExtensionWappalyzer(String name) {
-		super(name);
-	}
-
-	/**
-	 * This method initializes this
-	 */
-	@SuppressWarnings("unchecked")
-	private void initialize() {
-		this.setName(NAME);
-		// TODO - something sensible
+		super(NAME);
 		this.setOrder(201);
 		
 		try {
@@ -119,6 +116,7 @@ public class ExtensionWappalyzer extends ExtensionAdaptor implements SessionChan
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void parseJson(String jsonStr) {
 		
 		try {
@@ -142,10 +140,11 @@ public class ExtensionWappalyzer extends ExtensionAdaptor implements SessionChan
 				app.setName(appName);
 				app.setWebsite(appData.getString("website"));
 				app.setCategories(this.jsonToCategoryList(appData.get("cats")));
-				app.setHeaders(this.jsonToHeadersList(appData.get("headers")));
+				app.setHeaders(this.jsonToAppPatternMapList(appData.get("headers")));
 				app.setUrl(this.jsonToPatternList(appData.get("url")));
 				app.setHtml(this.jsonToPatternList(appData.get("html")));
 				app.setScript(this.jsonToPatternList(appData.get("script")));
+				app.setMetas(this.jsonToAppPatternMapList(appData.get("meta")));
 				app.setImplies(this.jsonToStringList(appData.get("implies")));
 				
 				URL icon = ExtensionWappalyzer.class.getResource( RESOURCE + "/icons/" + appName + ".png");
@@ -190,7 +189,7 @@ public class ExtensionWappalyzer extends ExtensionAdaptor implements SessionChan
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<Map<String, AppPattern>> jsonToHeadersList(Object json) {
+	private List<Map<String, AppPattern>> jsonToAppPatternMapList(Object json) {
 		List<Map<String, AppPattern>> list = new ArrayList<Map<String, AppPattern>>();
 		AppPattern ap;
 		if (json instanceof JSONObject) {
@@ -266,6 +265,13 @@ public class ExtensionWappalyzer extends ExtensionAdaptor implements SessionChan
 	}
 
 	@Override
+	public void init() {
+		super.init();
+
+		passiveScanner = new WappalyzerPassiveScanner();
+	}
+	
+	@Override
 	public void hook(ExtensionHook extensionHook) {
 		super.hook(extensionHook);
 
@@ -279,6 +285,9 @@ public class ExtensionWappalyzer extends ExtensionAdaptor implements SessionChan
 	        extensionHook.getHookMenu().addPopupMenuItem(this.getPopupMenuEvidence());
 	    }
 
+		ExtensionPassiveScan extPScan = Control.getSingleton().getExtensionLoader().getExtension(ExtensionPassiveScan.class);
+		extPScan.addPassiveScanner(passiveScanner);
+
 	}
 
 	private TechPanel getTechPanel() {
@@ -290,8 +299,7 @@ public class ExtensionWappalyzer extends ExtensionAdaptor implements SessionChan
 
 	private PopupMenuEvidence getPopupMenuEvidence () {
 		if (popupMenuEvidence == null) {
-			popupMenuEvidence = new PopupMenuEvidence();
-			popupMenuEvidence.setExtension(this);
+			popupMenuEvidence = new PopupMenuEvidence(this);
 		}
 		return popupMenuEvidence;
 	}
@@ -299,7 +307,20 @@ public class ExtensionWappalyzer extends ExtensionAdaptor implements SessionChan
 	
 	@Override
 	public boolean canUnload() {
-		return false;
+		return true;
+	}
+
+	@Override
+	public void unload() {
+		super.unload();
+
+		ExtensionPassiveScan extPScan = Control.getSingleton().getExtensionLoader().getExtension(ExtensionPassiveScan.class);
+		extPScan.removePassiveScanner(passiveScanner);
+	}
+
+	@Override
+	public List<Class<?>> getDependencies() {
+		return EXTENSION_DEPENDENCIES;
 	}
 
 	@Override
@@ -471,19 +492,7 @@ public class ExtensionWappalyzer extends ExtensionAdaptor implements SessionChan
 			}
 			this.getTechPanel().addSite(site);
 		}
-		/*
-		try {
-			List<RecordParam> params = Model.getSingleton().getDb().getTableParam().getAll();
-			
-			for (RecordParam param : params) {
-				SiteParameters sps = this.getSiteParameters(param.getSite());
-				sps.addParam(param.getSite(), param);
-				
-			}
-		} catch (SQLException e) {
-            logger.error(e.getMessage(), e);
-		}
-		*/
+
 	}
 
 	@Override

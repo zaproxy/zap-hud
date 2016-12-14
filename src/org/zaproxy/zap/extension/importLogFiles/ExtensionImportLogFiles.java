@@ -51,18 +51,10 @@ public class ExtensionImportLogFiles extends ExtensionAdaptor {
     private ImportLogAPI importLogAPI;
     
     public ExtensionImportLogFiles() {
-        super();
-        initialize();
+        super("ExtensionImportLogFiles");
     }
 
-    public ExtensionImportLogFiles(String name) {
-        super(name);
-    }
-
-    private void initialize() {
-        this.setName("ExtensionImportLogFiles");
-    }
-
+    @SuppressWarnings("deprecation")
     @Override
     public void hook(ExtensionHook extensionHook) {
         super.hook(extensionHook);
@@ -259,7 +251,6 @@ public class ExtensionImportLogFiles extends ExtensionAdaptor {
                 parsed.add(sc.next());
             }
             sc.close();
-            reader.close();
             return parsed;
         } catch (IOException x) {
             log.error(x.getMessage(), x);

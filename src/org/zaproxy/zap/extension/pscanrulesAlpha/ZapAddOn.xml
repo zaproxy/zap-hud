@@ -1,14 +1,14 @@
 <zapaddon>
 	<name>Passive scanner rules (alpha)</name>
-	<version>9</version>
+	<version>12</version>
 	<status>alpha</status>
 	<description>The alpha quality Passive Scanner rules</description>
 	<author>ZAP Dev Team</author>
 	<url/>
 	<changes>
 	<![CDATA[
-		Add CWE and WASC IDs to passive scanners which may have been lacking those details.<br>
-		Fix exception when scanning with "User Controllable Charset" scanner.<br>
+		Refactoring the x-powered-by scanner to raise one alert if it finds repetitive headers.<br>
+		Update the CSP scanner to handle the Content-Security-Policy-Report-Only header.<br>
 	]]>
 	</changes>
 	<extensions>
@@ -19,6 +19,7 @@
 		<pscanrule>org.zaproxy.zap.extension.pscanrulesAlpha.Base64Disclosure</pscanrule>
 		<pscanrule>org.zaproxy.zap.extension.pscanrulesAlpha.BigRedirectsScanner</pscanrule>
 		<pscanrule>org.zaproxy.zap.extension.pscanrulesAlpha.CacheableScanner</pscanrule>
+		<pscanrule>org.zaproxy.zap.extension.pscanrulesAlpha.CookieSameSiteScanner</pscanrule>
 		<pscanrule>org.zaproxy.zap.extension.pscanrulesAlpha.ContentSecurityPolicyMissingScanner</pscanrule>
 		<pscanrule>org.zaproxy.zap.extension.pscanrulesAlpha.CrossDomainMisconfiguration</pscanrule>
 		<pscanrule>org.zaproxy.zap.extension.pscanrulesAlpha.DirectoryBrowsingScanner</pscanrule>
