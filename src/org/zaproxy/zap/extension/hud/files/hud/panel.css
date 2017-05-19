@@ -1,0 +1,34 @@
+.buttons-list {
+  font-size: 14px;
+  font-family: Sans-serif;
+  font-align: center;
+}
+
+.button {
+  background: #dddddd;
+  border: 2px solid #a1a1a1; 
+  border-radius: 25px; 
+  margin: 1px;
+  clear: both;
+  cursor: pointer;
+  height: 30px;
+  float: ORIENTATION;
+}
+
+.button-icon {
+  padding: 5px 5px;
+  float: ORIENTATION;
+}
+
+.button-data {
+  padding: 5px 5px;
+  min-width: 30px;
+  float: ORIENTATION;
+}
+
+.button-label {
+  padding: 5px 5px;
+  width: 100px;
+  float: ORIENTATION;
+  display: none;
+}

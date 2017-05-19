@@ -28,6 +28,9 @@ import java.nio.file.Files;
 
 import javax.swing.ImageIcon;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -61,7 +64,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener {
 			ExtensionHUD.class.getResource( RESOURCE + "/radar.png"));
 
 	protected static final String FILE_PREFIX = "hud/";
-	protected static final String HUD_HTML = "zapHudInject.html";
+	protected static final String HUD_HTML = "injectionHtml.html";
 	//protected static final String HUD_HTML = "zap-hud.html";
 	//protected static final String JQUERY_JS = "jquery-1.11.2.min.js";
 	//protected static final String PNOTIFY_CSS = "pnotify.custom.min.css";
@@ -69,25 +72,26 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener {
 	
 	private HudAPI api = new HudAPI(this);
 
-    private Logger log = Logger.getLogger(this.getClass());
-    
-    private ZapToggleButton hudButton = null;
-    private boolean hudEnabled = false;
+	private Logger log = Logger.getLogger(this.getClass());
+
+	private ZapToggleButton hudButton = null;
+	private boolean hudEnabled = false;
+	private boolean isFirstRequest = true;
 
 	/**
-     * 
-     */
-    public ExtensionHUD() {
-        super();
- 		initialize();
-    }
+	*
+	*/
+	public ExtensionHUD() {
+		super();
+			initialize();
+	}
 
-    /**
-     * @param name
-     */
-    public ExtensionHUD(String name) {
-        super(name);
-    }
+	/**
+	 * @param name
+	 */
+	public ExtensionHUD(String name) {
+		super(name);
+	}
 
 	/**
 	 * This method initializes this
@@ -99,10 +103,10 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener {
 	
 	@Override
 	public void hook(ExtensionHook extensionHook) {
-	    super.hook(extensionHook);
+		super.hook(extensionHook);
 	    
-	    API.getInstance().registerApiImplementor(this.api);
-	    
+		API.getInstance().registerApiImplementor(this.api);
+
 	    if (getView() != null) {
 			View.getSingleton().addMainToolbarButton(getHudButton());
 	    }
@@ -177,23 +181,38 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener {
 	public boolean onHttpResponseReceive(HttpMessage msg) {
 		if (hudEnabled && msg.getResponseHeader().isHtml()) {
 			try {
-				String body = msg.getResponseBody().toString();
-				int endBodyTag = body.toLowerCase().lastIndexOf("</body");
-				String hudScript = this.getFile(msg, HUD_HTML, false);
-				if (endBodyTag > -1 && hudScript != null) {
+				String header = msg.getResponseBody().toString();
+
+				//todo: confirm correct regex
+				Pattern pattern = Pattern.compile("<(\\s*?)body+(>|.*?[^?]>)");
+				int openBodyTag = regexEndOf(pattern, header.toLowerCase());
+
+				String hudScript = "";
+				if (isFirstRequest) {
+					String contents = this.getFile(msg, HUD_HTML, false);
+					String[] lines = contents.split("\\r?\\n");
+					hudScript = lines[0] + lines[1];
+
+					isFirstRequest = false;
+				} else {
+					hudScript = this.getFile(msg, HUD_HTML, false);
+				}
+
+				if (openBodyTag > -1  && hudScript != null) {
 					System.out.println(msg.getRequestHeader().getURI() + 
 							" orig clen " + msg.getResponseHeader().getContentLength() + 
 							" body len " + msg.getResponseBody().length() + " charset " + msg.getResponseBody().getCharset());
-					
+
 					hudScript = hudScript
 									.replace("<<FILE_PREFIX>>", api.getUrlPrefix(getSite(msg)))
 									.replace("<<URL>>", msg.getRequestHeader().getURI().toString());
 					
 					
 					StringBuilder sb = new StringBuilder();
-					sb.append(body.substring(0, endBodyTag));
+					sb.append(header.substring(0, openBodyTag));
 					sb.append(hudScript);
-					sb.append(body.substring(endBodyTag));
+					sb.append(header.substring(openBodyTag));
+
 					String newBody = sb.toString();
 					msg.getResponseBody().setBody(newBody);
 					msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
@@ -220,7 +239,9 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener {
 					replace("<<ZAP_HUD_API>>", API.API_URL_S);
 			
 			if (incApiKey) {
-				String apiKey = Model.getSingleton().getOptionsParam().getApiParam().getKey();
+				//todo: this is currenty broken
+				//String apiKey = Model.getSingleton().getOptionsParam().getApiParam().getKey();
+				String apiKey = "1234";
 				contents = contents.replace("<<ZAP_HUD_API_KEY>>", apiKey);
 			}
 			
@@ -250,4 +271,9 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener {
 		}
 	}
 
+    /** @return index of pattern in s or -1, if not found */
+	public static int regexEndOf(Pattern pattern, String s) {
+	    Matcher matcher = pattern.matcher(s);
+	    return matcher.find() ? matcher.end() : -1;
+	}
 }
