@@ -3,6 +3,7 @@ package org.zaproxy.zap.extension.hud;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 import net.sf.json.JSONObject;
@@ -30,6 +31,8 @@ import org.zaproxy.zap.extension.ascan.ActiveScan;
 import org.zaproxy.zap.extension.ascan.ExtensionActiveScan;
 import org.zaproxy.zap.extension.spider.ExtensionSpider;
 import org.zaproxy.zap.extension.spider.SpiderScan;
+import org.zaproxy.zap.extension.brk.ExtensionBreak;
+import org.zaproxy.zap.extension.httppanel.Message;
 
 public class HudAPI extends ApiImplementor {
 
@@ -50,6 +53,7 @@ public class HudAPI extends ApiImplementor {
 
 	private static final String PARAM_NAME = "name";
 	private static final String PARAM_URL = "url";
+	private static final String PARAM_ISWORKER = "isworker";
 
     private static Logger logger = Logger.getLogger(HudAPI.class);
     
@@ -148,9 +152,12 @@ public class HudAPI extends ApiImplementor {
 	public ApiResponse handleApiView (String name,
 			JSONObject params) throws ApiException {
 		ApiResponse result = null;
+		Map<String, Object> resultMap = null;
 
 		if (HUD_DATA.equals(name)) {
-			result = new ApiResponseList(name);
+			//result = new ApiResponseList(name);
+			resultMap = new HashMap<String, Object>();
+
 			String url = this.getParam(params, PARAM_URL, (String) null);
 			
 			SiteNode node = null;
@@ -163,7 +170,8 @@ public class HudAPI extends ApiImplementor {
 				throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_URL);
 			}
 			if (parent != null) {
-				ApiResponseList siteSummary = new ApiResponseList("siteSummary");
+				//ApiResponseList siteSummary = new ApiResponseList("siteSummary");
+				List<Map<String, String>> summary = new ArrayList<Map<String, String>>();
 
 				// find the top level site node
 				while (!((SiteNode)parent.getParent()).isRoot()) {
@@ -193,15 +201,18 @@ public class HudAPI extends ApiImplementor {
 							Map<String, String> alertAtts = new HashMap<String, String>();
 							alertAtts.put("alert", alert.getKey());
 							alertAtts.put("risk", Alert.MSG_RISK[i]);
-							siteSummary.addItem(new ApiResponseSet("alert", alertAtts));
+							//siteSummary.addItem(new ApiResponseSet("alert", alertAtts));
+							summary.add(alertAtts);
 						}
 					}
 				}
-				((ApiResponseList)result).addItem(siteSummary);
+				//((ApiResponseList)result).addItem(siteSummary);
+				resultMap.put("siteSummary", summary);
 			}
 			if (node != null) {
 				// Loop through siblings to find nodes for the same url
-				ApiResponseList pageAlerts = new ApiResponseList("pageAlerts");
+				//ApiResponseList pageAlerts = new ApiResponseList("pageAlerts");
+				List<Map<String, String>> pageAlerts = new ArrayList<Map<String, String>>();
 				String cleanName = node.getHierarchicNodeName();
 				@SuppressWarnings("rawtypes")
 				Enumeration en = node.getParent().children();
@@ -216,12 +227,14 @@ public class HudAPI extends ApiImplementor {
 								alertAtts.put("risk", Alert.MSG_RISK[alert.getRisk()]);
 								alertAtts.put("param", alert.getParam());
 								alertAtts.put("id", Integer.toString(alert.getAlertId()));
-								pageAlerts.addItem(new ApiResponseSet("alert", alertAtts));
+								//pageAlerts.addItem(new ApiResponseSet("alert", alertAtts));
+								pageAlerts.add(alertAtts);
 							}
 						}
 					}
 				}
-				((ApiResponseList)result).addItem(pageAlerts);
+				//((ApiResponseList)result).addItem(pageAlerts);
+				resultMap.put("pageAlerts", pageAlerts);
 
 				// Report on scope
 				ApiResponseList scopeData = new ApiResponseList("scope");
@@ -230,7 +243,8 @@ public class HudAPI extends ApiImplementor {
 				scopeAtts.put("attack", Boolean.toString(Control.getSingleton().getMode().equals(Control.Mode.attack)));
 				scopeData.addItem(new ApiResponseSet("scope", scopeAtts));
 				scopeData.addItem(new ApiResponseSet("attack", scopeAtts));
-				((ApiResponseList)result).addItem(scopeData);
+				//((ApiResponseList)result).addItem(scopeData);
+				resultMap.put("scope", scopeAtts);
 			}
 			
 			// Spider
@@ -257,7 +271,8 @@ public class HudAPI extends ApiImplementor {
 				Map<String, String> spiderAtts = new HashMap<String, String>();
 				spiderAtts.put("progress", Integer.toString(progress));
 				spiderData.addItem(new ApiResponseSet("spider", spiderAtts));
-				((ApiResponseList)result).addItem(spiderData);
+				//((ApiResponseList)result).addItem(spiderData);
+				resultMap.put("spider", spiderAtts);
 			}
 
 			// Active Scan
@@ -284,29 +299,45 @@ public class HudAPI extends ApiImplementor {
 				Map<String, String> ascanAtts = new HashMap<String, String>();
 				ascanAtts.put("progress", Integer.toString(progress));
 				ascanData.addItem(new ApiResponseSet("ascan", ascanAtts));
-				((ApiResponseList)result).addItem(ascanData);
+				//((ApiResponseList)result).addItem(ascanData);
+				resultMap.put("active-scan", ascanAtts);
 			}
 
-			// TODO hacking break...
-			/* Looks like it will require a load of core changes :/
-			ExtensionBreak extBrk = (ExtensionBreak) Control.getSingleton().getExtensionLoader().getExtension("ExtensionBreak");
-			if (extBrk != null) {
-				ApiResponseList breakData = new ApiResponseList("break");
-				Map<String, String> scopeAtts = new HashMap<String, String>();
-				extBrk.getBreakPanel().is.breakpointHit();
-				scopeAtts.put("inscope", Boolean.toString(node.isIncludedInScope()));
-				scopeAtts.put("attack", Boolean.toString(Control.getSingleton().getMode().equals(Control.Mode.attack)));
-				breakData.addItem(new ApiResponseSet("scope", scopeAtts));
-				breakData.addItem(new ApiResponseSet("attack", scopeAtts));
-				((ApiResponseList)result).addItem(breakData);
-				
+			// Break
+			ExtensionBreak extBreak = (ExtensionBreak) Control.getSingleton().getExtensionLoader().getExtension("ExtensionBreak");
+			if (extBreak != null) {
+				Map<String, String> breakData = new HashMap<String, String>();
+				boolean isBreakingRequest = false;
+				HttpMessage message = (HttpMessage)extBreak.getBreakpointManagementInterface().getMessage();
+
+
+				if (message != null) {
+					logger.debug("break message: " + message.toString());
+
+					isBreakingRequest = true;
+					breakData.put("request_header", message.getRequestHeader().toString());
+					breakData.put("request_body", message.getRequestBody().toString());
+					breakData.put("response_header", message.getResponseHeader().toString());
+					breakData.put("response_body", message.getResponseBody().toString());
+				}
+				else {
+					breakData.put("request_header", "");
+					breakData.put("request_body", "");
+					breakData.put("response_header", "");
+					breakData.put("response_body", "");
+				}
+
+				breakData.put("isBreakingRequest", Boolean.toString(isBreakingRequest));
+
+				resultMap.put("break", breakData);
 			}
-			*/
+
 			
 		} else {
 			throw new ApiException(ApiException.Type.BAD_VIEW);
 		}
 
+		result = new ApiResponseSet(name, resultMap);
 		return result;
 	}
 
@@ -325,16 +356,22 @@ public class HudAPI extends ApiImplementor {
 			}
 			try {
 				if (fileName.toLowerCase().endsWith(".css")) {
-					msg.setResponseHeader(API.getDefaultResponseHeader("text/css; charset=UTF-8"));
+					msg.setResponseHeader(API.getDefaultResponseHeader("text/css; charset=UTF-8", 0, false));
 				} else if (fileName.toLowerCase().endsWith(".js")) {
-                    msg.setResponseHeader(API.getDefaultResponseHeader("application/javascript; charset=UTF-8"));
+					msg.setResponseHeader(API.getDefaultResponseHeader("application/javascript; charset=UTF-8", 0, false));
 				} else {
-					msg.setResponseHeader(getAllowFramingResponseHeader(
-							"200 OK", "text/html; charset=UTF-8", 0, false));
+					msg.setResponseHeader(getAllowFramingResponseHeader("200 OK", "text/html; charset=UTF-8", 0, false));
 				}
-				if (!fileName.equals("zapHudInjectScript.js")) {
-					msg.getResponseHeader().addHeader("Content-Security-Policy", CSP_POLICY);
+				
+				if (!fileName.equals("inject.js")) {
+					//todo: commented for mozilla 52 bug with jquery
+					//msg.getResponseHeader().addHeader("Content-Security-Policy", CSP_POLICY);
 				}
+
+				if (fileName.equals("serviceworker.js")) {
+					msg.setResponseHeader(API.getDefaultResponseHeader("application/javascript; charset=UTF-8", 0, false));
+				}
+				
 				msg.setResponseBody(file);
 				msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
 			} catch (HttpMalformedHeaderException e) {
@@ -346,35 +383,52 @@ public class HudAPI extends ApiImplementor {
 				
 			byte[] image = extension.getImage(this.getParam(params, PARAM_NAME, ""));
 			try {
-				msg.setResponseHeader(API.getDefaultResponseHeader("image/png"));
+				msg.setResponseHeader(API.getDefaultResponseHeader("image/png", 0, true));
 				msg.setResponseBody(image);
 				msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
 			} catch (HttpMalformedHeaderException e) {
 				throw new ApiException (ApiException.Type.INTERNAL_ERROR, msg.getRequestHeader().getURI().toString());
 			}
 			return msg;
+		} else if (this.getParam(params, PARAM_ISWORKER, "").equals("true")) {
+			String fileName = this.getParam(params, PARAM_NAME, "");
+			String file = extension.getFile(msg, fileName, true);
+
+			try {
+				msg.setResponseHeader(API.getDefaultResponseHeader("application/javascript; charset=UTF-8", 0, false));
+
+				msg.setResponseBody(file);
+				msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
+			} catch (HttpMalformedHeaderException e) {
+				throw new ApiException (ApiException.Type.INTERNAL_ERROR, msg.getRequestHeader().getURI().toString());
+			}
+
+			return msg;
 		} else {
 			throw new ApiException(ApiException.Type.BAD_OTHER);
 		}
 	}
 
-    public static String getAllowFramingResponseHeader(String responseStatus, String contentType, int contentLength, boolean canCache) {
-        StringBuilder sb = new StringBuilder(250);
+	public static String getAllowFramingResponseHeader(String responseStatus, String contentType, int contentLength, boolean canCache) {
+		StringBuilder sb = new StringBuilder(250);
 
-        sb.append("HTTP/1.1 ").append(responseStatus).append("\r\n");
-        if (! canCache) {
-        	sb.append("Pragma: no-cache\r\n");
-        	sb.append("Cache-Control: no-cache\r\n");
-        }
-        sb.append("Access-Control-Allow-Methods: GET,POST,OPTIONS\r\n");
-        sb.append("Access-Control-Allow-Headers: ZAP-Header\r\n");
-        sb.append("X-XSS-Protection: 1; mode=block\r\n");
-        sb.append("X-Content-Type-Options: nosniff\r\n");
-        sb.append("X-Clacks-Overhead: GNU Terry Pratchett\r\n");
-        sb.append("Content-Length: ").append(contentLength).append("\r\n");
-        sb.append("Content-Type: ").append(contentType).append("\r\n");
+		sb.append("HTTP/1.1 ").append(responseStatus).append("\r\n");
+		if (! canCache) {
+			sb.append("Pragma: no-cache\r\n");
+			sb.append("Cache-Control: no-cache\r\n");
+		}
+		else {
+			//todo: found this necessary to cache, remove if not
+			sb.append("Cache-Control: public,max-age=3000000\r\n");
+		}
+		sb.append("Access-Control-Allow-Methods: GET,POST,OPTIONS\r\n");
+		sb.append("Access-Control-Allow-Headers: ZAP-Header\r\n");
+		sb.append("X-XSS-Protection: 1; mode=block\r\n");
+		sb.append("X-Content-Type-Options: nosniff\r\n");
+		sb.append("X-Clacks-Overhead: GNU Terry Pratchett\r\n");
+		sb.append("Content-Length: ").append(contentLength).append("\r\n");
+		sb.append("Content-Type: ").append(contentType).append("\r\n");
 
-        return sb.toString();
-    }
-
+		return sb.toString();
+	}
 }

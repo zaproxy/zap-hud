@@ -13,22 +13,25 @@
 	<pscanrules/>
 	<filters/>
 	<files>
-		<file>hud/alertify.js</file>
-		<file>hud/jquery-1.12.0.js</file>
-		<file>hud/jquery-ui.css</file>
-		<file>hud/jquery-ui.js</file>
-		<file>hud/jquery-ui.theme.css</file>
-		<file>hud/zapHudInject.html</file>
-		<file>hud/zapHudInjectScript.js</file>
-		<file>hud/zapHudMainDisplay.css</file>
-		<file>hud/zapHudMainDisplay.html</file>
-		<file>hud/zapHudMainDisplay.js</file>
-		<file>hud/zapHudStatus.css</file>
-		<file>hud/zapHudStatus.html</file>
-		<file>hud/zapHudStatus.js</file>
-		<file>hud/zapHudStatusRhs.css</file>
-		<file>hud/zapHudStatusRhs.html</file>
-		<file>hud/zapHudWorker.js</file>
+		<file>hud/libraries/alertify.js</file>
+		<file>hud/libraries/jquery-1.12.0.js</file>
+		<file>hud/libraries/jquery-ui.css</file>
+		<file>hud/libraries/jquery-ui.js</file>
+		<file>hud/libraries/jquery-ui.theme.css</file>
+		<file>hud/libraries/localforage.min.js</file>
+		<file>hud/injectionHtml.html</file>
+		<file>hud/inject.js</file>
+		<file>hud/panel.html</file>
+		<file>hud/panel.css</file>
+		<file>hud/panel.js</file>
+		<file>hud/main.html</file>
+		<file>hud/main.css</file>
+		<file>hud/main.js</file>
+		<file>hud/utils.js</file>
+		<file>hud/management.html</file>
+		<file>hud/management.css</file>
+		<file>hud/management.js</file>
+		<file>hud/serviceworker.js</file>
 	</files>
 	<not-before-version>2.4.3</not-before-version>
 	<not-from-version></not-from-version>

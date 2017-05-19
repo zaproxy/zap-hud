@@ -5,6 +5,7 @@
 	<property name="src.version" value="1.7" />
 	<property name="test.src" location="../test" />
 	<property name="test.lib" location="../testlib" />
+	<property name="test.build" location="buildtest" />
 	<property name="test.results.dir" value="results" />
 	<property name="build" location="build" />
 	<property name="build.lib.dir" location="lib" />
@@ -16,7 +17,7 @@
 	<property name="wiki.dir" location="../../zap-extensions-wiki" />
 	<!-- This assumes you also have the zaproxy project -->
 	<property name="zap.plugin.dir" location="../../zaproxy/src/plugin" />
-	<property name="zap.download.url" value="https://github.com/zaproxy/zap-extensions/releases/download/2.4" />
+	<property name="zap.download.url" value="https://github.com/zaproxy/zap-extensions/releases/download/2.5" />
 
 	<path id="build.classpath">
 		   <fileset dir="${build.lib.dir}" includes="*.jar"/>
@@ -35,6 +36,7 @@
 		<delete dir="${dist}" includeEmptyDirs="true" />
 		<delete dir="${build}" includeEmptyDirs="true" />
 		<delete dir="${temp}" includeEmptyDirs="true" />
+		<delete dir="${test.build}" includeEmptyDirs="true" />
 		<delete dir="${test.results.dir}" includeEmptyDirs="true" />
 	</target>
 
@@ -43,6 +45,7 @@
 		<mkdir dir="${dist}" />
 		<mkdir dir="${build}" />
 		<mkdir dir="${temp}" />
+		<mkdir dir="${test.build}" />
 		<mkdir dir="${test.results.dir}"/>
 	</target>
 
@@ -61,6 +64,11 @@
 		<!-- Compile the java code from ${src} into ${build} -->
 		<javac srcdir="${src}" destdir="${build}" source="${src.version}" target="${src.version}" includeantruntime="false" debug="${debug}" encoding="UTF-8"
 			excludes="org/zaproxy/zap/extension/*/files/**,org/zaproxy/zap/extension/*/resources/**">
+			<compilerarg value="-Xlint:all"/>
+			<compilerarg value="-Xlint:-path"/>
+			<compilerarg value="-Xlint:-options"/> <!-- Otherwise fails with Java 8 -->
+			<!-- Cant enable this while we build with Java 7 and include the ZAPSNITerminator.jar -->
+			<!--compilerarg value="-Werror"/-->
 			<classpath>
 				<fileset dir="${dist.lib.dir}">
 					<include name="**/*.jar" />
@@ -70,12 +78,16 @@
 		</javac>
 
 		<echo message="Compiling tests..." />
-		<javac srcdir="${test.src}" destdir="${build}" source="${src.version}" target="${src.version}" includeantruntime="false" debug="${debug}" encoding="UTF-8">
+		<javac srcdir="${test.src}" destdir="${test.build}" source="${src.version}" target="${src.version}" includeantruntime="false" debug="${debug}" encoding="UTF-8">
+			<compilerarg value="-Xlint:all"/>
+			<compilerarg value="-Xlint:-path"/>
+			<compilerarg value="-Xlint:-options"/> <!-- Otherwise fails with Java 8 -->
+			<!-- <compilerarg value="-Werror"/> -->
 			<classpath>
+				<pathelement location="${build}" />
 				<fileset dir="${dist.lib.dir}">
 					<include name="**/*.jar" />
 				</fileset>
-				<pathelement location="${build}" />
 				<fileset dir="${test.lib}">
 					<include name="**/*.jar" />
 				</fileset>
@@ -84,8 +96,20 @@
 	</target>
 
 	<target name="test" depends="clean, compile">
+		<echo message="Copying add-on resources..." />
+		<copy todir="${test.build}">
+			<fileset dir="${src}">
+				<include name="org/zaproxy/zap/extension/*/resources/**" />
+				<!-- Probably not needed but include (just) the main help files and Messages.properties -->
+				<exclude name="org/zaproxy/zap/extension/*/resources/help_*/**" />
+				<exclude name="org/zaproxy/zap/extension/*/resources/Messages_*.properties" />
+			</fileset>
+		</copy>
+		<echo message="Running tests..." />
 		<junit printsummary="yes" haltonerror="true" failureproperty="TestsFailed">
 			<classpath>
+				<pathelement location="${test.build}"/>
+				<pathelement location="${build}"/>
 				<fileset dir="${dist.lib.dir}">
 					<include name="*.jar" />
 					<include name="*.zap" />
@@ -93,12 +117,11 @@
 				<fileset dir="${test.lib}">
 					<include name="*.jar" />
 				</fileset>
-				<pathelement location="${build}" />
 			</classpath>
 			<formatter type="plain" />
 			<formatter type="xml" />
 			<batchtest fork="yes" todir="${test.results.dir}">
-				<fileset dir="${build}">
+				<fileset dir="${test.build}">
 					<include name="**/*UnitTest.class" />
 					<exclude name="**/Abstract*Test.class" />
 				</fileset>
@@ -149,12 +172,13 @@
 
 	<macrodef name="build-addon" description="build the specified addon">
 		<attribute name="name"/>
+		<attribute name="addonid" default="@{name}" />
 		<element name="extra-actions" implicit="true" optional="true" />
 		<sequential>
 			<local name="zapaddon.version" />
 			<xmlproperty file="${src}/org/zaproxy/zap/extension/@{name}/ZapAddOn.xml"/>
 			<local name="file" />
-			<property name="file" value="@{name}-${status}-${zapaddon.version}.zap" />
+			<property name="file" value="@{addonid}-${status}-${zapaddon.version}.zap" />
 
 			<generatejavahelpsearchindexes jhalljar="${build.lib.dir}/jhall.jar"
 				helpcontentsdirname="contents" helpsetfilename="helpset*.hs">
@@ -221,12 +245,77 @@
 			</tstamp>
 
 			<appendzapaddonfile from="${src}/org/zaproxy/zap/extension/@{name}/ZapAddOn.xml" to="${versions.file}"
-				addonid="@{name}" filename="${file}" status="${status}" size="${length}" hash="${hash}" date="${yyyymmdd}"
+				addonid="@{addonid}" filename="${file}" status="${status}" size="${length}" hash="${hash}" date="${yyyymmdd}"
 				url="${zap.download.url}/${file}" />
 
 		</sequential>
 	</macrodef>
 
+	<macrodef name="build-addon-without-help-indexes" description="build the specified addon">
+				<attribute name="name"/>
+				<attribute name="addonid" default="@{name}" />
+				<element name="extra-actions" implicit="true" optional="true" />
+				<sequential>
+					<local name="zapaddon.version" />
+					<xmlproperty file="${src}/org/zaproxy/zap/extension/@{name}/ZapAddOn.xml"/>
+					<local name="file" />
+					<property name="file" value="@{addonid}-${status}-${zapaddon.version}.zap" />
+
+					<local name="addon.libs.zip" />
+					<property name="addon.libs.zip" value="${temp}/libs-@{name}.zip" />
+
+					<delete file="${addon.libs.zip}" failonerror="true" />
+					<zip destfile="${addon.libs.zip}" whenempty="create">
+						<zipgroupfileset dir="${src}/org/zaproxy/zap/extension/@{name}/lib/" includes="*.jar" erroronmissingdir="false" />
+					</zip>
+
+					<jar jarfile="${dist}/${file}" update="true" compress="true">
+						<zipfileset dir="${build}" prefix="">
+							<include name="org/zaproxy/zap/extension/@{name}/**"/>
+						</zipfileset>
+						<zipfileset dir="${src}" prefix="">
+							<include name="org/zaproxy/zap/extension/@{name}/Messages*"/>
+						</zipfileset>
+						<zipfileset dir="${src}" prefix="">
+							<include name="org/zaproxy/zap/extension/@{name}/resources/**"/>
+						</zipfileset>
+						<zipfileset src="${addon.libs.zip}">
+							<exclude name="META-INF/*.DSA" />
+							<exclude name="META-INF/*.SF" />
+						</zipfileset>
+						<zipfileset dir="${src}" includes="org/zaproxy/zap/extension/@{name}/ZapAddOn.xml" fullpath="ZapAddOn.xml"/>
+					</jar>
+					<delete file="${addon.libs.zip}" />
+
+					<!-- Include add-on files -->
+					<jar jarfile="${dist}/${file}" update="true" compress="true">
+						<zipfileset dir="${src}/org/zaproxy/zap/extension/@{name}/files/" prefix="" erroronmissingdir="false" />
+					</jar>
+
+					<!-- allow callers to do extra actions before generating the hash and determine the size of the file -->
+					<extra-actions />
+
+					<local name="length" />
+					<length file="${dist}/${file}" property="length" />
+
+					<local name="sha1hash" />
+					<checksum file="${dist}/${file}"  algorithm="SHA-1"  property="sha1hash"/>
+
+					<local name="hash" />
+					<property name="hash"  value="SHA1:${sha1hash}"/>
+
+					<local name="yyyymmdd" />
+					<tstamp>
+						<format property="yyyymmdd" pattern="yyyy-MM-dd"/>
+					</tstamp>
+
+					<appendzapaddonfile from="${src}/org/zaproxy/zap/extension/@{name}/ZapAddOn.xml" to="${versions.file}"
+						addonid="@{addonid}" filename="${file}" status="${status}" size="${length}" hash="${hash}" date="${yyyymmdd}"
+						url="${zap.download.url}/${file}" />
+
+				</sequential>
+			</macrodef>
+	
 	<macrodef name="build-help-addon" description="build the specified addon">
 		<attribute name="name"/>
 		<element name="extra-actions" implicit="true" optional="true" />
@@ -279,22 +368,24 @@
 		
 		<!-- 'Standard' addons (keep in alphabetical order ;) -->
 		<build-addon name="accessControl" />
-		<build-addon name="alertFilters" />
 		<build-addon name="amf" />
 		<build-addon name="ascanrulesAlpha" />
 		<build-addon name="birtreports" />
 		<build-addon name="browserView" />
+		<build-addon name="bugtracker" />
 		<build-addon name="callgraph" />
 		<build-addon name="cmss" />
 		<build-addon name="codedx"/>
+		<build-addon name="communityScripts"/>
 		<build-addon name="customreport"/>
 		<build-addon name="domxss"/>
+		<build-addon name="exportreport" />
 		<build-addon name="help_bs_BA" />
 		<build-addon name="help_es_ES" />
 		<build-addon name="help_fr_FR" />
 		<build-addon name="help_ja_JP" />
 		<build-addon name="highlighter" />
-		<build-addon name="httpsInfo" />
+		<build-addon name="httpsinfo" addonid="httpsInfo" />
 		<build-addon name="importLogFiles" />
 		<build-addon name="pscanrulesAlpha" >
 				<!-- Add the extra classes required -->
@@ -304,6 +395,7 @@
 					</zipfileset>
 				</jar>
 			</build-addon>
+		<build-addon name="requester" />
 		<build-addon name="revisit" />
 		<build-addon name="saml" />
 		<build-addon name="sequence" />
@@ -311,6 +403,8 @@
 		<build-addon name="sniTerminator" />
 		<build-addon name="soap" />
 		<build-addon name="sse" />
+		<build-addon name="tlsdebug" />
+		<build-addon name="viewstate" />
 		<build-addon name="wappalyzer" />
 
 	</target>
@@ -328,15 +422,28 @@
 
 	<macrodef name="build-deploy-addon" description="build and deploy the specified addon">
 		<attribute name="name"/>
+		<attribute name="addonid" default="@{name}" />
 		<sequential>
 			<antcall target="clean" />
 			<antcall target="compile" />
 
-			<build-addon name="@{name}" />
-			<deploy-addon name="@{name}" />
+			<build-addon name="@{name}" addonid="@{addonid}" />
+			<deploy-addon name="@{addonid}" />
 		</sequential>
 	</macrodef>
 
+	<macrodef name="build-deploy-addon-without-help-indexes" description="build and deploy the specified addon">
+		<attribute name="name"/>
+		<attribute name="addonid" default="@{name}" />
+		<sequential>
+			<antcall target="clean" />
+			<antcall target="compile" />
+
+			<build-addon-without-help-indexes name="@{name}" addonid="@{addonid}" />
+			<deploy-addon name="@{addonid}" />
+		</sequential>
+	</macrodef>
+	
 	<macrodef name="build-deploy-help-addon" description="build and deploy the specified help addon">
 		<attribute name="name"/>
 		<sequential>
@@ -355,14 +462,6 @@
 		<generate-wiki addon="accessControl" />
 	</target>
 
-	<target name="deploy-alertFilters" description="deploy the alert filters">
-		<build-deploy-addon name="alertFilters" />
-	</target>
-
-	<target name="generate-wiki-alertFilters" description="Generates the wiki of alert filters">
-		<generate-wiki addon="alertFilters" />
-	</target>
-
 	<target name="deploy-amf" description="deploys AMF add-on">
 		<build-deploy-addon name="amf" />
 	</target>
@@ -371,8 +470,21 @@
 		<build-deploy-addon name="ascanrulesAlpha" />
 	</target>
 
+	<target name="deploy-ascanrulesAlpha-without-help-indexes" description="deploy the active scan rules">
+		<!-- To facilitate quick Dev builds -->
+		<build-deploy-addon-without-help-indexes name="ascanrulesAlpha" />
+	</target>
+	
 	<target name="generate-wiki-ascanrulesAlpha" description="Generates the wiki of active scan rules">
 		<generate-wiki addon="ascanrulesAlpha" />
+	</target>
+
+	<target name="deploy-authstats" description="deploy the authstats extension">
+		<build-deploy-addon name="authstats" />
+	</target>
+
+	<target name="generate-wiki-authstats" description="Generates the wiki of authStats extension">
+		<generate-wiki addon="authstats" />
 	</target>
 
 	<target name="deploy-birtreports" description="deploy the birtreports extension">
@@ -381,6 +493,10 @@
 
     <target name="deploy-browserView" description="deploy the browser extension">
         <build-deploy-addon name="browserView" />
+    </target>
+
+    <target name="deploy-bugtracker" description="deploy the bug tracker extension">
+        <build-deploy-addon name="bugtracker" />
     </target>
     
 	<target name="generate-wiki-browserView" description="Generates the wiki of browser extension">
@@ -399,6 +515,14 @@
 		<build-deploy-addon name="codedx" />
 	</target>
 	
+	<target name="deploy-communityScripts" description="deploy the communityScripts extension">
+		<build-deploy-addon name="communityScripts" />
+	</target>
+	
+	<target name="generate-wiki-communityScripts" description="Generates the wiki for communityScripts">
+		<generate-wiki addon="communityScripts" />
+	</target>
+
 	<target name="deploy-customreport" description="deploy the custom reporting extension">
 		<build-deploy-addon name="customreport" />
 	</target>
@@ -415,6 +539,14 @@
 		<generate-wiki addon="domxss" />
 	</target>
 
+	<target name="deploy-exportreport" description="deploy the export report extension">
+        <build-deploy-addon name="exportreport" />
+	</target>
+
+	<target name="generate-wiki-exportreport" description="Generates the wiki of export report extension">
+		<generate-wiki addon="exportreport" />
+	</target>
+
 	<target name="deploy-help-fr-FR" description="deploy the help_fr_FR add-on">
 		<build-deploy-help-addon name="help_fr_FR" />
 	</target>
@@ -427,14 +559,22 @@
 		<build-deploy-addon name="highlighter" />
 	</target>
   
-  	<target name="deploy-httpsInfo" description="deploy the httpsInfo extension">
-		<build-deploy-addon name="httpsInfo" />
+  	<target name="deploy-httpsinfo" description="deploy the httpsInfo extension">
+  		<build-deploy-addon name="httpsinfo" addonid="httpsInfo" />
 	</target>
 
+  	<target name="deploy-httpsinfo-without-help-indexes" description="deploy the httpsInfo extension">
+		<build-deploy-addon-without-help-indexes name="httpsinfo" addonid="httpsInfo" />
+	</target>
+	
   	<target name="deploy-hud" description="deploy the hud extension">
 		<build-deploy-addon name="hud" />
 	</target>
 
+	<target name="generate-wiki-httpsinfo" description="Generates the wiki of HTTPS Info Add-on">
+		<generate-wiki addon="httpsinfo" />
+	</target>
+	
 	<target name="deploy-importLogFiles" description="deploy the importLogFiles extension">
 		<build-deploy-addon name="importLogFiles" />
 	</target>
@@ -447,10 +587,19 @@
 		<build-deploy-addon name="pscanrulesAlpha" />
 	</target>
 
+	<target name="deploy-pscanrulesAlpha-without-help-indexes" description="deploy the passive scan rules">
+		<!-- To facilitate quick Dev builds -->
+		<build-deploy-addon-without-help-indexes name="pscanrulesAlpha" />
+	</target>
+	
 	<target name="generate-wiki-pscanrulesAlpha" description="Generates the wiki of passive scan rules">
 		<generate-wiki addon="pscanrulesAlpha" />
 	</target>
-	
+
+    <target name="deploy-requester" description="deploy the Requester extension">
+        <build-deploy-addon name="requester" />
+    </target>
+
     <target name="deploy-revisit" description="deploy the revisit extension">
         <build-deploy-addon name="revisit" />
     </target>
@@ -468,7 +617,7 @@
 	</target>
 	
 	<target name="deploy-serverSentEvents" description="deploy the Server-Sent Events extension">
-		<build-deploy-addon name="serverSentEvents" />
+		<build-deploy-addon name="sse" />
 	</target>
 
     <target name="generate-wiki-serverSentEvents" description="Generates the wiki of Server-Sent Events">
@@ -494,15 +643,32 @@
     <target name="deploy-soap" description="deploy the SOAP scanning extension">
 		<build-deploy-addon name="soap" />
 	</target>
+	  
+	<target name="deploy-tlsDebug" description="deploy the tlsDebug extension">
+		<build-deploy-addon name="tlsdebug" />
+	</target>
+
+	<target name="generate-wiki-tlsdebug" description="Generates the wiki of TLS Debug">
+		<generate-wiki addon="tlsdebug" />
+	</target>
+	
+	<target name="deploy-viewstate" description="deploy the viewstate extension">
+		<build-deploy-addon name="viewstate" />
+	</target>
 		
     <target name="deploy-wappalyzer" description="deploy the Wappalyzer extension">
         <build-deploy-addon name="wappalyzer" />
     </target>
 
+	<target name="deploy-wappalyzer-without-help-indexes" description="deploy the Wappalyzer extension">
+		<!-- To facilitate quick Dev builds -->
+		<build-deploy-addon-without-help-indexes name="wappalyzer" />
+	</target>
+	
 	<target name="generate-wiki-wappalyzer" description="Generates the wiki of wappalyzer">
 		<generate-wiki addon="wappalyzer" />
 	</target>
-
+	
     <target name="deploy-wavsepRpt" description="deploy the wavsepRpt extension">
         <build-deploy-addon name="wavsepRpt" />
     </target>
@@ -514,7 +680,6 @@
 		<copy todir="${zap.plugin.dir}">
 			<fileset dir="${dist}">
 				<include name="accessControl-${status}-*.zap"/>
-				<include name="alertFilters-${status}-*.zap"/>
 				<include name="sequence-${status}-*.zap"/>
 				<include name="soap-${status}-*.zap"/>
 			</fileset>
