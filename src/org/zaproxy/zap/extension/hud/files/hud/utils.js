@@ -280,6 +280,23 @@ function messageFrame(key, message) {
 	});
 }
 
+function messageWindow(window, message, origin) {
+	return new Promise(function(resolve, reject) {
+		var channel = new MessageChannel();
+
+		channel.port1.onmessage = function(event) {
+			if (event.data.error) {
+				reject(event.data.error);
+			}
+			else {
+				resolve(event.data);
+			}
+		};
+
+		window.postMessage(message, origin, [channel.port2]);
+	});
+}
+
 function utilCheck() {
 	console.log("LOADED FROM UTILS");
 }

@@ -133,6 +133,7 @@
 
 			case "showMainDisplay":
 				showMainDisplay();
+				event.ports[0].postMessage({"isDisplayShown":"true"});
 				break;
 
 			case "hideMainDisplay":
