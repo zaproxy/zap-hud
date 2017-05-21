@@ -32,16 +32,16 @@ function showDialog(config, port) {
 		buttons[button.text] = buttonHandler(button.id, port);
 	});
 
-	document.body.appendChild(dialog);
-	$( "#dialog" ).dialog({
-		resizable: false,
-		height: 240,
-		position: { my: 'left top', at: 'left+' + (550) + ' top+' + (50)},
-		buttons: buttons,
-		open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },	// Hides close button
+	showMainDisplay().then(function() {
+		document.body.appendChild(dialog);
+		$( "#dialog" ).dialog({
+			resizable: false,
+			height: 240,
+			position: { my: 'left top', at: 'left+' + (550) + ' top+' + (550)},
+			buttons: buttons,
+			open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },	// Hides close button
+		});
 	});
-
-	showMainDisplay();
 }
 
 function buttonHandler(id, port) {
@@ -54,7 +54,7 @@ function buttonHandler(id, port) {
 
 /* the injected script makes the main frame visible */
 function showMainDisplay() {
-	parent.postMessage({action: "showMainDisplay"}, document.referrer);
+	return messageWindow(parent, {action: "showMainDisplay"}, document.referrer);
 }
 
 /* removes all displays added to the main display and then the injected script makes the main frame invisible */

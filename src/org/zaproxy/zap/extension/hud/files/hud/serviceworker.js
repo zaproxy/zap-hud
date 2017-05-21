@@ -10,7 +10,7 @@ var BUTTON_DATA = /BUTTON_DATA/g;
 var BUTTON_LABEL = /BUTTON_LABEL/g;
 var ORIENTATION = /ORIENTATION/g;
 var IMAGE_NAME = /IMAGE_NAME/g;
-
+ 
 var urlsToCache = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/jquery-1.12.0.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/jquery-ui.js",
