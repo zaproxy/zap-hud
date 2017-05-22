@@ -6,17 +6,33 @@
 
 	<script type="text/javascript" src="<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/jquery-1.12.0.js"></script>
 	<script type="text/javascript" src="<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/jquery-ui.js"></script>
+	<script type="text/javascript" src="<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/localforage.min.js"></script>
 	<script type="text/javascript" src="<<ZAP_HUD_API>>OTHER/hud/other/file/?name=utils.js"></script>
 	<script type="text/javascript" src="<<ZAP_HUD_API>>OTHER/hud/other/file/?name=main.js"></script>
 </head>
 <body>
 	<a  id="background-link" href="#"></a>
-</body>
 
+
+<!-- Dialog Templates -->
 <template id="dialog-template">
 <div id="dialog" class="display">
 	<p id="dialog-text"></p>
 </div>
 </template>
+
+<template id="select-tool-template"> 
+	<ul id="tool-options" class="display"></ul>
+
+	<template id="tool-option-template">
+		<li class="tool-option">
+			<img class="tool-icon" src="" alt="image" height="16" width="16"/>
+			<p class="tool-label"></p>
+			<input id="tool-name" type="hidden"/>
+		</li>
+	</template>
+</template>
+
+</body>
 
 </html>

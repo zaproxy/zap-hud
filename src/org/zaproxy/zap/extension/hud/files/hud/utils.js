@@ -4,9 +4,17 @@
  * Description goes here...
  */
 
- var CLIENT_LEFT = "left";
- var CLIENT_RIGHT = "right";
- var CLIENT_MAIN = "main.html";
+var CLIENT_LEFT = "left";
+var CLIENT_RIGHT = "right";
+var CLIENT_MAIN = "main.html";
+
+var BUTTON_HTML = '<div class="button" id="BUTTON_NAME-button">\n<div class="button-icon" id="BUTTON_NAME-button-icon"><img src="<<ZAP_HUD_API>>OTHER/hud/other/image/?name=IMAGE_NAME" alt="IMAGE_NAME" height="16" width="16"></div>\n<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA</div>\n<div class="button-label" id="BUTTON_NAME-button-label">BUTTON_LABEL</div>\n</div>\n';
+var BUTTON_NAME = /BUTTON_NAME/g;
+var BUTTON_DATA_DIV  = /<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA<\/div>/g;
+var BUTTON_DATA = /BUTTON_DATA/g;
+var BUTTON_LABEL = /BUTTON_LABEL/g;
+var IMAGE_NAME = /IMAGE_NAME/g;
+
 
 /* given the text from an HTTP request header, returns a parsed object */
 function parseRequestHeader(headerText) {
@@ -65,6 +73,7 @@ function parseResponseHeader(headerText) {
 
 /* returns the send() function on xmlRequest object initialized to the given 
    restString and can handle return data with the callback function*/
+//todo: using fetch from SW instead
 function buildApiCall(restString, callback) {
 	var xmlRequest = new XMLHttpRequest();
 
@@ -94,6 +103,7 @@ function isFromTrustedOrigin (message) {
 	return false;
 }
 
+// These functions don't work in SW - no document
 /* parses the domain from a uri string */
 function parseDomainFromUrl(url) {
 	var parser = document.createElement("a");
@@ -155,33 +165,51 @@ function isStorageConfigured() {
 	return localforage.getItem(KEY_IS_CONFIG);
 }
 
+//todo: could just be named "conigureFrames" 
 function configureStorage() {
-	localforage.setItem(KEY_IS_CONFIG, true).catch(function(err) {
-		console.log(Error(err));
+	return new Promise(function(resolve) {
+		localforage.setItem(KEY_IS_CONFIG, true).catch(function(err) {
+			console.log(Error(err));
+		});
+
+		// Configure Panels
+		loadFrame("leftPanel").then(function(oldPanel) {
+			var panel = {};
+
+			panel.key = "leftPanel";
+			panel.orientation = "left";
+			panel.clientId = oldPanel.clientId;
+			panel.tools = [];
+
+			saveFrame(panel);
+		});
+		
+		loadFrame("rightPanel").then(function(oldPanel) {
+			var panel = {};
+
+			panel.key = "rightPanel";
+			panel.orientation = "right";
+			panel.clientId = oldPanel.clientId;
+			panel.tools = [];
+
+			saveFrame(panel);
+		});
+		
+		//todo; hacky
+		loadFrame("mainDisplay").then(function(oldFrame) {
+			var frame = {};
+
+			frame.key = "mainDisplay";
+			frame.clientId = oldFrame.clientId;
+
+			saveFrame(frame);
+		});
+
+		resolve();
 	});
-
-	// Configure Panels
-	var panel = {};
-
-	panel.key = "leftPanel";
-	panel.orientation = "left";
-	panel.tools = [];
-	//todo: remove temporary
-	panel.tools.push("scope");
-	saveFrame(panel);
-
-	panel = {};
-	panel.key = "rightPanel";
-	panel.orientation = "right";
-	panel.tools = [];
-	saveFrame(panel);
-
-	//todo; hacky
-	panel = {};
-	panel.key = "mainDisplay";
-	saveFrame(panel);
 }
 
+/* loads and saves the "frame" object from local storage */
 function loadFrame(key) {
 	return new Promise(function(resolve, reject) {
 		localforage.getItem(key).then(function(frame) {
@@ -198,7 +226,15 @@ function saveFrame(frame) {
 	});
 }
 
-/* loads and saves the "tools" object from local storage */
+function registerTool(toolname) {
+	localforage.getItem("tools").then(function(tools) {
+		tools.push(toolname);
+
+		localforage.setItem("tools", tools);
+	});
+}
+
+/* loads and saves the "tool" object from local storage */
 function loadTool(key) {
 	return new Promise(function(resolve) {
 		localforage.getItem(key).then(function(value) {
@@ -231,6 +267,29 @@ function loadPanelTools(panelKey) {
 				var p = new Promise(function(resolve) {
 					loadTool(toolKey).then(function(tool) {
 						resolve(tool);
+					});
+				});
+				toolPromises.push(p);
+			});
+
+			Promise.all(toolPromises).then(function(tools) {
+				resolve(tools);
+			});
+		});
+	});
+}
+
+function loadAllTools() {
+	return new Promise(function(resolve) {
+		
+
+		localforage.getItem("tools").then(function(toolnames) {
+			var toolPromises = [];
+
+			toolnames.forEach(function(toolname) {
+				var p = new Promise(function(resolve) {
+					loadTool(toolname).then(function(tool) {
+ 						resolve(tool);
 					});
 				});
 				toolPromises.push(p);
@@ -295,6 +354,22 @@ function messageWindow(window, message, origin) {
 
 		window.postMessage(message, origin, [channel.port2]);
 	});
+}
+
+function configureButtonHtml(tool) {
+	var html = BUTTON_HTML;
+
+	if (!tool.data) {
+		html = html.replace(BUTTON_DATA_DIV, " ");
+	}	
+
+	html = html.
+		replace(BUTTON_NAME, tool.name).
+		replace(BUTTON_LABEL, tool.label).
+		replace(BUTTON_DATA, tool.data).
+		replace(IMAGE_NAME, tool.icon);	
+
+	return html;
 }
 
 function utilCheck() {

@@ -7,6 +7,7 @@
 var Scope = (function() {
 
 	// Constants
+	// todo: could probably switch this to a config file?
 	var NAME = "scope";
 	var LABEL = "Scope";
 	var DATA = {};
@@ -26,9 +27,8 @@ var Scope = (function() {
 		tool.label = LABEL;
 		tool.data = DATA.OUT;
 		tool.icon = ICONS.OUT;
-		tool.isSelected = true;
-		//todo: remove temporary
-		tool.panel = "leftPanel";
+		tool.isSelected = false;
+		tool.panel = "";
 		tool.urls = [];
 
 		saveTool(tool);
@@ -90,7 +90,6 @@ var Scope = (function() {
 		fetch("<<ZAP_HUD_API>>JSON/context/action/includeInContext/?contextName=Default%20Context&regex=" + domain + "/.*&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
 			response.json().then(function(json) {
 				//todo: handle response if needed
-				console.log(json)
 			});
 		});
 
@@ -108,7 +107,6 @@ var Scope = (function() {
 		fetch("<<ZAP_HUD_API>>JSON/context/action/excludeFromContext/?contextName=Default%20Context&regex=" + domain + "/.*&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
 			response.json().then(function(json) {
 				//todo: handle response if needed
-				console.log(json)
 			});
 		});
 
@@ -123,24 +121,35 @@ var Scope = (function() {
 	}
 
 	// On script load
-	initializeStorage();
+	registerTool(NAME);
+
+	self.addEventListener("activate", function(event) {
+		initializeStorage();
+	});
 
 	self.addEventListener("message", function(event) {
-		if (!isFromTrustedOrigin(event)) {
-			return;
-		}
-
 		var message = event.data;
 
+		// Broadcasts
 		switch(message.action) {
-			case "useTool":
-				if (message.tool === "scope") {
-					showDialog(message.domain);
-				}
+			case "initializeTools":
+				initializeStorage();
 				break;
 
 			default:
 				break;
+		}
+
+		// Directed
+		if (message.tool === NAME) {
+			switch(message.action) {
+				case "buttonClicked":
+					showDialog(message.domain);
+					break;
+
+				default:
+					break;
+			}
 		}
 	});
 })();

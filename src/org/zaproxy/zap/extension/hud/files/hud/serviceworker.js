@@ -1,16 +1,13 @@
 importScripts("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/localforage.min.js");
 importScripts("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=utils.js");
- 
+
 var CACHE_NAME = "hud-cache-1.0";
-var BUTTON_HTML = '<div class="button" id="BUTTON_NAME-button">\n<div class="button-icon" id="BUTTON_NAME-button-icon"><img src="<<ZAP_HUD_API>>OTHER/hud/other/image/?name=IMAGE_NAME" alt="IMAGE_NAME" height="16" width="16"></div>\n<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA</div>\n<div class="button-label" id="BUTTON_NAME-button-label">BUTTON_LABEL</div>\n</div>\n';
 var BUTTON_LIST_HTML = '<div class="buttons-list">';
 var PARAM_ORIENATATION = "orientation=";
-var BUTTON_NAME = /BUTTON_NAME/g;
-var BUTTON_DATA = /BUTTON_DATA/g;
-var BUTTON_LABEL = /BUTTON_LABEL/g;
 var ORIENTATION = /ORIENTATION/g;
-var IMAGE_NAME = /IMAGE_NAME/g;
- 
+
+var isDebugging = true;
+
 var urlsToCache = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/jquery-1.12.0.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/jquery-ui.js",
@@ -19,22 +16,23 @@ var urlsToCache = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.html",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.css",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.js",
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=main.css",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=main.html",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=main.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=inject.js"
 ];
 
-//todo: replace with config file
 var toolScripts = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/scope.js"
 ];
 
 // Load Tool Scripts
-//todo: read in config file (json/xml)
-toolScripts.forEach(function(script) {
-	importScripts(script); 
+localforage.setItem("tools", []).then(function() {
+	toolScripts.forEach(function(script) {
+		importScripts(script); 
+	});
 });
- 
+
 
 /* Listeners */  
 self.addEventListener("install", function(event) {
@@ -47,23 +45,19 @@ self.addEventListener("install", function(event) {
 			return cache.addAll(urlsToCache);
 		})
 	);
-});
- 
-self.addEventListener("activate", function(event) {
-	console.log("activating...");
+}); 
 
+self.addEventListener("activate", function(event) {
 	// Check Storage & Initiate
 	event.waitUntil(		
 		isStorageConfigured().then(function(isConfigured) {
-
-			if (!isConfigured) {
-				console.log("initializing indexdb...");
+			if (!isConfigured || isDebugging) {
 				configureStorage();
 			}
 		}).catch(function(err) {
 			console.log(Error(err));
 		})
-	); 
+	);
 });
 
 self.addEventListener("fetch", function(event) {
@@ -86,7 +80,6 @@ self.addEventListener("fetch", function(event) {
 					saveFrameId(event);
 				}
 
-				// Cache Hit
 				return response;
 			}
 			else {
@@ -107,7 +100,10 @@ self.addEventListener("message", function(event) {
 	var message = event.data;
  
 	switch(message.action) {
-		case "":
+		case "buttonClicked":
+			if (message.buttonLabel === "add-tool") {
+				showAddToolDialog(message.panelKey);
+			}
 			break;
 
 		default:
@@ -116,7 +112,7 @@ self.addEventListener("message", function(event) {
 });
 
 
-/* Helper Methods */
+/* Fetch Methods */
 function handlePanelHtmlFetch(reqUrl) {
 	return caches.match("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.html").then(function(resp) {
 		var orientation = reqUrl.substring(reqUrl.indexOf(PARAM_ORIENATATION) + PARAM_ORIENATATION.length);
@@ -164,14 +160,19 @@ function saveFrameId(event) {
 }
 
 function buildPanelHtml(response, orientation) {
-
 	var key = orientation + "Panel";
+	
 	return loadPanelTools(key).then(function(tools) {
 
 		return response.text().then(function(text) {
 			var init = buildInit(response);
 			var body = text.replace(ORIENTATION, orientation);
 
+			// Last, AddTool Button
+			var addToolButton = {name:"add-tool", label:"Add", icon:"plus.png"};
+			body = addButtonToBody(body, addToolButton);
+
+			// Add Each Tool
 			tools.forEach(function(tool) {
 				body = addButtonToBody(body, tool);
 			});
@@ -208,7 +209,7 @@ function buildInit(response) {
 
 	return init;
 }
-
+ 
 //todo: home made parsing for now
 function addButtonToBody(body, tool) {
 	var insertAt = body.indexOf(BUTTON_LIST_HTML) + BUTTON_LIST_HTML.length;
@@ -218,14 +219,22 @@ function addButtonToBody(body, tool) {
 	return newBody;
 }
 
-function configureButtonHtml(tool) {
-	var html = BUTTON_HTML;
+function showAddToolDialog(panelKey) {
+	var config = {};
 
-	html = html.
-		replace(BUTTON_NAME, tool.name).
-		replace(BUTTON_LABEL, tool.label).
-		replace(BUTTON_DATA, tool.data).
-		replace(IMAGE_NAME, tool.icon);
+	messageFrame("mainDisplay", {action: "showAddToolList", config: config}).then(function(response) {
 
-	return html;
+		loadTool(response.id).then(function(tool) {
+			tool.isSelected = true;
+			tool.panel = panelKey;
+
+			saveTool(tool);
+
+			loadFrame(panelKey).then(function(panel) {
+				panel.tools.push(tool.name);
+
+				saveFrame(panel);
+			});
+		});
+	});
 }

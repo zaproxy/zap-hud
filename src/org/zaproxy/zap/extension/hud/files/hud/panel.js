@@ -6,6 +6,7 @@
 
 var IMAGE_URL = "<<ZAP_HUD_API>>OTHER/hud/other/image/?name=";
 var orientation = "";
+var panelKey = "";
 
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -16,17 +17,17 @@ document.addEventListener("DOMContentLoaded", function() {
 		var param = params[i].split("=");
 		if (param[0] === "orientation") {
 			orientation = param[1];
+			panelKey = orientation + "Panel";
 		}
 	}
 
 	window.name = orientation+"Panel";
 
-
-	// Add Listeners
+	// Add Button Listeners
 	var buttons = document.getElementsByClassName("button");
 
 	for (var button of buttons) {
-		var buttonName = button.id.substring(0, button.id.indexOf("-"));
+		var buttonName = button.id.substring(0, button.id.indexOf("-button"));
 
 		button.addEventListener("mouseenter", showButtonLabel);
 		button.addEventListener("mouseleave", hideButtonLabel);
@@ -35,19 +36,20 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 document.addEventListener("message", function(event) {
-	console.log(event);
+	//todo: anything from other frames here
 });
 
 navigator.serviceWorker.addEventListener("message", function(event) {
-	if (!isFromTrustedOrigin(event)) {
-		return;
-	}
-
 	var message = event.data;
 	
 	switch(message.action) {
 		case "updateData":
-			setButtonData(message.tool);
+			if (hasButton(message.tool)) {
+				setButtonData(message.tool);
+			}
+			else {
+				addButton(message.tool);
+			}
 			break;
 
 		default:
@@ -64,12 +66,32 @@ function setButtonData(tool) {
 	button.querySelector("img").src = IMAGE_URL + tool.icon;
 }
 
+function addButton(tool) {
+	var template = document.createElement("template");
+	template.innerHTML = configureButtonHtml(tool);
+
+	var newButton = template.content.firstChild;
+
+	newButton.addEventListener("mouseenter", showButtonLabel);
+	newButton.addEventListener("mouseleave", hideButtonLabel);
+	newButton.addEventListener("click", handleButtonAction(tool.name), true);
+
+	var buttonList = document.querySelector(".buttons-list");
+	var lastButton = document.getElementById("add-tool-button");
+	buttonList.insertBefore(newButton, lastButton);
+}
+
 function handleButtonAction(name) {
 	return function() { doButtonAction(name); };
 }
 
 function doButtonAction(buttonName) {
-	navigator.serviceWorker.controller.postMessage({action:"useTool", tool:buttonName, domain:getReferrerDomain()});
+	navigator.serviceWorker.controller.postMessage({
+		action:"buttonClicked",
+		buttonLabel:buttonName,
+		tool: buttonName,
+		domain:getReferrerDomain(),
+		panelKey:panelKey});
 }
 
 /* shows or hides a button label and expands or shrinks panel */
@@ -110,4 +132,14 @@ function getReferrerDomain() {
 	parser.href = document.referrer;
 
 	return parser.protocol + "//" + parser.host;
+}
+
+function hasButton(tool) {
+	var buttonId = tool.name + "-button";
+	var hasButton = document.getElementById(buttonId);
+
+	if (hasButton) {
+		return true;
+	}
+	return false;
 }
