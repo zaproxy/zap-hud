@@ -178,8 +178,10 @@ function configureStorage() {
 
 			panel.key = "leftPanel";
 			panel.orientation = "left";
-			panel.clientId = oldPanel.clientId;
 			panel.tools = [];
+			if (oldPanel) {
+				panel.clientId = oldPanel.clientId;
+			}
 
 			saveFrame(panel);
 		});
@@ -189,8 +191,10 @@ function configureStorage() {
 
 			panel.key = "rightPanel";
 			panel.orientation = "right";
-			panel.clientId = oldPanel.clientId;
 			panel.tools = [];
+			if (oldPanel) {
+				panel.clientId = oldPanel.clientId;
+			}
 
 			saveFrame(panel);
 		});
@@ -200,7 +204,9 @@ function configureStorage() {
 			var frame = {};
 
 			frame.key = "mainDisplay";
-			frame.clientId = oldFrame.clientId;
+			if (oldFrame) {
+				frame.clientId = oldFrame.clientId;
+			}
 
 			saveFrame(frame);
 		});
