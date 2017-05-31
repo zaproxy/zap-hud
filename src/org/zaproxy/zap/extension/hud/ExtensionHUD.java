@@ -30,6 +30,7 @@ import javax.swing.ImageIcon;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.Arrays;
 
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.io.IOUtils;
@@ -188,14 +189,15 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener {
 				int openBodyTag = regexEndOf(pattern, header.toLowerCase());
 
 				String hudScript = "";
+				String contents = this.getFile(msg, HUD_HTML, false);
+				String[] lines = contents.split("\\r?\\n");
+
 				if (isFirstRequest) {
-					String contents = this.getFile(msg, HUD_HTML, false);
-					String[] lines = contents.split("\\r?\\n");
 					hudScript = lines[0] + lines[1];
 
 					isFirstRequest = false;
 				} else {
-					hudScript = this.getFile(msg, HUD_HTML, false);
+					hudScript = lines[0] + String.join("", Arrays.copyOfRange(lines, 2, lines.length));
 				}
 
 				if (openBodyTag > -1  && hudScript != null) {

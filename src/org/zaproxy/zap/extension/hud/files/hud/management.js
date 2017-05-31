@@ -25,7 +25,24 @@ function addButtonListener() {
 	});
 }
 
+function checkForFirstLoad() {
+	var isFirstLoad = false;
+	var params = document.location.search.substring(1).split("&");
+
+	for (var i=0; i<params.length; i++) {
+		var param = params[i].split("=");
+		if (param[0] === "firstload") {
+			
+			var message = {
+				action: "refresh"
+			};
+			parent.postMessage(message, document.referrer);
+		}
+	}
+}
+
 document.addEventListener("DOMContentLoaded", function() {
+	checkForFirstLoad();
 	startServiceWorker();
 	addButtonListener();
 });

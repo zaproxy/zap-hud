@@ -218,7 +218,7 @@ function addButtonToBody(body, tool) {
 
 	return newBody;
 }
-
+ 
 function showAddToolDialog(panelKey) {
 	var config = {};
 
