@@ -193,11 +193,11 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener {
 				String[] lines = contents.split("\\r?\\n");
 
 				if (isFirstRequest) {
-					hudScript = lines[0] + lines[1];
+					hudScript = String.join("", Arrays.copyOfRange(lines, 0, 8));
 
 					isFirstRequest = false;
 				} else {
-					hudScript = lines[0] + String.join("", Arrays.copyOfRange(lines, 2, lines.length));
+					hudScript = lines[0] + String.join("", Arrays.copyOfRange(lines, 9, lines.length));
 				}
 
 				if (openBodyTag > -1  && hudScript != null) {

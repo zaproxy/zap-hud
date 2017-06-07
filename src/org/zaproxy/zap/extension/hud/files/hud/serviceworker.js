@@ -180,7 +180,7 @@ function saveFrameId(event) {
     });
 }
 
-function buildPanelHtml(response, orientation, url) { 
+function buildPanelHtml(response, orientation, url) {
 	var key = orientation + "Panel";
 	
 	return loadPanelTools(key).then(function(tools) {
