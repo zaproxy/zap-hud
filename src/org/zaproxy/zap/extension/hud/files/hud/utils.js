@@ -106,10 +106,24 @@ function isFromTrustedOrigin (message) {
 // These functions don't work in SW - no document
 /* parses the domain from a uri string */
 function parseDomainFromUrl(url) {
-	var parser = document.createElement("a");
-	parser.href = url;
+	var hostname;
+	var protocol;
 
-	return parser.protocol + "//" + parser.host;
+	if (url.indexOf("://") > -1) {
+		hostname = url.split('/')[2];
+	}
+	else {
+		hostname = url.split('/')[0];
+	}
+
+	//find & remove port number
+	hostname = hostname.split(':')[0];
+	
+	//find & remove "?" & "#"
+	hostname = hostname.split('?')[0];
+	hostname = hostname.split('#')[0];
+
+	return hostname;
 }
 
 /* parses the path from a uri string */
@@ -204,6 +218,17 @@ function configureStorage() {
 			var frame = {};
 
 			frame.key = "mainDisplay";
+			if (oldFrame) {
+				frame.clientId = oldFrame.clientId;
+			}
+
+			saveFrame(frame);
+		});
+
+		loadFrame("management").then(function(oldFrame) {
+			var frame = {};
+
+			frame.key = "management";
 			if (oldFrame) {
 				frame.clientId = oldFrame.clientId;
 			}
@@ -325,19 +350,24 @@ function messageFrame(key, message) {
 	return new Promise(function(resolve, reject) {
 		loadFrame(key).then(function(frame) {
 			clients.get(frame.clientId).then(function(client) {
+				if (client !== undefined) {
 
-				var channel = new MessageChannel();
+					var channel = new MessageChannel();
 
-				channel.port1.onmessage = function(event) {
-					if (event.data.error) {
-						reject(event.data.error);
-					}
-					else {
-						resolve(event.data);
-					}
-				};
+					channel.port1.onmessage = function(event) {
+						if (event.data.error) {
+							reject(event.data.error);
+						}
+						else {
+							resolve(event.data);
+						}
+					};
 
-				client.postMessage(message, [channel.port2]);
+					client.postMessage(message, [channel.port2]);
+				}
+				else {
+					console.log("client: " + key + " is unavailable");
+				}
 			}).catch(function(err) {
 				console.log(Error(err));
 			});
@@ -385,5 +415,5 @@ function utilCheck() {
 
 // todo: maybe needed instead of passing info through postmessage
 function getTargetDomain() {
-
+	return messageFrame("management", {action:"getTargetDomain"});
 }

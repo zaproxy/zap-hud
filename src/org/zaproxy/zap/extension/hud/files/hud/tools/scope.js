@@ -120,6 +120,27 @@ var Scope = (function() {
 		});
 	}
 
+	function onTargetLoad(data) {
+		return checkDomainInScope(data.domain).then(function(isInScope) {
+			if (isInScope) {
+				loadTool(NAME).then(function(tool) {
+					tool.data = DATA.IN;
+					tool.icon = ICONS.IN;
+
+					saveTool(tool);
+				});
+			}
+			else {
+				loadTool(NAME).then(function(tool) {
+					tool.data = DATA.OUT;
+					tool.icon = ICONS.OUT;
+
+					saveTool(tool);
+				});
+			}
+		});
+	}
+
 	// On script load
 	registerTool(NAME);
 
@@ -152,8 +173,14 @@ var Scope = (function() {
 			}
 		}
 	});
+
+	return {
+		name: NAME,
+		onTargetLoad: onTargetLoad
+	};
 })();
 
+self.tools[Scope.name] = Scope;
 /*
 function requireScope(targetDomain, callback) {
 	withTool(name, function(tool) {
