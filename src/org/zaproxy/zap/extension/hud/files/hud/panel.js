@@ -82,7 +82,9 @@ function addButton(tool) {
 }
 
 function handleButtonAction(name) {
-	return function() { doButtonAction(name); };
+	return function() { 
+		doButtonAction(name);
+	};
 }
 
 function doButtonAction(buttonName) {
@@ -102,10 +104,7 @@ function showButtonLabel(event){
 
 function hideButtonLabel(event){
 	event.target.querySelector(".button-label").style.display = "none";
-
-	if (event.target.id != "add-tool-button") {
-		contractPanel();
-	}
+	contractPanel();
 }
 
 /* sends message to inject script to expand or contract width of panel iframe */

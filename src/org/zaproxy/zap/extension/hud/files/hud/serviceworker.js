@@ -212,7 +212,7 @@ function buildPanelHtml(response, orientation, url) {
 				}).catch(function(error) {
 					console.log(Error("Could not get text for response. " + error));
 				});
-			})
+			});
 		});
 	});
 }
