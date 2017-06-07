@@ -128,10 +128,7 @@ function contractPanel() {
 
 /* parses the domain from a uri string */
 function getReferrerDomain() {
-	var parser = document.createElement("a");
-	parser.href = document.referrer;
-
-	return parser.protocol + "//" + parser.host;
+	return parseDomainFromUrl(document.referrer);
 }
 
 function hasButton(tool) {

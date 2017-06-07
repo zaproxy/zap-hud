@@ -3,7 +3,8 @@ importScripts("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=utils.js");
 
 var CACHE_NAME = "hud-cache-1.0";
 var BUTTON_LIST_HTML = '<div class="buttons-list">';
-var PARAM_ORIENATATION = "orientation=";
+var PARAM_ORIENATATION = "orientation";
+var PARAM_URL = "url";
 var ORIENTATION = /ORIENTATION/g;
 
 var isDebugging = true;
@@ -19,12 +20,16 @@ var urlsToCache = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=main.css",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=main.html",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=main.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=inject.js"
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=management.css",
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=management.html",
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=management.js"
 ];
 
 var toolScripts = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/scope.js"
 ];
+
+self.tools = {};
 
 // Load Tool Scripts
 localforage.setItem("tools", []).then(function() {
@@ -111,18 +116,27 @@ self.addEventListener("message", function(event) {
 	}
 });
 
+function getParamater(url, parameter) {
+	var start = url.indexOf(parameter) + parameter.length + 1;
+	var end = url.indexOf("&", start);
+	end = end == -1 ? url.length : end;
+
+	return url.substring(start, end);
+}
 
 /* Fetch Methods */
 function handlePanelHtmlFetch(reqUrl) {
 	return caches.match("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.html").then(function(resp) {
-		var orientation = reqUrl.substring(reqUrl.indexOf(PARAM_ORIENATATION) + PARAM_ORIENATATION.length);
-		return buildPanelHtml(resp, orientation);
+		var orientation = getParamater(reqUrl, PARAM_ORIENATATION);
+		var url = getParamater(reqUrl, PARAM_URL);
+
+		return buildPanelHtml(resp, orientation, url);
 	});
 }
 
 function handlePanelCssFetch(reqUrl) {
 	return caches.match("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.css").then(function(resp) {
-		var orientation = reqUrl.substring(reqUrl.indexOf(PARAM_ORIENATATION) + PARAM_ORIENATATION.length);
+		var orientation = getParamater(reqUrl, PARAM_ORIENATATION);
 		return buildPanelCss(resp, orientation);
 	});
 }
@@ -154,32 +168,51 @@ function saveFrameId(event) {
 						saveFrame(panel);
 					});
 				}
+				else if (client.url.endsWith("management.html")) {
+					loadFrame("management").then(function(frame) {
+						frame.clientId = client.id;
+
+						saveFrame(frame);
+					});
+				}
 			}
 		});
     });
 }
 
-function buildPanelHtml(response, orientation) {
+function buildPanelHtml(response, orientation, url) { 
 	var key = orientation + "Panel";
 	
 	return loadPanelTools(key).then(function(tools) {
+		// run onTargetLoad for any tools in the panel
+		var promises = [];
 
-		return response.text().then(function(text) {
-			var init = buildInit(response);
-			var body = text.replace(ORIENTATION, orientation);
+		for (var tool in tools) {
+			promises.push(self.tools[tools[tool].name].onTargetLoad({domain: parseDomainFromUrl(url)}));
+		}
 
-			// Last, AddTool Button
-			var addToolButton = {name:"add-tool", label:"Add", icon:"plus.png"};
-			body = addButtonToBody(body, addToolButton);
+		return Promise.all(promises).then(
+			function() {
+				return loadPanelTools(key).then(function(tools) {
 
-			// Add Each Tool
-			tools.forEach(function(tool) {
-				body = addButtonToBody(body, tool);
-			});
+				return response.text().then(function(text) {
+					var init = buildInit(response);
+					var body = text.replace(ORIENTATION, orientation);
 
-			return new Response(body, init);
-		}).catch(function(error) {
-			console.log(Error("Could not get text for response. " + error));
+					// Last, AddTool Button
+					var addToolButton = {name:"add-tool", label:"Add", icon:"plus.png"};
+					body = addButtonToBody(body, addToolButton);
+
+					// Add Each Tool
+					tools.forEach(function(tool) {
+						body = addButtonToBody(body, tool);
+					});
+
+					return new Response(body, init);
+				}).catch(function(error) {
+					console.log(Error("Could not get text for response. " + error));
+				});
+			})
 		});
 	});
 }
