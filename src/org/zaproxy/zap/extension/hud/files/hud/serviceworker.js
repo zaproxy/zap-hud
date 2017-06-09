@@ -14,6 +14,8 @@ var urlsToCache = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/jquery-ui.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/jquery-ui.css",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/jquery-ui.theme.css",
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/localforage.min.js",
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=utils.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.html",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.css",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.js",
@@ -22,7 +24,9 @@ var urlsToCache = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=main.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=management.css",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=management.html",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=management.js"
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=management.js",
+	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=plus.png",
+	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=gear.png"
 ];
 
 var toolScripts = [
@@ -39,7 +43,7 @@ localforage.setItem("tools", []).then(function() {
 });
 
 
-/* Listeners */  
+/* Listeners */
 self.addEventListener("install", function(event) {
 	console.log("installing...");
 
@@ -54,7 +58,7 @@ self.addEventListener("install", function(event) {
 
 self.addEventListener("activate", function(event) {
 	// Check Storage & Initiate
-	event.waitUntil(		
+	event.waitUntil(
 		isStorageConfigured().then(function(isConfigured) {
 			if (!isConfigured || isDebugging) {
 				configureStorage();
@@ -191,9 +195,8 @@ function buildPanelHtml(response, orientation, url) {
 			promises.push(self.tools[tools[tool].name].onTargetLoad({domain: parseDomainFromUrl(url)}));
 		}
 
-		return Promise.all(promises).then(
-			function() {
-				return loadPanelTools(key).then(function(tools) {
+		return Promise.all(promises).then(function() {
+			return loadPanelTools(key).then(function(tools) {
 
 				return response.text().then(function(text) {
 					var init = buildInit(response);
@@ -214,6 +217,8 @@ function buildPanelHtml(response, orientation, url) {
 				});
 			});
 		});
+	}).catch(function(error) {
+		console.log(Error(error))
 	});
 }
 

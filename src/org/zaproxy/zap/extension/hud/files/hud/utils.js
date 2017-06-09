@@ -103,7 +103,6 @@ function isFromTrustedOrigin (message) {
 	return false;
 }
 
-// These functions don't work in SW - no document
 /* parses the domain from a uri string */
 function parseDomainFromUrl(url) {
 	var hostname;
@@ -126,6 +125,7 @@ function parseDomainFromUrl(url) {
 	return hostname;
 }
 
+// These functions don't work in SW - no document
 /* parses the path from a uri string */
 function parsePathFromUrl(url) {
 	var parser = document.createElement("a");

@@ -77,7 +77,6 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener {
 
 	private ZapToggleButton hudButton = null;
 	private boolean hudEnabled = false;
-	private boolean isFirstRequest = true;
 
 	/**
 	*
@@ -188,17 +187,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener {
 				Pattern pattern = Pattern.compile("<(\\s*?)body+(>|.*?[^?]>)");
 				int openBodyTag = regexEndOf(pattern, header.toLowerCase());
 
-				String hudScript = "";
-				String contents = this.getFile(msg, HUD_HTML, false);
-				String[] lines = contents.split("\\r?\\n");
-
-				if (isFirstRequest) {
-					hudScript = String.join("", Arrays.copyOfRange(lines, 0, 8));
-
-					isFirstRequest = false;
-				} else {
-					hudScript = lines[0] + String.join("", Arrays.copyOfRange(lines, 9, lines.length));
-				}
+				String hudScript = this.getFile(msg, HUD_HTML, false);
 
 				if (openBodyTag > -1  && hudScript != null) {
 					System.out.println(msg.getRequestHeader().getURI() + 
