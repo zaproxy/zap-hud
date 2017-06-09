@@ -149,7 +149,7 @@
 				break;
 
 			case "refresh":
-				window.location.reload(true);
+				window.location.reload(false);
 				break;
 
 			case "heighten":

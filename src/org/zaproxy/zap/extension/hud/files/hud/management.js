@@ -6,8 +6,23 @@
 
  function startServiceWorker() {
 	if ("serviceWorker" in navigator) {
+		
 		navigator.serviceWorker.register("<<ZAP_HUD_API>>OTHER/hud/other/?name=serviceworker.js&isworker=true").then(function(registration) {
 			console.log("Service worker registration successfully in scope: " + registration.scope);
+			return registration;
+			
+		}).then(function(registration) {
+			var wasInstall = registration.installing;
+			
+			navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
+				if (wasInstall && serviceWorkerRegistration.active) {
+					// force reload after installation
+					var message = {
+						action: "refresh"
+					};
+					parent.postMessage(message, document.referrer);
+				}
+			});
 		}).catch(function(err) {
 			console.log(Error("Service worker registration failed: " + err));
 		});
@@ -25,24 +40,7 @@ function addButtonListener() {
 	});
 }
 
-function checkForFirstLoad() {
-	var isFirstLoad = false;
-	var params = document.location.search.substring(1).split("&");
-
-	for (var i=0; i<params.length; i++) {
-		var param = params[i].split("=");
-		if (param[0] === "firstload") {
-			
-			var message = {
-				action: "refresh"
-			};
-			parent.postMessage(message, document.referrer);
-		}
-	}
-}
-
 document.addEventListener("DOMContentLoaded", function() {
-	checkForFirstLoad();
 	startServiceWorker();
 	addButtonListener();
 });
