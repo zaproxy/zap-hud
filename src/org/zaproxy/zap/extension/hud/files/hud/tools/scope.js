@@ -120,7 +120,7 @@ var Scope = (function() {
 		});
 	}
 
-	function onTargetLoad(data) {
+	function onPanelLoad(data) {
 		return checkDomainInScope(data.domain).then(function(isInScope) {
 			if (isInScope) {
 				loadTool(NAME).then(function(tool) {
