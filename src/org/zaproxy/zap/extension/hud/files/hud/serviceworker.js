@@ -1,4 +1,4 @@
-importScripts("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/localforage.min.js");
+importScripts("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/localforage.min.js"); 
 importScripts("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=utils.js");
 
 var CACHE_NAME = "hud-cache-1.0";
