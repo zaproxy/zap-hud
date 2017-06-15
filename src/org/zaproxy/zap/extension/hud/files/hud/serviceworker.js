@@ -192,7 +192,7 @@ function buildPanelHtml(response, orientation, url) {
 		var promises = [];
 
 		for (var tool in tools) {
-			promises.push(self.tools[tools[tool].name].onTargetLoad({domain: parseDomainFromUrl(url)}));
+			promises.push(self.tools[tools[tool].name].onPanelLoad({domain: parseDomainFromUrl(url)}));
 		}
 
 		return Promise.all(promises).then(function() {
