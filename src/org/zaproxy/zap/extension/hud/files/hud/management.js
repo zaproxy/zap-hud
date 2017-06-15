@@ -40,7 +40,12 @@ function addButtonListener() {
 	});
 }
 
+function onTargetLoadMessage() {
+	navigator.serviceWorker.controller.postMessage({action:"onTargetLoad"});
+}
+
 document.addEventListener("DOMContentLoaded", function() {
 	startServiceWorker();
 	addButtonListener();
+	onTargetLoadMessage();
 });

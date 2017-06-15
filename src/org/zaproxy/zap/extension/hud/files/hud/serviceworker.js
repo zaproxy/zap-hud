@@ -42,7 +42,6 @@ localforage.setItem("tools", []).then(function() {
 	});
 });
 
-
 /* Listeners */
 self.addEventListener("install", function(event) {
 	console.log("installing...");
@@ -113,6 +112,10 @@ self.addEventListener("message", function(event) {
 			if (message.buttonLabel === "add-tool") {
 				showAddToolDialog(message.panelKey);
 			}
+			break;
+
+		case "onTargetLoad":
+			onTargetLoad();
 			break;
 
 		default:
@@ -255,6 +258,10 @@ function addButtonToBody(body, tool) {
 	var newBody = body.substring(0, insertAt) + configureButtonHtml(tool) + body.substring(insertAt, body.length);
 
 	return newBody;
+}
+
+function onTargetLoad() {
+	// anything to do when target loads goes here
 }
  
 function showAddToolDialog(panelKey) {
