@@ -176,7 +176,7 @@ var Scope = (function() {
 
 	return {
 		name: NAME,
-		onTargetLoad: onTargetLoad
+		onPanelLoad: onPanelLoad
 	};
 })();
 
