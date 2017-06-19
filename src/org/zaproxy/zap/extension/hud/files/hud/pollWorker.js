@@ -26,6 +26,7 @@ function startPolling() {
 		poll();
 	}
 
+	//todo: change this to pollDelay
 	setTimeout(startPolling, 1000);
 }
 

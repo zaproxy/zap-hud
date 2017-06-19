@@ -30,7 +30,8 @@ var urlsToCache = [
 ];
 
 var toolScripts = [
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/scope.js"
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/scope.js",
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/pageAlerts.js",
 ];
 
 self.tools = {};
@@ -40,6 +41,13 @@ localforage.setItem("tools", []).then(function() {
 	toolScripts.forEach(function(script) {
 		importScripts(script); 
 	});
+}).then(function(){
+	var ts = [];
+	for (var tool in self.tools) {
+		ts.push(self.tools[tool].name);
+	}
+	registerTools(ts); 
+
 });
 
 /* Listeners */

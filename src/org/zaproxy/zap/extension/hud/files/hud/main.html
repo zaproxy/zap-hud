@@ -14,7 +14,7 @@
 	<a  id="background-link" href="#"></a>
 
 
-<!-- Dialog Templates -->
+<!-- Dialog: shows text with buttons -->
 <template id="dialog-template">
 <div id="dialog" class="display">
 	<p id="dialog-text"></p>
@@ -30,6 +30,52 @@
 			<p class="tool-label"></p>
 			<input id="tool-name" type="hidden"/>
 		</li>
+	</template>
+</template>
+
+<!-- Alerts: shows all alerts -->
+<template id="alerts-template">
+	<div id="alerts-div" class="display">
+		<!-- tabs -->
+		<ul class="tab">
+			<li><a href="#" id="informational-tab" class="tablinks">Info </a></li>
+			<li><a href="#" id="low-tab" class="tablinks">Low </a></li>
+			<li><a href="#" id="medium-tab" class="tablinks">Medium </a></li>
+			<li><a href="#" id="high-tab" class="tablinks">High </a></li>
+		</ul>
+
+		<!-- tab contents -->
+		<div id="informational-content" class="alert-content">
+		</div>
+
+		<div id="low-content" class="alert-content">
+		</div>
+
+		<div id="medium-content" class="alert-content">
+		</div>
+
+		<div id="high-content" class="alert-content">
+		</div>
+		
+	</div>
+	<template id="alert-type-template">
+		<h4 class="alert-type-header">Item</h4>
+		<ul>
+		</ul>
+	</template>
+	<template id="alert-item-template">
+		<li><a class="alert-link" href="#"></a></li>
+	</template>
+</template>
+
+<!-- Alert Details: shows the details about an individual alert -->
+<template id="alert-details-template">
+	<div id="alert-details" class="display">
+	</div>
+	<template id="detail-field-template">
+		<label></label>
+		<textarea class="alert-detail-input"readonly="true">
+		</textarea>
 	</template>
 </template>
 

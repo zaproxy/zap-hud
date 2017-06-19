@@ -22,6 +22,10 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			showAddToolList(message.config, event.ports[0]);
 			break;
 
+		case "showAlertsDialog":
+			showAlerts(message.config, event.ports[0]);
+			break;
+
 		default:
 			break;
 	}
@@ -49,6 +53,91 @@ function showDialog(config, port) {
 			open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },	// Hides close button
 		});
 	});
+}
+
+function showAlerts(config, port) {
+	var dialog = loadTemplate("alerts-template");
+	var alertData = config.alerts;
+
+	for (var level in alertData) {
+		// update count on tab
+		var tab = display.querySelector("#" + level.toLowerCase() +"-tab");
+		var text = tab.innerText.substring(0, tab.innerText.indexOf(" "));
+		text += " (" + Object.keys(alertData[level]).length +")";
+		tab.innerText = text;
+
+		// get the content panel, and set low to display first
+		var content = display.getElementById(level.toLowerCase() + "-content");
+		if (level !== "Low") {
+			content.style.display = "none";
+		}
+
+		// populate 
+		// todo: fix this closure garbage
+		var alertTypes = alertData[level];
+		for (var alertType in alertTypes) {		
+			var typeUl = utils.loadTemplate("alert-type-template", display);		
+			
+			typeUl.querySelector(".alert-type-header").innerText = alertType + " (" + alertTypes[alertType].length +")";
+
+			var alerts = alertTypes[alertType];
+			for (var i=0; i<alerts.length; i++) {
+				(function () {
+					var alert = utils.loadTemplate("alert-item-template", display);
+					var alertLi = alert.querySelector(".alert-link");
+
+					alertLi.text = alerts[i].alert + " (" + alerts[i].id + ")";
+					//var apiString = "core/view/alert/?id="+alerts[i].id;
+
+					//todo: fix this with the actual button handlers
+					alertLi.addEventListener("click", buttonHandler(alerts[i].id, port));
+					//alertLi.addEventListener("click", function() {utils.buildApiCall(apiString, showAlertDetails);});
+
+					typeUl.querySelector("ul").appendChild(alertLi);
+				})();
+			}
+			content.appendChild(typeUl);
+		}
+	}
+
+	showMainDisplay().then(function() {
+		document.body.appendChild(dialog);
+
+		// make tabs change the content pane
+		var tabs = document.querySelectorAll(".tablinks");
+		for (var i=0; i<tabs.length; i++) {
+			tabs[i].addEventListener("click", handleOpenAlertPane);
+		}
+
+		// make all content panes accordions
+		var contents = document.querySelectorAll(".alert-content");
+		for (i=0; i<contents.length; i++) {
+			$(contents[i]).accordion({
+				active: false,
+				heightStyle: "content",
+				collapsible: true
+			});
+		}
+
+		$( "#alerts-div" ).dialog({
+			resizable: false,
+			height: 450,
+			width: 500,
+			position: { my: 'left top', at: 'left+' + (550) + ' top+' + (550)},
+			open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },	// Hides close button
+		});
+	});
+}
+
+function handleOpenAlertPane() {
+	var panes = document.querySelectorAll(".alert-content");
+	for (var i=0; i < panes.length; i++) {
+		panes[i].style.display = "none";
+	}
+
+	var paneName = this.id.slice(0, this.id.indexOf("-tab"));
+	console.log(paneName);
+	document.getElementById(paneName+"-content").style.display = "";
 }
 
 function showAddToolList(config, port) {
