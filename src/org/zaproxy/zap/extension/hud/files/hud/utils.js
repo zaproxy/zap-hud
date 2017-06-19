@@ -265,6 +265,14 @@ function registerTool(toolname) {
 	});
 }
 
+function registerTools(toolnames) {
+	localforage.getItem("tools").then(function(tools) {
+		tools = tools.concat(toolnames);
+
+		localforage.setItem("tools", tools);
+	});
+}
+
 /* loads and saves the "tool" object from local storage */
 function loadTool(key) {
 	return new Promise(function(resolve) {

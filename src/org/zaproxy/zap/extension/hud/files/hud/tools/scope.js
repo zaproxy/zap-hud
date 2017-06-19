@@ -141,9 +141,6 @@ var Scope = (function() {
 		});
 	}
 
-	// On script load
-	registerTool(NAME);
-
 	self.addEventListener("activate", function(event) {
 		initializeStorage();
 	});

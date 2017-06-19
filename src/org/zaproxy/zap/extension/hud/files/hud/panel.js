@@ -93,6 +93,7 @@ function doButtonAction(buttonName) {
 		buttonLabel:buttonName,
 		tool: buttonName,
 		domain:getReferrerDomain(),
+		url: document.referrer,
 		panelKey:panelKey});
 }
 
