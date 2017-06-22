@@ -13,7 +13,7 @@ function poll() {
 					cache = xhr.responseText;
 
 					var data = JSON.parse(xhr.responseText);
-					postMessage({action: "pollData", pollData: data});
+					postMessage({action: "pollData", pollData: data, targetUrl: targetUrl});
 				}
 			}
 		}
