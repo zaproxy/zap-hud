@@ -83,14 +83,35 @@ var PageAlerts = (function() {
 		console.log(details);
 	}
 
-
-	function onPanelLoad(data) {
-		
+	function updateAlertCount(url) {
+		return loadTool(NAME).then(function(tool) {
+			if (tool.alerts[url]) {
+				var count = 0;
+				for (var key in tool.alerts[url]) {
+					count += Object.keys(tool.alerts[url][key]).length;
+				}
+				tool.data = count.toString();
+			}
+			else {
+				tool.data = "0";
+			}
+			saveTool(tool);
+		});
 	}
 
-	function onPollData(alerts) {
+
+	function onPanelLoad(data) {
+		return updateAlertCount(data.url);
+	}
+
+	function onPollData(url, alerts) {
 		loadTool(NAME).then(function(tool) {
 			tool.alerts[url] = formatAlerts(alerts);
+
+			saveTool(tool);
+			return url;
+		}).then(function(url) {
+			updateAlertCount(url);
 		});
 	}
 
@@ -108,7 +129,7 @@ var PageAlerts = (function() {
 				break;
 
 			case "pollData":
-				onPollData(message.pollData.pageAlerts);
+				onPollData(message.targetUrl, message.pollData.pageAlerts);
 				break;
 
 			default:

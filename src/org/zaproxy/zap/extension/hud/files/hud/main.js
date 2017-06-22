@@ -61,13 +61,13 @@ function showAlerts(config, port) {
 
 	for (var level in alertData) {
 		// update count on tab
-		var tab = display.querySelector("#" + level.toLowerCase() +"-tab");
+		var tab = dialog.querySelector("#" + level.toLowerCase() +"-tab");
 		var text = tab.innerText.substring(0, tab.innerText.indexOf(" "));
 		text += " (" + Object.keys(alertData[level]).length +")";
 		tab.innerText = text;
 
 		// get the content panel, and set low to display first
-		var content = display.getElementById(level.toLowerCase() + "-content");
+		var content = dialog.getElementById(level.toLowerCase() + "-content");
 		if (level !== "Low") {
 			content.style.display = "none";
 		}
@@ -76,14 +76,14 @@ function showAlerts(config, port) {
 		// todo: fix this closure garbage
 		var alertTypes = alertData[level];
 		for (var alertType in alertTypes) {		
-			var typeUl = utils.loadTemplate("alert-type-template", display);		
+			var typeUl = loadTemplate("alert-type-template", dialog);		
 			
 			typeUl.querySelector(".alert-type-header").innerText = alertType + " (" + alertTypes[alertType].length +")";
 
 			var alerts = alertTypes[alertType];
 			for (var i=0; i<alerts.length; i++) {
 				(function () {
-					var alert = utils.loadTemplate("alert-item-template", display);
+					var alert = loadTemplate("alert-item-template", dialog);
 					var alertLi = alert.querySelector(".alert-link");
 
 					alertLi.text = alerts[i].alert + " (" + alerts[i].id + ")";
