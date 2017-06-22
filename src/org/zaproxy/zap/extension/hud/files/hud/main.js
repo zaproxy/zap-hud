@@ -22,8 +22,12 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			showAddToolList(message.config, event.ports[0]);
 			break;
 
-		case "showAlertsDialog":
+		case "showAlerts":
 			showAlerts(message.config, event.ports[0]);
+			break;
+
+		case "showAlertDetails":
+			showAlertDetails(message.config, event.ports[0]);
 			break;
 
 		default:
@@ -120,6 +124,7 @@ function showAlerts(config, port) {
 		}
 
 		$( "#alerts-div" ).dialog({
+			title: "Alerts For This Page",
 			resizable: false,
 			height: 450,
 			width: 500,
@@ -136,8 +141,36 @@ function handleOpenAlertPane() {
 	}
 
 	var paneName = this.id.slice(0, this.id.indexOf("-tab"));
-	console.log(paneName);
 	document.getElementById(paneName+"-content").style.display = "";
+}
+
+function showAlertDetails(config, port){
+	var alertData = config.details;
+
+	var details = loadTemplate("alert-details-template");
+
+	for (var field in alertData) {
+		var detailField = loadTemplate("detail-field-template", details);
+
+		detailField.querySelector("label").innerText = field;
+		detailField.querySelector("textarea").value = alertData[field];
+
+		details.getElementById("alert-details").appendChild(detailField);
+	}
+
+
+	showMainDisplay().then(function() {
+		document.body.appendChild(details);
+
+		$( "#alert-details" ).dialog({
+			title: "Alert Details",
+			resizable: false,
+			height: 400,
+			width: 400,
+			position: { my: 'left top', at: 'left+' + (550) + ' top+' + (50)},
+			open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },	// Hides close button
+		});
+	});
 }
 
 function showAddToolList(config, port) {

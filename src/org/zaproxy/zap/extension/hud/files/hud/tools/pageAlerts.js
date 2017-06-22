@@ -60,15 +60,12 @@ var PageAlerts = (function() {
 		loadTool(NAME).then(function(tool) {
 			config.alerts = tool.alerts[url];
 
-			messageFrame("mainDisplay", {action:"showAlertsDialog", config:config}).then(function(response) {
-
+			messageFrame("mainDisplay", {action:"showAlerts", config:config}).then(function(response) {
 				// Handle button choice
-				if (response.id) {
+				if ("id" in response) {
 					fetch("<<ZAP_HUD_API>>JSON/core/view/alert/?id=" + response.id + "&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
 						response.json().then(function(json) {
-							var details = JSON.parse(data).alert;
-
-							showAlertDetails(details);
+							showAlertDetails(json.alert);
 						});
 					});
 				}
@@ -80,7 +77,10 @@ var PageAlerts = (function() {
 	}
 
 	function showAlertDetails(details) {
-		console.log(details);
+		var config = {};
+		config.details = details;
+
+		messageFrame("mainDisplay", {action: "showAlertDetails", config: config});
 	}
 
 	function updateAlertCount(url) {
