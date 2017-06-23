@@ -71,12 +71,23 @@
 <!-- Alert Details: shows the details about an individual alert -->
 <template id="alert-details-template">
 	<div id="alert-details" class="display">
+		<!-- todo: change to a tabel -->
+		<label>URL:</label><p id="detail-url" class="alert-detail"></p>
+		<label>Risk:</label><p id="detail-risk" class="alert-detail"></p>
+		<label>Confidence:</label><p id="detail-confidence" class="alert-detail"></p>
+		<label>Parameter:</label><p id="detail-param" class="alert-detail"></p>
+		<label>Attack:</label><p id="detail-attack" class="alert-detail"></p>
+		<label>Evidence:</label><p id="detail-evidence" class="alert-detail"></p>
+		<label>CWE ID:</label><p id="detail-cweid" class="alert-detail"></p>
+		<label>WASC ID:</label><p id="detail-wascid" class="alert-detail"></p>
+		<label>Source:</label><p id="detail-sourceid" class="alert-detail"></p>
+		<p></p>
+		<label>Description:</label><textarea id="detail-description"  class="alert-detail-area" readonly="true" rows="4"></textarea>
+		<label>Other Info:</label><textarea id="detail-other" class="alert-detail-area" readonly="true" rows="4"></textarea>
+		<label>Solution:</label><textarea id="detail-solution" class="alert-detail-area" readonly="true" rows="4"></textarea>
+		<label>Reference:</label><textarea id="detail-reference" class="alert-detail-area" readonly="true" rows="4"></textarea>
+
 	</div>
-	<template id="detail-field-template">
-		<label></label>
-		<textarea class="alert-detail-input"readonly="true">
-		</textarea>
-	</template>
 </template>
 
 </body>
