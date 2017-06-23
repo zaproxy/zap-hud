@@ -26,7 +26,15 @@ var urlsToCache = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=management.html",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=management.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=plus.png",
-	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=gear.png"
+	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=gear.png",
+	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-bg_glass_75_79c9ec_1x400.png",
+	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-bg_inset-hard_100_fcfdfd_1x100.png",
+	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-icons_0078ae_256x240.png",
+	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-icons_056b93_256x240.png",
+	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-icons_e0fdff_256x240.png",
+	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-icons_f5e175_256x240.png",
+	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-bg_highlight-soft_45_0078ae_1x100.png",
+	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-bg_highlight-soft_75_2191c0_1x100.png",
 ];
 
 var toolScripts = [
@@ -90,6 +98,15 @@ self.addEventListener("fetch", function(event) {
 				// Modify Panel CSS
 				return handlePanelCssFetch(reqUrl);
 			}
+			else if (reqUrl.startsWith("<<ZAP_HUD_API>>OTHER/hud/other/file/images/")) {
+				var name = reqUrl.replace("file/images/", "image/?name=");
+
+				return caches.match(name).then(function(response) {
+					if (!response) {
+						console.log("Could not find jquery images: " + name);
+					}
+				});
+			}
 			else if (response) {
 				// Record Client ID
 				if (reqUrl.endsWith(".js")) {
@@ -103,7 +120,7 @@ self.addEventListener("fetch", function(event) {
 			}
 		}).catch(function() {
 			console.log(Error("Could not handle response from: " + event.request.url));
-			return caches.match("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.html");
+			return "<html><body>Error: could not find page</body></html>";
 		})
 	);
 });
