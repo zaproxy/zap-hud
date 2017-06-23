@@ -150,23 +150,23 @@ function showAlertDetails(config, port){
 	var details = loadTemplate("alert-details-template");
 
 	for (var field in alertData) {
-		var detailField = loadTemplate("detail-field-template", details);
-
-		detailField.querySelector("label").innerText = field;
-		detailField.querySelector("textarea").value = alertData[field];
-
-		details.getElementById("alert-details").appendChild(detailField);
+		var detailField = details.querySelector("#detail-" + field);
+		if (detailField) {
+			detailField.innerText = "   " + alertData[field] + "\n";
+		}
+		else {
+			console.log("no label for field: #detail-" + field + " with value: " + alertData[field]);
+		}
 	}
-
 
 	showMainDisplay().then(function() {
 		document.body.appendChild(details);
 
 		$( "#alert-details" ).dialog({
-			title: "Alert Details",
-			resizable: false,
-			height: 400,
-			width: 400,
+			title: alertData.name,
+			resizable: true,
+			height: 600,
+			width: 800,
 			position: { my: 'left top', at: 'left+' + (550) + ' top+' + (50)},
 			open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },	// Hides close button
 		});

@@ -125,7 +125,12 @@ label {
   display: inline-block;
 }
 
-.alert-detail-input {
+.alert-detail {
+  display: inline;
+  width: 100%;
+}
+
+.alert-detail-area {
   width: 100%;
 }
 
