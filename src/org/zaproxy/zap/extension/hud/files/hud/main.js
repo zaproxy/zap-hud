@@ -72,7 +72,7 @@ function showAlerts(config, port) {
 
 		// get the content panel, and set low to display first
 		var content = dialog.getElementById(level.toLowerCase() + "-content");
-		if (level !== "Low") {
+		if (level !== "Informational") {
 			content.style.display = "none";
 		}
 
