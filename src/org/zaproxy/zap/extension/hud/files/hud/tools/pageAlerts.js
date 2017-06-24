@@ -115,6 +115,30 @@ var PageAlerts = (function() {
 		});
 	}
 
+	function showOptions() {
+		var config = {};
+
+		config.tool = NAME;
+		config.toolLabel = LABEL;
+		config.options = {opt1: "Option 1", opt2: "Option 2", remove: "Remove"};
+
+		messageFrame("mainDisplay", {action:"showButtonOptions", config:config}).then(function(response) {
+			// Handle button choice
+			if (response.id == "opt1") {
+				console.log("Option 1 chosen");
+			}
+			else if (response.id == "opt2") {
+				console.log("Option 2 chosen");
+			}
+			else if (response.id == "remove") {
+				console.log("Remove chosen");
+			}
+			else {
+				//cancel
+			}
+		});
+	}
+
 	self.addEventListener("activate", function(event) {
 		initializeStorage();
 	});
@@ -141,6 +165,10 @@ var PageAlerts = (function() {
 			switch(message.action) {
 				case "buttonClicked":
 					showAlerts(message.url);
+					break;
+
+				case "buttonMenuClicked":
+					showOptions();
 					break;
 
 				default:

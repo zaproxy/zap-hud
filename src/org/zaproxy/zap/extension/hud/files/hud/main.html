@@ -21,14 +21,25 @@
 </div>
 </template>
 
+<template id="list-menu-template">
+	<ul id="menu-options" class="display"></ul>
+
+	<template id="menu-option-template">
+		<li class="menu-option">
+			<p class="option-label"></p>
+			<input id="option-name" type="hidden"/>
+		</li>
+	</template>
+</template>
+
 <template id="select-tool-template"> 
-	<ul id="tool-options" class="display"></ul>
+	<ul id="menu-options" class="display"></ul>
 
 	<template id="tool-option-template">
-		<li class="tool-option">
-			<img class="tool-icon" src="" alt="image" height="16" width="16"/>
-			<p class="tool-label"></p>
-			<input id="tool-name" type="hidden"/>
+		<li class="menu-option">
+			<img class="option-icon" src="" alt="image" height="16" width="16"/>
+			<p class="option-label"></p>
+			<input id="option-name" type="hidden"/>
 		</li>
 	</template>
 </template>

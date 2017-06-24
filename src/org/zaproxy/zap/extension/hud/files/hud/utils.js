@@ -374,7 +374,7 @@ function messageFrame(key, message) {
 					client.postMessage(message, [channel.port2]);
 				}
 				else {
-					console.log("client: " + key + " is unavailable");
+					console.log("info: client: " + key + " is unavailable. This is not an error.");
 				}
 			}).catch(function(err) {
 				console.log(Error(err));
