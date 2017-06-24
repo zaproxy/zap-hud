@@ -10,7 +10,7 @@
 }
 
 /* select tool display */
-.tool-options {
+.menu-options {
   width: auto; 
   height: 334px; 
   padding: 0.5em; 
@@ -19,7 +19,7 @@
   max-height: none;
 }
 
-.tool-option {
+.menu-option {
   list-style-type: none;
   background: #eee;
   cursor: pointer;
@@ -27,11 +27,11 @@
   height: 50px;
 }
 
-.tool-option:hover {
+.menu-option:hover {
   background: #ddd;
 }
 
-.tool-icon {
+.option-icon {
   display: inline-block;
   background: #dddddd;
   border: 2px solid #a1a1a1; 
@@ -39,7 +39,7 @@
   padding: 10px;
 }
 
-.tool-label {
+.option-label {
   display: inline-block;
   font-size: 20px;
 }

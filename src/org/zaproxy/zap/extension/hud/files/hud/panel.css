@@ -32,3 +32,26 @@
   float: ORIENTATION;
   display: none;
 }
+
+/* context menu */
+/* USE IF WE WANT CONTEXT MENU IN THE PANEL
+.show {
+  z-index: 2147483647;
+  position: absolute;
+  background-color:#dddddd;
+  border: 2px solid #a1a1a1;
+  padding: 2px;
+  display: block;
+  margin: 0;
+  list-style-type: none;
+  list-style: none;
+  font-size: 14px;
+  font-family: Sans-serif;
+}
+
+.hide {
+  display: none;
+}
+
+.show li{ list-style: none; }
+*/

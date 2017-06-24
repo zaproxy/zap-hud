@@ -29,9 +29,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	for (var button of buttons) {
 		var buttonName = button.id.substring(0, button.id.indexOf("-button"));
 
-		button.addEventListener("mouseenter", showButtonLabel);
-		button.addEventListener("mouseleave", hideButtonLabel);
-		button.addEventListener("click", handleButtonAction(buttonName), true);
+		addListeners(button, buttonName);
 	}
 });
 
@@ -72,9 +70,7 @@ function addButton(tool) {
 
 	var newButton = template.content.firstChild;
 
-	newButton.addEventListener("mouseenter", showButtonLabel);
-	newButton.addEventListener("mouseleave", hideButtonLabel);
-	newButton.addEventListener("click", handleButtonAction(tool.name), true);
+	addListeners(newButton, tool.name);
 
 	var buttonList = document.querySelector(".buttons-list");
 	var lastButton = document.getElementById("add-tool-button");
@@ -87,6 +83,16 @@ function handleButtonAction(name) {
 	};
 }
 
+function handleButtonMenu(event, name) {
+	event.preventDefault();
+	navigator.serviceWorker.controller.postMessage({action: "buttonMenuClicked", tool: name});
+
+	/* USE IF WE WANT CONTEXT MENU IN THE PANEL */
+	//document.getElementById("rmenu").className = "show";  
+	//document.getElementById("rmenu").style.top =  mouseY(event);
+	//document.getElementById("rmenu").style.left = mouseX(event);
+}
+
 function doButtonAction(buttonName) {
 	navigator.serviceWorker.controller.postMessage({
 		action:"buttonClicked",
@@ -95,6 +101,13 @@ function doButtonAction(buttonName) {
 		domain:getReferrerDomain(),
 		url: document.referrer,
 		panelKey:panelKey});
+}
+
+function addListeners(button, name) {	
+	button.addEventListener("mouseenter", showButtonLabel);
+	button.addEventListener("mouseleave", hideButtonLabel);
+	button.addEventListener("click", handleButtonAction(name), true);
+	button.addEventListener("contextmenu", function(e) {handleButtonMenu(e, name);}, true);
 }
 
 /* shows or hides a button label and expands or shrinks panel */
@@ -140,3 +153,30 @@ function hasButton(tool) {
 	}
 	return false;
 }
+
+// context menu
+/* USE IF WE WANT CONTEXT MENU IN THE PANEL
+function mouseX(evt) {
+    if (evt.pageX) {
+        return evt.pageX;
+    } else if (evt.clientX) {
+       return evt.clientX + (document.documentElement.scrollLeft ?
+           document.documentElement.scrollLeft :
+           document.body.scrollLeft);
+    } else {
+        return null;
+    }
+}
+
+function mouseY(evt) {
+    if (evt.pageY) {
+        return evt.pageY;
+    } else if (evt.clientY) {
+       return evt.clientY + (document.documentElement.scrollTop ?
+       document.documentElement.scrollTop :
+       document.body.scrollTop);
+    } else {
+        return null;
+    }
+}
+*/

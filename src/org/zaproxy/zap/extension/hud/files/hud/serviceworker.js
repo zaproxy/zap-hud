@@ -138,7 +138,7 @@ self.addEventListener("message", function(event) {
 				showAddToolDialog(message.panelKey);
 			}
 			break;
-
+			
 		case "onTargetLoad":
 			onTargetLoad();
 			break;

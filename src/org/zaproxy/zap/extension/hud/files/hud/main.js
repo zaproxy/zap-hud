@@ -30,11 +30,49 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			showAlertDetails(message.config, event.ports[0]);
 			break;
 
+		case "showButtonOptions":
+			showButtonOptions(message.config, event.ports[0]);
+			break;
+
 		default:
 			break;
 	}
 });
 
+
+function showListMenu(config, port) {
+	var menu = loadTemplate("list-menu-template");
+	var options = config.options;
+
+	for (var key in options) {
+		var item = loadTemplate("menu-option-template", menu);
+
+		item.querySelector(".option-label").innerText += options[key];
+		item.getElementById("option-name").value = key;
+
+		// create function for on click
+		var option = item.querySelector(".menu-option");
+		option.addEventListener("click", buttonHandler(key, port));
+
+		menu.getElementById("menu-options").appendChild(item);
+	}
+
+	showMainDisplay().then(function() {
+		document.body.appendChild(menu);
+
+		$( "#menu-options" ).dialog({
+			title: config.toolLabel + " Options",
+			width: 400,
+			height: 400,
+			open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },
+		});
+	});
+}
+
+function showButtonOptions(config, port) {
+	// could add default functionality here
+	showListMenu(config, port);
+}
 
 function showDialog(config, port) {
 	var buttons = {};
@@ -182,22 +220,22 @@ function showAddToolList(config, port) {
 			if (!tool.isSelected) {
 				var item = loadTemplate("tool-option-template", dialog);
 
-				item.querySelector(".tool-icon").src = IMAGE_PREFIX + tool.icon;
-				item.querySelector(".tool-label").innerText += tool.label;
-				item.getElementById("tool-name").value = tool.name;
+				item.querySelector(".option-icon").src = IMAGE_PREFIX + tool.icon;
+				item.querySelector(".option-label").innerText += tool.label;
+				item.getElementById("option-name").value = tool.name;
 
 				// create function for on click
-				var option = item.querySelector(".tool-option");
+				var option = item.querySelector(".menu-option");
 				option.addEventListener("click", buttonHandler(tool.name, port));
 
-				dialog.getElementById("tool-options").appendChild(item);
+				dialog.getElementById("menu-options").appendChild(item);
 			}
 		});
 
 		showMainDisplay().then(function() {
 			document.body.appendChild(dialog);
 
-			$( "#tool-options" ).dialog({
+			$( "#menu-options" ).dialog({
 				title: "Select Tool to Add",
 				width: 400,
 				height: 400,
