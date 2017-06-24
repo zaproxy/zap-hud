@@ -17,10 +17,7 @@ function startServiceWorker() {
 			navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
 				if (wasInstall && serviceWorkerRegistration.active) {
 					// force reload after installation
-					var message = {
-						action: "refresh"
-					};
-					parent.postMessage(message, document.referrer);
+					refreshTarget();
 				}
 				else {
 					onTargetLoadMessage();
@@ -39,7 +36,7 @@ function addButtonListener() {
 	// Reset HUD To Defaults
 	button.addEventListener("click", function() {
 		configureStorage().then(function() {
-			navigator.serviceWorker.controller.postMessage({action:"initializeTools"});
+			navigator.serviceWorker.controller.postMessage({action:"showHudSettings"});
 		});
 	});
 }
@@ -62,6 +59,25 @@ function startPollWorker() {
 		alert("Web Workers not supported in this browser. HUD will not work properly");
 	}
 }
+
+function refreshTarget() {
+	var message = { action: "refresh" };
+	parent.postMessage(message, document.referrer);
+}
+
+navigator.serviceWorker.addEventListener("message", function(event) {
+	console.log("received message")
+	var message = event.data;
+	
+	switch(message.action) {
+		case "refreshTarget":
+			refreshTarget();
+			break;
+
+		default:
+			break;
+	}
+});
 
 document.addEventListener("DOMContentLoaded", function() {
 	//todo: return promise from "startServiceWorker" that with a boolean
