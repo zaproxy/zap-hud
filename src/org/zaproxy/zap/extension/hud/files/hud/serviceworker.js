@@ -138,6 +138,10 @@ self.addEventListener("message", function(event) {
 				showAddToolDialog(message.panelKey);
 			}
 			break;
+
+		case "showHudSettings":
+			showHudSettings();
+			break;
 			
 		case "onTargetLoad":
 			onTargetLoad();
@@ -306,5 +310,35 @@ function showAddToolDialog(panelKey) {
 				saveFrame(panel);
 			});
 		});
+	});
+}
+
+function showHudSettings() {
+	var config = {};
+	config.settings = {
+		initialize: "Reset Configurations to Default",
+	};
+
+	messageFrame("mainDisplay", {action: "showHudSettings", config: config}).then(function(response) {
+		if (response.id === "initialize") {
+			resetToDefault();
+		}
+	});
+}
+
+function resetToDefault() {
+	loadAllTools().then(function(tools) {
+		// run onTargetLoad for any tools in the panel
+		var promises = [];
+
+		for (var tool in tools) {
+			promises.push(self.tools[tools[tool].name].initialize());
+		}
+
+		Promise.all(promises).then(function() {
+			messageFrame("management", {action: "refreshTarget"});
+		});
+	}).catch(function(error) {
+		console.log(Error(error));
 	});
 }

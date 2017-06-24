@@ -34,6 +34,10 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			showButtonOptions(message.config, event.ports[0]);
 			break;
 
+		case "showHudSettings":
+			showHudSettings(message.config, event.ports[0]);
+			break;
+
 		default:
 			break;
 	}
@@ -61,7 +65,7 @@ function showListMenu(config, port) {
 		document.body.appendChild(menu);
 
 		$( "#menu-options" ).dialog({
-			title: config.toolLabel + " Options",
+			title: config.title,
 			width: 400,
 			height: 400,
 			open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },
@@ -70,7 +74,15 @@ function showListMenu(config, port) {
 }
 
 function showButtonOptions(config, port) {
-	// could add default functionality here
+	config.title = "Options for " + config.toolLabel;
+
+	showListMenu(config, port);
+}
+
+function showHudSettings(config, port) {
+	config.options = config.settings;
+	config.title = "HUD Settings";
+
 	showListMenu(config, port);
 }
 

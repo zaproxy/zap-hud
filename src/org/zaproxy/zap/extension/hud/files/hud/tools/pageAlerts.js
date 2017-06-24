@@ -179,7 +179,8 @@ var PageAlerts = (function() {
 
 	return {
 		name: NAME,
-		onPanelLoad: onPanelLoad
+		onPanelLoad: onPanelLoad,
+		initialize: initializeStorage
 	};
 })();
 
