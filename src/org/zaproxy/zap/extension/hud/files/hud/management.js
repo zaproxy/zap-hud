@@ -4,6 +4,8 @@
  * Description goes here...
  */
 
+var worker;
+
 function startServiceWorker() {
 	if ("serviceWorker" in navigator) {
 		
@@ -47,7 +49,7 @@ function onTargetLoadMessage() {
 
 function startPollWorker() {
 	if (window.Worker) {
-		var worker = new Worker("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=pollWorker.js");
+		worker = new Worker("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=pollWorker.js");
 
 		worker.addEventListener("message", function(event) {
 			navigator.serviceWorker.controller.postMessage(event.data);
@@ -66,12 +68,19 @@ function refreshTarget() {
 }
 
 navigator.serviceWorker.addEventListener("message", function(event) {
-	console.log("received message")
 	var message = event.data;
 	
 	switch(message.action) {
 		case "refreshTarget":
 			refreshTarget();
+			break;
+
+		case "increasePollRate":
+			worker.postMessage({delay: 100});
+			break;
+
+		case "decreasePollRate":
+			worker.postMessage({delay: 1000});
 			break;
 
 		default:

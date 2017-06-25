@@ -13,7 +13,7 @@ var PageAlerts = (function() {
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
-		ICONS.RED = "page-alerts.png";
+		ICONS.PA = "page-alerts.png";
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -21,7 +21,7 @@ var PageAlerts = (function() {
 		tool.name = NAME;
 		tool.label = LABEL;
 		tool.data = DATA.NONE;
-		tool.icon = ICONS.RED;
+		tool.icon = ICONS.PA;
 		tool.isSelected = false;
 		tool.panel = "";
 		tool.alerts = {};
