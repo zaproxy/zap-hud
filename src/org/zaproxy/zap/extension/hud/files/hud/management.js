@@ -53,7 +53,7 @@ function startPollWorker() {
 			navigator.serviceWorker.controller.postMessage(event.data);
 		});
 		
-		worker.postMessage({targetUrl: document.referrer});
+		worker.postMessage({targetUrl: document.referrer, targetDomain: parseDomainFromUrl(document.referrer)});
 	}
 	else {
 		alert("Web Workers not supported in this browser. HUD will not work properly");

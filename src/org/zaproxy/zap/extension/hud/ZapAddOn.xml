@@ -35,6 +35,7 @@
 		<file>hud/serviceworker.js</file>
 		<file>hud/tools/scope.js</file>
 		<file>hud/tools/pageAlerts.js</file>
+		<file>hud/tools/siteAlerts.js</file>
 	</files>
 	<not-before-version>2.4.3</not-before-version>
 	<not-from-version></not-from-version>

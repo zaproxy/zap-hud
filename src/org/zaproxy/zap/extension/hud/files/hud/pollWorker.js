@@ -1,3 +1,4 @@
+var targetDomain = "";
 var targetUrl = "";
 var pollDelay = 1000;
 var cache = null;
@@ -13,7 +14,7 @@ function poll() {
 					cache = xhr.responseText;
 
 					var data = JSON.parse(xhr.responseText);
-					postMessage({action: "pollData", pollData: data, targetUrl: targetUrl});
+					postMessage({action: "pollData", pollData: data, targetUrl: targetUrl, targetDomain: targetDomain});
 				}
 			}
 		}
@@ -31,6 +32,7 @@ function startPolling() {
 }
 
 addEventListener("message", function(message) {
+	targetDomain = message.data.targetDomain !== null ? message.data.targetDomain : targetDomain;
 	targetUrl = message.data.targetUrl !== null ? message.data.targetUrl : targetUrl;
 	pollDelay = message.data.delay !== null ? message.data.delay : pollDelay;
 });
