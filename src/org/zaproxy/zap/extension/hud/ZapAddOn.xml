@@ -35,6 +35,7 @@
 		<file>hud/serviceworker.js</file>
 		<file>hud/tools/scope.js</file>
 		<file>hud/tools/spider.js</file>
+		<file>hud/tools/activeScan.js</file>
 		<file>hud/tools/pageAlerts.js</file>
 		<file>hud/tools/siteAlerts.js</file>
 	</files>
