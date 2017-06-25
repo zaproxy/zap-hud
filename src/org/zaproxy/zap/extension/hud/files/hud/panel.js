@@ -50,6 +50,10 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			}
 			break;
 
+		case "removeTool":
+			removeButton(message.tool);
+			break;
+
 		default:
 			break;
 	}
@@ -57,7 +61,7 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 
 
 function setButtonData(tool) {
-	var buttonId = tool.name+"-button";
+	var buttonId = tool.name + "-button";
 	var button = document.getElementById(buttonId);
 
 	button.querySelector(".button-data").innerText = tool.data;
@@ -75,6 +79,12 @@ function addButton(tool) {
 	var buttonList = document.querySelector(".buttons-list");
 	var lastButton = document.getElementById("add-tool-button");
 	buttonList.insertBefore(newButton, lastButton);
+}
+
+function removeButton(tool) {
+	var button = document.getElementById(tool.name + "-button");
+
+	button.parentNode.removeChild(button);
 }
 
 function handleButtonAction(name) {
