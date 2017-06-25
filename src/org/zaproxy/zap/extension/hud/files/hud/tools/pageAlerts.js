@@ -13,7 +13,7 @@ var PageAlerts = (function() {
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
-		ICONS.RED = "flag-red.png";
+		ICONS.RED = "page-alerts.png";
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
