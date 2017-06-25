@@ -191,6 +191,14 @@ public class HudAPI extends ApiImplementor {
 					}
 					count++;
 					alertCount.put(alert.getAlert(), count);
+
+					// site alerts
+					Map<String, String> alertAtts = new HashMap<String, String>();
+					alertAtts.put("alert", alert.getAlert());
+					alertAtts.put("risk", Alert.MSG_RISK[alert.getRisk()]);
+					alertAtts.put("param", alert.getParam());
+					alertAtts.put("id", Integer.toString(alert.getAlertId()));
+					summary.add(alertAtts);
 				}
 				for (int i=0; i < alertCounts.length; i++) {
 					// loop through info, low, medium, high
@@ -201,13 +209,15 @@ public class HudAPI extends ApiImplementor {
 							Map<String, String> alertAtts = new HashMap<String, String>();
 							alertAtts.put("alert", alert.getKey());
 							alertAtts.put("risk", Alert.MSG_RISK[i]);
+							//alertAtts.put("param", alert.getKey().getParam());
+							//alertAtts.put("id", Integer.toString(alert.getAlertId()));
 							//siteSummary.addItem(new ApiResponseSet("alert", alertAtts));
-							summary.add(alertAtts);
+							//summary.add(alertAtts);
 						}
 					}
 				}
 				//((ApiResponseList)result).addItem(siteSummary);
-				resultMap.put("siteSummary", summary);
+				resultMap.put("siteAlerts", summary);
 			}
 			if (node != null) {
 				// Loop through siblings to find nodes for the same url

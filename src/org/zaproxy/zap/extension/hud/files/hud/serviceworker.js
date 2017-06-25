@@ -40,6 +40,7 @@ var urlsToCache = [
 var toolScripts = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/scope.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/pageAlerts.js",
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/siteAlerts.js",
 ];
 
 self.tools = {};
