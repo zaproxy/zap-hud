@@ -343,15 +343,38 @@ function loadAllTools() {
 
 
 /* adds a tool to specific panel */
-function addToolToPanel(frameKey, toolKey) {
+function addToolToPanel(toolKey, panelKey) {
 	loadTool(toolKey).then(function(tool) {
 		tool.isSelected = true;
-		tool.panel = orientation;
+		tool.panel = panelKey;
 
 		saveTool(tool);
-	});
 
-	messageFrame(frameKey, {action:"addButton", toolName:toolKey});
+		loadFrame(panelKey).then(function(panel) {
+			panel.tools.push(tool.name);
+
+			saveFrame(panel);
+		});
+	});
+}
+
+function removeToolFromPanel(toolKey) {
+	loadTool(toolKey).then(function(tool) {
+		var oldPanel = tool.panel;
+
+		tool.isSelected = false;
+		tool.panel = "";
+
+		saveTool(tool);
+
+		loadFrame(oldPanel).then(function(panel) {
+			panel.tools.splice(panel.tools.indexOf(tool.name), 1);
+
+			saveFrame(panel);
+		});
+
+		messageFrame(oldPanel, {action:"removeTool", tool:tool});
+	});
 }
 
 function messageFrame(key, message) {

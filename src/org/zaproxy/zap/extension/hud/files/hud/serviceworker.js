@@ -298,18 +298,7 @@ function showAddToolDialog(panelKey) {
 
 	messageFrame("mainDisplay", {action: "showAddToolList", config: config}).then(function(response) {
 
-		loadTool(response.id).then(function(tool) {
-			tool.isSelected = true;
-			tool.panel = panelKey;
-
-			saveTool(tool);
-
-			loadFrame(panelKey).then(function(panel) {
-				panel.tools.push(tool.name);
-
-				saveFrame(panel);
-			});
-		});
+		addToolToPanel(response.id, panelKey);
 	});
 }
 

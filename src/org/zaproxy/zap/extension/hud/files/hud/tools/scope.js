@@ -141,6 +141,24 @@ var Scope = (function() {
 		});
 	}
 
+	function showOptions() {
+		var config = {};
+
+		config.tool = NAME;
+		config.toolLabel = LABEL;
+		config.options = {remove: "Remove"};
+
+		messageFrame("mainDisplay", {action:"showButtonOptions", config:config}).then(function(response) {
+			// Handle button choice
+			if (response.id == "remove") {
+				removeToolFromPanel(NAME);
+			}
+			else {
+				//cancel
+			}
+		});
+	}
+
 	self.addEventListener("activate", function(event) {
 		initializeStorage();
 	});
@@ -163,6 +181,10 @@ var Scope = (function() {
 			switch(message.action) {
 				case "buttonClicked":
 					showDialog(message.domain);
+					break;
+
+				case "buttonMenuClicked":
+					showOptions();
 					break;
 
 				default:

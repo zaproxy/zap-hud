@@ -131,7 +131,7 @@ var PageAlerts = (function() {
 				console.log("Option 2 chosen");
 			}
 			else if (response.id == "remove") {
-				console.log("Remove chosen");
+				removeToolFromPanel(NAME);
 			}
 			else {
 				//cancel
