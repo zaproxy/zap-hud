@@ -76,17 +76,16 @@ var Spider = (function() {
 	}
 
 	function startSpider(domain) {
-		console.log("<<ZAP_HUD_API>>JSON/spider/action/scan/?url=" + domain + "/&apikey=<<ZAP_HUD_API_KEY>>");
 		fetch("<<ZAP_HUD_API>>JSON/spider/action/scan/?url=" + domain + "/&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
 			response.json().then(function(json) {
 				//todo: handle response if needed
-				console.log(json)
+				//console.log(json)
 			});
 		});
 
 		loadTool(NAME).then(function(tool) {
 			tool.isRunning = true;
-			tool.data = DATA.STOP;
+			tool.data = "0";
 
 			saveTool(tool);
 		});
@@ -117,10 +116,15 @@ var Spider = (function() {
 
 	function onPollData(data) {
 		// do something witht the data
-		console.log(data)
-
 		if (data.progress == "100") {
 			stopSpider();
+		}
+		else if (data.progress !== "-1") {
+			loadTool(NAME).then(function(tool) {
+			tool.data = data.progress;
+
+			saveTool(tool);
+		});
 		}
 	}
 
