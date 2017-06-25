@@ -108,10 +108,14 @@ function parseDomainFromUrl(url) {
 	var hostname;
 	var protocol;
 
-	if (url.indexOf("://") > -1) {
+	var hasProtocol = url.indexOf("://");
+
+	if (hasProtocol > -1) {
+		protocol = url.substring(0, hasProtocol + 3);
 		hostname = url.split('/')[2];
 	}
 	else {
+		protocol = "http://";
 		hostname = url.split('/')[0];
 	}
 
@@ -122,7 +126,7 @@ function parseDomainFromUrl(url) {
 	hostname = hostname.split('?')[0];
 	hostname = hostname.split('#')[0];
 
-	return hostname;
+	return protocol + hostname;
 }
 
 // These functions don't work in SW - no document

@@ -27,14 +27,13 @@ function startPolling() {
 		poll();
 	}
 
-	//todo: change this to pollDelay
-	setTimeout(startPolling, 1000);
+	setTimeout(startPolling, pollDelay);
 }
 
 addEventListener("message", function(message) {
-	targetDomain = message.data.targetDomain !== null ? message.data.targetDomain : targetDomain;
-	targetUrl = message.data.targetUrl !== null ? message.data.targetUrl : targetUrl;
-	pollDelay = message.data.delay !== null ? message.data.delay : pollDelay;
+	targetDomain = message.data.targetDomain ? message.data.targetDomain : targetDomain;
+	targetUrl = message.data.targetUrl ? message.data.targetUrl : targetUrl;
+	pollDelay = message.data.delay ? message.data.delay : pollDelay;
 });
 
 startPolling();

@@ -39,6 +39,7 @@ var urlsToCache = [
 
 var toolScripts = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/scope.js",
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/spider.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/pageAlerts.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/siteAlerts.js",
 ];
@@ -225,7 +226,9 @@ function buildPanelHtml(response, orientation, url) {
 		var promises = [];
 
 		for (var tool in tools) {
-			promises.push(self.tools[tools[tool].name].onPanelLoad({domain: parseDomainFromUrl(url), url: url}));
+			if (self.tools[tools[tool].name].onPanelLoad) {
+				promises.push(self.tools[tools[tool].name].onPanelLoad({domain: parseDomainFromUrl(url), url: url}));
+			}
 		}
 
 		return Promise.all(promises).then(function() {
