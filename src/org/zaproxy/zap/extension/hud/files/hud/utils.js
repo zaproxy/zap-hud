@@ -120,7 +120,7 @@ function parseDomainFromUrl(url) {
 	}
 
 	//find & remove port number
-	hostname = hostname.split(':')[0];
+	//hostname = hostname.split(':')[0];
 	
 	//find & remove "?" & "#"
 	hostname = hostname.split('?')[0];
