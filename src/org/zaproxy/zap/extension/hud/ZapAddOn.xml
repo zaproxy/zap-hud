@@ -31,10 +31,14 @@
 		<file>hud/management.html</file>
 		<file>hud/management.css</file>
 		<file>hud/management.js</file>
+		<file>hud/timelinePane.html</file>
+		<file>hud/timelinePane.css</file>
+		<file>hud/timelinePane.js</file>
 		<file>hud/pollWorker.js</file>
 		<file>hud/serviceworker.js</file>
 		<file>hud/tools/scope.js</file>
 		<file>hud/tools/spider.js</file>
+		<file>hud/tools/timeline.js</file>
 		<file>hud/tools/activeScan.js</file>
 		<file>hud/tools/pageAlerts.js</file>
 		<file>hud/tools/siteAlerts.js</file>

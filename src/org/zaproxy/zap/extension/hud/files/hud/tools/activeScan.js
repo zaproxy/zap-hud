@@ -118,7 +118,6 @@ var ActiveScan = (function() {
 	}
 
 	function onPollData(data) {
-		console.log(data)
 		// do something witht the data
 		if (data.progress == "100") {
 			stopActiveScan();

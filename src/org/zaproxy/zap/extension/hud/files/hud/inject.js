@@ -28,7 +28,7 @@
 		var timelineFrame = document.createElement("iframe");
 
 		timelineFrame.id = "timeline";
-		timelineFrame.src = "<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timeline.html&parentUrl=" + document.location.toString();
+		timelineFrame.src = "<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timelinePane.html&parentUrl=" + document.location.toString();
 		timelineFrame.scrolling = "no";
 		timelineFrame.style.cssText = "position: fixed; top: 0; right: 0; width: 300px; height: 100%; overflow: hidden; border: none; z-index: 2000;";
 
@@ -123,11 +123,11 @@
 				createPanel(message.orientation);
 				break;
 
-			case "createTimeline":
+			case "showTimeline":
 				createTimeline();
 				break;
 
-			case "removeTimeline":
+			case "hideTimeline":
 				removeTimeline();
 				break;
 
