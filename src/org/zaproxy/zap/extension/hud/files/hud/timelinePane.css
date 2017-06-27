@@ -1,0 +1,81 @@
+.main {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+  background-color: #dddddd;
+  overflow: hidden;
+  font-family: Sans-serif;
+  font-size: 14px;
+}
+
+.header {
+  height: 40px;
+}
+
+.header h2 {
+  text-align: center;
+}
+
+.list {
+  overflow: scroll;
+  height: 100%;
+}
+
+.list-item {
+  list-style-type: none;
+  background: #eee;
+  cursor: pointer;
+  border: 1px solid white;
+  height: 50px;
+  margin: 5px;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.left {
+  display: inline-block;
+  width: 50px;
+  left: 0px;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.method {
+  display: block;
+  margin: 0px;
+  font-size: 14px;
+}
+
+.status {
+  display: block;
+  margin: 0px;
+  font-size: 14px;
+}
+
+.right {
+  display: inline-block;
+  right: 0px;
+  height: 100%;
+  width: 200px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.domain {
+  display: block;
+  margin: 0px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.file {
+  display: block;
+  margin: 0px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+}

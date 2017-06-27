@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- libraries -->
+
+	<!-- custom styling and scripts -->
+	<script type="text/javascript" src="<<ZAP_HUD_API>>OTHER/hud/other/file/?name=utils.js"></script>
+	<script type="text/javascript" src="<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timelinePane.js"></script>
+	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timelinePane.css" />
+</head>
+
+<body>
+	<div class="main">
+		<div class="header">
+			<h2>Timeline</h2>
+		</div>
+
+		<div class="list">
+		</div>
+	</div>
+</body>
+
+<!-- templates -->
+<template id="list-item">
+	<li class="list-item">
+		<div class="left">
+			<p class="method"></p>
+			<p class="status"></p>
+		</div>
+		<div class="right">
+			<p class="domain"></p>
+			<p class="file"></p>
+		</div>
+		<input class="full-message" type="hidden" />
+	</li>
+</template>
+
+</html>

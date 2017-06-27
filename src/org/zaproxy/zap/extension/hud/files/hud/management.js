@@ -83,6 +83,14 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			worker.postMessage({delay: 1000});
 			break;
 
+		case "showTimeline":
+			parent.postMessage({action: "showTimeline"}, document.referrer);
+			break;
+
+		case "hideTimeline":
+			parent.postMessage({action: "hideTimeline"}, document.referrer);
+			break;
+
 		default:
 			break;
 	}
