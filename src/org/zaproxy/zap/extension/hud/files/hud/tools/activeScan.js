@@ -92,7 +92,7 @@ var ActiveScan = (function() {
 			saveTool(tool);
 		});
 
-		messageFrame("management", {action: "increasePollRate"});
+		messageFrame("management", {action: "increaseDataPollRate"});
 	}
 
 	function stopActiveScan() {
@@ -106,7 +106,7 @@ var ActiveScan = (function() {
 			saveTool(tool);
 		});
 
-		messageFrame("management", {action: "decreasePollRate"});
+		messageFrame("management", {action: "decreaseDataPollRate"});
 	}
 
 	function checkIsRunning() {

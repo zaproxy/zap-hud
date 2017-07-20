@@ -90,7 +90,7 @@ var Spider = (function() {
 			saveTool(tool);
 		});
 
-		messageFrame("management", {action: "increasePollRate"});
+		messageFrame("management", {action: "increaseDataPollRate"});
 	}
 
 	function stopSpider() {
@@ -103,7 +103,7 @@ var Spider = (function() {
 			saveTool(tool);
 		});
 
-		messageFrame("management", {action: "decreasePollRate"});
+		messageFrame("management", {action: "decreaseDataPollRate"});
 	}
 
 	function checkIsRunning() {

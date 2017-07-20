@@ -4,6 +4,7 @@
 	<!-- libraries -->
 
 	<!-- custom styling and scripts -->
+	<script type="text/javascript" src="<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/localforage.min.js"></script>
 	<script type="text/javascript" src="<<ZAP_HUD_API>>OTHER/hud/other/file/?name=utils.js"></script>
 	<script type="text/javascript" src="<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timelinePane.js"></script>
 	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timelinePane.css" />
@@ -16,13 +17,15 @@
 		</div>
 
 		<div class="list">
+		<!-- TODO: clean this up/ add functionality -->
+			<li class="list-item" id="top">Load More</li>
 		</div>
 	</div>
 </body>
 
 <!-- templates -->
 <template id="list-item">
-	<li class="list-item">
+	<li class="list-item" id="new">
 		<div class="left">
 			<p class="method"></p>
 			<p class="status"></p>

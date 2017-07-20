@@ -26,6 +26,8 @@ var Timeline = (function() {
 		tool.isSelected = false;
 		tool.panel = "";
 		tool.isRunning = false;
+		tool.messages = [];
+		tool.lastMessage = 1;
 
 		saveTool(tool);
 	}
@@ -34,9 +36,13 @@ var Timeline = (function() {
 		checkIsRunning().then(function(isRunning) {
 			if (isRunning) {
 				hideTimeline();
+
+				fetch("<<ZAP_HUD_API>>JSON/hud/action/disableTimeline");
 			}
 			else {
 				showTimeline();
+
+				fetch("<<ZAP_HUD_API>>JSON/hud/action/enableTimeline");
 			}
 		}).catch(function(error) {
 			console.log(Error(error));
@@ -55,6 +61,7 @@ var Timeline = (function() {
 
 	function hideTimeline() {
 		messageFrame("management", {action:"hideTimeline"});
+
 		loadTool(NAME).then(function(tool) {
 			tool.data = DATA.SHOW;
 			tool.isRunning = false;
@@ -79,6 +86,26 @@ var Timeline = (function() {
 			else {
 				
 			}
+		});
+	}
+
+	function updateHttpMessages(messages, last) {
+		loadTool(NAME).then(function(tool) {
+			//tool.messages = messages;
+			tool.lastMessage = last;
+
+			// only store last 20
+			for (var i in messages) {
+				tool.messages.push(messages[i]);
+
+				if (tool.messages.length >= 20)
+					tool.messages.shift();
+			}
+
+			saveTool(tool).then(function() {
+				// notify pane
+				messageFrame("timelinePane", {action: "updateMessages", count: messages.length});
+			});
 		});
 	}
 
@@ -111,6 +138,14 @@ var Timeline = (function() {
 		switch(message.action) {
 			case "initializeTools":
 				initializeStorage();
+				break;
+
+			case "pollMessages":
+				updateHttpMessages(message.pollMessages, message.lastMessage);
+				break;
+
+			case "showHttpMessage":
+				console.log(message);
 				break;
 
 			default:

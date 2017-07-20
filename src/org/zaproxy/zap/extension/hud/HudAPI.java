@@ -26,7 +26,9 @@ import org.zaproxy.zap.extension.api.ApiOther;
 import org.zaproxy.zap.extension.api.ApiResponse;
 import org.zaproxy.zap.extension.api.ApiResponseList;
 import org.zaproxy.zap.extension.api.ApiResponseSet;
+import org.zaproxy.zap.extension.api.ApiResponseElement;
 import org.zaproxy.zap.extension.api.ApiView;
+import org.zaproxy.zap.extension.api.ApiAction;
 import org.zaproxy.zap.extension.ascan.ActiveScan;
 import org.zaproxy.zap.extension.ascan.ExtensionActiveScan;
 import org.zaproxy.zap.extension.spider.ExtensionSpider;
@@ -51,9 +53,14 @@ public class HudAPI extends ApiImplementor {
 
 	private static final String HUD_DATA = "hudData";
 
+	private static final String ACTION_ENABLE_TIMELINE = "enableTimeline";
+	private static final String ACTION_DISABLE_TIMELINE = "disableTimeline";
+
 	private static final String PARAM_NAME = "name";
 	private static final String PARAM_URL = "url";
 	private static final String PARAM_ISWORKER = "isworker";
+
+    private boolean isTimelineEnabled = false;
 
     private static Logger logger = Logger.getLogger(HudAPI.class);
     
@@ -61,6 +68,9 @@ public class HudAPI extends ApiImplementor {
     	this.extension = extension;
 
     	this.addApiView(new ApiView(HUD_DATA, new String[] {PARAM_URL}));
+
+    	this.addApiAction(new ApiAction(ACTION_ENABLE_TIMELINE));
+    	this.addApiAction(new ApiAction(ACTION_DISABLE_TIMELINE));
     	
     	// TODO check its really safe to not require the key for files as we will need to inject it into them :/
     	this.addApiOthers(new ApiOther(OTHER_FILE, new String[] {PARAM_NAME}, new String[] {PARAM_URL}, false));
@@ -90,6 +100,10 @@ public class HudAPI extends ApiImplementor {
 			extAlert = (ExtensionAlert) Control.getSingleton().getExtensionLoader().getExtension(ExtensionAlert.NAME);
 		}
 		return extAlert;
+	}
+
+	public boolean isTimelineEnabled() {
+		return this.isTimelineEnabled;
 	}
 
     @Override
@@ -417,6 +431,25 @@ public class HudAPI extends ApiImplementor {
 		} else {
 			throw new ApiException(ApiException.Type.BAD_OTHER);
 		}
+	}
+
+	@Override
+	public ApiResponse handleApiAction(String name, JSONObject params) throws ApiException {
+
+		switch (name) {
+			case ACTION_ENABLE_TIMELINE:
+				this.isTimelineEnabled = true;
+				break;
+
+			case ACTION_DISABLE_TIMELINE:
+				this.isTimelineEnabled = false;
+				break;
+
+			default:
+				throw new ApiException(ApiException.Type.BAD_ACTION);
+		}
+
+		return ApiResponseElement.OK;
 	}
 
 	public static String getAllowFramingResponseHeader(String responseStatus, String contentType, int contentLength, boolean canCache) {

@@ -240,6 +240,17 @@ function configureStorage() {
 			saveFrame(frame);
 		});
 
+		loadFrame("timelinePane").then(function(oldFrame) {
+			var frame = {};
+
+			frame.key = "timelinePane";
+			if (oldFrame) {
+				frame.clientId = oldFrame.clientId;
+			}
+
+			saveFrame(frame);
+		});
+
 		resolve();
 	});
 }
@@ -289,15 +300,14 @@ function loadTool(key) {
 }
 
 function saveTool(tool) {
-
-	localforage.setItem(tool.name, tool).then(function(tool) {
-		// Notify Panel of Updated Data
-		if (tool.isSelected) {
-			messageFrame(tool.panel, {action:"updateData", tool:tool});
-		}
-	}).catch(function(err) {
-		console.log(Error(err));
-	});
+	return localforage.setItem(tool.name, tool).then(function(tool) {
+			// Notify Panel of Updated Data
+			if (tool.isSelected) {
+				messageFrame(tool.panel, {action:"updateData", tool:tool});
+			}
+		}).catch(function(err) {
+			console.log(Error(err));
+		});
 }
 
 function loadPanelTools(panelKey) {

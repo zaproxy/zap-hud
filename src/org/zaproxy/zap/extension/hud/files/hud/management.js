@@ -51,11 +51,13 @@ function startPollWorker() {
 	if (window.Worker) {
 		worker = new Worker("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=pollWorker.js");
 
+		loadTool('timeline').then(function(tool) {
+			worker.postMessage({targetUrl: document.referrer, targetDomain: parseDomainFromUrl(document.referrer), lastMessage: tool.lastMessage});
+		});
+
 		worker.addEventListener("message", function(event) {
 			navigator.serviceWorker.controller.postMessage(event.data);
 		});
-		
-		worker.postMessage({targetUrl: document.referrer, targetDomain: parseDomainFromUrl(document.referrer)});
 	}
 	else {
 		alert("Web Workers not supported in this browser. HUD will not work properly");
@@ -75,12 +77,12 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			refreshTarget();
 			break;
 
-		case "increasePollRate":
-			worker.postMessage({delay: 100});
+		case "increaseDataPollRate":
+			worker.postMessage({dataDelay: 100});
 			break;
 
-		case "decreasePollRate":
-			worker.postMessage({delay: 1000});
+		case "decreaseDataPollRate":
+			worker.postMessage({dataDelay: 1000});
 			break;
 
 		case "showTimeline":
