@@ -66,6 +66,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener {
 
 	protected static final String FILE_PREFIX = "hud/";
 	protected static final String HUD_HTML = "injectionHtml.html";
+	protected static final String HUD_HTML_TIMELINE = "injectionHtmlTimeline.html";
 	//protected static final String HUD_HTML = "zap-hud.html";
 	//protected static final String JQUERY_JS = "jquery-1.11.2.min.js";
 	//protected static final String PNOTIFY_CSS = "pnotify.custom.min.css";
@@ -187,7 +188,15 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener {
 				Pattern pattern = Pattern.compile("<(\\s*?)body+(>|.*?[^?]>)");
 				int openBodyTag = regexEndOf(pattern, header.toLowerCase());
 
-				String hudScript = this.getFile(msg, HUD_HTML, false);
+				//todo: can do more elegantly
+				String htmlFile = "";
+				if (api.isTimelineEnabled()) {
+					htmlFile = HUD_HTML_TIMELINE;
+				} else {
+					htmlFile = HUD_HTML;
+				}
+
+				String hudScript = this.getFile(msg, htmlFile, false);
 
 				if (openBodyTag > -1  && hudScript != null) {
 					System.out.println(msg.getRequestHeader().getURI() + 

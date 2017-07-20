@@ -1,38 +1,23 @@
-function startWorkerThread () {
-	// todo: notify user if browser doesn't support worker
-	if (window.Worker) {
-		var worker = new Worker("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timelinePaneWorker.js");
+function initializeTimeline() {
+	loadTool("timeline").then(function(tool) {
+		var messages = tool.messages;
 
-		worker.onmessage = receiveMessages;
-		worker.onerror = function(error) {console.log('worker error:' + error.toString());};
-	}
+		setTimeline(messages);
+	});
 }
 
-/* displays http-message info from selected item in timeline */
-function displayHttpMessage(event) {
-	var timelineItem = event.target.parentNode.parentNode;
+function updateTimeline(count) {
+	loadTool("timeline").then(function(tool) {
+		var messages = tool.messages;
 
-	var message = {
-		action: "showHttpMessage",
-		httpMessageData: timelineItem.querySelector(".full-message").value
-	};
-
-	//todo: message serviceworker, duh.
-	mainDisplay.postMessage(message, mainDisplay.location);
+		setTimeline(messages.slice(messages.length - count, messages.length));
+	});
 }
 
-/* load all messages from ZAP */
-// todo: happens every page load and takes way too long, need to improve performance
-//       perhaps only load 50 most recent then load older messages as we scroll
-// hacked: to show only last 50
-function updateTimeline(httpMessages) {
-	// todo: tertiary operator
-	var end = httpMessages.length - 50;
-	if (end < 0) {
-		end = 0;
-	}
+function setTimeline(httpMessages) {
+	var top = null;
 
-	for (var i=httpMessages.length-1; i>=end; i--) {
+	for (var i=0; i<httpMessages.length; i++) {
 		var item = loadTemplate("list-item");
 
 		// get info and populate each item
@@ -48,33 +33,37 @@ function updateTimeline(httpMessages) {
 
 		// append to list
 		var list = document.querySelector(".list");
-		list.appendChild(item);
+		top = document.getElementById("top");
+
+		list.insertBefore(item, top);
+
+		top.id = "";
+		top = document.getElementById("new");
+		top.id = "top";
 	}
 }
 
+/* displays http-message info from selected item in timeline */
+function displayHttpMessage(event) {
+	var timelineItem = event.target.parentNode.parentNode;
+	var httpMessageData = timelineItem.querySelector(".full-message").value;
 
-/* COMMUNICATION */
-function receiveMessages (event) {
+	navigator.serviceWorker.controller.postMessage({action: "showHttpMessage", httpMessageData: httpMessageData});
+}
 
-	if (!isFromTrustedOrigin(event)) {
-		return;
-	}
-
+navigator.serviceWorker.addEventListener("message", function(event) {
 	var message = event.data;
-
+	
 	switch(message.action) {
-		case "updateTimeline":
-			updateTimeline(message.timelineMessages);
+		case "updateMessages":
+			updateTimeline(message.count);
 			break;
 
 		default:
 			break;
 	}
-}
+});
 
-/* INIT */
 document.addEventListener("DOMContentLoaded", function () {
-	window.addEventListener("message", receiveMessages);
-	//startWorkerThread();
-	console.log("timeline started")
+	initializeTimeline();
 });

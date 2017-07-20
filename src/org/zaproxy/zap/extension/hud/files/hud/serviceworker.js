@@ -136,7 +136,7 @@ self.addEventListener("message", function(event) {
 	}
 
 	var message = event.data;
- 
+
 	switch(message.action) {
 		case "buttonClicked":
 			if (message.buttonLabel === "add-tool") {
@@ -211,6 +211,13 @@ function saveFrameId(event) {
 				}
 				else if (client.url.endsWith("management.html")) {
 					loadFrame("management").then(function(frame) {
+						frame.clientId = client.id;
+
+						saveFrame(frame);
+					});
+				}
+				else if (client.url.endsWith("timelinePane.html")) {
+					loadFrame("timelinePane").then(function(frame) {
 						frame.clientId = client.id;
 
 						saveFrame(frame);
