@@ -28,7 +28,7 @@ import org.zaproxy.zap.extension.api.JavaAPIGenerator;
 import org.zaproxy.zap.extension.api.NodeJSAPIGenerator;
 import org.zaproxy.zap.extension.api.PhpAPIGenerator;
 import org.zaproxy.zap.extension.api.PythonAPIGenerator;
-import org.zaproxy.zap.extension.importLogFiles.ImportLogAPI;
+import org.zaproxy.zap.extension.hud.HudAPI;
 
 public class ApiGenerator {
 
@@ -48,7 +48,7 @@ public class ApiGenerator {
 		// 	nodejs/api/zapv2/index.js
 		//	php/api/zapv2/src/Zap/Zapv2.php
 
-		list.add(new ImportLogAPI(null));
+		list.add(new HudAPI(null));
 
 		return list;
 	}
