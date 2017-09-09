@@ -38,6 +38,10 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			showHudSettings(message.config, event.ports[0]);
 			break;
 
+		case "showHttpMessage":
+			shoeHttpMessage(message.config, event.ports[0]);
+			break;
+
 		default:
 			break;
 	}
@@ -257,7 +261,23 @@ function showAddToolList(config, port) {
 	});
 }
 
+function showHttpMessage(config, port) {
 
+	var dialog = loadTemplate("http-message-template");
+
+	// do something with dialog
+
+	showMainDisplay().then(function() {
+		document.body.appendChild(dialog);
+
+		$( "#menu-options" ).dialog({
+			title: "Select Tool to Add",
+			width: 400,
+			height: 400,
+			open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },
+		});
+	});
+}
 
 function buttonHandler(id, port) {
 	return function() {
