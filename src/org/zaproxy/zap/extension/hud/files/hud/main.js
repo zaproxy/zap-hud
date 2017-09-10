@@ -39,7 +39,7 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			break;
 
 		case "showHttpMessage":
-			shoeHttpMessage(message.config, event.ports[0]);
+			showHttpMessage(message.config, event.ports[0]);
 			break;
 
 		default:
@@ -264,19 +264,30 @@ function showAddToolList(config, port) {
 function showHttpMessage(config, port) {
 
 	var dialog = loadTemplate("http-message-template");
+	var buttons = {};
 
-	// do something with dialog
+	dialog.querySelector("#header-text").textContent = config.headerText;
+	dialog.querySelector("#body-text").textContent = config.bodyText;
+
+	config.buttons.forEach(function(button) {
+		buttons[button.text] = buttonHandler(button.id, port);
+	});
 
 	showMainDisplay().then(function() {
 		document.body.appendChild(dialog);
 
-		$( "#menu-options" ).dialog({
-			title: "Select Tool to Add",
-			width: 400,
-			height: 400,
-			open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },
+		$( "#http-message-div" ).dialog({
+			resizable: true,
+			height: 800,
+			width: 900,
+			position: { my: 'left top', at: 'left+' + (550) + ' top+' + (50)},
+			buttons: buttons,
+			open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },	// Hides close button
 		});
 	});
+
+	// show main display
+	showMainDisplay();
 }
 
 function buttonHandler(id, port) {

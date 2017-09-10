@@ -112,7 +112,7 @@ var Break = (function() {
 		});
 	}
 
-	function nextBreakPoint() {
+	function step() {
 		fetch("<<ZAP_HUD_API>>JSON/break/action/step/?apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
 			response.json().then(function(json) {
 				//todo: handle response if needed
@@ -133,29 +133,36 @@ var Break = (function() {
 	}
 
 	function onPollData(data) {
-		if (data.isBreakingRequest) {
-			showBreakDisplay();
+		if (data.isBreakingRequest === "true") {
+			showBreakDisplay(data);
 		}
 	}
 
 	function showBreakDisplay(data) {
 		var config = {};
-		
-		config.text = "intercepted message";
+
+		if (data.response_body === "") {
+			config.headerText = data.request_header;
+			config.bodyText = data.request_body;
+		}
+		else {
+			config.headerText = data.response_header;
+			config.bodyText = data.response_body;
+		}
 		config.buttons = [
-			{text:"Next",
-			 id:"next"},
-			{text:"Stop",
-			 id:"stop"}
+			{text:"Step",
+			 id:"step"},
+			{text:"Continue",
+			 id:"continue"}
 		];
 
-		messageFrame("mainDisplay", {action:"showDialog", config:config}).then(function(response) {
+		messageFrame("mainDisplay", {action:"showHttpMessage", config:config}).then(function(response) {
 
 			// Handle button choice
-			if (response.id === "next") {
-				nextBreakPoint();
+			if (response.id === "step") {
+				step();
 			}
-			else if (response.id === "stop") {
+			else if (response.id === "continue") {
 				stopBreaking();
 			}
 			else {
