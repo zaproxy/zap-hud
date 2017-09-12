@@ -255,6 +255,28 @@ function configureStorage() {
 	});
 }
 
+function setDefaultTools() {
+	// default tools
+	var leftTools = ["scope", "site-alerts"];
+	var rightTools = ["spider", "page-alerts"];
+
+	return new Promise(function(resolve) {
+		var promises = [];
+
+		leftTools.forEach(function(toolName) {
+			promises.push(function() { return addToolToPanel(toolName, "leftPanel");});
+		});
+
+		rightTools.forEach(function(toolName) {
+			promises.push(function() { return addToolToPanel(toolName, "rightPanel");});
+		});
+
+		return promises.reduce(function(pacc, fn) {
+			return pacc.then(fn);
+		}, Promise.resolve());
+	});
+}
+
 /* loads and saves the "frame" object from local storage */
 function loadFrame(key) {
 	return new Promise(function(resolve, reject) {
@@ -301,13 +323,15 @@ function loadTool(key) {
 
 function saveTool(tool) {
 	return localforage.setItem(tool.name, tool).then(function(tool) {
-			// Notify Panel of Updated Data
-			if (tool.isSelected) {
-				messageFrame(tool.panel, {action:"updateData", tool:tool});
-			}
-		}).catch(function(err) {
-			console.log(Error(err));
-		});
+		// Notify Panel of Updated Data
+		if (tool.isSelected) {
+			messageFrame(tool.panel, {action:"updateData", tool:tool});
+		}
+
+		return tool;
+	}).catch(function(err) {
+		console.log(Error(err));
+	});
 }
 
 function loadPanelTools(panelKey) {
@@ -334,7 +358,6 @@ function loadPanelTools(panelKey) {
 
 function loadAllTools() {
 	return new Promise(function(resolve) {
-		
 
 		localforage.getItem("tools").then(function(toolnames) {
 			var toolPromises = [];
@@ -358,16 +381,18 @@ function loadAllTools() {
 
 /* adds a tool to specific panel */
 function addToolToPanel(toolKey, panelKey) {
-	loadTool(toolKey).then(function(tool) {
+
+	return loadTool(toolKey).then(function(tool) {
 		tool.isSelected = true;
 		tool.panel = panelKey;
 
-		saveTool(tool);
+		return saveTool(tool);
 
-		loadFrame(panelKey).then(function(panel) {
+	}).then(function(tool) {
+		return loadFrame(panelKey).then(function(panel) {
 			panel.tools.push(tool.name);
 
-			saveFrame(panel);
+			return saveFrame(panel);
 		});
 	});
 }
