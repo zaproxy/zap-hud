@@ -60,7 +60,9 @@ var Spider = (function() {
 			messageFrame("mainDisplay", {action:"showDialog", config:config}).then(function(response) {
 				// Handle button choice
 				if (response.id === "start") {
-					startSpider(domain);
+					self.tools.scope.requireScope(domain).then(function() {
+						startSpider(domain);
+					});
 				}
 				else if (response.id === "stop") {
 					stopSpider(domain);
