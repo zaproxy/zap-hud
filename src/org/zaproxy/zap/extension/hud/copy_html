@@ -1,2 +1,0 @@
-rm -r ~/.ZAP/hud/*
-cp -r ~/projects/zas/zap-hud/src/org/zaproxy/zap/extension/hud/files/hud/* ~/.ZAP/hud/
