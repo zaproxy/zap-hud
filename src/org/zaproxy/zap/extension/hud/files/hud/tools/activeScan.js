@@ -61,7 +61,9 @@ var ActiveScan = (function() {
 			messageFrame("mainDisplay", {action:"showDialog", config:config}).then(function(response) {
 				// Handle button choice
 				if (response.id === "start") {
-					startActiveScan(domain);
+					self.tools.scope.requireScope(domain).then(function() {
+						startActiveScan(domain);
+					});
 				}
 				else if (response.id === "stop") {
 					stopActiveScan(domain);

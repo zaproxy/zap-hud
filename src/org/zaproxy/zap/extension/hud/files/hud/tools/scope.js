@@ -19,6 +19,7 @@ var Scope = (function() {
 	var DIALOG = {};
 		DIALOG.IN = "Remove current domain from scope?";
 		DIALOG.OUT = "Add current domain to scope?";
+		DIALOG.REQUIRED = "This tool requires the current site be added to the scope, via the Scope tool.";
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -76,6 +77,46 @@ var Scope = (function() {
 			console.log(Error(error));
 		});
 	}
+	function showScopeRequiredDialog(domain) {
+
+		return loadTool(NAME).then(function(tool) {
+			var config = {};
+
+			config.text = DIALOG.REQUIRED;
+			config.buttons = [{text:"Cancel", id:"cancel"}];
+
+			if (tool.isSelected) {
+				config.text += " Add " + domain + " to the scope?";
+				config.buttons.unshift({text:"Add", id:"add"});
+			}
+			else {
+				config.text += " Add the scope tool to the HUD and add " + domain + " to the scope?";
+				config.buttons.unshift({text:"Add", id:"addBoth"});
+			}
+
+			return config;
+		}).then(function(config) {
+
+			return messageFrame("mainDisplay", {action:"showDialog", config:config}).then(function(response) {
+
+				// Handle button choice
+				if (response.id === "add") {
+					return addToScope(domain);
+				}
+				else if (response.id === "addBoth") {
+					return addToolToPanel(NAME, "leftPanel").then(function() {
+						return addToScope(domain);
+					});
+				}
+				else {
+					//cancel
+					return false;
+				}
+			});
+		}).catch(function(err) {
+			console.log(Error(err));
+		});
+	}
 
 	function checkDomainInScope(domain) {
 		return new Promise(function(resolve) {
@@ -87,19 +128,17 @@ var Scope = (function() {
 	}
 
 	function addToScope(domain) {
-		fetch("<<ZAP_HUD_API>>JSON/context/action/includeInContext/?contextName=Default%20Context&regex=" + domain + "/.*&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
-			response.json().then(function(json) {
-				//todo: handle response if needed
+		return fetch("<<ZAP_HUD_API>>JSON/context/action/includeInContext/?contextName=Default%20Context&regex=" + domain + "/.*&apikey=<<ZAP_HUD_API_KEY>>").then(function() {
+			// add to list and save
+			return loadTool(NAME).then(function(tool) {
+				tool.urls.push(domain);
+				tool.data = DATA.IN;
+				tool.icon = ICONS.IN;
+
+				return saveTool(tool).then(function() {
+					return true;
+				});
 			});
-		});
-
-		// add to list and save
-		loadTool(NAME).then(function(tool) {
-			tool.urls.push(domain);
-			tool.data = DATA.IN;
-			tool.icon = ICONS.IN;
-
-			saveTool(tool);
 		});
 	}
 
@@ -117,6 +156,26 @@ var Scope = (function() {
 			tool.icon = ICONS.OUT;
 
 			saveTool(tool);
+		});
+	}
+
+	function requireScope(targetDomain) {
+		
+		return new Promise(function(resolve, reject) {
+			checkDomainInScope(targetDomain).then(function(isInScope) {
+
+				if (!isInScope) {
+					return showScopeRequiredDialog(targetDomain);
+				}
+				return true;
+			}).then(function(addedToScope) {
+				if (addedToScope) {
+					resolve();
+				}
+				else {
+					reject();
+				}
+			});
 		});
 	}
 
@@ -196,42 +255,9 @@ var Scope = (function() {
 	return {
 		name: NAME,
 		onPanelLoad: onPanelLoad,
-		initialize: initializeStorage
+		initialize: initializeStorage,
+		requireScope: requireScope
 	};
 })();
 
 self.tools[Scope.name] = Scope;
-/*
-function requireScope(targetDomain, callback) {
-	withTool(name, function(tool) {
-		if(tool.isInScope) {
-			callback();
-			return;
-		}
-
-		var text;
-
-		if (tool.isSelected) {
-			text = "This tool requires this site be added to the attack scope, via the Scope tool. Add '" + targetDomain + "' to the scope?";
-		}
-		else {
-			text = "This tool requires this site be added to the attack scope, via the Scope tool. Add the Scope tool to the HUD and add '" + targetDomain + "' to the scope?";
-		}
-
-		buttonFunction = function() {
-			if (!tool.isSelected) {
-				// add scope to panel
-				addToolToPanel("leftPanel", name);
-			}
-
-			// add site to scope
-			addToScope(parseDomainFromUrl(targetDomain));
-
-			callback();
-		};
-
-		// todo: return this??
-		showDialog(text, "Add", buttonFunction);
-	});
-}
-*/
