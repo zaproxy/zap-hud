@@ -15,11 +15,9 @@ var Break = (function() {
 		DATA.ON = "On";
 	var ICONS = {};
 		ICONS.OFF = "break-off.png";
-		ICONS.NEXT = "break-next.png";
-		ICONS.ON = "break-on.png"
+		ICONS.ON = "break-on.png";
 	var DIALOG = {};
 		DIALOG.START = "Start breaking?";
-		DIALOG.NEXT = "Go to the next break point?";
 		DIALOG.STOP = "Stop breaking?";
 
 	//todo: change this to a util function that reads in a config file (json/xml)
@@ -32,7 +30,6 @@ var Break = (function() {
 		tool.isSelected = false;
 		tool.isRunning = false;
 		tool.panel = "";
-		tool.urls = [];
 
 		saveTool(tool);
 	}
@@ -96,6 +93,7 @@ var Break = (function() {
 		});
 	}
 
+	// todo: change this to 'continue' and figure out / fix stopBreaking
 	function stopBreaking() {
 		fetch("<<ZAP_HUD_API>>JSON/break/action/continue?apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
 			response.json().then(function(json) {
@@ -120,16 +118,16 @@ var Break = (function() {
 		});
 	}
 
+	function setHttpMessage(method, header, body) {
+		return fetch("<<ZAP_HUD_API>>JSON/break/action/setHttpMessage/?formMethod=" + method + "&httpHeader=" + header + "&httpBody=" + body + "&apikey=<<ZAP_HUD_API_KEY>>");
+	}
+
 	function checkIsRunning() {
 		return new Promise(function(resolve) {
 			loadTool(NAME).then(function(tool) {
 				resolve(tool.isRunning);
 			});
 		});
-	}	
-
-	function onPanelLoad(data) {
-		
 	}
 
 	function onPollData(data) {
@@ -160,11 +158,14 @@ var Break = (function() {
 
 			// Handle button choice
 			if (response.id === "step") {
-				step();
+				setHttpMessage(response.method, response.header, response.body).then(function() {
+					step();
+				});
 			}
 			else if (response.id === "continue") {
-				stopBreaking();
-			}
+				setHttpMessage(response.method, response.header, response.body).then(function() {
+					stopBreaking();
+				});			}
 			else {
 				//cancel
 			}

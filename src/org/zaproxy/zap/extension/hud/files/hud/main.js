@@ -266,11 +266,11 @@ function showHttpMessage(config, port) {
 	var dialog = loadTemplate("http-message-template");
 	var buttons = {};
 
-	dialog.querySelector("#header-text").textContent = config.headerText;
-	dialog.querySelector("#body-text").textContent = config.bodyText;
+	dialog.querySelector("#header-text").value = config.headerText;
+	dialog.querySelector("#body-text").value = config.bodyText;
 
 	config.buttons.forEach(function(button) {
-		buttons[button.text] = buttonHandler(button.id, port);
+		buttons[button.text] = httpMessageHandler(button.id, port);
 	});
 
 	showMainDisplay().then(function() {
@@ -294,7 +294,21 @@ function buttonHandler(id, port) {
 	return function() {
 		hideMainDisplay();
 		port.postMessage({"action": "dialogSelected", id:id});
-		//$( this ).dialog( "close" );
+	};
+}
+
+function httpMessageHandler(id, port) {
+	return function() {
+		var data = {};
+
+		data.action = "dialogSelected";
+		data.id = id;
+		data.header = encodeURIComponent(document.getElementById("header-text").value);
+		data.body = encodeURIComponent(document.getElementById("body-text").value);
+		data.method = encodeURIComponent(parseRequestHeader(data.header).method);
+
+		hideMainDisplay();
+		port.postMessage(data);
 	};
 }
 
