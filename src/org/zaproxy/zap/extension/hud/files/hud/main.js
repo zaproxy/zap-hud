@@ -38,6 +38,10 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			showHudSettings(message.config, event.ports[0]);
 			break;
 
+		case "showHttpMessage":
+			showHttpMessage(message.config, event.ports[0]);
+			break;
+
 		default:
 			break;
 	}
@@ -257,13 +261,54 @@ function showAddToolList(config, port) {
 	});
 }
 
+function showHttpMessage(config, port) {
 
+	var dialog = loadTemplate("http-message-template");
+	var buttons = {};
+
+	dialog.querySelector("#header-text").value = config.headerText;
+	dialog.querySelector("#body-text").value = config.bodyText;
+
+	config.buttons.forEach(function(button) {
+		buttons[button.text] = httpMessageHandler(button.id, port);
+	});
+
+	showMainDisplay().then(function() {
+		document.body.appendChild(dialog);
+
+		$( "#http-message-div" ).dialog({
+			resizable: true,
+			height: 800,
+			width: 900,
+			position: { my: 'left top', at: 'left+' + (550) + ' top+' + (50)},
+			buttons: buttons,
+			open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },	// Hides close button
+		});
+	});
+
+	// show main display
+	showMainDisplay();
+}
 
 function buttonHandler(id, port) {
 	return function() {
 		hideMainDisplay();
 		port.postMessage({"action": "dialogSelected", id:id});
-		//$( this ).dialog( "close" );
+	};
+}
+
+function httpMessageHandler(id, port) {
+	return function() {
+		var data = {};
+
+		data.action = "dialogSelected";
+		data.id = id;
+		data.header = encodeURIComponent(document.getElementById("header-text").value);
+		data.body = encodeURIComponent(document.getElementById("body-text").value);
+		data.method = encodeURIComponent(parseRequestHeader(data.header).method);
+
+		hideMainDisplay();
+		port.postMessage(data);
 	};
 }
 
