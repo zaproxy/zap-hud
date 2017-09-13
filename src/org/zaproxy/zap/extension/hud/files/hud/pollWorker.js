@@ -86,4 +86,5 @@ addEventListener("message", function(message) {
 });
 
 startPollingData();
-startPollingMessages();
+// Disable until its fixed
+//startPollingMessages();
