@@ -45,7 +45,8 @@ var toolScripts = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/activeScan.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/pageAlerts.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/siteAlerts.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/attack.js",
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/break.js",
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/attack.js"
 ];
 
 self.tools = {};
