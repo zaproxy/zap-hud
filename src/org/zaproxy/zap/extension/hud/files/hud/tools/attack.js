@@ -1,71 +1,71 @@
 /*
- * Active Scan Tool
+ * Attack mode Tool
  *
- * Description goes here...
+ * Allows the user to switch attack mode on and off
  */
 
-var ActiveScan = (function() {
+var Attack = (function() {
 
 	// Constants
 	// todo: could probably switch this to a config file?
-	var NAME = "active-scan";
-	var LABEL = "Active Scan";
+	var NAME = "attack";
+	var LABEL = "Attack Mode";
 	var DATA = {};
-		DATA.START = "Start";
-		DATA.STOP = "Stop";
+		DATA.ON = "On";
+		DATA.OFF = "Off";
 	var ICONS = {};
-		ICONS.OFF = "flame-grey.png";
 		ICONS.ON = "flame.png";
+		ICONS.OFF = "flame-grey.png";
 	var DIALOG = {};
-		DIALOG.START = "Start actively scanning this site?";
-		DIALOG.STOP = "The active scanner is currently running. Would you like to stop it?";
+		DIALOG.ON = "Turn off Attack Mode?";
+		DIALOG.OFF = "Turn on Attack Mode? This will cause ZAP to automatically attack all pages in scope.";
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		var tool = {};
 		tool.name = NAME;
 		tool.label = LABEL;
-		tool.data = DATA.START;
+		tool.data = DATA.OFF;
 		tool.icon = ICONS.OFF;
 		tool.isSelected = false;
 		tool.panel = "";
-		tool.isRunning = false;
-		tool.scanid = -1
+		tool.isAttackMode = false;
 
 		saveTool(tool);
 	}
 
 	function showDialog(domain) {
 
-		checkIsRunning().then(function(isRunning) {
+		checkIsRunning().then(function(isAttackMode) {
 			var config = {};
 
-			if(!isRunning) {
-				config.text = DIALOG.START;
+			if(!isAttackMode) {
+				config.text = DIALOG.OFF;
 				config.buttons = [
-					{text:"Start",
-					 id:"start"},
+					{text:"Turn on",
+					 id:"turnon"},
 					{text:"Cancel",
 					 id:"cancel"}
 				];
 			}
 			else {
-				config.text = DIALOG.STOP;
+				config.text = DIALOG.ON;
 				config.buttons = [
-					{text:"Stop",
-					 id:"stop"},
+					{text:"Turn off",
+					 id:"turnoff"},
 					{text:"Cancel",
 					 id:"cancel"}
 				];
 			}
 
 			messageFrame("mainDisplay", {action:"showDialog", config:config}).then(function(response) {
+
 				// Handle button choice
-				if (response.id === "start") {
-					startActiveScan(domain);
+				if (response.id === "turnon") {
+					turnOnAttackMode();
 				}
-				else if (response.id === "stop") {
-					stopActiveScan(domain);
+				else if (response.id === "turnoff") {
+					turnOffAttackMode();
 				}
 				else {
 					//cancel
@@ -77,34 +77,33 @@ var ActiveScan = (function() {
 		});
 	}
 
-	function startActiveScan(domain) {
-		fetch("<<ZAP_HUD_API>>JSON/ascan/action/scan/?url=" + domain + "/&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
-			response.json().then(function(data) {
-				loadTool(NAME).then(function(tool) {
-					tool.isRunning = true;
-					tool.icon = ICONS.ON;
-					tool.data = "0";
-					tool.scanid = data.scan;
-					saveTool(tool);
-				});
+	function turnOnAttackMode(domain) {
+		fetch("<<ZAP_HUD_API>>JSON/core/action/setMode/?mode=attack").then(function(response) {
+			response.json().then(function(json) {
+				//todo: handle response if needed
+				//console.log(json)
 			});
 		});
 
-		messageFrame("management", {action: "increaseDataPollRate"});
-	}
-
-	function stopActiveScan() {
 		loadTool(NAME).then(function(tool) {
-			fetch("<<ZAP_HUD_API>>JSON/ascan/action/stop?scanId=" + tool.scanId + "&apikey=<<ZAP_HUD_API_KEY>>");
-			tool.isRunning = false;
-			tool.icon = ICONS.OFF;
-			tool.data = DATA.START;
-			tool.scanid = -1;
+			tool.isRunning = true;
+			tool.icon = ICONS.ON;
+			tool.data = DATA.ON;
 
 			saveTool(tool);
 		});
+	}
 
-		messageFrame("management", {action: "decreaseDataPollRate"});
+	function turnOffAttackMode() {
+		fetch("<<ZAP_HUD_API>>JSON/core/action/setMode/?mode=standard");
+
+		loadTool(NAME).then(function(tool) {
+			tool.isRunning = false;
+			tool.icon = ICONS.OFF;
+			tool.data = DATA.OFF;
+
+			saveTool(tool);
+		});
 	}
 
 	function checkIsRunning() {
@@ -113,20 +112,6 @@ var ActiveScan = (function() {
 				resolve(tool.isRunning);
 			});
 		});
-	}
-
-	function onPollData(data) {
-		// do something witht the data
-		if (data.progress == "100") {
-			stopActiveScan();
-		}
-		else if (data.progress !== "-1") {
-			loadTool(NAME).then(function(tool) {
-			tool.data = data.progress;
-
-			saveTool(tool);
-		});
-		}
 	}
 
 	function showOptions() {
@@ -160,10 +145,6 @@ var ActiveScan = (function() {
 				initializeStorage();
 				break;
 
-			case "pollData":
-				onPollData(message.pollData["active-scan"]);
-				break;
-
 			default:
 				break;
 		}
@@ -191,4 +172,4 @@ var ActiveScan = (function() {
 	};
 })();
 
-self.tools[ActiveScan.name] = ActiveScan;
+self.tools[Attack.name] = Attack;

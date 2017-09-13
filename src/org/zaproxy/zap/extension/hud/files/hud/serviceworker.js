@@ -46,6 +46,7 @@ var toolScripts = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/pageAlerts.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/siteAlerts.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/break.js",
+	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/attack.js"
 ];
 
 self.tools = {};
@@ -81,8 +82,11 @@ self.addEventListener("activate", function(event) {
 	// Check Storage & Initiate
 	event.waitUntil(
 		isStorageConfigured().then(function(isConfigured) {
+			// todo: maybe chain this instead
 			if (!isConfigured || isDebugging) {
-				configureStorage();
+				configureStorage().then(function() {
+					return setDefaultTools();
+				});
 			}
 		}).catch(function(err) {
 			console.log(Error(err));
