@@ -81,8 +81,11 @@ self.addEventListener("activate", function(event) {
 	// Check Storage & Initiate
 	event.waitUntil(
 		isStorageConfigured().then(function(isConfigured) {
+			// todo: maybe chain this instead
 			if (!isConfigured || isDebugging) {
-				configureStorage();
+				configureStorage().then(function() {
+					return setDefaultTools();
+				});
 			}
 		}).catch(function(err) {
 			console.log(Error(err));
