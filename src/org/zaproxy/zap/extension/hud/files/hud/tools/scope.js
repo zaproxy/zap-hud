@@ -77,46 +77,6 @@ var Scope = (function() {
 			console.log(Error(error));
 		});
 	}
-	function showScopeRequiredDialog(domain) {
-
-		return loadTool(NAME).then(function(tool) {
-			var config = {};
-
-			config.text = DIALOG.REQUIRED;
-			config.buttons = [{text:"Cancel", id:"cancel"}];
-
-			if (tool.isSelected) {
-				config.text += " Add " + domain + " to the scope?";
-				config.buttons.unshift({text:"Add", id:"add"});
-			}
-			else {
-				config.text += " Add the scope tool to the HUD and add " + domain + " to the scope?";
-				config.buttons.unshift({text:"Add", id:"addBoth"});
-			}
-
-			return config;
-		}).then(function(config) {
-
-			return messageFrame("mainDisplay", {action:"showDialog", config:config}).then(function(response) {
-
-				// Handle button choice
-				if (response.id === "add") {
-					return addToScope(domain);
-				}
-				else if (response.id === "addBoth") {
-					return addToolToPanel(NAME, "leftPanel").then(function() {
-						return addToScope(domain);
-					});
-				}
-				else {
-					//cancel
-					return false;
-				}
-			});
-		}).catch(function(err) {
-			console.log(Error(err));
-		});
-	}
 
 	function checkDomainInScope(domain) {
 		return new Promise(function(resolve) {
@@ -256,7 +216,8 @@ var Scope = (function() {
 		name: NAME,
 		onPanelLoad: onPanelLoad,
 		initialize: initializeStorage,
-		requireScope: requireScope
+		addToScope: addToScope,
+		isInScope: checkDomainInScope
 	};
 })();
 

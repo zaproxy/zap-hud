@@ -17,6 +17,7 @@ var Spider = (function() {
 		ICONS.SPIDER = "spider.png";
 	var DIALOG = {};
 		DIALOG.START = "Start spidering this site?";
+		DIALOG.START_ADD_SCOPE = "This site is not in scope.\nIn order to spider the site you must add it to the scope.\nAdd the site to the scope and start spidering it?";
 		DIALOG.STOP = "The spider is currently running. Would you like to stop it?";
 
 	//todo: change this to a util function that reads in a config file (json/xml)
@@ -35,34 +36,44 @@ var Spider = (function() {
 
 	function showDialog(domain) {
 
-		checkIsRunning().then(function(isSpidering) {
-			var config = {};
+		Promise.all([checkIsRunning(), self.tools.scope.isInScope(domain)])
+			.then(function(results) {
+				var isRunning = results[0];
+				var isInScope = results[1];
 
-			if(!isSpidering) {
-				config.text = DIALOG.START;
-				config.buttons = [
-					{text:"Start",
-					 id:"start"},
-					{text:"Cancel",
-					 id:"cancel"}
-				];
-			}
-			else {
-				config.text = DIALOG.STOP;
-				config.buttons = [
-					{text:"Stop",
-					 id:"stop"},
-					{text:"Cancel",
-					 id:"cancel"}
-				];
-			}
+				var config = {};
+				config.buttons = [{text: "Cancel", id: "cancel"}];
 
-			messageFrame("mainDisplay", {action:"showDialog", config:config}).then(function(response) {
+				if(!isRunning) {
+					if (!isInScope) {
+						config.text = DIALOG.START_ADD_SCOPE;
+						config.buttons.unshift({text: "Start", id: "start-add-to-scope"});
+					}
+					else {
+						config.text = DIALOG.START;
+						config.buttons.unshift({text: "Start", id: "start"});
+					}
+				}
+				else {
+					config.text = DIALOG.STOP;
+					config.buttons.unshift({text: "Stop", id: "stop"});
+				}
+
+				return config;
+			})
+			.then(function(config) {
+				return messageFrame("mainDisplay", {action:"showDialog", config:config});
+			})
+			.then(function(response) {
 				// Handle button choice
 				if (response.id === "start") {
-					self.tools.scope.requireScope(domain).then(function() {
-						startSpider(domain);
-					});
+					startSpider(domain);
+				}
+				else if (response.id === "start-add-to-scope") {
+					self.tools.scope.addToScope(domain)
+						.then(
+							startSpider(domain)
+						);
 				}
 				else if (response.id === "stop") {
 					stopSpider(domain);
@@ -70,11 +81,10 @@ var Spider = (function() {
 				else {
 					//cancel
 				}
+			})
+			.catch(function(error) {
+				console.log(Error(error));
 			});
-
-		}).catch(function(error) {
-			console.log(Error(error));
-		});
 	}
 
 	function startSpider(domain) {
