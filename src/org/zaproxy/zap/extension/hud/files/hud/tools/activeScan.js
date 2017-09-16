@@ -31,6 +31,7 @@ var ActiveScan = (function() {
 		tool.isSelected = false;
 		tool.panel = "";
 		tool.isRunning = false;
+		tool.scanid = -1
 
 		saveTool(tool);
 	}
@@ -90,30 +91,27 @@ var ActiveScan = (function() {
 
 	function startActiveScan(domain) {
 		fetch("<<ZAP_HUD_API>>JSON/ascan/action/scan/?url=" + domain + "/&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
-			response.json().then(function(json) {
-				//todo: handle response if needed
-				//console.log(json)
+			response.json().then(function(data) {
+				loadTool(NAME).then(function(tool) {
+					tool.isRunning = true;
+					tool.icon = ICONS.ON;
+					tool.data = "0";
+					tool.scanid = data.scan;
+					saveTool(tool);
+				});
 			});
-		});
-
-		loadTool(NAME).then(function(tool) {
-			tool.isRunning = true;
-			tool.icon = ICONS.ON;
-			tool.data = "0";
-
-			saveTool(tool);
 		});
 
 		messageFrame("management", {action: "increaseDataPollRate"});
 	}
 
 	function stopActiveScan() {
-		fetch("<<ZAP_HUD_API>>JSON/ascan/action/stop?apikey=<<ZAP_HUD_API_KEY>>");
-
 		loadTool(NAME).then(function(tool) {
+			fetch("<<ZAP_HUD_API>>JSON/ascan/action/stop?scanId=" + tool.scanId + "&apikey=<<ZAP_HUD_API_KEY>>");
 			tool.isRunning = false;
 			tool.icon = ICONS.OFF;
 			tool.data = DATA.START;
+			tool.scanid = -1;
 
 			saveTool(tool);
 		});

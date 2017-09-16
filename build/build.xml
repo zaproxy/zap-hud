@@ -18,6 +18,9 @@
 	<!-- This assumes you also have the zaproxy project -->
 	<property name="zap.plugin.dir" location="../../zaproxy/src/plugin" />
 	<property name="zap.download.url" value="https://github.com/zaproxy/zap-extensions/releases/download/2.5" />
+	
+	<!-- Change this as required for your local setup -->
+	<property name="hud.config.dir" location="${user.home}/.ZAP_D/hud" />
 
 	<path id="build.classpath">
 		   <fileset dir="${build.lib.dir}" includes="*.jar"/>
@@ -418,6 +421,11 @@
 	
 	<target name="deploy-hud" description="deploy the hud extension">
 		<build-deploy-addon name="hud" />
+	</target>
+
+	<target name="deploy-and-reset-hud" description="deploy the hud extension and delete the config directory">
+		<build-deploy-addon name="hud" />
+		<delete dir="${hud.config.dir}"/>
 	</target>
 
 	<target name="deploy-weekly" description="deploy extensions to be included in weekly releases">

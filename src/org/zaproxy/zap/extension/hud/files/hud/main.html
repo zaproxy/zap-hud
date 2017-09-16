@@ -21,6 +21,7 @@
 </div>
 </template>
 
+<!-- List Menu: a basic list menu -->
 <template id="list-menu-template">
 	<ul id="menu-options" class="display"></ul>
 
@@ -32,6 +33,7 @@
 	</template>
 </template>
 
+<!-- Select Tool: presents tools to add to the HUD -->
 <template id="select-tool-template"> 
 	<ul id="menu-options" class="display"></ul>
 
@@ -98,6 +100,19 @@
 		<label>Solution:</label><textarea id="detail-solution" class="alert-detail-area" readonly="true" rows="4"></textarea>
 		<label>Reference:</label><textarea id="detail-reference" class="alert-detail-area" readonly="true" rows="4"></textarea>
 
+	</div>
+</template>
+
+<!-- HTTP Message: displays the details of a single http message (request or response) -->
+<template id="http-message-template">
+	<div id="http-message-div" class="display">
+		<!-- header -->
+		<label for="header-text">Header</label>
+		<textarea id="header-text" class="text" name="header-text" rows="10"></textarea>
+
+		<!-- body -->
+		<label for="body-text">Body</label>
+		<textarea id="body-text" class="text" name="body-text" rows="10"></textarea>
 	</div>
 </template>
 
