@@ -29,6 +29,7 @@ var Attack = (function() {
 		tool.icon = ICONS.OFF;
 		tool.isSelected = false;
 		tool.panel = "";
+		tool.position = 0;
 		tool.isAttackMode = false;
 
 		saveTool(tool);

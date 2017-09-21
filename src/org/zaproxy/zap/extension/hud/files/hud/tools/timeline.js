@@ -25,6 +25,7 @@ var Timeline = (function() {
 		tool.icon = ICONS.CLOCK;
 		tool.isSelected = false;
 		tool.panel = "";
+		tool.position = 0;
 		tool.isRunning = false;
 		tool.messages = [];
 		tool.lastMessage = 1;

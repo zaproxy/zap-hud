@@ -29,6 +29,7 @@ var Scope = (function() {
 		tool.icon = ICONS.OUT;
 		tool.isSelected = false;
 		tool.panel = "";
+		tool.position = 0;
 		tool.urls = [];
 
 		saveTool(tool);
