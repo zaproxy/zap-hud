@@ -71,26 +71,34 @@ self.addEventListener("install", function(event) {
 
 	// Cache Files
 	event.waitUntil(
-		caches.open(CACHE_NAME).then(function(cache) {
-			console.log("caching urls...");
-			return cache.addAll(urlsToCache);
-		})
+		caches.open(CACHE_NAME)
+			.then(function(cache) {
+				console.log("caching urls...");
+				return cache.addAll(urlsToCache);
+			})
+			.catch(function(err) {
+				console.log(Error(err));
+			})
 	);
 }); 
 
 self.addEventListener("activate", function(event) {
 	// Check Storage & Initiate
 	event.waitUntil(
-		isStorageConfigured().then(function(isConfigured) {
-			// todo: maybe chain this instead
-			if (!isConfigured || isDebugging) {
-				configureStorage().then(function() {
-					return setDefaultTools();
-				});
-			}
-		}).catch(function(err) {
-			console.log(Error(err));
-		})
+		isStorageConfigured()
+			.then(function(isConfigured) {
+
+				if (!isConfigured || isDebugging) {
+					return configureStorage();
+				}
+			})
+			.then(function() {
+				// set the default tools after configuring storage
+				setDefaultTools();
+			})
+			.catch(function(err) {
+				console.log(Error(err));
+			})
 	);
 });
 
@@ -235,42 +243,50 @@ function saveFrameId(event) {
 
 function buildPanelHtml(response, orientation, url) {
 	var key = orientation + "Panel";
-	
-	return loadPanelTools(key).then(function(tools) {
-		// run onTargetLoad for any tools in the panel
-		var promises = [];
 
-		for (var tool in tools) {
-			if (self.tools[tools[tool].name].onPanelLoad) {
-				promises.push(self.tools[tools[tool].name].onPanelLoad({domain: parseDomainFromUrl(url), url: url}));
-			}
-		}
+	return loadPanelTools(key)
+		.then(function(tools) {
+			var promises = [];
+			var panelLoadData = {domain: parseDomainFromUrl(url), url:url};
 
-		return Promise.all(promises).then(function() {
-			return loadPanelTools(key).then(function(tools) {
-
-				return response.text().then(function(text) {
-					var init = buildInit(response);
-					var body = text.replace(ORIENTATION, orientation);
-
-					// Last, AddTool Button
-					var addToolButton = {name:"add-tool", label:"Add", icon:"plus.png"};
-					body = addButtonToBody(body, addToolButton);
-
-					// Add Each Tool
-					tools.forEach(function(tool) {
-						body = addButtonToBody(body, tool);
-					});
-
-					return new Response(body, init);
-				}).catch(function(error) {
-					console.log(Error("Could not get text for response. " + error));
-				});
+			tools.forEach(function(tool) {
+				var toolMod = self.tools[tool.name];
+				// if tool has onPanelLoad function, then call it
+				if (toolMod.onPanelLoad) {
+					promises.push(toolMod.onPanelLoad(panelLoadData));
+				}
 			});
+
+			return Promise.all(promises)
+				.then(function() {
+					// return the tools, and the results of response.text()
+					return Promise.all([tools, response.text()]);
+				});
+		})
+		.then(function(results) {
+			var tools = results[0];
+			var text = results[1];
+
+			var init = buildInit(response);
+			var body = text.replace(ORIENTATION, orientation);
+
+			// Last, AddTool Button
+			var addToolButton = {name:"add-tool", label:"Add", icon:"plus.png"};
+			body = addButtonToBody(body, addToolButton);
+
+			// sort tools by position
+			tools = sortToolsByPosition(tools);
+
+			// Add Each Tool
+			tools.forEach(function(tool) {
+				body = addButtonToBody(body, tool);
+			});
+
+			return new Response(body, init);
+		})
+		.catch(function(error) {
+			console.log(Error("Could not get text for response. " + error));
 		});
-	}).catch(function(error) {
-		console.log(Error(error))
-	});
 }
 
 function buildPanelCss(response, orientation) {

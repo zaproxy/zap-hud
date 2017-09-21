@@ -185,74 +185,75 @@ function isStorageConfigured() {
 
 //todo: could just be named "conigureFrames" 
 function configureStorage() {
-	return new Promise(function(resolve) {
-		localforage.setItem(KEY_IS_CONFIG, true).catch(function(err) {
+	var promises = [];
+
+
+	promises.push(localforage.setItem(KEY_IS_CONFIG, true));
+		
+	// Configure Panels
+	promises.push(loadFrame("rightPanel").then(function(oldPanel) {
+		var panel = {};
+
+		panel.key = "rightPanel";
+		panel.orientation = "right";
+		panel.tools = [];
+		if (oldPanel) {
+			panel.clientId = oldPanel.clientId;
+		}
+
+		return saveFrame(panel);
+	}));
+
+	promises.push(loadFrame("leftPanel").then(function(oldPanel) {
+		var panel = {};
+
+		panel.key = "leftPanel";
+		panel.orientation = "left";
+		panel.tools = [];
+		if (oldPanel) {
+			panel.clientId = oldPanel.clientId;
+		}
+
+		saveFrame(panel);
+	}));
+	
+	promises.push(loadFrame("mainDisplay").then(function(oldFrame) {
+		var frame = {};
+
+		frame.key = "mainDisplay";
+		if (oldFrame) {
+			frame.clientId = oldFrame.clientId;
+		}
+
+		saveFrame(frame);
+	}));
+
+	promises.push(loadFrame("management").then(function(oldFrame) {
+		var frame = {};
+
+		frame.key = "management";
+		if (oldFrame) {
+			frame.clientId = oldFrame.clientId;
+		}
+
+		saveFrame(frame);
+	}));
+
+	promises.push(loadFrame("timelinePane").then(function(oldFrame) {
+		var frame = {};
+
+		frame.key = "timelinePane";
+		if (oldFrame) {
+			frame.clientId = oldFrame.clientId;
+		}
+
+		saveFrame(frame);
+	}));
+
+	return Promise.all(promises)
+		.catch(function(err) {
 			console.log(Error(err));
 		});
-
-		// Configure Panels
-		loadFrame("leftPanel").then(function(oldPanel) {
-			var panel = {};
-
-			panel.key = "leftPanel";
-			panel.orientation = "left";
-			panel.tools = [];
-			if (oldPanel) {
-				panel.clientId = oldPanel.clientId;
-			}
-
-			saveFrame(panel);
-		});
-		
-		loadFrame("rightPanel").then(function(oldPanel) {
-			var panel = {};
-
-			panel.key = "rightPanel";
-			panel.orientation = "right";
-			panel.tools = [];
-			if (oldPanel) {
-				panel.clientId = oldPanel.clientId;
-			}
-
-			saveFrame(panel);
-		});
-		
-		//todo; hacky
-		loadFrame("mainDisplay").then(function(oldFrame) {
-			var frame = {};
-
-			frame.key = "mainDisplay";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-
-			saveFrame(frame);
-		});
-
-		loadFrame("management").then(function(oldFrame) {
-			var frame = {};
-
-			frame.key = "management";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-
-			saveFrame(frame);
-		});
-
-		loadFrame("timelinePane").then(function(oldFrame) {
-			var frame = {};
-
-			frame.key = "timelinePane";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-
-			saveFrame(frame);
-		});
-
-		resolve();
-	});
 }
 
 function setDefaultTools() {
@@ -382,19 +383,21 @@ function loadAllTools() {
 /* adds a tool to specific panel */
 function addToolToPanel(toolKey, panelKey) {
 
-	return loadTool(toolKey).then(function(tool) {
-		tool.isSelected = true;
-		tool.panel = panelKey;
+	var promises = [loadTool(toolKey), loadFrame(panelKey)];
+	
+	return Promise.all(promises)
+		.then(function(results) {
+			var tool = results[0];
+			var panel = results[1];
 
-		return saveTool(tool);
+			tool.isSelected = true;
+			tool.panel = panelKey;
+			tool.position = panel.tools.length;
 
-	}).then(function(tool) {
-		return loadFrame(panelKey).then(function(panel) {
 			panel.tools.push(tool.name);
 
-			return saveFrame(panel);
+			return Promise.all([saveTool(tool), saveFrame(panel)]);
 		});
-	});
 }
 
 function removeToolFromPanel(toolKey) {
@@ -459,6 +462,23 @@ function messageWindow(window, message, origin) {
 		};
 
 		window.postMessage(message, origin, [channel.port2]);
+	});
+}
+
+/*
+ * Sorts an array of tool objects by their position property
+ */
+function sortToolsByPosition(tools) {
+	return tools.sort(function (a, b) {
+		if (a.position < b.position) {
+			return 1;
+		}
+		else if (a.position > b.position) {
+			return -1;
+		}
+		else {
+			return 0;
+		}
 	});
 }
 
