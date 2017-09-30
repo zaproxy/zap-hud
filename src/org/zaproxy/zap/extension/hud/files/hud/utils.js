@@ -251,6 +251,17 @@ function configureStorage() {
 			saveFrame(frame);
 		});
 
+		loadFrame("growlerAlerts").then(function(oldFrame) {
+			var frame = {};
+
+			frame.key = "growlerAlerts";
+			if (oldFrame) {
+				frame.clientId = oldFrame.clientId;
+			}
+
+			saveFrame(frame);
+		});
+
 		resolve();
 	});
 }
@@ -416,6 +427,8 @@ function removeToolFromPanel(toolKey) {
 	});
 }
 
+// maybe add another function "messageFrameWithoutRespone" or something that doesn't depend on a repsonse
+// to the postMessage
 function messageFrame(key, message) {
 	return new Promise(function(resolve, reject) {
 		loadFrame(key).then(function(frame) {
