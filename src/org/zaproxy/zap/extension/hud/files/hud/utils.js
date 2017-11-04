@@ -290,9 +290,10 @@ function loadFrame(key) {
 }
 
 function saveFrame(frame) {
-	localforage.setItem(frame.key, frame).catch(function(err) {
-		console.log(Error(err).stack);
-	});
+	return localforage.setItem(frame.key, frame)
+		.catch(function(err) {
+			console.log(Error(err).stack);
+		});
 }
 
 function registerTool(toolname) {
@@ -401,22 +402,49 @@ function addToolToPanel(toolKey, panelKey) {
 }
 
 function removeToolFromPanel(toolKey) {
-	loadTool(toolKey).then(function(tool) {
-		var oldPanel = tool.panel;
 
-		tool.isSelected = false;
-		tool.panel = "";
+	return loadTool(toolKey)
+		.then(function(tool) {
+			return Promise.all([tool, loadFrame(tool.panel), loadPanelTools(tool.panel)]);
+		})
+		.then(function(results) {
+			var removedTool = results[0];
+			var panel = results[1];
+			var panelTools = results[2];
 
-		saveTool(tool);
+			var promises = [];
 
-		loadFrame(oldPanel).then(function(panel) {
-			panel.tools.splice(panel.tools.indexOf(tool.name), 1);
+			// update tool
+			removedTool.isSelected = false;
+			removedTool.panel = "";
 
-			saveFrame(panel);
+			promises.push(saveTool(removedTool));
+
+			// update panel
+			panel.tools.splice(panel.tools.indexOf(removedTool.name), 1);
+			
+			promises.push(saveFrame(panel));
+
+			// update all panel tool positions
+			panelTools.forEach(function(tool) {
+				if (tool.position > removedTool.position) {
+					tool.position = tool.position - 1;
+
+					promises.push(saveTool(tool));
+				}
+			});
+
+			return Promise.all(promises);
+		})
+		.then(function(results) {
+   			var tool = results[0];
+			var panel = results[1];
+
+			return messageFrame(panel.key, {action:"removeTool", tool:tool});
+		})
+		.catch(function(err) {
+			console.log(Error(err));
 		});
-
-		messageFrame(oldPanel, {action:"removeTool", tool:tool});
-	});
 }
 
 function messageFrame(key, message) {
