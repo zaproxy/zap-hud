@@ -90,7 +90,7 @@ var PageAlerts = (function() {
 					tool.cache[alert.id] = alert;
 
 					// send growler alert (fine with it being async, can change later if its an issue)
-					showGrowlerAlert(alert);
+					//showGrowlerAlert(alert);
 
 					// if url not initialized
 					if (tool.alerts[url] === undefined) {
@@ -120,7 +120,6 @@ var PageAlerts = (function() {
 	}
 
 	function showGrowlerAlert(alert) {
-
 		return messageFrame("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
 	}
 

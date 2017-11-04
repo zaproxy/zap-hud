@@ -25,33 +25,9 @@ var SiteAlerts = (function() {
 		tool.isSelected = false;
 		tool.panel = "";
 		tool.alerts = {};
+		tool.cache = {};
 
 		saveTool(tool);
-	}
-
-	function formatAlerts (alerts) {
-		var formatted = {};
-		var risks = ["Low", "Medium", "High", "Informational"];
-		var alertTypes = [];
-
-		for (var i=0; i<risks.length; i++) {
-			var risk = risks[i];
-			var riskAlerts = alerts.filter(function(alert) {return alert.risk === risk; });
-
-			formatted[risk] = {};
-			for (var j=0; j<riskAlerts.length; j++) {
-				var alert = riskAlerts[j];
-				if (alert.alert in formatted[risk]) {
-					formatted[risk][alert.alert].push(alert);
-				}
-				else {
-					formatted[risk][alert.alert] = [];
-					formatted[risk][alert.alert].push(alert);
-				}
-			}
-		}
-
-		return formatted;
 	}
 
 	function showAlerts(domain) {
@@ -104,15 +80,47 @@ var SiteAlerts = (function() {
 		return updateAlertCount(data.domain);
 	}
 
-	function onPollData(domain, alerts) {
+	function onPollData(domain, data) {
 		loadTool(NAME).then(function(tool) {
-			tool.alerts[domain] = formatAlerts(alerts);
 
-			saveTool(tool);
-			return domain;
-		}).then(function(domain) {
-			updateAlertCount(domain);
+			data.forEach(function(alert) {
+				// not in cache
+				if (tool.cache[alert.id] === undefined) {
+					// add to cache
+					tool.cache[alert.id] = alert;
+
+					// if domain not initialized
+					if (tool.alerts[domain] === undefined) {
+						tool.alerts[domain] = {};
+						tool.alerts[domain].Low = {};
+						tool.alerts[domain].Medium = {};
+						tool.alerts[domain].High = {};
+						tool.alerts[domain].Informational = {};
+					}
+
+					// add to alerts for the page
+					if (tool.alerts[domain][alert.risk][alert.alert] === undefined) {
+						tool.alerts[domain][alert.risk][alert.alert] = [];
+
+						// send growler alert (fine with it being async, can change later if its an issue)
+						showGrowlerAlert(alert);
+					}
+					tool.alerts[domain][alert.risk][alert.alert].push(alert);
+				}
+			});
+
+			return saveTool(tool);
+		})
+		.then(function() {
+			return updateAlertCount(domain);
+		})
+		.catch(function(err) {
+			console.log(Error(err));
 		});
+	}
+
+	function showGrowlerAlert(alert) {
+		return messageFrame("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
 	}
 
 	function showOptions() {
