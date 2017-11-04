@@ -35,6 +35,10 @@ var PageAlerts = (function() {
 		var risks = ["Low", "Medium", "High", "Informational"];
 		var alertTypes = [];
 
+		if (!(alerts && alerts.length)) {
+			return formatted;
+		}
+
 		for (var i=0; i<risks.length; i++) {
 			var risk = risks[i];
 			var riskAlerts = alerts.filter(function(alert) {return alert.risk === risk; });
