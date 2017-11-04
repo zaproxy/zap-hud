@@ -19,6 +19,7 @@ var Scope = (function() {
 	var DIALOG = {};
 		DIALOG.IN = "Remove current domain from scope?";
 		DIALOG.OUT = "Add current domain to scope?";
+		DIALOG.REQUIRED = "This tool requires the current site be added to the scope, via the Scope tool.";
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -87,19 +88,17 @@ var Scope = (function() {
 	}
 
 	function addToScope(domain) {
-		fetch("<<ZAP_HUD_API>>JSON/context/action/includeInContext/?contextName=Default%20Context&regex=" + domain + "/.*&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
-			response.json().then(function(json) {
-				//todo: handle response if needed
+		return fetch("<<ZAP_HUD_API>>JSON/context/action/includeInContext/?contextName=Default%20Context&regex=" + domain + "/.*&apikey=<<ZAP_HUD_API_KEY>>").then(function() {
+			// add to list and save
+			return loadTool(NAME).then(function(tool) {
+				tool.urls.push(domain);
+				tool.data = DATA.IN;
+				tool.icon = ICONS.IN;
+
+				return saveTool(tool).then(function() {
+					return true;
+				});
 			});
-		});
-
-		// add to list and save
-		loadTool(NAME).then(function(tool) {
-			tool.urls.push(domain);
-			tool.data = DATA.IN;
-			tool.icon = ICONS.IN;
-
-			saveTool(tool);
 		});
 	}
 
@@ -117,6 +116,26 @@ var Scope = (function() {
 			tool.icon = ICONS.OUT;
 
 			saveTool(tool);
+		});
+	}
+
+	function requireScope(targetDomain) {
+		
+		return new Promise(function(resolve, reject) {
+			checkDomainInScope(targetDomain).then(function(isInScope) {
+
+				if (!isInScope) {
+					return showScopeRequiredDialog(targetDomain);
+				}
+				return true;
+			}).then(function(addedToScope) {
+				if (addedToScope) {
+					resolve();
+				}
+				else {
+					reject();
+				}
+			});
 		});
 	}
 
@@ -196,42 +215,10 @@ var Scope = (function() {
 	return {
 		name: NAME,
 		onPanelLoad: onPanelLoad,
-		initialize: initializeStorage
+		initialize: initializeStorage,
+		addToScope: addToScope,
+		isInScope: checkDomainInScope
 	};
 })();
 
 self.tools[Scope.name] = Scope;
-/*
-function requireScope(targetDomain, callback) {
-	withTool(name, function(tool) {
-		if(tool.isInScope) {
-			callback();
-			return;
-		}
-
-		var text;
-
-		if (tool.isSelected) {
-			text = "This tool requires this site be added to the attack scope, via the Scope tool. Add '" + targetDomain + "' to the scope?";
-		}
-		else {
-			text = "This tool requires this site be added to the attack scope, via the Scope tool. Add the Scope tool to the HUD and add '" + targetDomain + "' to the scope?";
-		}
-
-		buttonFunction = function() {
-			if (!tool.isSelected) {
-				// add scope to panel
-				addToolToPanel("leftPanel", name);
-			}
-
-			// add site to scope
-			addToScope(parseDomainFromUrl(targetDomain));
-
-			callback();
-		};
-
-		// todo: return this??
-		showDialog(text, "Add", buttonFunction);
-	});
-}
-*/
