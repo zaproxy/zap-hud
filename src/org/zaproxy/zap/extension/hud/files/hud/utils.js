@@ -392,7 +392,7 @@ function loadAllTools() {
 
 /* adds a tool to specific panel */
 function addToolToPanel(toolKey, panelKey) {
-
+	
 	return loadTool(toolKey).then(function(tool) {
 		tool.isSelected = true;
 		tool.panel = panelKey;
