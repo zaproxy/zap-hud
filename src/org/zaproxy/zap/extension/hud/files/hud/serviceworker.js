@@ -28,7 +28,6 @@ var urlsToCache = [
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timelinePane.css",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timelinePane.html",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timelinePane.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=growlerAlerts.css",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=growlerAlerts.html",
 	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=growlerAlerts.js",
 	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-bg_glass_75_79c9ec_1x400.png",
