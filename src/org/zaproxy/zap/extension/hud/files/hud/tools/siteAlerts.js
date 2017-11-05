@@ -31,120 +31,24 @@ var SiteAlerts = (function() {
 	}
 
 	function showAlerts(domain) {
-		var config = {};
-
-		loadTool(NAME).then(function(tool) {
-			config.alerts = tool.alerts[domain];
-
-			messageFrame("mainDisplay", {action:"showAlerts", config:config}).then(function(response) {
-				// Handle button choice
-				if ("id" in response) {
-					fetch("<<ZAP_HUD_API>>JSON/core/view/alert/?id=" + response.id + "&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
-						response.json().then(function(json) {
-							showAlertDetails(json.alert);
-						});
-					});
-				}
-				else {
-					//cancel
-				}
-			});
-		});
-	}
-
-	function showAlertDetails(details) {
-		var config = {};
-		config.details = details;
-
-		messageFrame("mainDisplay", {action: "showAlertDetails", config: config});
+		alertUtils.showAlerts(NAME, domain);
 	}
 
 	function updateAlertCount(domain) {
-		return loadTool(NAME).then(function(tool) {
-			if (tool.alerts[domain]) {
-				var count = 0;
-				for (var key in tool.alerts[domain]) {
-					count += Object.keys(tool.alerts[domain][key]).length;
-				}
-				tool.data = count.toString();
-			}
-			else {
-				tool.data = "0";
-			}
-			saveTool(tool);
-		});
+		return alertUtils.updateAlertCount(NAME, domain);
 	}
 
 
 	function onPanelLoad(data) {
-		return updateAlertCount(data.domain);
+		return alertUtils.updateAlertCount(NAME, data.domain);
 	}
 
 	function onPollData(domain, data) {
-		loadTool(NAME).then(function(tool) {
-
-			data.forEach(function(alert) {
-				// not in cache
-				if (tool.cache[alert.id] === undefined) {
-					// add to cache
-					tool.cache[alert.id] = alert;
-
-					// if domain not initialized
-					if (tool.alerts[domain] === undefined) {
-						tool.alerts[domain] = {};
-						tool.alerts[domain].Low = {};
-						tool.alerts[domain].Medium = {};
-						tool.alerts[domain].High = {};
-						tool.alerts[domain].Informational = {};
-					}
-
-					// add to alerts for the page
-					if (tool.alerts[domain][alert.risk][alert.alert] === undefined) {
-						tool.alerts[domain][alert.risk][alert.alert] = [];
-
-						// send growler alert (fine with it being async, can change later if its an issue)
-						showGrowlerAlert(alert);
-					}
-					tool.alerts[domain][alert.risk][alert.alert].push(alert);
-				}
-			});
-
-			return saveTool(tool);
-		})
-		.then(function() {
-			return updateAlertCount(domain);
-		})
-		.catch(function(err) {
-			console.log(Error(err));
-		});
+		alertUtils.onPollData(NAME, domain, data, true);	
 	}
-
-	function showGrowlerAlert(alert) {
-		return messageFrame("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
-	}
-
+		
 	function showOptions() {
-		var config = {};
-
-		config.tool = NAME;
-		config.toolLabel = LABEL;
-		config.options = {opt1: "Option 1", opt2: "Option 2", remove: "Remove"};
-
-		messageFrame("mainDisplay", {action:"showButtonOptions", config:config}).then(function(response) {
-			// Handle button choice
-			if (response.id == "opt1") {
-				console.log("Option 1 chosen");
-			}
-			else if (response.id == "opt2") {
-				console.log("Option 2 chosen");
-			}
-			else if (response.id == "remove") {
-				removeToolFromPanel(NAME);
-			}
-			else {
-				//cancel
-			}
-		});
+		alertUtils.showOptions(NAME, LABEL);
 	}
 
 	self.addEventListener("activate", function(event) {
