@@ -1,5 +1,6 @@
 importScripts("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/localforage.min.js"); 
 importScripts("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=utils.js");
+importScripts("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/alertUtils.js");
 
 var CACHE_NAME = "hud-cache-1.0";
 var BUTTON_LIST_HTML = '<div class="buttons-list">';
@@ -58,7 +59,8 @@ localforage.setItem("tools", []).then(function() {
 	toolScripts.forEach(function(script) {
 		importScripts(script); 
 	});
-}).then(function(){
+})
+.then(function(){
 	var ts = [];
 	for (var tool in self.tools) {
 		ts.push(self.tools[tool].name);
