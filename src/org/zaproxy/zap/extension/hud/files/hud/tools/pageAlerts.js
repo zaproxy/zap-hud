@@ -24,6 +24,7 @@ var PageAlerts = (function() {
 		tool.icon = ICONS.PA;
 		tool.isSelected = false;
 		tool.panel = "";
+		tool.position = 0;
 		tool.alerts = {};
 
 		saveTool(tool);
