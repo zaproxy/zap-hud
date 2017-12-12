@@ -40,11 +40,7 @@ var SiteAlerts = (function() {
 			messageFrame("mainDisplay", {action:"showAlerts", config:config}).then(function(response) {
 				// Handle button choice
 				if ("id" in response) {
-					fetch("<<ZAP_HUD_API>>JSON/core/view/alert/?id=" + response.id + "&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
-						response.json().then(function(json) {
-							showAlertDetails(json.alert);
-						});
-					});
+					showAlertDetails(response.id);
 				}
 				else {
 					//cancel
@@ -53,11 +49,18 @@ var SiteAlerts = (function() {
 		});
 	}
 
-	function showAlertDetails(details) {
-		var config = {};
-		config.details = details;
+	function showAlertDetails(id) {
+		fetch("<<ZAP_HUD_API>>JSON/core/view/alert/?id=" + id + "&apikey=<<ZAP_HUD_API_KEY>>")
+			.then(function(response) {
 
-		messageFrame("mainDisplay", {action: "showAlertDetails", config: config});
+				response.json().then(function(json) {
+
+					var config = {};
+					config.details = json.alert;
+
+					messageFrame("mainDisplay", {action: "showAlertDetails", config: config});
+				});
+			});
 	}
 
 	function updateAlertCount(domain) {
@@ -178,6 +181,10 @@ var SiteAlerts = (function() {
 
 				case "buttonMenuClicked":
 					showOptions();
+					break;
+
+				case "showAlertDetails":
+					showAlertDetails(message.id);
 					break;
 
 				default:
