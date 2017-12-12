@@ -33,8 +33,13 @@ function showGrowlerAlert(alert, port) {
 	// expands growler frame for one alert
 	expandFrame();
 
-	var content = getRiskFlag(alert.risk) + alert.alert;
-	alertify.delay(3000).log(content);
+	var content = getRiskFlag(alert.risk) + alert.alert + getHiddenId(alert.id);
+	alertify.delay(3000).log(content, function(event) {
+		var alertId = event.target.querySelector("#alertId");
+
+		// todo: show alert details
+		console.log(alertId)
+	});
 
 	// shrinks frame for one alert
 	setTimeout(function() {shrinkFrame();}, 3500);
@@ -65,4 +70,8 @@ function getRiskFlag(risk) {
 		default:
 			return "";
 	}
+}
+
+function getHiddenId(alertId) {
+	return "<input id='alertId' type='hidden' name='alertId' value=" + alertId + ">"
 }
