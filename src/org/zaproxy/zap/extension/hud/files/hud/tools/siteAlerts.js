@@ -24,6 +24,7 @@ var SiteAlerts = (function() {
 		tool.icon = ICONS.SA;
 		tool.isSelected = false;
 		tool.panel = "";
+		tool.position = 0;
 		tool.alerts = {};
 		tool.cache = {};
 

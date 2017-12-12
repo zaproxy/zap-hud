@@ -30,6 +30,7 @@ var Break = (function() {
 		tool.isSelected = false;
 		tool.isRunning = false;
 		tool.panel = "";
+		tool.position = 0;
 
 		saveTool(tool);
 	}
