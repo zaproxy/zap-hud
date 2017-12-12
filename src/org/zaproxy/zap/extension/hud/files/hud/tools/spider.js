@@ -29,6 +29,7 @@ var Spider = (function() {
 		tool.icon = ICONS.SPIDER;
 		tool.isSelected = false;
 		tool.panel = "";
+		tool.position = 0;
 		tool.isRunning = false;
 
 		saveTool(tool);
