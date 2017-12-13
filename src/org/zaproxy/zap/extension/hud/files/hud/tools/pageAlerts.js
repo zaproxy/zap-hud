@@ -26,37 +26,9 @@ var PageAlerts = (function() {
 		tool.panel = "";
 		tool.position = 0;
 		tool.alerts = {};
+		tool.cache = {};
 
 		saveTool(tool);
-	}
-
-	function formatAlerts (alerts) {
-		var formatted = {};
-		var risks = ["Low", "Medium", "High", "Informational"];
-		var alertTypes = [];
-
-		if (!(alerts && alerts.length)) {
-			return formatted;
-		}
-
-		for (var i=0; i<risks.length; i++) {
-			var risk = risks[i];
-			var riskAlerts = alerts.filter(function(alert) {return alert.risk === risk; });
-
-			formatted[risk] = {};
-			for (var j=0; j<riskAlerts.length; j++) {
-				var alert = riskAlerts[j];
-				if (alert.alert in formatted[risk]) {
-					formatted[risk][alert.alert].push(alert);
-				}
-				else {
-					formatted[risk][alert.alert] = [];
-					formatted[risk][alert.alert].push(alert);
-				}
-			}
-		}
-
-		return formatted;
 	}
 
 	function showAlerts(url) {
@@ -109,15 +81,47 @@ var PageAlerts = (function() {
 		return updateAlertCount(data.url);
 	}
 
-	function onPollData(url, alerts) {
+	function onPollData(url, data) {
 		loadTool(NAME).then(function(tool) {
-			tool.alerts[url] = formatAlerts(alerts);
 
-			saveTool(tool);
-			return url;
-		}).then(function(url) {
-			updateAlertCount(url);
+			data.forEach(function(alert) {
+				// not in cache
+				if (tool.cache[alert.id] === undefined) {
+					// add to cache
+					tool.cache[alert.id] = alert;
+
+					// send growler alert (fine with it being async, can change later if its an issue)
+					//showGrowlerAlert(alert);
+
+					// if url not initialized
+					if (tool.alerts[url] === undefined) {
+						tool.alerts[url] = {};
+						tool.alerts[url].Low = {};
+						tool.alerts[url].Medium = {};
+						tool.alerts[url].High = {};
+						tool.alerts[url].Informational = {};
+					}
+
+					// add to alerts for the page
+					if (tool.alerts[url][alert.risk][alert.alert] === undefined) {
+						tool.alerts[url][alert.risk][alert.alert] = [];
+					}
+					tool.alerts[url][alert.risk][alert.alert].push(alert);
+				}
+			});
+
+			return saveTool(tool);
+		})
+		.then(function() {
+			return updateAlertCount(url);
+		})
+		.catch(function(err) {
+			console.log(Error(err));
 		});
+	}
+
+	function showGrowlerAlert(alert) {
+		return messageFrame("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
 	}
 
 	function showOptions() {

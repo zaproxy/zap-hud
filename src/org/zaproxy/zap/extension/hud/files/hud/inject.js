@@ -86,6 +86,19 @@
 		panel.style.width = "110px";
 	}
 
+	/* dynamically size growler iframes with number of alerts */
+	function heightenGrowlerFrame() {
+		var panel = document.getElementById("growler-alerts");
+
+		panel.style.height = (panel.offsetHeight + 55) + "px";
+	}
+
+	function shortenGrowlerFrame() {
+		var panel = document.getElementById("growler-alerts");
+
+		panel.style.height = (panel.offsetHeight - 55) + "px";
+	}
+
 	/* dynamically size iframes with number of buttons */
 	function heighten(panelOrientation) {
 		var panel = document.getElementById(panelOrientation+"-panel");
@@ -158,6 +171,14 @@
 
 			case "shorten":
 				shorten(message.orientation);
+				break;
+
+			case "heightenGrowlerFrame":
+				heightenGrowlerFrame();
+				break;
+
+			case "shortenGrowlerFrame":
+				shortenGrowlerFrame();
 				break;
 
 			default:

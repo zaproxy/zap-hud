@@ -26,33 +26,9 @@ var SiteAlerts = (function() {
 		tool.panel = "";
 		tool.position = 0;
 		tool.alerts = {};
+		tool.cache = {};
 
 		saveTool(tool);
-	}
-
-	function formatAlerts (alerts) {
-		var formatted = {};
-		var risks = ["Low", "Medium", "High", "Informational"];
-		var alertTypes = [];
-
-		for (var i=0; i<risks.length; i++) {
-			var risk = risks[i];
-			var riskAlerts = alerts.filter(function(alert) {return alert.risk === risk; });
-
-			formatted[risk] = {};
-			for (var j=0; j<riskAlerts.length; j++) {
-				var alert = riskAlerts[j];
-				if (alert.alert in formatted[risk]) {
-					formatted[risk][alert.alert].push(alert);
-				}
-				else {
-					formatted[risk][alert.alert] = [];
-					formatted[risk][alert.alert].push(alert);
-				}
-			}
-		}
-
-		return formatted;
 	}
 
 	function showAlerts(domain) {
@@ -64,11 +40,7 @@ var SiteAlerts = (function() {
 			messageFrame("mainDisplay", {action:"showAlerts", config:config}).then(function(response) {
 				// Handle button choice
 				if ("id" in response) {
-					fetch("<<ZAP_HUD_API>>JSON/core/view/alert/?id=" + response.id + "&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
-						response.json().then(function(json) {
-							showAlertDetails(json.alert);
-						});
-					});
+					showAlertDetails(response.id);
 				}
 				else {
 					//cancel
@@ -77,11 +49,18 @@ var SiteAlerts = (function() {
 		});
 	}
 
-	function showAlertDetails(details) {
-		var config = {};
-		config.details = details;
+	function showAlertDetails(id) {
+		fetch("<<ZAP_HUD_API>>JSON/core/view/alert/?id=" + id + "&apikey=<<ZAP_HUD_API_KEY>>")
+			.then(function(response) {
 
-		messageFrame("mainDisplay", {action: "showAlertDetails", config: config});
+				response.json().then(function(json) {
+
+					var config = {};
+					config.details = json.alert;
+
+					messageFrame("mainDisplay", {action: "showAlertDetails", config: config});
+				});
+			});
 	}
 
 	function updateAlertCount(domain) {
@@ -105,15 +84,47 @@ var SiteAlerts = (function() {
 		return updateAlertCount(data.domain);
 	}
 
-	function onPollData(domain, alerts) {
+	function onPollData(domain, data) {
 		loadTool(NAME).then(function(tool) {
-			tool.alerts[domain] = formatAlerts(alerts);
 
-			saveTool(tool);
-			return domain;
-		}).then(function(domain) {
-			updateAlertCount(domain);
+			data.forEach(function(alert) {
+				// not in cache
+				if (tool.cache[alert.id] === undefined) {
+					// add to cache
+					tool.cache[alert.id] = alert;
+
+					// if domain not initialized
+					if (tool.alerts[domain] === undefined) {
+						tool.alerts[domain] = {};
+						tool.alerts[domain].Low = {};
+						tool.alerts[domain].Medium = {};
+						tool.alerts[domain].High = {};
+						tool.alerts[domain].Informational = {};
+					}
+
+					// add to alerts for the page
+					if (tool.alerts[domain][alert.risk][alert.alert] === undefined) {
+						tool.alerts[domain][alert.risk][alert.alert] = [];
+
+						// send growler alert (fine with it being async, can change later if its an issue)
+						showGrowlerAlert(alert);
+					}
+					tool.alerts[domain][alert.risk][alert.alert].push(alert);
+				}
+			});
+
+			return saveTool(tool);
+		})
+		.then(function() {
+			return updateAlertCount(domain);
+		})
+		.catch(function(err) {
+			console.log(Error(err));
 		});
+	}
+
+	function showGrowlerAlert(alert) {
+		return messageFrame("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
 	}
 
 	function showOptions() {
@@ -170,6 +181,10 @@ var SiteAlerts = (function() {
 
 				case "buttonMenuClicked":
 					showOptions();
+					break;
+
+				case "showAlertDetails":
+					showAlertDetails(message.id);
 					break;
 
 				default:
