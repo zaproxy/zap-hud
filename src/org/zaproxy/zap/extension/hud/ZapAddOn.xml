@@ -20,6 +20,7 @@
 		<file>hud/libraries/jquery-ui.theme.css</file>
 		<file>hud/libraries/localforage.min.js</file>
 		<file>hud/injectionHtml.html</file>
+		<file>hud/injectionHtmlTimeline.html</file>
 		<file>hud/inject.js</file>
 		<file>hud/panel.html</file>
 		<file>hud/panel.css</file>
