@@ -30,6 +30,7 @@ var ActiveScan = (function() {
 		tool.icon = ICONS.OFF;
 		tool.isSelected = false;
 		tool.panel = "";
+		tool.position = 0;
 		tool.isRunning = false;
 		tool.scanid = -1
 

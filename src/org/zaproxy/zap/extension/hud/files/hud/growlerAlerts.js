@@ -33,8 +33,19 @@ function showGrowlerAlert(alert, port) {
 	// expands growler frame for one alert
 	expandFrame();
 
-	var content = getRiskFlag(alert.risk) + alert.alert;
-	alertify.delay(3000).log(content);
+	// build notification content
+	var content = getRiskFlag(alert.risk) + alert.alert + getHiddenId(alert.id);
+
+	// display and handle click
+	alertify
+		.delay(3000)
+		.closeLogOnClick(true)
+		.log(content, function(event) {
+			var alertId = event.target.querySelector("#alertId").value;
+
+			// todo: show alert details
+			navigator.serviceWorker.controller.postMessage({tool: "site-alerts", action: "showAlertDetails", "id": alertId});
+		});
 
 	// shrinks frame for one alert
 	setTimeout(function() {shrinkFrame();}, 3500);
@@ -65,4 +76,8 @@ function getRiskFlag(risk) {
 		default:
 			return "";
 	}
+}
+
+function getHiddenId(alertId) {
+	return "<input id='alertId' type='hidden' name='alertId' value=" + alertId + ">"
 }
