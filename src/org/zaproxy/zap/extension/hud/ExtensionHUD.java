@@ -402,6 +402,10 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 
     @Override
     public void scriptAdded(ScriptWrapper sw, boolean arg1) {
+        if (!hudScriptType.equals(sw.getType())) {
+            return;
+        }
+
         // Detect duplicated files and save them to the right place
         if (sw.getFile() == null) {
             try {
