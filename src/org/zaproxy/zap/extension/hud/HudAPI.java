@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import net.sf.json.JSONObject;
 
@@ -34,7 +35,6 @@ import org.zaproxy.zap.extension.ascan.ExtensionActiveScan;
 import org.zaproxy.zap.extension.spider.ExtensionSpider;
 import org.zaproxy.zap.extension.spider.SpiderScan;
 import org.zaproxy.zap.extension.brk.ExtensionBreak;
-import org.zaproxy.zap.extension.httppanel.Message;
 
 public class HudAPI extends ApiImplementor {
 
@@ -129,8 +129,8 @@ public class HudAPI extends ApiImplementor {
 					SiteNode parent = Model.getSingleton().getSession().getSiteTree().findClosestParent(msg);
 					if (parent != null) {
 						// find the top level node
-						while (!((SiteNode)parent.getParent()).isRoot()) {
-							parent = (SiteNode)parent.getParent();
+						while (!parent.getParent().isRoot()) {
+							parent = parent.getParent();
 						}
 						int [] alertTotals = new int[4];
 						for (Alert alert : parent.getAlerts() ) {
@@ -188,41 +188,40 @@ public class HudAPI extends ApiImplementor {
 				List<Map<String, String>> summary = new ArrayList<Map<String, String>>();
 
 				// find the top level site node
-				while (!((SiteNode)parent.getParent()).isRoot()) {
-					parent = (SiteNode)parent.getParent();
+				while (!parent.getParent().isRoot()) {
+					parent = parent.getParent();
 				}
-				@SuppressWarnings("unchecked")
-				Map<String, Integer>[] alertCounts = new HashMap[4]; 
+				Map<Integer, Map<String, Integer>> alertCounts = new HashMap<>(); 
 				for (Alert alert : parent.getAlerts() ) {
-					Map<String, Integer> alertCount = alertCounts[alert.getRisk()];
+					Map<String, Integer> alertCount = alertCounts.get(alert.getRisk());
 					if (alertCount == null) {
 						alertCount = new HashMap<String, Integer>();
-						alertCounts[alert.getRisk()] = alertCount;
+						alertCounts.put(alert.getRisk(), alertCount);
 					}
 					int count = 0;
-					if (alertCount.containsKey(alert.getAlert())) {
-						count = alertCount.get(alert.getAlert());
+					if (alertCount.containsKey(alert.getName())) {
+						count = alertCount.get(alert.getName());
 					}
 					count++;
-					alertCount.put(alert.getAlert(), count);
+					alertCount.put(alert.getName(), count);
 
 					// site alerts
 					Map<String, String> alertAtts = new HashMap<String, String>();
-					alertAtts.put("alert", alert.getAlert());
+					alertAtts.put("alert", alert.getName());
 					alertAtts.put("risk", Alert.MSG_RISK[alert.getRisk()]);
 					alertAtts.put("param", alert.getParam());
 					alertAtts.put("id", Integer.toString(alert.getAlertId()));
 					summary.add(alertAtts);
 				}
-				for (int i=0; i < alertCounts.length; i++) {
+				for (Entry<Integer, Map<String, Integer>> entry : alertCounts.entrySet()) {
 					// loop through info, low, medium, high
-					Map<String, Integer> alertCount = alertCounts[i];
+					Map<String, Integer> alertCount = entry.getValue();
 					if (alertCount != null) {
 						for (Map.Entry<String, Integer>alert : alertCount.entrySet()) {
 							// Loop through the alert counts for each level
 							Map<String, String> alertAtts = new HashMap<String, String>();
 							alertAtts.put("alert", alert.getKey());
-							alertAtts.put("risk", Alert.MSG_RISK[i]);
+							alertAtts.put("risk", Alert.MSG_RISK[entry.getKey()]);
 							//alertAtts.put("param", alert.getKey().getParam());
 							//alertAtts.put("id", Integer.toString(alert.getAlertId()));
 							//siteSummary.addItem(new ApiResponseSet("alert", alertAtts));
@@ -247,7 +246,7 @@ public class HudAPI extends ApiImplementor {
 							if (alert.getUri().startsWith(cleanName)) {
 								// TODO is this a good enough match? Could still match child alerts :/
 								Map<String, String> alertAtts = new HashMap<String, String>();
-								alertAtts.put("alert", alert.getAlert());
+								alertAtts.put("alert", alert.getName());
 								alertAtts.put("risk", Alert.MSG_RISK[alert.getRisk()]);
 								alertAtts.put("param", alert.getParam());
 								alertAtts.put("id", Integer.toString(alert.getAlertId()));
@@ -265,8 +264,8 @@ public class HudAPI extends ApiImplementor {
 				Map<String, String> scopeAtts = new HashMap<String, String>();
 				scopeAtts.put("inscope", Boolean.toString(node.isIncludedInScope()));
 				scopeAtts.put("attack", Boolean.toString(Control.getSingleton().getMode().equals(Control.Mode.attack)));
-				scopeData.addItem(new ApiResponseSet("scope", scopeAtts));
-				scopeData.addItem(new ApiResponseSet("attack", scopeAtts));
+				scopeData.addItem(new ApiResponseSet<>("scope", scopeAtts));
+				scopeData.addItem(new ApiResponseSet<>("attack", scopeAtts));
 				//((ApiResponseList)result).addItem(scopeData);
 				resultMap.put("scope", scopeAtts);
 			}
@@ -294,7 +293,7 @@ public class HudAPI extends ApiImplementor {
 				ApiResponseList spiderData = new ApiResponseList("spider");
 				Map<String, String> spiderAtts = new HashMap<String, String>();
 				spiderAtts.put("progress", Integer.toString(progress));
-				spiderData.addItem(new ApiResponseSet("spider", spiderAtts));
+				spiderData.addItem(new ApiResponseSet<>("spider", spiderAtts));
 				//((ApiResponseList)result).addItem(spiderData);
 				resultMap.put("spider", spiderAtts);
 			}
@@ -322,7 +321,7 @@ public class HudAPI extends ApiImplementor {
 				ApiResponseList ascanData = new ApiResponseList("ascan");
 				Map<String, String> ascanAtts = new HashMap<String, String>();
 				ascanAtts.put("progress", Integer.toString(progress));
-				ascanData.addItem(new ApiResponseSet("ascan", ascanAtts));
+				ascanData.addItem(new ApiResponseSet<>("ascan", ascanAtts));
 				//((ApiResponseList)result).addItem(ascanData);
 				resultMap.put("active-scan", ascanAtts);
 			}
@@ -361,7 +360,7 @@ public class HudAPI extends ApiImplementor {
 			throw new ApiException(ApiException.Type.BAD_VIEW);
 		}
 
-		result = new ApiResponseSet(name, resultMap);
+		result = new ApiResponseSet<>(name, resultMap);
 		return result;
 	}
 
