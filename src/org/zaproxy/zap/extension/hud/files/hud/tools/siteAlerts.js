@@ -24,6 +24,7 @@ var SiteAlerts = (function() {
 		tool.icon = ICONS.SA;
 		tool.isSelected = false;
 		tool.panel = "";
+		tool.position = 0;
 		tool.alerts = {};
 		tool.cache = {};
 
@@ -81,6 +82,10 @@ var SiteAlerts = (function() {
 
 				case "buttonMenuClicked":
 					showOptions();
+					break;
+
+				case "showAlertDetails":
+					alertUtils.showAlertDetails(message.id);
 					break;
 
 				default:

@@ -20,6 +20,7 @@
 		<file>hud/libraries/jquery-ui.theme.css</file>
 		<file>hud/libraries/localforage.min.js</file>
 		<file>hud/injectionHtml.html</file>
+		<file>hud/injectionHtmlTimeline.html</file>
 		<file>hud/inject.js</file>
 		<file>hud/panel.html</file>
 		<file>hud/panel.css</file>
@@ -39,6 +40,7 @@
 		<file>hud/timelinePane.js</file>
 		<file>hud/pollWorker.js</file>
 		<file>hud/serviceworker.js</file>
+		<file>hud/tools/alertUtils.js</file>
 		<file>hud/tools/scope.js</file>
 		<file>hud/tools/spider.js</file>
 		<file>hud/tools/timeline.js</file>
