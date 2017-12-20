@@ -121,7 +121,7 @@ var alertUtils = (function() {
 
 	return {
 		showAlerts: showAlerts,
-        showAlertDetails: showAlertDetails,
+		showAlertDetails: showAlertDetails,
 		updateAlertCount: updateAlertCount,
 		onPollData: onPollData,
 		showOptions: showOptions
