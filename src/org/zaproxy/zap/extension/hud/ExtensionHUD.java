@@ -46,7 +46,6 @@ import org.parosproxy.paros.extension.ExtensionHook;
 import org.parosproxy.paros.extension.OptionsChangedListener;
 import org.parosproxy.paros.model.OptionsParam;
 import org.parosproxy.paros.network.HttpMessage;
-import org.parosproxy.paros.view.View;
 import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.script.ExtensionScript;
 import org.zaproxy.zap.extension.script.ScriptEventListener;
@@ -134,14 +133,14 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	public void hook(ExtensionHook extensionHook) {
 		super.hook(extensionHook);
 	    
-		API.getInstance().registerApiImplementor(this.api);
+		extensionHook.addApiImplementor(this.api);
 
 		extensionHook.addOptionsParamSet(this.getHudParam());
 		extensionHook.addOptionsChangedListener(this);
 		
 	    if (getView() != null) {
 	        extensionHook.getHookView().addOptionPanel(getOptionsPanel());
-			View.getSingleton().addMainToolbarButton(getHudButton());
+	        extensionHook.getHookView().addMainToolBarComponent(getHudButton());
 	    }
 
 	    // No reason this cant be used in daemon mode ;)
@@ -153,6 +152,17 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	    this.getExtScript().addListener(this);
 	}
 	
+	@Override
+	public boolean canUnload() {
+		return true;
+	}
+
+	@Override
+	public void unload() {
+		getExtScript().removeScripType(hudScriptType);
+		getExtScript().removeListener(this);
+	}
+
 	@Override
 	public void optionsLoaded() {
 	    addHudScripts();
