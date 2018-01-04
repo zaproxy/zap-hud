@@ -200,7 +200,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
                 // Add to tree
                 ScriptWrapper sw = new ScriptWrapper(prefix + file.getName(), "", "", hudScriptType, false, file);
                 this.getExtScript().loadScript(sw);
-                this.getExtScript().addScript(sw);
+                this.getExtScript().addScript(sw, false);
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }
