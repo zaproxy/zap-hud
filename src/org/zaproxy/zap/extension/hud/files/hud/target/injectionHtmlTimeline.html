@@ -1,0 +1,9 @@
+<script src="<<FILE_PREFIX>>?zapfile=inject.js"></script>
+<script>
+	if (window.self == window.top) {
+		var template = document.createElement("template");
+		template.innerHTML = '<iframe id="management" src="<<ZAP_HUD_FILES>>?name=management.html" style="position: fixed; left: 0px; top: 0px; width:50px; height:50px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n<iframe id="left-panel" src="<<ZAP_HUD_FILES>>?name=panel.html&amp;url=<<URL>>&amp;orientation=left" scrolling="no" style="position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n<iframe id="right-panel" src="<<ZAP_HUD_FILES>>?name=panel.html&amp;url=<<URL>>&amp;orientation=right" scrolling="no" style="position: fixed; border: medium none; top: 30%; overflow: hidden; right: 300px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n<iframe id="main-display" src="<<ZAP_HUD_FILES>>?name=main.html" style="position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;"></iframe><iframe id="timeline" src="<<ZAP_HUD_FILES>>?name=timelinePane.html" scrolling="no" style="position: fixed; right: 0px; top: 0px; width:300px; height:100%; border: none; z-index: 2147483647"></iframe>';
+		document.body.style.marginRight = "300px";
+		document.body.appendChild(template.content);
+	}
+</script>

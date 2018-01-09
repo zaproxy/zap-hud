@@ -5,7 +5,7 @@ var pollDelay = 200;
 function poll() {
 	var xhr = new XMLHttpRequest();
 
-	xhr.open("GET", "<<ZAP_HUD_API>>JSON/core/view/messages/?start=" + last + "&count=" + count, true);
+	xhr.open("GET", "<<ZAP_HUD_API>>/core/view/messages/?start=" + last + "&count=" + count, true);
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState === XMLHttpRequest.DONE) {
 			if (xhr.status === 200) {

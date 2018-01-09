@@ -9,7 +9,7 @@ var worker;
 function startServiceWorker() {
 	if ("serviceWorker" in navigator) {
 		
-		navigator.serviceWorker.register("<<ZAP_HUD_API>>OTHER/hud/other/?name=serviceworker.js&isworker=true").then(function(registration) {
+		navigator.serviceWorker.register("<<ZAP_HUD_FILES>>?name=serviceworker.js").then(function(registration) {
 			console.log("Service worker registration successfully in scope: " + registration.scope);
 			return registration;
 			
@@ -49,7 +49,7 @@ function onTargetLoadMessage() {
 
 function startPollWorker() {
 	if (window.Worker) {
-		worker = new Worker("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=pollWorker.js");
+		worker = new Worker("<<ZAP_HUD_FILES>>?name=pollWorker.js");
 
 		loadTool('timeline').then(function(tool) {
 			worker.postMessage({targetUrl: document.referrer, targetDomain: parseDomainFromUrl(document.referrer), lastMessage: tool.lastMessage});

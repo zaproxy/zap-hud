@@ -19,7 +19,7 @@ var alertUtils = (function() {
 	}
 
 	function showAlertDetails(id) {
-		fetch("<<ZAP_HUD_API>>JSON/core/view/alert/?id=" + id + "&apikey=<<ZAP_HUD_API_KEY>>")
+		fetch("<<ZAP_HUD_API>>/core/view/alert/?id=" + id)
 			.then(function(response) {
 
 				response.json().then(function(json) {

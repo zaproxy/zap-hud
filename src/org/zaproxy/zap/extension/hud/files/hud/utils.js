@@ -8,7 +8,7 @@ var CLIENT_LEFT = "left";
 var CLIENT_RIGHT = "right";
 var CLIENT_MAIN = "main.html";
 
-var BUTTON_HTML = '<div class="button" id="BUTTON_NAME-button">\n<div class="button-icon" id="BUTTON_NAME-button-icon"><img src="<<ZAP_HUD_API>>OTHER/hud/other/image/?name=IMAGE_NAME" alt="IMAGE_NAME" height="16" width="16"></div>\n<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA</div>\n<div class="button-label" id="BUTTON_NAME-button-label">BUTTON_LABEL</div>\n</div>\n';
+var BUTTON_HTML = '<div class="button" id="BUTTON_NAME-button">\n<div class="button-icon" id="BUTTON_NAME-button-icon"><img src="<<ZAP_HUD_FILES>>?image=IMAGE_NAME" alt="IMAGE_NAME" height="16" width="16"></div>\n<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA</div>\n<div class="button-label" id="BUTTON_NAME-button-label">BUTTON_LABEL</div>\n</div>\n';
 var BUTTON_NAME = /BUTTON_NAME/g;
 var BUTTON_DATA_DIV  = /<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA<\/div>/g;
 var BUTTON_DATA = /BUTTON_DATA/g;
@@ -88,7 +88,7 @@ function buildApiCall(restString, callback) {
 		};
 	}
 
-	xmlRequest.open("GET", "<<ZAP_HUD_API>>JSON/"+restString, true);
+	xmlRequest.open("GET", "<<ZAP_HUD_API>>/"+restString, true);
 	
 	return xmlRequest.send();
 }

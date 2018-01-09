@@ -28,7 +28,7 @@
 		var timelineFrame = document.createElement("iframe");
 
 		timelineFrame.id = "timeline";
-		timelineFrame.src = "<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timelinePane.html&parentUrl=" + document.location.toString();
+		timelineFrame.src = "<<ZAP_HUD_FILES>>?name=timelinePane.html&parentUrl=" + document.location.toString();
 		timelineFrame.scrolling = "no";
 		timelineFrame.style.cssText = "position: fixed; top: 0; right: 0; width: 300px; height: 100%; overflow: hidden; border: none; z-index: 2000;";
 
@@ -189,5 +189,12 @@
 	/* initializes the HUD Frames */
 	if (window.top == window.self) {
 		window.addEventListener("message", receiveMessages);
+		var template = document.createElement("template");
+		template.innerHTML = '<iframe id="management" src="<<ZAP_HUD_FILES>>?name=management.html" style="position: fixed; left: 0px; top: 0px; width:50px; height:50px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
+			'<iframe id="left-panel" src="<<ZAP_HUD_FILES>>?name=panel.html&amp;url=<<URL>>&amp;orientation=left" scrolling="no" style="position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
+			'<iframe id="right-panel" src="<<ZAP_HUD_FILES>>?name=panel.html&amp;url=<<URL>>&amp;orientation=right" scrolling="no" style="position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
+			'<iframe id="main-display" src="<<ZAP_HUD_FILES>>?name=main.html" style="position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;"></iframe>\n' +
+			'<iframe id="growler-alerts" src="<<ZAP_HUD_FILES>>?name=growlerAlerts.html" style="position: fixed; right: 0px; bottom: 0px; width: 500px; height: 0px; border: 0px none; z-index: 2147483647;"></iframe>';
+		document.body.appendChild(template.content);
 	}
 })();
