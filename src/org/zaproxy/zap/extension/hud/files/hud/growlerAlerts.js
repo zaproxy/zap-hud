@@ -1,7 +1,7 @@
-var INFORMATIONAL_FLAG = "<img src='<<ZAP_HUD_API>>OTHER/hud/other/image/?name=flag-blue.png' >&nbsp";
-var LOW_FLAG = "<img src='<<ZAP_HUD_API>>OTHER/hud/other/image/?name=flag-yellow.png' >&nbsp";
-var MEDIUM_FLAG = "<img src='<<ZAP_HUD_API>>OTHER/hud/other/image/?name=flag-orange.png' >&nbsp";
-var HIGH_FLAG = "<img src='<<ZAP_HUD_API>>OTHER/hud/other/image/?name=flag-red.png' >&nbsp";
+var INFORMATIONAL_FLAG = "<img src='<<ZAP_HUD_FILES>>?image=flag-blue.png' >&nbsp";
+var LOW_FLAG = "<img src='<<ZAP_HUD_FILES>>?image=flag-yellow.png' >&nbsp";
+var MEDIUM_FLAG = "<img src='<<ZAP_HUD_FILES>>?image=flag-orange.png' >&nbsp";
+var HIGH_FLAG = "<img src='<<ZAP_HUD_FILES>>?image=flag-red.png' >&nbsp";
 
 
 document.addEventListener("DOMContentLoaded", function() {

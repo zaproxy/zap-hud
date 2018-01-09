@@ -79,7 +79,7 @@ var Break = (function() {
 	}
 
 	function startBreaking() {
-		fetch("<<ZAP_HUD_API>>JSON/break/action/break?type=http-all&state=true&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
+		fetch("<<ZAP_HUD_API>>/break/action/break/?type=http-all&state=true").then(function(response) {
 			response.json().then(function(json) {
 				//todo: handle response if needed
 			});
@@ -96,7 +96,7 @@ var Break = (function() {
 
 	// todo: change this to 'continue' and figure out / fix stopBreaking
 	function stopBreaking() {
-		fetch("<<ZAP_HUD_API>>JSON/break/action/continue?apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
+		fetch("<<ZAP_HUD_API>>/break/action/continue").then(function(response) {
 			response.json().then(function(json) {
 				//todo: handle response if needed
 			});
@@ -112,7 +112,7 @@ var Break = (function() {
 	}
 
 	function step() {
-		fetch("<<ZAP_HUD_API>>JSON/break/action/step/?apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
+		fetch("<<ZAP_HUD_API>>/break/action/step/").then(function(response) {
 			response.json().then(function(json) {
 				//todo: handle response if needed
 			});
@@ -120,7 +120,7 @@ var Break = (function() {
 	}
 
 	function setHttpMessage(method, header, body) {
-		return fetch("<<ZAP_HUD_API>>JSON/break/action/setHttpMessage/?formMethod=" + method + "&httpHeader=" + header + "&httpBody=" + body + "&apikey=<<ZAP_HUD_API_KEY>>");
+		return fetch("<<ZAP_HUD_API>>/break/action/setHttpMessage/?formMethod=" + method + "&httpHeader=" + header + "&httpBody=" + body );
 	}
 
 	function checkIsRunning() {

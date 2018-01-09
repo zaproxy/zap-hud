@@ -11,7 +11,7 @@ var lastMessage = 0;
 function pollData() {
 	var xhr = new XMLHttpRequest();
 
-	xhr.open("GET", "<<ZAP_HUD_API>>JSON/hud/view/hudData/?url=" + targetUrl, true);
+	xhr.open("GET", "<<ZAP_HUD_API>>/hud/view/hudData/?url=" + targetUrl, true);
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState === XMLHttpRequest.DONE) {
 			if (xhr.status === 200) {
@@ -31,7 +31,7 @@ function pollData() {
 function pollMessages() {
 	var xhr = new XMLHttpRequest();
 
-	xhr.open("GET", "<<ZAP_HUD_API>>JSON/core/view/messages/?start=" + lastMessage + "&count=" + messageCount, true);
+	xhr.open("GET", "<<ZAP_HUD_API>>/core/view/messages/?start=" + lastMessage + "&count=" + messageCount, true);
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState === XMLHttpRequest.DONE) {
 			if (xhr.status === 200) {

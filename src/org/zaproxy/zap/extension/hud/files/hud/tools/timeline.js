@@ -38,12 +38,12 @@ var Timeline = (function() {
 			if (isRunning) {
 				hideTimeline();
 
-				fetch("<<ZAP_HUD_API>>JSON/hud/action/disableTimeline");
+				fetch("<<ZAP_HUD_API>>/hud/action/disableTimeline");
 			}
 			else {
 				showTimeline();
 
-				fetch("<<ZAP_HUD_API>>JSON/hud/action/enableTimeline");
+				fetch("<<ZAP_HUD_API>>/hud/action/enableTimeline");
 			}
 		}).catch(function(error) {
 			console.log(Error(error));

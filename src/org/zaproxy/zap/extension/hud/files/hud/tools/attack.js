@@ -79,7 +79,7 @@ var Attack = (function() {
 	}
 
 	function turnOnAttackMode(domain) {
-		fetch("<<ZAP_HUD_API>>JSON/core/action/setMode/?mode=attack").then(function(response) {
+		fetch("<<ZAP_HUD_API>>/core/action/setMode/?mode=attack").then(function(response) {
 			response.json().then(function(json) {
 				//todo: handle response if needed
 				//console.log(json)
@@ -96,7 +96,7 @@ var Attack = (function() {
 	}
 
 	function turnOffAttackMode() {
-		fetch("<<ZAP_HUD_API>>JSON/core/action/setMode/?mode=standard");
+		fetch("<<ZAP_HUD_API>>/core/action/setMode/?mode=standard");
 
 		loadTool(NAME).then(function(tool) {
 			tool.isRunning = false;
