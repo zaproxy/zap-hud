@@ -1,6 +1,6 @@
-importScripts("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/localforage.min.js"); 
-importScripts("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=utils.js");
-importScripts("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/alertUtils.js");
+importScripts("<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js"); 
+importScripts("<<ZAP_HUD_FILES>>?name=utils.js");
+importScripts("<<ZAP_HUD_FILES>>?name=tools/alertUtils.js");
 
 var CACHE_NAME = "hud-cache-1.0";
 var BUTTON_LIST_HTML = '<div class="buttons-list">';
@@ -11,45 +11,45 @@ var ORIENTATION = /ORIENTATION/g;
 var isDebugging = true;
 
 var urlsToCache = [
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/jquery-1.12.0.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/jquery-ui.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/jquery-ui.css",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/jquery-ui.theme.css",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=libraries/localforage.min.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=utils.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.html",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.css",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=main.css",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=main.html",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=main.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=management.css",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=management.html",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=management.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timelinePane.css",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timelinePane.html",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=timelinePane.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=growlerAlerts.html",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=growlerAlerts.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-bg_glass_75_79c9ec_1x400.png",
-	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-bg_inset-hard_100_fcfdfd_1x100.png",
-	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-icons_0078ae_256x240.png",
-	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-icons_056b93_256x240.png",
-	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-icons_e0fdff_256x240.png",
-	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-icons_f5e175_256x240.png",
-	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-bg_highlight-soft_45_0078ae_1x100.png",
-	"<<ZAP_HUD_API>>OTHER/hud/other/image/?name=ui-bg_highlight-soft_75_2191c0_1x100.png",
+	"<<ZAP_HUD_FILES>>?name=libraries/jquery-1.12.0.js",
+	"<<ZAP_HUD_FILES>>?name=libraries/jquery-ui.js",
+	"<<ZAP_HUD_FILES>>?name=libraries/jquery-ui.css",
+	"<<ZAP_HUD_FILES>>?name=libraries/jquery-ui.theme.css",
+	"<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js",
+	"<<ZAP_HUD_FILES>>?name=utils.js",
+	"<<ZAP_HUD_FILES>>?name=panel.html",
+	"<<ZAP_HUD_FILES>>?name=panel.css",
+	"<<ZAP_HUD_FILES>>?name=panel.js",
+	"<<ZAP_HUD_FILES>>?name=main.css",
+	"<<ZAP_HUD_FILES>>?name=main.html",
+	"<<ZAP_HUD_FILES>>?name=main.js",
+	"<<ZAP_HUD_FILES>>?name=management.css",
+	"<<ZAP_HUD_FILES>>?name=management.html",
+	"<<ZAP_HUD_FILES>>?name=management.js",
+	"<<ZAP_HUD_FILES>>?name=timelinePane.css",
+	"<<ZAP_HUD_FILES>>?name=timelinePane.html",
+	"<<ZAP_HUD_FILES>>?name=timelinePane.js",
+	"<<ZAP_HUD_FILES>>?name=growlerAlerts.html",
+	"<<ZAP_HUD_FILES>>?name=growlerAlerts.js",
+	"<<ZAP_HUD_FILES>>?image=ui-bg_glass_75_79c9ec_1x400.png",
+	"<<ZAP_HUD_FILES>>?image=ui-bg_inset-hard_100_fcfdfd_1x100.png",
+	"<<ZAP_HUD_FILES>>?image=ui-icons_0078ae_256x240.png",
+	"<<ZAP_HUD_FILES>>?image=ui-icons_056b93_256x240.png",
+	"<<ZAP_HUD_FILES>>?image=ui-icons_e0fdff_256x240.png",
+	"<<ZAP_HUD_FILES>>?image=ui-icons_f5e175_256x240.png",
+	"<<ZAP_HUD_FILES>>?image=ui-bg_highlight-soft_45_0078ae_1x100.png",
+	"<<ZAP_HUD_FILES>>?image=ui-bg_highlight-soft_75_2191c0_1x100.png",
 ];
 
 var toolScripts = [
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/scope.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/spider.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/timeline.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/activeScan.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/pageAlerts.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/siteAlerts.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/break.js",
-	"<<ZAP_HUD_API>>OTHER/hud/other/file/?name=tools/attack.js"
+	"<<ZAP_HUD_FILES>>?name=tools/scope.js",
+	"<<ZAP_HUD_FILES>>?name=tools/spider.js",
+	"<<ZAP_HUD_FILES>>?name=tools/timeline.js",
+	"<<ZAP_HUD_FILES>>?name=tools/activeScan.js",
+	"<<ZAP_HUD_FILES>>?name=tools/pageAlerts.js",
+	"<<ZAP_HUD_FILES>>?name=tools/siteAlerts.js",
+	"<<ZAP_HUD_FILES>>?name=tools/break.js",
+	"<<ZAP_HUD_FILES>>?name=tools/attack.js"
 ];
 
 self.tools = {};
@@ -112,21 +112,22 @@ self.addEventListener("fetch", function(event) {
 		caches.match(event.request).then(function(response) {  
 			var reqUrl = event.request.url;
 
-			if (reqUrl.startsWith("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.html")) {
+			if (reqUrl.startsWith("<<ZAP_HUD_FILES>>?name=panel.html")) {
 				// Modify Panel HTML
 				return handlePanelHtmlFetch(reqUrl);
 			}
-			else if (reqUrl.startsWith("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.css")) {
+			else if (reqUrl.startsWith("<<ZAP_HUD_FILES>>?name=panel.css")) {
 				// Modify Panel CSS
 				return handlePanelCssFetch(reqUrl);
 			}
-			else if (reqUrl.startsWith("<<ZAP_HUD_API>>OTHER/hud/other/file/images/")) {
-				var name = reqUrl.replace("file/images/", "image/?name=");
-
+			else if (reqUrl.indexOf("zapCallBackUrl/images") > 0) {
+				// Need to rewrite jquery image URLs
+				var name = "<<ZAP_HUD_FILES>>?image=" + reqUrl.substring(reqUrl.lastIndexOf("/")+1);
 				return caches.match(name).then(function(response) {
 					if (!response) {
-						console.log("Could not find jquery images: " + name);
+						console.log("Could not find jquery image: " + name);
 					}
+					return response;
 				});
 			}
 			else if (response) {
@@ -184,7 +185,7 @@ function getParamater(url, parameter) {
 
 /* Fetch Methods */
 function handlePanelHtmlFetch(reqUrl) {
-	return caches.match("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.html").then(function(resp) {
+	return caches.match("<<ZAP_HUD_FILES>>?name=panel.html").then(function(resp) {
 		var orientation = getParamater(reqUrl, PARAM_ORIENATATION);
 		var url = getParamater(reqUrl, PARAM_URL);
 
@@ -193,7 +194,7 @@ function handlePanelHtmlFetch(reqUrl) {
 }
 
 function handlePanelCssFetch(reqUrl) {
-	return caches.match("<<ZAP_HUD_API>>OTHER/hud/other/file/?name=panel.css").then(function(resp) {
+	return caches.match("<<ZAP_HUD_FILES>>?name=panel.css").then(function(resp) {
 		var orientation = getParamater(reqUrl, PARAM_ORIENATATION);
 		return buildPanelCss(resp, orientation);
 	});

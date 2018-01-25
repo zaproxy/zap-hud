@@ -4,7 +4,7 @@
  * Description goes here...
  */
 
-var IMAGE_URL = "<<ZAP_HUD_API>>OTHER/hud/other/image/?name=";
+var IMAGE_URL = "<<ZAP_HUD_FILES>>?image=";
 var orientation = "";
 var panelKey = "";
 

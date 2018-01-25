@@ -19,13 +19,10 @@ package org.zaproxy.zap.extension.hud;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,8 +31,6 @@ import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.control.Control;
@@ -46,7 +41,6 @@ import org.parosproxy.paros.extension.ExtensionHook;
 import org.parosproxy.paros.extension.OptionsChangedListener;
 import org.parosproxy.paros.model.OptionsParam;
 import org.parosproxy.paros.network.HttpMessage;
-import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.script.ExtensionScript;
 import org.zaproxy.zap.extension.script.ScriptEventListener;
 import org.zaproxy.zap.extension.script.ScriptType;
@@ -67,7 +61,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	// to copy and change this example
 	protected static final String PREFIX = "hud";
 
-	private static final String RESOURCE = "/org/zaproxy/zap/extension/hud/resources";
+	protected static final String RESOURCE = "/org/zaproxy/zap/extension/hud/resources";
 	
 	private static final ImageIcon ICON = new ImageIcon(
 			ExtensionHUD.class.getResource( RESOURCE + "/radar.png"));
@@ -75,8 +69,9 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	public static final String SCRIPT_TYPE_HUD = "hud";
 
 	protected static final String DIRECTORY_NAME = "hud";
-	protected static final String HUD_HTML = "injectionHtml.html";
-	protected static final String HUD_HTML_TIMELINE = "injectionHtmlTimeline.html";
+	protected static final String TARGET_DIRECTORY = "target";
+	protected static final String HUD_HTML = TARGET_DIRECTORY + "/injectionHtml.html";
+	protected static final String HUD_HTML_TIMELINE = TARGET_DIRECTORY + "/injectionHtmlTimeline.html";
 	
 	private static final List<Class<? extends Extension>> DEPENDENCIES;
 
@@ -134,6 +129,8 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 		super.hook(extensionHook);
 	    
 		extensionHook.addApiImplementor(this.api);
+		extensionHook.addApiImplementor(this.api.getHudApiProxy());
+		extensionHook.addApiImplementor(this.api.getHudFileProxy());
 
 		extensionHook.addOptionsParamSet(this.getHudParam());
 		extensionHook.addOptionsChangedListener(this);
@@ -180,7 +177,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 		}
 	}
 	
-	private HudParam getHudParam() {
+	protected HudParam getHudParam() {
 		if (hudParam == null) {
 			hudParam = new HudParam();
 		}
@@ -261,32 +258,17 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 		return true;
 	}
 	
-	private String getSite(HttpMessage msg) throws URIException {
-		StringBuilder site = new StringBuilder();
-		if (msg.getRequestHeader().isSecure()) {
-			site.append("https://");
-		} else {
-			site.append("http://");
-		}
-		site.append(msg.getRequestHeader().getURI().getHost());
-		if (msg.getRequestHeader().getURI().getPort() > 0) {
-			site.append(":");
-			site.append(msg.getRequestHeader().getURI().getPort());
-		}
-		return site.toString();
-	}
-
 	@Override
 	public boolean onHttpResponseReceive(HttpMessage msg) {
 		if (hudEnabled && msg.getResponseHeader().isHtml()) {
 			try {
 				String header = msg.getResponseBody().toString();
 
-				//todo: confirm correct regex
+				// TODO: confirm correct regex
 				Pattern pattern = Pattern.compile("<(\\s*?)body+(>|.*?[^?]>)");
 				int openBodyTag = regexEndOf(pattern, header.toLowerCase());
 
-				//todo: can do more elegantly
+				// TODO: can do more elegantly
 				String htmlFile = "";
 				if (api.isTimelineEnabled()) {
 					htmlFile = HUD_HTML_TIMELINE;
@@ -294,17 +276,11 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 					htmlFile = HUD_HTML;
 				}
 
-				String hudScript = this.getFile(msg, htmlFile, false);
+				String hudScript = this.api.getFile(msg, htmlFile);
 
 				if (openBodyTag > -1  && hudScript != null) {
-					System.out.println(msg.getRequestHeader().getURI() + 
-							" orig clen " + msg.getResponseHeader().getContentLength() + 
-							" body len " + msg.getResponseBody().length() + " charset " + msg.getResponseBody().getCharset());
-
-					hudScript = hudScript
-									.replace("<<FILE_PREFIX>>", api.getUrlPrefix(getSite(msg)))
-									.replace("<<URL>>", msg.getRequestHeader().getURI().toString());
-					
+					// These are the only files that use FILE_PREFIX
+					hudScript = hudScript.replace("<<FILE_PREFIX>>", api.getUrlPrefix(api.getSite(msg)));
 					
 					StringBuilder sb = new StringBuilder();
 					sb.append(header.substring(0, openBodyTag));
@@ -320,60 +296,6 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 			}
 		}
 		return true;
-	}
-	
-	protected String getFile (HttpMessage msg, String file, boolean incApiKey) {
-		try {
-			String contents;
-			ScriptWrapper sw = this.getExtScript().getScript(file);
-			if (sw != null) {
-				contents = sw.getContents();
-			} else {
-				log.warn("Failed to access script " + file + " via the script extension");
-				File f = new File(this.getHudParam().getBaseDirectory(), file);
-				if (! f.exists()) {
-					log.error("No such file " + f.getAbsolutePath());
-					return null;
-				}
-				// Quick way to read a small text file
-				contents = new String(Files.readAllBytes(f.toPath()));
-			}
-		
-			contents = contents.
-					replace("<<FILE_PREFIX>>", api.getUrlPrefix(getSite(msg))).
-					replace("<<ZAP_HUD_API>>", API.API_URL_S);
-			
-			if (incApiKey) {
-				//todo: this is currenty broken
-				//String apiKey = Model.getSingleton().getOptionsParam().getApiParam().getKey();
-				String apiKey = "1234";
-				contents = contents.replace("<<ZAP_HUD_API_KEY>>", apiKey);
-			}
-			
-			return contents;
-		} catch (Exception e) {
-			// Something unexpected went wrong, write the error to the log
-			log.error(e.getMessage(), e);
-			return null;
-		}
-	}
-
-	protected byte[] getImage (String name) {
-		// TODO cache? And support local files
-		try {
-			InputStream is = this.getClass().getResourceAsStream(RESOURCE + "/" + name);
-			if (is == null) {
-				log.error("No such resource: " + name);
-				return null;
-			}
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			IOUtils.copy(is, bos);
-	    	return bos.toByteArray();
-		} catch (Exception e) {
-			// Something unexpected went wrong, write the error to the log
-			log.error(e.getMessage(), e);
-			return null;
-		}
 	}
 
     /** @return index of pattern in s or -1, if not found */

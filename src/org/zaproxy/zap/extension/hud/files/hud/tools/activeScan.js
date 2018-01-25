@@ -91,7 +91,7 @@ var ActiveScan = (function() {
 	}
 
 	function startActiveScan(domain) {
-		fetch("<<ZAP_HUD_API>>JSON/ascan/action/scan/?url=" + domain + "/&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
+		fetch("<<ZAP_HUD_API>>/ascan/action/scan/?url=" + domain + "/").then(function(response) {
 			response.json().then(function(data) {
 				loadTool(NAME).then(function(tool) {
 					tool.isRunning = true;
@@ -108,7 +108,7 @@ var ActiveScan = (function() {
 
 	function stopActiveScan() {
 		loadTool(NAME).then(function(tool) {
-			fetch("<<ZAP_HUD_API>>JSON/ascan/action/stop?scanId=" + tool.scanId + "&apikey=<<ZAP_HUD_API_KEY>>");
+			fetch("<<ZAP_HUD_API>>/ascan/action/stop/?scanId=" + tool.scanId + "");
 			tool.isRunning = false;
 			tool.icon = ICONS.OFF;
 			tool.data = DATA.START;
