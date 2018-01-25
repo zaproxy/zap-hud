@@ -89,7 +89,7 @@ var Spider = (function() {
 	}
 
 	function startSpider(domain) {
-		fetch("<<ZAP_HUD_API>>JSON/spider/action/scan/?url=" + domain + "/&apikey=<<ZAP_HUD_API_KEY>>").then(function(response) {
+		fetch("<<ZAP_HUD_API>>/spider/action/scan/?url=" + domain + "/").then(function(response) {
 			response.json().then(function(json) {
 				//todo: handle response if needed
 				//console.log(json)
@@ -107,7 +107,7 @@ var Spider = (function() {
 	}
 
 	function stopSpider() {
-		fetch("<<ZAP_HUD_API>>JSON/spider/action/stop?apikey=<<ZAP_HUD_API_KEY>>");
+		fetch("<<ZAP_HUD_API>>/spider/action/stop");
 
 		loadTool(NAME).then(function(tool) {
 			tool.isRunning = false;

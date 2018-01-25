@@ -4,7 +4,7 @@
  * Description goes here...
  */
 
-var IMAGE_PREFIX = "<<ZAP_HUD_API>>OTHER/hud/other/image/?name=";
+var IMAGE_PREFIX = "<<ZAP_HUD_FILES>>?image=";
 
 document.addEventListener("DOMContentLoaded", function() {
 	document.getElementById("background-link").addEventListener("click", hideMainDisplay);
