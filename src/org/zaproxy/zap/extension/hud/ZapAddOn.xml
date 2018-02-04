@@ -45,6 +45,7 @@
 		<file>hud/tools/timeline.js</file>
 		<file>hud/tools/activeScan.js</file>
 		<file>hud/tools/pageAlerts.js</file>
+		<file>hud/tools/pageAlertsHigh.js</file>
 		<file>hud/tools/siteAlerts.js</file>
 		<file>hud/tools/break.js</file>
 		<file>hud/tools/attack.js</file>
