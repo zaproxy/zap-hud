@@ -44,7 +44,7 @@ function showGrowlerAlert(alert, port) {
 			var alertId = event.target.querySelector("#alertId").value;
 
 			// todo: show alert details
-			navigator.serviceWorker.controller.postMessage({tool: "site-alerts", action: "showAlertDetails", "id": alertId});
+			navigator.serviceWorker.controller.postMessage({tool: "site-alerts-all", action: "showAlertDetails", "id": alertId});
 		});
 
 	// shrinks frame for one alert

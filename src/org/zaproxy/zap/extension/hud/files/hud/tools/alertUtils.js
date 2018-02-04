@@ -1,21 +1,27 @@
 var alertUtils = (function() {
 
-	function showAlerts(toolname, target) {
+	function showAlerts(toolname, target, alertRisk) {
 		var config = {};
 
-		loadTool(toolname).then(function(tool) {
-			config.alerts = tool.alerts[target];
+		loadTool(toolname)
+			.then(function(tool) {
+				config.alerts = tool.alerts[target];
+				config.alertRisk = alertRisk;
+				config.alertType = tool.alertType
 
-			messageFrame("mainDisplay", {action:"showAlerts", config:config}).then(function(response) {
-				// Handle button choice
-				if ("id" in response) {
-					showAlertDetails(response.id);
-				}
-				else {
-					//cancel
-				}
+				messageFrame("mainDisplay", {action:"showAlerts", config:config}).then(function(response) {
+					// Handle button choice
+					if ("id" in response) {
+						showAlertDetails(response.id);
+					}
+					else {
+						//cancel
+					}
+				});
+			})
+			.catch(function(err) {
+				console.log(Error(err));
 			});
-		});
 	}
 
 	function showAlertDetails(id) {
@@ -33,46 +39,60 @@ var alertUtils = (function() {
 	}
 
 	function updateAlertCount(toolname, target) {
+
 		return loadTool(toolname)
 			.then(function(tool) {
-				if (tool.alerts[target]) {
-					var count = 0;
-					for (var key in tool.alerts[target]) {
-						count += Object.keys(tool.alerts[target][key]).length;
+
+				var count = 0;
+				var targetAlerts = tool.alerts[target];
+
+				if (targetAlerts) {
+
+					for (var risk in tool.alerts[target]) {
+						var riskAlerts = targetAlerts[risk] || {};
+
+						count += Object.keys(riskAlerts).length;
 					}
-					tool.data = count.toString();
 				}
-				else {
-					tool.data = "0";
-				}
+
+				tool.data = count.toString();
 				
 				return saveTool(tool);
 			});
 	}
 
-	function onPollData(toolname, target, data, isGrowlerShown) {
+	function onPollData(toolname, target, data, alertRisk) {
+
 		loadTool(toolname)
 			.then(function(tool) {
+				// if target not initialized
+				if (tool.alerts[target] === undefined) {
+					tool.alerts[target] = {};
+					tool.alerts[target].Low = {};
+					tool.alerts[target].Medium = {};
+					tool.alerts[target].High = {};
+					tool.alerts[target].Informational = {};
+				}
+
+				// filter out unrelated alerts for the risk-specific tools
+				if (alertRisk) {
+					console.log(alertRisk)
+					data = data.filter(function(alert) {
+						return alert.risk.toLowerCase() === alertRisk;
+					})
+				}
+
 				data.forEach(function(alert) {
 					// not in cache
 					if (tool.cache[alert.id] === undefined) {
 						// add to cache
 						tool.cache[alert.id] = alert;
 
-						// if target not initialized
-						if (tool.alerts[target] === undefined) {
-							tool.alerts[target] = {};
-							tool.alerts[target].Low = {};
-							tool.alerts[target].Medium = {};
-							tool.alerts[target].High = {};
-							tool.alerts[target].Informational = {};
-						}
-
-						// add to alerts for the page
+						// first time seeing alert
 						if (tool.alerts[target][alert.risk][alert.alert] === undefined) {
 							tool.alerts[target][alert.risk][alert.alert] = [];
 
-							if (isGrowlerShown) {
+							if (toolname === "site-alerts-all") {
 								// send growler alert (fine with it being async, can change later if its an issue)
 								showGrowlerAlert(alert);
 							}

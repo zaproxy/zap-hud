@@ -1,20 +1,21 @@
 /*
- * Page Alerts Tool
+ * Informational Risk Site Alerts Tool
  *
  * Description goes here...
  */
 
-var PageAlerts = (function() {
+var SiteAlertsInformational = (function() {
 
 	// Constants
 	// todo: could probably switch this to a config file?
-	var NAME = "page-alerts-all";
-	var LABEL = "Page Alerts";
+	var NAME = "site-alerts-informational";
+	var LABEL = "Informational Risk Site Alerts";
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
-		ICONS.PA = "page-alerts.png";
-	var ALERT_TYPE = "page-alerts"
+        ICONS.PA = "site-alerts-informational.png";
+    var ALERT_TYPE = "site-alerts"
+    var ALERT_RISK = "informational"
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -22,8 +23,9 @@ var PageAlerts = (function() {
 		tool.name = NAME;
 		tool.label = LABEL;
 		tool.data = DATA.NONE;
-		tool.icon = ICONS.PA;
-		tool.alertType = ALERT_TYPE;
+        tool.icon = ICONS.PA;
+        tool.alertType = ALERT_TYPE;
+        tool.alertRisk = ALERT_RISK;
 		tool.isSelected = false;
 		tool.panel = "";
 		tool.position = 0;
@@ -34,20 +36,19 @@ var PageAlerts = (function() {
 	}
 
 	function showAlerts(url) {
-		alertUtils.showAlerts(NAME, url);
+		alertUtils.showAlerts(NAME, url, ALERT_RISK);
 	}
 
 	function updateAlertCount(url) {
 		return alertUtils.updateAlertCount(NAME, url);
 	}
 
-
 	function onPanelLoad(data) {
 		return alertUtils.updateAlertCount(NAME, data.url);
 	}
 
 	function onPollData(url, data) {
-		alertUtils.onPollData(NAME, url, data);
+		alertUtils.onPollData(NAME, url, data, ALERT_RISK);
 	}
 
 	function showOptions() {
@@ -68,7 +69,7 @@ var PageAlerts = (function() {
 				break;
 
 			case "pollData":
-				onPollData(message.targetUrl, message.pollData.pageAlerts);
+				onPollData(message.targetUrl, message.pollData.siteAlerts);
 				break;
 
 			default:
@@ -99,4 +100,4 @@ var PageAlerts = (function() {
 	};
 })();
 
-self.tools[PageAlerts.name] = PageAlerts;
+self.tools[SiteAlertsInformational.name] = SiteAlertsInformational;
