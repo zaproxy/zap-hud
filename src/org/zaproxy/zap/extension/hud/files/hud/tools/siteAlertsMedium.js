@@ -35,20 +35,20 @@ var SiteAlertsMedium = (function() {
 		saveTool(tool);
 	}
 
-	function showAlerts(url) {
-		alertUtils.showAlerts(NAME, url, ALERT_RISK);
+	function showAlerts(domain) {
+		alertUtils.showAlerts(NAME, domain, ALERT_RISK);
 	}
 
-	function updateAlertCount(url) {
-		return alertUtils.updateAlertCount(NAME, url);
+	function updateAlertCount(domain) {
+		return alertUtils.updateAlertCount(NAME, domain);
 	}
 
 	function onPanelLoad(data) {
-		return alertUtils.updateAlertCount(NAME, data.url);
+		return alertUtils.updateAlertCount(NAME, data.domain);
 	}
 
-	function onPollData(url, data) {
-		alertUtils.onPollData(NAME, url, data, ALERT_RISK);
+	function onPollData(domain, data) {
+		alertUtils.onPollData(NAME, domain, data, ALERT_RISK);
 	}
 
 	function showOptions() {
@@ -69,7 +69,7 @@ var SiteAlertsMedium = (function() {
 				break;
 
 			case "pollData":
-				onPollData(message.targetUrl, message.pollData.siteAlerts);
+				onPollData(message.targetDomain, message.pollData.siteAlerts);
 				break;
 
 			default:
@@ -80,7 +80,7 @@ var SiteAlertsMedium = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showAlerts(message.url);
+					showAlerts(message.domain);
 					break;
 
 				case "buttonMenuClicked":
