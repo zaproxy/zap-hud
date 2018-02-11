@@ -5,9 +5,57 @@
  */
 
 var IMAGE_PREFIX = "<<ZAP_HUD_FILES>>?image=";
+var v;
 
 document.addEventListener("DOMContentLoaded", function() {
-	document.getElementById("background-link").addEventListener("click", hideMainDisplay);
+	//document.getElementById("background-link").addEventListener("click", hideMainDisplay);
+
+	Vue.component('modal', {
+		template: '#modal-template',
+		props: ['show'],
+		methods: {
+			close: function () {
+				this.$emit('close');
+			},
+			afterLeave: function (el) {
+				parent.postMessage({action:"hideMainDisplay"}, document.referrer);
+			}
+		},
+		mounted: function () {
+			document.addEventListener("keydown", (e) => {
+				if (this.show && e.keyCode == 27) {
+					this.close();
+				}
+			});
+		}
+	});
+	
+	Vue.component('dialogModal', {
+		template: '#dialog-modal-template',
+		props: ['show'],
+		methods: {
+			close: function () {
+				this.$emit('close');
+			},
+			buttonPress: function () {
+				buttonHandler("button", port)
+			
+				this.close();
+			}
+		}
+	});
+	
+	v = new Vue({
+		el: '#app',
+		data: {
+			showModal: false,
+			header: '',
+			text: ''
+		}, 
+		methods: {
+			
+		}
+	});
 });
 
 navigator.serviceWorker.addEventListener("message", function(event) {
@@ -15,7 +63,7 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 	
 	switch(message.action) {
 		case "showDialog":
-			showDialog(message.config, event.ports[0]);
+			showVueDialog(message.config, event.ports[0]);
 			break;
 
 		case "showAddToolList":
@@ -90,6 +138,15 @@ function showHudSettings(config, port) {
 	showListMenu(config, port);
 }
 
+function showVueDialog(config, port) {
+	// show modal pop up
+	v.showModal = true;
+	v.header = config.title;
+	v.text = config.text;
+
+	showMainDisplay();
+}
+
 function showDialog(config, port) {
 	var buttons = {};
 	var dialog = loadTemplate("dialog-template");
@@ -134,7 +191,7 @@ function showAlerts(config, port) {
 		// todo: fix this closure garbage
 		var alertTypes = alertData[level];
 		for (var alertType in alertTypes) {		
-			var typeUl = loadTemplate("alert-type-template", dialog);		
+			var typeUl = loadTemplate("alert-type-template", dialog);
 			
 			typeUl.querySelector(".alert-type-header").innerText = alertType + " (" + alertTypes[alertType].length +")";
 

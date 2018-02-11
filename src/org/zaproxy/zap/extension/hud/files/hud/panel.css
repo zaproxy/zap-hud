@@ -5,7 +5,7 @@
 }
 
 .button {
-  background: #dddddd;
+  background: rgba(221, 221, 221, .7);
   border: 2px solid #a1a1a1; 
   border-radius: 25px; 
   margin: 1px;

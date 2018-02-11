@@ -6,7 +6,7 @@ var alertUtils = (function() {
 		loadTool(toolname).then(function(tool) {
 			config.alerts = tool.alerts[target];
 
-			messageFrame("mainDisplay", {action:"showAlerts", config:config}).then(function(response) {
+			messageFrame("display", {action:"showAlerts", config:config}).then(function(response) {
 				// Handle button choice
 				if ("id" in response) {
 					showAlertDetails(response.id);
@@ -27,7 +27,7 @@ var alertUtils = (function() {
 					var config = {};
 					config.details = json.alert;
 
-					messageFrame("mainDisplay", {action: "showAlertDetails", config: config});
+					messageFrame("display", {action: "showAlertDetails", config: config});
 				});
 			});
 	}
@@ -102,7 +102,7 @@ var alertUtils = (function() {
 		config.toolLabel = toolLabel;
 		config.options = {opt1: "Option 1", opt2: "Option 2", remove: "Remove"};
 
-		messageFrame("mainDisplay", {action:"showButtonOptions", config:config}).then(function(response) {
+		messageFrame("display", {action:"showButtonOptions", config:config}).then(function(response) {
 			// Handle button choice
 			if (response.id == "opt1") {
 				console.log("Option 1 chosen");

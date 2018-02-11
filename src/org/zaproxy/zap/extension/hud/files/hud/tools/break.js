@@ -59,7 +59,7 @@ var Break = (function() {
 				];
 			}
 
-			messageFrame("mainDisplay", {action:"showDialog", config:config}).then(function(response) {
+			messageFrame("display", {action:"showDialog", config:config}).then(function(response) {
 
 				// Handle button choice
 				if (response.id === "on") {
@@ -155,7 +155,7 @@ var Break = (function() {
 			 id:"continue"}
 		];
 
-		messageFrame("mainDisplay", {action:"showHttpMessage", config:config}).then(function(response) {
+		messageFrame("display", {action:"showHttpMessage", config:config}).then(function(response) {
 
 			// Handle button choice
 			if (response.id === "step") {
@@ -180,7 +180,7 @@ var Break = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: "Remove"};
 
-		messageFrame("mainDisplay", {action:"showButtonOptions", config:config}).then(function(response) {
+		messageFrame("display", {action:"showButtonOptions", config:config}).then(function(response) {
 			// Handle button choice
 			if (response.id == "remove") {
 				removeToolFromPanel(NAME);
