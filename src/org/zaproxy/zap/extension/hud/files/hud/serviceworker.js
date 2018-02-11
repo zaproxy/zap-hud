@@ -20,9 +20,9 @@ var urlsToCache = [
 	"<<ZAP_HUD_FILES>>?name=panel.html",
 	"<<ZAP_HUD_FILES>>?name=panel.css",
 	"<<ZAP_HUD_FILES>>?name=panel.js",
-	"<<ZAP_HUD_FILES>>?name=main.css",
-	"<<ZAP_HUD_FILES>>?name=main.html",
-	"<<ZAP_HUD_FILES>>?name=main.js",
+	"<<ZAP_HUD_FILES>>?name=display.css",
+	"<<ZAP_HUD_FILES>>?name=display.html",
+	"<<ZAP_HUD_FILES>>?name=display.js",
 	"<<ZAP_HUD_FILES>>?name=management.css",
 	"<<ZAP_HUD_FILES>>?name=management.html",
 	"<<ZAP_HUD_FILES>>?name=management.js",
@@ -220,8 +220,8 @@ function saveFrameId(event) {
 						saveFrame(panel);
 					});
 				}
-				else if (client.url.endsWith("main.html")) {
-					loadFrame("mainDisplay").then(function(panel) {
+				else if (client.url.endsWith("display.html")) {
+					loadFrame("display").then(function(panel) {
 						panel.clientId = client.id;
 					
 						saveFrame(panel);
@@ -343,7 +343,7 @@ function onTargetLoad() {
 function showAddToolDialog(panelKey) {
 	var config = {};
 
-	messageFrame("mainDisplay", {action: "showAddToolList", config: config}).then(function(response) {
+	messageFrame("display", {action: "showAddToolList", config: config}).then(function(response) {
 
 		addToolToPanel(response.id, panelKey);
 	});
@@ -355,7 +355,7 @@ function showHudSettings() {
 		initialize: "Reset Configurations to Default",
 	};
 
-	messageFrame("mainDisplay", {action: "showHudSettings", config: config}).then(function(response) {
+	messageFrame("display", {action: "showHudSettings", config: config}).then(function(response) {
 		if (response.id === "initialize") {
 			resetToDefault();
 		}

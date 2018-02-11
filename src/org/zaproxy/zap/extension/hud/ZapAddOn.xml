@@ -19,12 +19,13 @@
 		<file>hud/libraries/jquery-ui.js</file>
 		<file>hud/libraries/jquery-ui.theme.css</file>
 		<file>hud/libraries/localforage.min.js</file>
+		<file>hud/libraries/vue.js</file>
 		<file>hud/panel.html</file>
 		<file>hud/panel.css</file>
 		<file>hud/panel.js</file>
-		<file>hud/main.html</file>
-		<file>hud/main.css</file>
-		<file>hud/main.js</file>
+		<file>hud/display.html</file>
+		<file>hud/display.css</file>
+		<file>hud/display.js</file>
 		<file>hud/utils.js</file>
 		<file>hud/management.html</file>
 		<file>hud/management.css</file>

@@ -1,0 +1,54 @@
+<html>
+    <head>   
+        <link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre.min.css"/>
+        <link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=display.css"/>
+
+        <script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue.js"></script>
+        <script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=utils.js"></script>
+        <script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=display.js"></script>
+    </head>
+
+    <body>
+        <!-- the body of the app -->
+        <div id="app">
+            <dialog-modal :show="isDialogModalShown" :title="dialogModalTitle" :text="dialogModalText" @close="isDialogModalShown = false"></dialog-modal>
+        </div>
+
+        <!-- a simple dialog modal component -->
+        <template id="dialog-modal-template">
+            <modal :title="title" :show="show" @close="close">
+                <div slot="body">
+                    <div class="content">
+                        {{text}}
+                    </div>
+                </div>
+                <div slot="footer">
+                    <button v-for="button in buttons" class="btn" v-text="button.text" @click="buttonClick(button.id)"></button>
+                </div>
+            </modal>
+        </template>
+
+        <!-- a base modal component -->
+        <template id="modal-template">
+            <transition name="modal" @after-leave="afterLeave">
+            <div class="modal active" id="modal-id" v-show="show">
+                <a href="#close" class="modal-overlay" aria-label="Close" @click="close"></a>
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <a href="#close" class="btn btn-clear float-right" aria-label="Close" @click="close"></a>
+                        <div class="modal-title h5">{{title}}</div>
+                    </div>
+
+                    <div class="modal-body">
+                        <slot name="body"></slot>
+                    </div>
+
+                    <div class="modal-footer">
+                        <slot name="footer"></slot>
+                    </div>
+                </div>
+            </div>
+            </transition>
+        </template>
+    </body>
+</html>
