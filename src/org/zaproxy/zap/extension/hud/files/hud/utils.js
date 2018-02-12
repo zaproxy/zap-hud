@@ -269,8 +269,8 @@ function configureStorage() {
 
 function setDefaultTools() {
 	// default tools
-	var leftTools = ["scope", "site-alerts"];
-	var rightTools = ["spider", "page-alerts"];
+	var leftTools = ["scope", "break", "site-alerts-high", "site-alerts-medium", "site-alerts-low", "site-alerts-informational"];
+	var rightTools = ["spider", "active-scan", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational"];
 
 	return new Promise(function(resolve) {
 		var promises = [];
