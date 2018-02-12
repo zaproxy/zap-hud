@@ -8,12 +8,13 @@ var SiteAlerts = (function() {
 
 	// Constants
 	// todo: could probably switch this to a config file?
-	var NAME = "site-alerts";
+	var NAME = "site-alerts-all";
 	var LABEL = "Site Alerts";
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
 		ICONS.SA = "site-alerts.png";
+	var ALERT_TYPE = "site-alerts"
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -22,6 +23,7 @@ var SiteAlerts = (function() {
 		tool.label = LABEL;
 		tool.data = DATA.NONE;
 		tool.icon = ICONS.SA;
+		tool.alertType = ALERT_TYPE
 		tool.isSelected = false;
 		tool.panel = "";
 		tool.position = 0;
@@ -45,7 +47,7 @@ var SiteAlerts = (function() {
 	}
 
 	function onPollData(domain, data) {
-		alertUtils.onPollData(NAME, domain, data, true);	
+		alertUtils.onPollData(NAME, domain, data);	
 	}
 		
 	function showOptions() {
