@@ -46,7 +46,15 @@
 		<file>hud/tools/timeline.js</file>
 		<file>hud/tools/activeScan.js</file>
 		<file>hud/tools/pageAlerts.js</file>
+		<file>hud/tools/pageAlertsHigh.js</file>
+		<file>hud/tools/pageAlertsMedium.js</file>
+		<file>hud/tools/pageAlertsLow.js</file>
+		<file>hud/tools/pageAlertsInformational.js</file>
 		<file>hud/tools/siteAlerts.js</file>
+		<file>hud/tools/siteAlertsHigh.js</file>
+		<file>hud/tools/siteAlertsMedium.js</file>
+		<file>hud/tools/siteAlertsLow.js</file>
+		<file>hud/tools/siteAlertsInformational.js</file>
 		<file>hud/tools/break.js</file>
 		<file>hud/tools/attack.js</file>
 	</files>
