@@ -1,20 +1,21 @@
 /*
- * Page Alerts Tool
+ * Medium Risk Site Alerts Tool
  *
  * Description goes here...
  */
 
-var PageAlerts = (function() {
+var SiteAlertsMedium = (function() {
 
 	// Constants
 	// todo: could probably switch this to a config file?
-	var NAME = "page-alerts-all";
-	var LABEL = "Page Alerts";
+	var NAME = "site-alerts-medium";
+	var LABEL = "Medium Risk Site Alerts";
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
-		ICONS.PA = "page-alerts.png";
-	var ALERT_TYPE = "page-alerts"
+        ICONS.PA = "site-alerts-medium.png";
+    var ALERT_TYPE = "site-alerts"
+    var ALERT_RISK = "medium"
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -22,8 +23,9 @@ var PageAlerts = (function() {
 		tool.name = NAME;
 		tool.label = LABEL;
 		tool.data = DATA.NONE;
-		tool.icon = ICONS.PA;
-		tool.alertType = ALERT_TYPE;
+        tool.icon = ICONS.PA;
+        tool.alertType = ALERT_TYPE;
+        tool.alertRisk = ALERT_RISK;
 		tool.isSelected = false;
 		tool.panel = "";
 		tool.position = 0;
@@ -33,21 +35,20 @@ var PageAlerts = (function() {
 		saveTool(tool);
 	}
 
-	function showAlerts(url) {
-		alertUtils.showAlerts(NAME, url);
+	function showAlerts(domain) {
+		alertUtils.showAlerts(NAME, domain, ALERT_RISK);
 	}
 
-	function updateAlertCount(url) {
-		return alertUtils.updateAlertCount(NAME, url);
+	function updateAlertCount(domain) {
+		return alertUtils.updateAlertCount(NAME, domain);
 	}
-
 
 	function onPanelLoad(data) {
-		return alertUtils.updateAlertCount(NAME, data.url);
+		return alertUtils.updateAlertCount(NAME, data.domain);
 	}
 
-	function onPollData(url, data) {
-		alertUtils.onPollData(NAME, url, data);
+	function onPollData(domain, data) {
+		alertUtils.onPollData(NAME, domain, data, ALERT_RISK);
 	}
 
 	function showOptions() {
@@ -68,7 +69,7 @@ var PageAlerts = (function() {
 				break;
 
 			case "pollData":
-				onPollData(message.targetUrl, message.pollData.pageAlerts);
+				onPollData(message.targetDomain, message.pollData.siteAlerts);
 				break;
 
 			default:
@@ -79,7 +80,7 @@ var PageAlerts = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showAlerts(message.url);
+					showAlerts(message.domain);
 					break;
 
 				case "buttonMenuClicked":
@@ -99,4 +100,4 @@ var PageAlerts = (function() {
 	};
 })();
 
-self.tools[PageAlerts.name] = PageAlerts;
+self.tools[SiteAlertsMedium.name] = SiteAlertsMedium;

@@ -174,22 +174,24 @@ function showAlerts(config, port) {
 	var dialog = loadTemplate("alerts-template");
 	var alertData = config.alerts;
 
-	for (var level in alertData) {
+	for (var risk in alertData) {
 		// update count on tab
-		var tab = dialog.querySelector("#" + level.toLowerCase() +"-tab");
+		var tab = dialog.querySelector("#" + risk.toLowerCase() +"-tab");
 		var text = tab.innerText.substring(0, tab.innerText.indexOf(" "));
-		text += " (" + Object.keys(alertData[level]).length +")";
+		text += " (" + Object.keys(alertData[risk]).length +")";
 		tab.innerText = text;
 
 		// get the content panel, and set low to display first
-		var content = dialog.getElementById(level.toLowerCase() + "-content");
-		if (level !== "Informational") {
+		var content = dialog.getElementById(risk.toLowerCase() + "-content");
+		var toDisplay = config.alertRisk || "informational";
+
+		if (risk.toLowerCase() !== toDisplay) {
 			content.style.display = "none";
 		}
 
 		// populate 
 		// todo: fix this closure garbage
-		var alertTypes = alertData[level];
+		var alertTypes = alertData[risk];
 		for (var alertType in alertTypes) {		
 			var typeUl = loadTemplate("alert-type-template", dialog);
 			
@@ -215,6 +217,10 @@ function showAlerts(config, port) {
 		}
 	}
 
+	if (config.alertRisk) {
+		dialog.querySelector(".tab").style.display = "none";
+	}
+
 	showMainDisplay().then(function() {
 		document.body.appendChild(dialog);
 
@@ -234,8 +240,19 @@ function showAlerts(config, port) {
 			});
 		}
 
+		// set the title
+		var title = "Alerts For This Site";
+
+		if (config.alertType === "page-alerts") {
+			title = "Alerts For This Page"
+		}
+
+		if (config.alertRisk) {
+			title = config.alertRisk.charAt(0).toUpperCase() + config.alertRisk.slice(1) + " " + title;
+		}
+
 		$( "#alerts-div" ).dialog({
-			title: "Alerts For This Page",
+			title: title,
 			resizable: false,
 			height: 450,
 			width: 500,
