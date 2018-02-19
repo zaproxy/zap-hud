@@ -10,6 +10,8 @@ var ORIENTATION = /ORIENTATION/g;
 
 var isDebugging = true;
 
+var webSocket;
+
 var urlsToCache = [
 	"<<ZAP_HUD_FILES>>?name=libraries/jquery-1.12.0.js",
 	"<<ZAP_HUD_FILES>>?name=libraries/jquery-ui.js",
@@ -174,6 +176,22 @@ self.addEventListener("message", function(event) {
 			break;
 	}
 });
+
+/* Set up WebSockets */
+
+webSocket = new WebSocket("<<ZAP_HUD_WS>>");
+
+webSocket.onopen = function (event) {
+	// Basic test
+	webSocket.send("{ \"component\" : \"core\", \"type\" : \"view\", \"name\" : \"version\" }"); 
+	// Register for alert events
+	webSocket.send("{\"component\" : \"event\", \"type\" : \"register\", \"name\" : \"org.zaproxy.zap.extension.alert.AlertEventPublisher\"}");
+};
+
+webSocket.onmessage = function (event) {
+	console.log("ServiceWorker received event: " + event.data);
+	// we now need to actually do something with this ;)
+}
 
 function getParamater(url, parameter) {
 	var start = url.indexOf(parameter) + parameter.length + 1;

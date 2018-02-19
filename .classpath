@@ -8,6 +8,7 @@
 	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/commons-configuration-1.9.jar"/>
 	<classpathentry kind="lib" path="lib/zap-2.7.0.jar"/>
+	<classpathentry kind="lib" path="lib/websocket-release-15.zap"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

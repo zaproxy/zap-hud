@@ -5,7 +5,13 @@
 	<author>ZAP Dev Team</author>
 	<url></url>
 	<changes>First version</changes>
-	<dependson/>
+	<dependencies>
+		<addons>
+			<addon>
+				<id>websocket</id>
+			</addon>
+		</addons>
+	</dependencies>
 	<extensions>
 		<extension>org.zaproxy.zap.extension.hud.ExtensionHUD</extension>
 	</extensions>
@@ -48,6 +54,8 @@
 		<file>hud/tools/siteAlerts.js</file>
 		<file>hud/tools/break.js</file>
 		<file>hud/tools/attack.js</file>
+		<file>hud/websockettest.html</file>
+		<file>hud/websockettest.js</file>
 	</files>
 	<not-before-version>2.7.0</not-before-version>
 	<not-from-version></not-from-version>
