@@ -30,15 +30,16 @@ Vue.component('dialog-modal', {
 			this.$emit('close');
 		},
 		buttonClick: function(id) {
-			this.port.postMessage({"action": "dialogSelected", id:id});
+			this.port.postMessage({'action': 'dialogSelected', id: id});
 			this.close();
 		}
 	},
 	data() {
 		return {
+			port: null,
 			buttons: [
 				{text: "Okay", id:"okay"},
-				{text: "close", id:"close"}
+				{text: "Cancel", id:"cancel"}
 			]
 		}
 	},
@@ -46,7 +47,7 @@ Vue.component('dialog-modal', {
 		let self = this;
 
 		Event.$on('showDialogModal', function(data) {
-			console.log("showDialogModal triggered")
+			console.log('showDialogModal triggered')
 
 			app.isDialogModalShown = true;
 			app.dialogModalTitle = data.title;
@@ -58,6 +59,91 @@ Vue.component('dialog-modal', {
 	}
 });
 
+Vue.component('select-tool-modal', {
+	template: '#select-tool-modal-template',
+	props:['show', 'title'],
+	methods: {
+		close: function() {
+			this.$emit('close');
+		},
+	},
+	data() {
+		return {
+			port: null,
+			tools: []
+		}
+	},
+	created: function() {
+		let self = this;
+
+		Event.$on('showSelectToolModal', function(data) {
+			console.log('showSelectToolModal triggered')
+
+			app.isSelectToolModalShown = true;
+			
+			self.tools = data.tools;
+			self.port = data.port;
+		});
+	}
+})
+
+Vue.component('tool-li', {
+	template: '#tool-li-template',
+	props:['image', 'label', 'toolname', 'port'],
+	methods: {
+		close: function() {
+			this.$emit('close');
+		},
+		toolSelect: function() {
+			this.port.postMessage({'action': 'toolSelected', 'toolname': this.toolname})
+			this.close();
+		}
+	}
+})
+
+Vue.component('alert-list-modal', {
+	template: '#alert-list-modal-template',
+	props:['show', 'title'],
+	methods: {
+		close: function() {
+			this.$emit('close');
+		},
+	},
+	data() {
+		return {
+			port: null,
+			alerts: []
+		}
+	},
+	created: function() {
+		let self = this;
+
+		Event.$on('showAlertListModal', function(data) {
+			console.log('showAlertListModal triggered')
+
+			app.isAlertListModalShown = true;
+			app.alertListModalTitle = data.title;
+
+			self.alerts = data.alerts;
+			self.port = data.port;
+		});
+	}
+})
+
+Vue.component('alert-accordion', {
+	template: '#alert-accordion-template',
+	props:['title', 'alerts', 'port'],
+	methods: {
+		close: function() {
+			this.$emit('close');
+		},
+		alertSelect: function(id) {
+			this.port.postMessage({'action': 'alertSelected', 'alertId': id})
+			this.close();
+		}
+	}
+})
+
 document.addEventListener("DOMContentLoaded", function() {
 	
 	app = new Vue({
@@ -65,7 +151,10 @@ document.addEventListener("DOMContentLoaded", function() {
 		data: {
 			isDialogModalShown: false,
 			dialogModalTitle: "Default Title",
-			dialogModalText: "Default Text"
+			dialogModalText: "Default Text",
+			isSelectToolModalShown: false,
+			isAlertListModalShown: false,
+			alertListModalTitle: "Default Title"
 		},
 	});
 });
@@ -79,11 +168,11 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			break;
 
 		case "showAddToolList":
-			showAddToolList(message.config, event.ports[0]);
+			showSelectTool(message.config, event.ports[0]);
 			break;
 
 		case "showAlerts":
-			showAlerts(message.config, event.ports[0]);
+			showAlertList(message.config, event.ports[0]);
 			break;
 
 		case "showAlertDetails":
@@ -118,12 +207,23 @@ function showDialog(config, port) {
 	showMainDisplay();
 }
 
-function showAddToolList(config, port) {
+function showSelectTool(config, port) {
+	Event.$emit('showSelectToolModal', {
+		tools: config.tools,
+		port: port
+	});
 
+	showMainDisplay();
 }
 
-function showAlerts(config, port) {
+function showAlertList(config, port) {
+	Event.$emit('showAlertListModal', {
+		title: config.title,
+		alerts: config.alerts,
+		port:port
+	});
 
+	showMainDisplay();
 }
 
 function showAlertDetails(config, port) {

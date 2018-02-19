@@ -6,10 +6,25 @@ var alertUtils = (function() {
 		loadTool(toolname)
 			.then(function(tool) {
 				config.alerts = tool.alerts[target];
-				config.alertRisk = alertRisk;
-				config.alertType = tool.alertType
+				// build the string for the title
+				config.title = tool.alertType[0].toUpperCase() + tool.alertType.substring(1, tool.alertType.indexOf('-')) + " Alerts"
 
-				messageFrame("mainDisplay", {action:"showAlerts", config:config}).then(function(response) {
+				console.log(tool.alerts[target])
+
+				// by default show ALL alert
+				var action = "showAllAlerts";
+				if (alertRisk) {
+					// TODO: capitalize the alert risk in the tools so that this just works
+					// capitalize the alert risk level 
+					alertRisk = alertRisk[0].toUpperCase() + alertRisk.substring(1);
+
+					// submit just the alerts for this risk level, change the title, and change the display action
+					config.alerts = config.alerts[alertRisk];
+					config.title = alertRisk + " " + config.title
+					action = "showAlerts";
+				}
+
+				messageFrame("display", {action: action, config:config}).then(function(response) {
 					// Handle button choice
 					if ("id" in response) {
 						showAlertDetails(response.id);
@@ -76,7 +91,6 @@ var alertUtils = (function() {
 
 				// filter out unrelated alerts for the risk-specific tools
 				if (alertRisk) {
-					console.log(alertRisk)
 					data = data.filter(function(alert) {
 						return alert.risk.toLowerCase() === alertRisk;
 					})

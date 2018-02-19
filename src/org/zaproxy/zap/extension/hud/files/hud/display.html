@@ -12,22 +12,10 @@
         <!-- the body of the app -->
         <div id="app">
             <dialog-modal :show="isDialogModalShown" :title="dialogModalTitle" :text="dialogModalText" @close="isDialogModalShown = false"></dialog-modal>
+            <select-tool-modal :show="isSelectToolModalShown" title="Select Tool" @close="isSelectToolModalShown = false"></select-tool-modal>
+            <alert-list-modal :show="isAlertListModalShown" :title="alertListModalTitle" @close="isAlertListModalShown = false"></alert-list-modal>
         </div>
-
-        <!-- a simple dialog modal component -->
-        <template id="dialog-modal-template">
-            <modal :title="title" :show="show" @close="close">
-                <div slot="body">
-                    <div class="content">
-                        {{text}}
-                    </div>
-                </div>
-                <div slot="footer">
-                    <button v-for="button in buttons" class="btn" v-text="button.text" @click="buttonClick(button.id)"></button>
-                </div>
-            </modal>
-        </template>
-
+        
         <!-- a base modal component -->
         <template id="modal-template">
             <transition name="modal" @after-leave="afterLeave">
@@ -49,6 +37,72 @@
                 </div>
             </div>
             </transition>
+        </template>
+
+        <!-- a simple dialog modal component -->
+        <template id="dialog-modal-template">
+            <modal :title="title" :show="show" @close="close">
+                <div slot="body">
+                    <div class="content">
+                        {{text}}
+                    </div>
+                </div>
+                <div slot="footer">
+                    <button v-for="button in buttons" class="btn" v-text="button.text" @click="buttonClick(button.id)"></button>
+                </div>
+            </modal>
+        </template>
+
+        <!-- select tool modal component -->
+        <template id="select-tool-modal-template">
+            <modal :title="title" :show="show" @close="close">
+                <div slot="body">
+                    <ul class="menu">
+                        <tool-li v-for="tool in tools" 
+                            :image="tool.image" 
+                            :label="tool.label" 
+                            :key="tool.toolname" 
+                            :toolname="tool.toolname" 
+                            :port="port"
+                            @close="close"></tool-li>
+                    </ul>
+                </div>
+            </modal>
+        </template>
+
+        <!-- select tool li component -->
+        <template id="tool-li-template">
+            <li class="menu-item" @click="toolSelect()">
+                <a href="#">
+                    <img :src="image" /> {{ label }}
+                </a>
+            </li>
+        </template>
+
+        <!-- alert list modal component -->
+        <template id="alert-list-modal-template">
+            <modal :title="title" :show="show" @close="close">
+                <div slot="body">
+                    <alert-accordion v-for="(value, key) in alerts" :key="key" :title="key" :alerts="value" :port="port"></alert-accordion>
+                </div>
+            </modal>
+        </template>
+
+        <!-- alert accordion component -->
+        <template id="alert-accordion-template">
+            <div class="accordion">
+                <input type="checkbox" :id="title" name="accordion-checkbox" hidden>
+                <label class="accordion-header" :for="title">
+                    {{ title }}
+                </label>
+                <div class="accordion-body">
+                    <ul class="menu menu-nav">
+                        <li class="menu-item" v-for="alert in alerts"> 
+                            <a @click="alertSelect(alert.id)"> {{ alert.id }} </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </template>
     </body>
 </html>

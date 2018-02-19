@@ -351,10 +351,31 @@ function onTargetLoad() {
 function showAddToolDialog(panelKey) {
 	var config = {};
 
-	messageFrame("display", {action: "showAddToolList", config: config}).then(function(response) {
+	loadAllTools()
+		.then(function(tools) {
 
-		addToolToPanel(response.id, panelKey);
-	});
+			// filter out unselected tools
+			tools = tools.filter(tool => !tool.isSelected);
+	
+			// reformat for displaying in list
+			tools = tools.map(function (tool) {
+				return {'label': tool.label, 'image': '<<ZAP_HUD_FILES>>?image=' + tool.icon, 'toolname': tool.name};
+			});
+
+			return tools;
+		})
+		.then(function(tools) {
+			// add tools to the config
+			config.tools = tools;
+
+			// display tools to select
+			messageFrame("display", {action: "showAddToolList", config: config}).then(function(response) {
+				addToolToPanel(response.toolname, panelKey);
+			});
+		})
+		.catch(function(err) {
+			console.log(Error(err));
+		});
 }
 
 function showHudSettings() {
