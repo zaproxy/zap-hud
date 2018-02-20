@@ -9,7 +9,10 @@ Vue.component('modal', {
 			this.$emit('close');
 		},
 		afterLeave: function (el) {
-			parent.postMessage({action:"hideMainDisplay"}, document.referrer);
+			if (!app.keepShowing) {
+				parent.postMessage({action:"hideMainDisplay"}, document.referrer);
+			}
+			app.keepShowing = false;
 		}
 	},
 	mounted: function () {
@@ -77,8 +80,6 @@ Vue.component('select-tool-modal', {
 		let self = this;
 
 		Event.$on('showSelectToolModal', function(data) {
-			console.log('showSelectToolModal triggered')
-
 			app.isSelectToolModalShown = true;
 			
 			self.tools = data.tools;
@@ -119,8 +120,6 @@ Vue.component('all-alerts-modal', {
 		let self = this;
 		
 		Event.$on('showAllAlertsModal', function(data) {
-			console.log('showAllAlertsModal triggered')
-
 			app.isAllAlertsModalShown = true;
 			app.allAlertsModalTitle = data.title;
 
@@ -148,8 +147,6 @@ Vue.component('alert-list-modal', {
 		let self = this;
 
 		Event.$on('showAlertListModal', function(data) {
-			console.log('showAlertListModal triggered')
-
 			app.isAlertListModalShown = true;
 			app.alertListModalTitle = data.title;
 
@@ -166,10 +163,41 @@ Vue.component('alert-accordion', {
 		close: function() {
 			this.$emit('close');
 		},
-		alertSelect: function(id) {
-			this.port.postMessage({'action': 'alertSelected', 'alertId': id})
-			this.close();
+		alertSelect: function(alert) {
+			// set keepShowing so that we don't hide the display frame
+			app.keepShowing = true;
+			app.isAlertListModalShown = false;
+			app.isAllAlertsModalShown = false;
+
+			this.port.postMessage({'action': 'alertSelected', 'alertId': alert.id})
 		}
+	}
+})
+
+Vue.component('alert-details-modal', {
+	template: '#alert-details-modal-template',
+	props: ['show', 'title'],
+	methods: {
+		close: function() {
+			this.$emit('close');
+		}
+	},
+	data() {
+		return {
+			port: null,
+			details: {}
+		}
+	},
+	created() {
+		let self = this;
+
+		Event.$on('showAlertDetailsModal', function(data) {
+			app.isAlertDetailsModalShown = true;
+			app.alertDetailsModalTitle = data.title;
+			
+			self.details = data.details;
+			self.port = data.port;
+		})
 	}
 })
 
@@ -226,7 +254,10 @@ document.addEventListener("DOMContentLoaded", function() {
 			isAlertListModalShown: false,
 			alertListModalTitle: "Default Title",
 			isAllAlertsModalShown: false,
-			allAlertsModalTitle: "Default Title"
+			allAlertsModalTitle: "Default Title",
+			isAlertDetailsModalShown: false,
+			alertDetailsModalTitle: "Default Title",
+			keepShowing: false,
 		},
 	});
 });
@@ -313,7 +344,13 @@ function showAllAlerts(config, port) {
 }
 
 function showAlertDetails(config, port) {
+	Event.$emit('showAlertDetailsModal', {
+		title: config.title,
+		details: config.details,
+		port: port
+	});
 
+	showMainDisplay();
 }
 
 function showButtonOptions(config, port) {

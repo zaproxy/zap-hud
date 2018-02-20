@@ -15,6 +15,7 @@
             <select-tool-modal :show="isSelectToolModalShown" title="Select Tool" @close="isSelectToolModalShown = false"></select-tool-modal>
             <alert-list-modal :show="isAlertListModalShown" :title="alertListModalTitle" @close="isAlertListModalShown = false"></alert-list-modal>
             <all-alerts-modal :show="isAllAlertsModalShown" :title="allAlertsModalTitle" @close="isAllAlertsModalShown = false"></all-alerts-modal>
+            <alert-details-modal :show="isAlertDetailsModalShown" :title="alertDetailsModalTitle" @close="isAlertDetailsModalShown = false"></alert-details-modal>
         </div>
         
         <!-- a base modal component -->
@@ -86,19 +87,19 @@
                 <div slot="body">
                     <tabs>
                         <tab name="High" :selected="true">
-                            <alert-accordion v-for="(value, key) in alerts['High']" :key="key" :title="key" :alerts="value" :port="port"></alert-accordion>
+                            <alert-accordion v-for="(value, key) in alerts['High']" :key="key" :title="key" :alerts="value" :port="port" @close="close"></alert-accordion>
                         </tab>
             
                         <tab name="Medium">
-                            <alert-accordion v-for="(value, key) in alerts['Medium']" :key="key" :title="key" :alerts="value" :port="port"></alert-accordion>
+                            <alert-accordion v-for="(value, key) in alerts['Medium']" :key="key" :title="key" :alerts="value" :port="port" @close="close"></alert-accordion>
                         </tab>
             
                         <tab name="Low">
-                            <alert-accordion v-for="(value, key) in alerts['Low']" :key="key" :title="key" :alerts="value" :port="port"></alert-accordion>
+                            <alert-accordion v-for="(value, key) in alerts['Low']" :key="key" :title="key" :alerts="value" :port="port" @close="close"></alert-accordion>
                         </tab>
 
                         <tab name="Informational">
-                            <alert-accordion v-for="(value, key) in alerts['Informational']" :key="key" :title="key" :alerts="value" :port="port"></alert-accordion>
+                            <alert-accordion v-for="(value, key) in alerts['Informational']" :key="key" :title="key" :alerts="value" :port="port" @close="close"></alert-accordion>
                         </tab>
                     </tabs>
                 </div>
@@ -109,7 +110,7 @@
         <template id="alert-list-modal-template">
             <modal :title="title" :show="show" @close="close">
                 <div slot="body">
-                    <alert-accordion v-for="(value, key) in alerts" :key="key" :title="key" :alerts="value" :port="port"></alert-accordion>
+                    <alert-accordion v-for="(value, key) in alerts" :key="key" :title="key" :alerts="value" :port="port" @close="close"></alert-accordion>
                 </div>
             </modal>
         </template>
@@ -124,11 +125,27 @@
                 <div class="accordion-body">
                     <ul class="menu menu-nav">
                         <li class="menu-item" v-for="alert in alerts"> 
-                            <a @click="alertSelect(alert.id)"> {{ alert.id }} </a>
+                            <a @click="alertSelect(alert)"> {{ title }} ({{ alert.id }}) </a>
                         </li>
                     </ul>
                 </div>
             </div>
+        </template>
+
+        <!-- alert details component -->
+        <template id="alert-details-modal-template">
+            <modal :title="title" :show="show" @close="close">
+                <div slot="body">
+                    <table class="table table-striped table-hover">
+                        <tbody>
+                            <tr v-for="(detail, field) in details">
+                                <td> {{ field }}</td>
+                                <td> {{ detail }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </modal>
         </template>
 
         <!-- tabs component -->
