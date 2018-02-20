@@ -14,6 +14,7 @@
             <dialog-modal :show="isDialogModalShown" :title="dialogModalTitle" :text="dialogModalText" @close="isDialogModalShown = false"></dialog-modal>
             <select-tool-modal :show="isSelectToolModalShown" title="Select Tool" @close="isSelectToolModalShown = false"></select-tool-modal>
             <alert-list-modal :show="isAlertListModalShown" :title="alertListModalTitle" @close="isAlertListModalShown = false"></alert-list-modal>
+            <all-alerts-modal :show="isAllAlertsModalShown" :title="allAlertsModalTitle" @close="isAllAlertsModalShown = false"></all-alerts-modal>
         </div>
         
         <!-- a base modal component -->
@@ -79,6 +80,31 @@
             </li>
         </template>
 
+        <!-- all alerts modal component -->
+        <template id="all-alerts-modal-template">
+            <modal :title="title" :show="show" @close="close">
+                <div slot="body">
+                    <tabs>
+                        <tab name="High" :selected="true">
+                            <alert-accordion v-for="(value, key) in alerts['High']" :key="key" :title="key" :alerts="value" :port="port"></alert-accordion>
+                        </tab>
+            
+                        <tab name="Medium">
+                            <alert-accordion v-for="(value, key) in alerts['Medium']" :key="key" :title="key" :alerts="value" :port="port"></alert-accordion>
+                        </tab>
+            
+                        <tab name="Low">
+                            <alert-accordion v-for="(value, key) in alerts['Low']" :key="key" :title="key" :alerts="value" :port="port"></alert-accordion>
+                        </tab>
+
+                        <tab name="Informational">
+                            <alert-accordion v-for="(value, key) in alerts['Informational']" :key="key" :title="key" :alerts="value" :port="port"></alert-accordion>
+                        </tab>
+                    </tabs>
+                </div>
+            </modal>
+        </template>        
+
         <!-- alert list modal component -->
         <template id="alert-list-modal-template">
             <modal :title="title" :show="show" @close="close">
@@ -103,6 +129,27 @@
                     </ul>
                 </div>
             </div>
+        </template>
+
+        <!-- tabs component -->
+        <template id="tabs-template">
+            <div>
+                <div class="tabs">
+                    <ul class="tab tab-block">
+                        <li v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true }">
+                            <a :href="tab.href" @click="selectTab(tab)">{{ tab.name }}</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tabs-details">
+                    <slot></slot>
+                </div>
+            </div>
+        </template>
+
+        <!-- tab component -->
+        <template id="tab-template">
+            <div v-show="isActive"><slot></slot></div>
         </template>
     </body>
 </html>
