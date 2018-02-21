@@ -16,6 +16,7 @@
             <alert-list-modal :show="isAlertListModalShown" :title="alertListModalTitle" @close="isAlertListModalShown = false"></alert-list-modal>
             <all-alerts-modal :show="isAllAlertsModalShown" :title="allAlertsModalTitle" @close="isAllAlertsModalShown = false"></all-alerts-modal>
             <alert-details-modal :show="isAlertDetailsModalShown" :title="alertDetailsModalTitle" @close="isAlertDetailsModalShown = false"></alert-details-modal>
+            <simple-menu-modal :show="isSimpleMenuModalShown" :title="simpleMenuModalTitle" @close="isSimpleMenuModalShown = false"></simple-menu-modal>
         </div>
         
         <!-- a base modal component -->
@@ -144,6 +145,17 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </modal>
+        </template>
+
+        <!-- simple menu modal component -->
+        <template id="simple-menu-modal-template">
+            <modal :title="title" :show="show" @close="close">
+                <div slot="body">
+                    <ul class="menu">
+                        <li v-for="(label, id) in items" class="menu-item" @click="itemSelect(id)"> {{ label }} </li>
+                    </ul>
                 </div>
             </modal>
         </template>
