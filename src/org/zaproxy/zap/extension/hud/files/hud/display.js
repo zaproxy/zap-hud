@@ -50,7 +50,6 @@ Vue.component('dialog-modal', {
 		let self = this;
 
 		Event.$on('showDialogModal', function(data) {
-			console.log('showDialogModal triggered')
 
 			app.isDialogModalShown = true;
 			app.dialogModalTitle = data.title;
@@ -201,6 +200,37 @@ Vue.component('alert-details-modal', {
 	}
 })
 
+Vue.component('simple-menu-modal', {
+	template: '#simple-menu-modal-template',
+	props: ['show', 'title'],
+	methods: {
+		close: function() {
+			this.$emit('close');
+		},
+		itemSelect: function(itemId) {
+			this.port.postMessage({'action': 'itemSelected', 'id': itemId}); 
+			this.close();
+		}
+	},
+	data() {
+		return {
+			port: null,
+			items: {}
+		}
+	},
+	created() {
+		let self = this;
+
+		Event.$on('showSimpleMenuModal', function(data) {
+			app.isSimpleMenuModalShown = true;
+			app.simpleMenuModalTitle = data.title;
+
+			self.items = data.items;
+			self.port = data.port;
+		})
+	}
+})
+
 Vue.component('tabs', {
 	template: '#tabs-template',
     data() {
@@ -248,15 +278,17 @@ document.addEventListener("DOMContentLoaded", function() {
 		el: '#app',
 		data: {
 			isDialogModalShown: false,
-			dialogModalTitle: "Default Title",
-			dialogModalText: "Default Text",
+			dialogModalTitle: "HUD Modal",
+			dialogModalText: "text",
 			isSelectToolModalShown: false,
 			isAlertListModalShown: false,
-			alertListModalTitle: "Default Title",
+			alertListModalTitle: "Alerts",
 			isAllAlertsModalShown: false,
-			allAlertsModalTitle: "Default Title",
+			allAlertsModalTitle: "All Alerts",
 			isAlertDetailsModalShown: false,
-			alertDetailsModalTitle: "Default Title",
+			alertDetailsModalTitle: "Alert Details",
+			isSimpleMenuModalShown: false,
+			simpleMenuModalTitle: "Menu",
 			keepShowing: false,
 		},
 	});
@@ -354,11 +386,23 @@ function showAlertDetails(config, port) {
 }
 
 function showButtonOptions(config, port) {
+	Event.$emit('showSimpleMenuModal', {
+		title: config.toolLabel,
+		items: config.options,
+		port: port
+	});
 
+	showMainDisplay();
 }
 
 function showHudSettings(config, port) {
+	Event.$emit('showSimpleMenuModal', {
+		title: 'HUD Settings',
+		items: config.settings,
+		port: port
+	});
 
+	showMainDisplay();
 }
 
 function showHttpMessage(config, port) {
