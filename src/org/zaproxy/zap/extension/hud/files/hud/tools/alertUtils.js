@@ -9,8 +9,6 @@ var alertUtils = (function() {
 				// build the string for the title
 				config.title = tool.alertType[0].toUpperCase() + tool.alertType.substring(1, tool.alertType.indexOf('-')) + " Alerts"
 
-				console.log(tool.alerts[target])
-
 				// by default show ALL alert
 				var action = "showAllAlerts";
 				if (alertRisk) {
@@ -50,7 +48,13 @@ var alertUtils = (function() {
 						config.details = json.alert;
 
 						messageFrame("display", {action: "showAlertDetails", config: config});
-				});
+					})
+					.catch(function(err) {
+						console.log(err);
+					});
+			})
+			.catch(function(err) {
+				console.log(err);
 			});
 	}
 
