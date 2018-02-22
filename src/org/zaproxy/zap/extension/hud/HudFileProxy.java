@@ -72,6 +72,12 @@ public class HudFileProxy extends ApiImplementor {
                     }
                     msg.setResponseBody(api.getFile(msg, file));
                     msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
+                    
+                    if (msg.getRequestHeader().getURI().toString().startsWith(API.API_URL_S)) {
+                        msg.getResponseHeader().setHeader("Content-Security-Policy", HudAPI.CSP_POLICY);
+                    }
+
+                    
                     return msg.getResponseBody().toString();
                 } else if (query.indexOf("image=") > 0) {
                     String file = query.substring(query.indexOf("image=") + 6);

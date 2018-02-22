@@ -41,6 +41,7 @@ import org.parosproxy.paros.core.scanner.Alert;
 import org.parosproxy.paros.model.Model;
 import org.parosproxy.paros.model.SiteNode;
 import org.parosproxy.paros.network.HttpMessage;
+import org.parosproxy.paros.view.View;
 import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.api.ApiAction;
 import org.zaproxy.zap.extension.api.ApiException;
@@ -56,14 +57,16 @@ import org.zaproxy.zap.extension.brk.ExtensionBreak;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.spider.ExtensionSpider;
 import org.zaproxy.zap.extension.spider.SpiderScan;
+import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 
 import net.sf.json.JSONObject;
 
 public class HudAPI extends ApiImplementor {
 
-	private static final String CSP_POLICY =
-			"default-src 'none'; script-src 'self'; connect-src 'self'; child-src 'self'; img-src 'self' data:; "
-			+ "font-src 'self' data:; style-src 'self';";
+    // TODO shouldnt allow unsafe-inline styles - need to work out where they are being used
+	protected static final String CSP_POLICY =
+			"default-src 'none'; script-src 'self'; connect-src https://zap wss://zap; frame-src 'self'; img-src 'self' data:; "
+			+ "font-src 'self' data:; style-src 'self' 'unsafe-inline' ;";
 
     private static final String PREFIX = "hud";
     
@@ -104,6 +107,25 @@ public class HudAPI extends ApiImplementor {
     	hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S); 
         hudApiProxy = new HudApiProxy();
         hudApiUrl = API.getInstance().getCallBackUrl(hudApiProxy, API.API_URL_S);
+
+        // Temporary hack to make it easier to find the websocket test page
+        // We could launch a browser, but then we'd need to depend on selenium
+        // and work out which browser to choose...
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
+                if (View.isInitialised()) {
+                    View.getSingleton().getOutputPanel().append(
+                            "The websocket testing page is: " + hudFileUrl + "?name=websockettest.html\n");
+                }
+            }
+        }.start();
+
     }
 
 	@Override
@@ -421,7 +443,8 @@ public class HudAPI extends ApiImplementor {
 
             if (url.startsWith(API.API_URL_S)) {
                 // Only do this on the ZAP domain
-                contents = contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl);
+                contents = contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
+                        .replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
             }
             
             return contents;
@@ -430,6 +453,14 @@ public class HudAPI extends ApiImplementor {
             logger.error(e.getMessage(), e);
             return null;
         }
+    }
+    
+    private String websocketUrl;
+    private String getWebSocketUrl() {
+        if (websocketUrl == null) {
+            websocketUrl = Control.getSingleton().getExtensionLoader().getExtension(ExtensionWebSocket.class).getCallbackUrl();
+        }
+        return websocketUrl;
     }
 
     protected byte[] getImage (String name) {
@@ -463,6 +494,7 @@ public class HudAPI extends ApiImplementor {
 			//todo: found this necessary to cache, remove if not
 			sb.append("Cache-Control: public,max-age=3000000\r\n");
 		}
+		sb.append("Content-Security-Policy: ").append(HudAPI.CSP_POLICY).append("\r\n");
 		sb.append("Access-Control-Allow-Methods: GET,POST,OPTIONS\r\n");
 		sb.append("Access-Control-Allow-Headers: ZAP-Header\r\n");
 		sb.append("X-XSS-Protection: 1; mode=block\r\n");
