@@ -16,7 +16,7 @@
 		<file>hud/libraries/alertify.js</file>
 		<file>hud/libraries/localforage.min.js</file>
 		<file>hud/libraries/vue.js</file>
-		<file>hud/libraries/spectre.min.js</file>
+		<file>hud/libraries/spectre.min.css</file>
 		<file>hud/panel.html</file>
 		<file>hud/panel.css</file>
 		<file>hud/panel.js</file>
