@@ -11,10 +11,6 @@ var ORIENTATION = /ORIENTATION/g;
 var isDebugging = true;
 
 var urlsToCache = [
-	"<<ZAP_HUD_FILES>>?name=libraries/jquery-1.12.0.js",
-	"<<ZAP_HUD_FILES>>?name=libraries/jquery-ui.js",
-	"<<ZAP_HUD_FILES>>?name=libraries/jquery-ui.css",
-	"<<ZAP_HUD_FILES>>?name=libraries/jquery-ui.theme.css",
 	"<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js",
 	"<<ZAP_HUD_FILES>>?name=utils.js",
 	"<<ZAP_HUD_FILES>>?name=panel.html",
@@ -31,14 +27,6 @@ var urlsToCache = [
 	"<<ZAP_HUD_FILES>>?name=timelinePane.js",
 	"<<ZAP_HUD_FILES>>?name=growlerAlerts.html",
 	"<<ZAP_HUD_FILES>>?name=growlerAlerts.js",
-	"<<ZAP_HUD_FILES>>?image=ui-bg_glass_75_79c9ec_1x400.png",
-	"<<ZAP_HUD_FILES>>?image=ui-bg_inset-hard_100_fcfdfd_1x100.png",
-	"<<ZAP_HUD_FILES>>?image=ui-icons_0078ae_256x240.png",
-	"<<ZAP_HUD_FILES>>?image=ui-icons_056b93_256x240.png",
-	"<<ZAP_HUD_FILES>>?image=ui-icons_e0fdff_256x240.png",
-	"<<ZAP_HUD_FILES>>?image=ui-icons_f5e175_256x240.png",
-	"<<ZAP_HUD_FILES>>?image=ui-bg_highlight-soft_45_0078ae_1x100.png",
-	"<<ZAP_HUD_FILES>>?image=ui-bg_highlight-soft_75_2191c0_1x100.png",
 ];
 
 var toolScripts = [
