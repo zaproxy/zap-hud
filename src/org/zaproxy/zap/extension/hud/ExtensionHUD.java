@@ -45,6 +45,7 @@ import org.zaproxy.zap.extension.script.ExtensionScript;
 import org.zaproxy.zap.extension.script.ScriptEventListener;
 import org.zaproxy.zap.extension.script.ScriptType;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
+import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 import org.zaproxy.zap.view.ZapToggleButton;
 
 /*
@@ -78,6 +79,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	static {
 	    List<Class<? extends Extension>> dependencies = new ArrayList<>(1);
 	    dependencies.add(ExtensionScript.class);
+        dependencies.add(ExtensionWebSocket.class);
 
 	    DEPENDENCIES = Collections.unmodifiableList(dependencies);
 	}

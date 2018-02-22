@@ -1,0 +1,40 @@
+<html>
+<head>
+	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=websockettest.js"></script>
+	<title>Web Socket API Test Page</title>
+</head>
+<body>
+	<H1>Web Socket API Test Page</H1>
+	This is a temporary page for testing the ZAP API over websockets.<br>
+	It should be removed from the HUD prior to release.<br>
+	
+	<form>
+	<table width="80%">
+	<tr><td>
+	Type in commands here, eg: (click on commands below to copy them to the input field)
+	<ul>
+	<li><div id="ex1">{ "component" : "core", "type" : "view", "name" : "version" }</div>
+	<li><div id="ex2">{ "component" : "core", "type" : "view", "name" : "sites" }</div>
+	<li><div id="ex3">{ "component" : "event", "type" : "register", "name" : "org.zaproxy.zap.extension.alert.AlertEventPublisher" }</div>
+	<li><div id="ex4">{ "component" : "event", "type" : "unregister", "name" : "org.zaproxy.zap.extension.alert.AlertEventPublisher" }</div>
+	</ul>
+	</td></tr>
+	<tr><td>
+	<input id="wsinput" type="text" style="width:100%"><br>
+	<input id="wssend" type="button" value="Send">
+	</td></tr>
+	<tr><td>
+	Messages from ZAP will appear here:<br>
+	</td></tr>
+	<tr><td>
+	<textarea style="width:100%" rows=30 id="wsoutput" readonly></textarea>
+	</td></tr>
+	<tr><td>
+	<input id="wsclear" type="button" value="Clear">
+	</td></tr>
+	</table>
+	</form>
+
+</body>
+
+</html>
