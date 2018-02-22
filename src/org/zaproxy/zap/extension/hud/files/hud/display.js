@@ -1,6 +1,22 @@
+// app is the main Vue object controlling everything
 var app;
-window.Event = new Vue();
 
+// the Event wrapper class will act as an Event dispatcher for Vue
+window.Event = new class {
+	constructor() {
+		this.vue = new Vue();
+	}
+
+	fire(event, data = null) {
+		this.vue.$emit(event, data);
+	}
+
+	listen(event, callback) {
+		this.vue.$on(event, callback);
+	}
+}
+
+/* Vue Components */
 Vue.component('modal', {
 	template: '#modal-template',
 	props: ['show', 'title', 'text'],
@@ -10,19 +26,11 @@ Vue.component('modal', {
 		},
 		afterLeave: function (el) {
 			if (!app.keepShowing) {
-				parent.postMessage({action:"hideMainDisplay"}, document.referrer);
+				hideDisplayFrame();
 			}
 			app.keepShowing = false;
 		}
-	},
-	mounted: function () {
-		// todo: supposed to close modal on escape key, doesn't work
-		document.addEventListener("keydown", (e) => {
-			if (this.show && e.keyCode == 27) {
-				this.close();
-			}
-		});
-	},
+	}
 })
 
 Vue.component('dialog-modal', {
@@ -49,7 +57,7 @@ Vue.component('dialog-modal', {
 	created: function() {
 		let self = this;
 
-		Event.$on('showDialogModal', function(data) {
+		Event.listen('showDialogModal', function(data) {
 
 			app.isDialogModalShown = true;
 			app.dialogModalTitle = data.title;
@@ -78,7 +86,7 @@ Vue.component('select-tool-modal', {
 	created: function() {
 		let self = this;
 
-		Event.$on('showSelectToolModal', function(data) {
+		Event.listen('showSelectToolModal', function(data) {
 			app.isSelectToolModalShown = true;
 			
 			self.tools = data.tools;
@@ -118,7 +126,7 @@ Vue.component('all-alerts-modal', {
 	created: function() {
 		let self = this;
 		
-		Event.$on('showAllAlertsModal', function(data) {
+		Event.listen('showAllAlertsModal', function(data) {
 			app.isAllAlertsModalShown = true;
 			app.allAlertsModalTitle = data.title;
 
@@ -145,7 +153,7 @@ Vue.component('alert-list-modal', {
 	created() {
 		let self = this;
 
-		Event.$on('showAlertListModal', function(data) {
+		Event.listen('showAlertListModal', function(data) {
 			app.isAlertListModalShown = true;
 			app.alertListModalTitle = data.title;
 
@@ -190,7 +198,7 @@ Vue.component('alert-details-modal', {
 	created() {
 		let self = this;
 
-		Event.$on('showAlertDetailsModal', function(data) {
+		Event.listen('showAlertDetailsModal', function(data) {
 			app.isAlertDetailsModalShown = true;
 			app.alertDetailsModalTitle = data.title;
 			
@@ -221,7 +229,7 @@ Vue.component('simple-menu-modal', {
 	created() {
 		let self = this;
 
-		Event.$on('showSimpleMenuModal', function(data) {
+		Event.listen('showSimpleMenuModal', function(data) {
 			app.isSimpleMenuModalShown = true;
 			app.simpleMenuModalTitle = data.title;
 
@@ -273,7 +281,8 @@ Vue.component('tab', {
 });
 
 document.addEventListener("DOMContentLoaded", function() {
-	
+
+	/* Vue app */
 	app = new Vue({
 		el: '#app',
 		data: {
@@ -295,126 +304,92 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 navigator.serviceWorker.addEventListener("message", function(event) {
-	var message = event.data;
+	var action = event.data.action;
+	var config = event.data.config;
+	var port = event.ports[0];
 	
-	switch(message.action) {
+	switch(action) {
 		case "showDialog":
-			showDialog(message.config, event.ports[0]);
+			Event.fire('showDialogModal', {
+				title: config.title, 
+				text: config.text,
+				buttons: config.buttons,
+				port: port
+			});
+			
 			break;
 
 		case "showAddToolList":
-			showSelectTool(message.config, event.ports[0]);
+			Event.fire('showSelectToolModal', {
+				tools: config.tools,
+				port: port
+			});
+		
 			break;
 
 		case "showAlerts":
-			showAlertList(message.config, event.ports[0]);
+			Event.fire('showAlertListModal', {
+				title: config.title,
+				alerts: config.alerts,
+				port: port
+			});
+		
 			break;
 
 		case "showAllAlerts":
-			showAllAlerts(message.config, event.ports[0]);
+			Event.fire('showAllAlertsModal', {
+				title: config.title,
+				alerts: config.alerts,
+				port: port
+			});
+		
 			break;
 
 		case "showAlertDetails":
-			showAlertDetails(message.config, event.ports[0]);
+			Event.fire('showAlertDetailsModal', {
+				title: config.title,
+				details: config.details,
+				port: port
+			});
+		
 			break;
 
 		case "showButtonOptions":
-			showButtonOptions(message.config, event.ports[0]);
+			Event.fire('showSimpleMenuModal', {
+				title: config.toolLabel,
+				items: config.options,
+				port: port
+			});
+		
 			break;
 
 		case "showHudSettings":
-			showHudSettings(message.config, event.ports[0]);
+			Event.fire('showSimpleMenuModal', {
+				title: 'HUD Settings',
+				items: config.settings,
+				port: port
+			});
+		
 			break;
 
 		case "showHttpMessage":
-			showHttpMessage(message.config, event.ports[0]);
+			//TODO: implement when fixing break & timeline
 			break;
 
 		default:
 			break;
 	}
+
+	// show the display frame
+	showDisplayFrame();
 });
 
-function showDialog(config, port) {
-	Event.$emit('showDialogModal', {
-		title: config.title, 
-		text: config.text,
-		buttons: config.buttons,
-		port: port
-	});
-	
-	showMainDisplay();
-}
-
-function showSelectTool(config, port) {
-	Event.$emit('showSelectToolModal', {
-		tools: config.tools,
-		port: port
-	});
-
-	showMainDisplay();
-}
-
-function showAlertList(config, port) {
-	Event.$emit('showAlertListModal', {
-		title: config.title,
-		alerts: config.alerts,
-		port: port
-	});
-
-	showMainDisplay();
-}
-
-function showAllAlerts(config, port) {
-	Event.$emit('showAllAlertsModal', {
-		title: config.title,
-		alerts: config.alerts,
-		port: port
-	});
-
-	showMainDisplay();
-}
-
-function showAlertDetails(config, port) {
-	Event.$emit('showAlertDetailsModal', {
-		title: config.title,
-		details: config.details,
-		port: port
-	});
-
-	showMainDisplay();
-}
-
-function showButtonOptions(config, port) {
-	Event.$emit('showSimpleMenuModal', {
-		title: config.toolLabel,
-		items: config.options,
-		port: port
-	});
-
-	showMainDisplay();
-}
-
-function showHudSettings(config, port) {
-	Event.$emit('showSimpleMenuModal', {
-		title: 'HUD Settings',
-		items: config.settings,
-		port: port
-	});
-
-	showMainDisplay();
-}
-
-function showHttpMessage(config, port) {
-
-}
-
 /* the injected script makes the main frame visible */
-function showMainDisplay() {
+function showDisplayFrame() {
 	return messageWindow(parent, {action: "showMainDisplay"}, document.referrer);
 }
 
 /* the injected script makes the main frame invisible */
-function hideMainDisplay() {
+function hideDisplayFrame() {
 	parent.postMessage({action:"hideMainDisplay"}, document.referrer);
 }
