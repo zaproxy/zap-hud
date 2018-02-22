@@ -14,10 +14,6 @@
 	<filters/>
 	<files>
 		<file>hud/libraries/alertify.js</file>
-		<file>hud/libraries/jquery-1.12.0.js</file>
-		<file>hud/libraries/jquery-ui.css</file>
-		<file>hud/libraries/jquery-ui.js</file>
-		<file>hud/libraries/jquery-ui.theme.css</file>
 		<file>hud/libraries/localforage.min.js</file>
 		<file>hud/libraries/vue.js</file>
 		<file>hud/panel.html</file>
