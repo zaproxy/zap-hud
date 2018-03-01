@@ -63,7 +63,7 @@ var Spider = (function() {
 				return config;
 			})
 			.then(function(config) {
-				return messageFrame("mainDisplay", {action:"showDialog", config:config});
+				return messageFrame("display", {action:"showDialog", config:config});
 			})
 			.then(function(response) {
 				// Handle button choice
@@ -148,7 +148,7 @@ var Spider = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: "Remove"};
 
-		messageFrame("mainDisplay", {action:"showButtonOptions", config:config}).then(function(response) {
+		messageFrame("display", {action:"showButtonOptions", config:config}).then(function(response) {
 			// Handle button choice
 			if (response.id == "remove") {
 				removeToolFromPanel(NAME);

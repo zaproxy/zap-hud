@@ -20,17 +20,15 @@
 	<filters/>
 	<files>
 		<file>hud/libraries/alertify.js</file>
-		<file>hud/libraries/jquery-1.12.0.js</file>
-		<file>hud/libraries/jquery-ui.css</file>
-		<file>hud/libraries/jquery-ui.js</file>
-		<file>hud/libraries/jquery-ui.theme.css</file>
 		<file>hud/libraries/localforage.min.js</file>
+		<file>hud/libraries/vue.js</file>
+		<file>hud/libraries/spectre.min.css</file>
 		<file>hud/panel.html</file>
 		<file>hud/panel.css</file>
 		<file>hud/panel.js</file>
-		<file>hud/main.html</file>
-		<file>hud/main.css</file>
-		<file>hud/main.js</file>
+		<file>hud/display.html</file>
+		<file>hud/display.css</file>
+		<file>hud/display.js</file>
 		<file>hud/utils.js</file>
 		<file>hud/management.html</file>
 		<file>hud/management.css</file>

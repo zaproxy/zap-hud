@@ -6,16 +6,26 @@ var alertUtils = (function() {
 		loadTool(toolname)
 			.then(function(tool) {
 				config.alerts = tool.alerts[target];
-				config.alertRisk = alertRisk;
-				config.alertType = tool.alertType
+				// build the string for the title
+				config.title = tool.alertType[0].toUpperCase() + tool.alertType.substring(1, tool.alertType.indexOf('-')) + " Alerts"
 
-				messageFrame("mainDisplay", {action:"showAlerts", config:config}).then(function(response) {
+				// by default show ALL alert
+				var action = "showAllAlerts";
+				if (alertRisk) {
+					// TODO: capitalize the alert risk in the tools so that this just works
+					// capitalize the alert risk level 
+					alertRisk = alertRisk[0].toUpperCase() + alertRisk.substring(1);
+
+					// submit just the alerts for this risk level, change the title, and change the display action
+					config.alerts = config.alerts[alertRisk];
+					config.title = alertRisk + " " + config.title
+					action = "showAlerts";
+				}
+
+				messageFrame("display", {action: action, config:config}).then(function(response) {
 					// Handle button choice
-					if ("id" in response) {
-						showAlertDetails(response.id);
-					}
-					else {
-						//cancel
+					if (response.alertId) {
+						showAlertDetails(response.alertId);
 					}
 				});
 			})
@@ -25,16 +35,26 @@ var alertUtils = (function() {
 	}
 
 	function showAlertDetails(id) {
+		console.log("id: " + id.toString())
+		// get the alert details given the id
 		fetch("<<ZAP_HUD_API>>/core/view/alert/?id=" + id)
 			.then(function(response) {
 
-				response.json().then(function(json) {
+				response.json().
+					then(function(json) {
 
-					var config = {};
-					config.details = json.alert;
+						var config = {};
+						config.title = json.alert.alert + ' (' + json.alert.id + ')';
+						config.details = json.alert;
 
-					messageFrame("mainDisplay", {action: "showAlertDetails", config: config});
-				});
+						messageFrame("display", {action: "showAlertDetails", config: config});
+					})
+					.catch(function(err) {
+						console.log(err);
+					});
+			})
+			.catch(function(err) {
+				console.log(err);
 			});
 	}
 
@@ -76,7 +96,6 @@ var alertUtils = (function() {
 
 				// filter out unrelated alerts for the risk-specific tools
 				if (alertRisk) {
-					console.log(alertRisk)
 					data = data.filter(function(alert) {
 						return alert.risk.toLowerCase() === alertRisk;
 					})
@@ -122,7 +141,7 @@ var alertUtils = (function() {
 		config.toolLabel = toolLabel;
 		config.options = {opt1: "Option 1", opt2: "Option 2", remove: "Remove"};
 
-		messageFrame("mainDisplay", {action:"showButtonOptions", config:config}).then(function(response) {
+		messageFrame("display", {action:"showButtonOptions", config:config}).then(function(response) {
 			// Handle button choice
 			if (response.id == "opt1") {
 				console.log("Option 1 chosen");
