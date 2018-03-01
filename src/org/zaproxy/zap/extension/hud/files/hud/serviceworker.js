@@ -13,18 +13,14 @@ var isDebugging = true;
 var webSocket;
 
 var urlsToCache = [
-	"<<ZAP_HUD_FILES>>?name=libraries/jquery-1.12.0.js",
-	"<<ZAP_HUD_FILES>>?name=libraries/jquery-ui.js",
-	"<<ZAP_HUD_FILES>>?name=libraries/jquery-ui.css",
-	"<<ZAP_HUD_FILES>>?name=libraries/jquery-ui.theme.css",
 	"<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js",
 	"<<ZAP_HUD_FILES>>?name=utils.js",
 	"<<ZAP_HUD_FILES>>?name=panel.html",
 	"<<ZAP_HUD_FILES>>?name=panel.css",
 	"<<ZAP_HUD_FILES>>?name=panel.js",
-	"<<ZAP_HUD_FILES>>?name=main.css",
-	"<<ZAP_HUD_FILES>>?name=main.html",
-	"<<ZAP_HUD_FILES>>?name=main.js",
+	"<<ZAP_HUD_FILES>>?name=display.css",
+	"<<ZAP_HUD_FILES>>?name=display.html",
+	"<<ZAP_HUD_FILES>>?name=display.js",
 	"<<ZAP_HUD_FILES>>?name=management.css",
 	"<<ZAP_HUD_FILES>>?name=management.html",
 	"<<ZAP_HUD_FILES>>?name=management.js",
@@ -33,14 +29,6 @@ var urlsToCache = [
 	"<<ZAP_HUD_FILES>>?name=timelinePane.js",
 	"<<ZAP_HUD_FILES>>?name=growlerAlerts.html",
 	"<<ZAP_HUD_FILES>>?name=growlerAlerts.js",
-	"<<ZAP_HUD_FILES>>?image=ui-bg_glass_75_79c9ec_1x400.png",
-	"<<ZAP_HUD_FILES>>?image=ui-bg_inset-hard_100_fcfdfd_1x100.png",
-	"<<ZAP_HUD_FILES>>?image=ui-icons_0078ae_256x240.png",
-	"<<ZAP_HUD_FILES>>?image=ui-icons_056b93_256x240.png",
-	"<<ZAP_HUD_FILES>>?image=ui-icons_e0fdff_256x240.png",
-	"<<ZAP_HUD_FILES>>?image=ui-icons_f5e175_256x240.png",
-	"<<ZAP_HUD_FILES>>?image=ui-bg_highlight-soft_45_0078ae_1x100.png",
-	"<<ZAP_HUD_FILES>>?image=ui-bg_highlight-soft_75_2191c0_1x100.png",
 ];
 
 var toolScripts = [
@@ -246,8 +234,8 @@ function saveFrameId(event) {
 						saveFrame(panel);
 					});
 				}
-				else if (client.url.endsWith("main.html")) {
-					loadFrame("mainDisplay").then(function(panel) {
+				else if (client.url.endsWith("display.html")) {
+					loadFrame("display").then(function(panel) {
 						panel.clientId = client.id;
 					
 						saveFrame(panel);
@@ -369,10 +357,31 @@ function onTargetLoad() {
 function showAddToolDialog(panelKey) {
 	var config = {};
 
-	messageFrame("mainDisplay", {action: "showAddToolList", config: config}).then(function(response) {
+	loadAllTools()
+		.then(function(tools) {
 
-		addToolToPanel(response.id, panelKey);
-	});
+			// filter out unselected tools
+			tools = tools.filter(tool => !tool.isSelected);
+	
+			// reformat for displaying in list
+			tools = tools.map(function (tool) {
+				return {'label': tool.label, 'image': '<<ZAP_HUD_FILES>>?image=' + tool.icon, 'toolname': tool.name};
+			});
+
+			return tools;
+		})
+		.then(function(tools) {
+			// add tools to the config
+			config.tools = tools;
+
+			// display tools to select
+			messageFrame("display", {action: "showAddToolList", config: config}).then(function(response) {
+				addToolToPanel(response.toolname, panelKey);
+			});
+		})
+		.catch(function(err) {
+			console.log(Error(err));
+		});
 }
 
 function showHudSettings() {
@@ -381,7 +390,7 @@ function showHudSettings() {
 		initialize: "Reset Configurations to Default",
 	};
 
-	messageFrame("mainDisplay", {action: "showHudSettings", config: config}).then(function(response) {
+	messageFrame("display", {action: "showHudSettings", config: config}).then(function(response) {
 		if (response.id === "initialize") {
 			resetToDefault();
 		}
