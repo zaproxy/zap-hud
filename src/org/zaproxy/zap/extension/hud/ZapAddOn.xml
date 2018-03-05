@@ -19,47 +19,48 @@
 	<pscanrules/>
 	<filters/>
 	<files>
-		<file>hud/libraries/alertify.js</file>
-		<file>hud/libraries/localforage.min.js</file>
-		<file>hud/libraries/vue.js</file>
-		<file>hud/libraries/spectre.min.css</file>
-		<file>hud/panel.html</file>
-		<file>hud/panel.css</file>
-		<file>hud/panel.js</file>
-		<file>hud/display.html</file>
 		<file>hud/display.css</file>
+		<file>hud/display.html</file>
 		<file>hud/display.js</file>
-		<file>hud/utils.js</file>
-		<file>hud/management.html</file>
-		<file>hud/management.css</file>
-		<file>hud/management.js</file>
 		<file>hud/growlerAlerts.html</file>
 		<file>hud/growlerAlerts.js</file>
-		<file>hud/timelinePane.html</file>
-		<file>hud/timelinePane.css</file>
-		<file>hud/timelinePane.js</file>
+		<file>hud/libraries/alertify.js</file>
+		<file>hud/libraries/localforage.min.js</file>
+		<file>hud/libraries/spectre.min.css</file>
+		<file>hud/libraries/vue.js</file>
+		<file>hud/management.css</file>
+		<file>hud/management.html</file>
+		<file>hud/management.js</file>
+		<file>hud/panel.css</file>
+		<file>hud/panel.html</file>
+		<file>hud/panel.js</file>
 		<file>hud/pollWorker.js</file>
 		<file>hud/serviceworker.js</file>
+		<file>hud/target/inject.js</file>
 		<file>hud/target/injectionHtml.html</file>
 		<file>hud/target/injectionHtmlTimeline.html</file>
-		<file>hud/target/inject.js</file>
-		<file>hud/tools/alertUtils.js</file>
-		<file>hud/tools/scope.js</file>
-		<file>hud/tools/spider.js</file>
-		<file>hud/tools/timeline.js</file>
+		<file>hud/timelinePane.css</file>
+		<file>hud/timelinePane.html</file>
+		<file>hud/timelinePane.js</file>
+		<file>hud/timelinePaneWorker.js</file>
 		<file>hud/tools/activeScan.js</file>
+		<file>hud/tools/alertUtils.js</file>
+		<file>hud/tools/attack.js</file>
+		<file>hud/tools/break.js</file>
 		<file>hud/tools/pageAlerts.js</file>
 		<file>hud/tools/pageAlertsHigh.js</file>
-		<file>hud/tools/pageAlertsMedium.js</file>
-		<file>hud/tools/pageAlertsLow.js</file>
 		<file>hud/tools/pageAlertsInformational.js</file>
+		<file>hud/tools/pageAlertsLow.js</file>
+		<file>hud/tools/pageAlertsMedium.js</file>
+		<file>hud/tools/scope.js</file>
 		<file>hud/tools/siteAlerts.js</file>
 		<file>hud/tools/siteAlertsHigh.js</file>
-		<file>hud/tools/siteAlertsMedium.js</file>
-		<file>hud/tools/siteAlertsLow.js</file>
 		<file>hud/tools/siteAlertsInformational.js</file>
-		<file>hud/tools/break.js</file>
-		<file>hud/tools/attack.js</file>
+		<file>hud/tools/siteAlertsLow.js</file>
+		<file>hud/tools/siteAlertsMedium.js</file>
+		<file>hud/tools/spider.js</file>
+		<file>hud/tools/timeline.js</file>
+		<file>hud/utils.js</file>
 		<file>hud/websockettest.html</file>
 		<file>hud/websockettest.js</file>
 	</files>
