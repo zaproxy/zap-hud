@@ -44,7 +44,7 @@ var alertUtils = (function() {
 					then(function(json) {
 
 						var config = {};
-						config.title = json.alert.alert + ' (' + json.alert.id + ')';
+						config.title = json.alert.alert;
 						config.details = json.alert;
 
 						messageFrame("display", {action: "showAlertDetails", config: config});
