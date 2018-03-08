@@ -230,6 +230,7 @@ public class HudAPI extends ApiImplementor {
 					alertAtts.put("risk", Alert.MSG_RISK[alert.getRisk()]);
 					alertAtts.put("param", alert.getParam());
 					alertAtts.put("id", Integer.toString(alert.getAlertId()));
+					alertAtts.put("uri", alert.getUri());
 					summary.add(alertAtts);
 				}
 				for (Entry<Integer, Map<String, Integer>> entry : alertCounts.entrySet()) {
@@ -269,6 +270,7 @@ public class HudAPI extends ApiImplementor {
 								alertAtts.put("param", alert.getParam());
 								alertAtts.put("id", Integer.toString(alert.getAlertId()));
 								//pageAlerts.addItem(new ApiResponseSet("alert", alertAtts));
+								alertAtts.put("uri", alert.getUri());
 								pageAlerts.add(alertAtts);
 							}
 						}
