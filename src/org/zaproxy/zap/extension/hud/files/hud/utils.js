@@ -130,6 +130,17 @@ function parsePathFromUrl(url) {
 }
 
 /*
+ * Return a parameter value from a uri string
+ */
+function getParamater(url, parameter) {
+	var start = url.indexOf(parameter) + parameter.length + 1;
+	var end = url.indexOf("&", start);
+	end = end == -1 ? url.length : end;
+
+	return url.substring(start, end);
+}
+
+/*
  * Return whether configureStorage has been run yet.
  */
 function isStorageConfigured() {
