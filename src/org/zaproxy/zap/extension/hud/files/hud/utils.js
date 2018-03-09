@@ -4,6 +4,8 @@
  * Description goes here...
  */
 
+var IS_HUD_CONFIGURED = "isHudConfigured";
+
 var CLIENT_LEFT = "left";
 var CLIENT_RIGHT = "right";
 
@@ -14,8 +16,14 @@ var BUTTON_DATA = /BUTTON_DATA/g;
 var BUTTON_LABEL = /BUTTON_LABEL/g;
 var IMAGE_NAME = /IMAGE_NAME/g;
 
+// default tools
+var DEFAULT_TOOLS_LEFT = ["scope", "break", "site-alerts-high", "site-alerts-medium", "site-alerts-low", "site-alerts-informational"];
+var DEFAULT_TOOLS_RIGHT = ["spider", "active-scan", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational"];
 
-/* given the text from an HTTP request header, returns a parsed object */
+
+/*
+ * Given the text from an HTTP request header, returns a parsed object.
+ */
 function parseRequestHeader(headerText) {
 	var header = {};
 
@@ -42,8 +50,9 @@ function parseRequestHeader(headerText) {
 	return header;
 }
 
-/* given the text from an HTTP response header, returns a parsed object */
-// todo: write this function
+/*
+ * Given the text from an HTTP response header, returns a parsed object.
+ */
 function parseResponseHeader(headerText) {
 	var header = {};
 
@@ -70,29 +79,9 @@ function parseResponseHeader(headerText) {
 	return header;
 }
 
-/* returns the send() function on xmlRequest object initialized to the given 
-   restString and can handle return data with the callback function*/
-//todo: using fetch from SW instead
-function buildApiCall(restString, callback) {
-	var xmlRequest = new XMLHttpRequest();
-
-	if (callback) {
-		xmlRequest.onreadystatechange = function() {
-			if (xmlRequest.readyState === XMLHttpRequest.DONE && xmlRequest.status === 200) {
-				callback(xmlRequest.responseText);
-			}
-			else {
-				// error handling
-			}
-		};
-	}
-
-	xmlRequest.open("GET", "<<ZAP_HUD_API>>/"+restString, true);
-	
-	return xmlRequest.send();
-}
-
-/* checks whether a message is from the ZAP domain or is a worker */
+/*
+ * Checks whether a message is from the ZAP domain or is a worker.
+ */
 function isFromTrustedOrigin (message) {
 
 	if (message.origin === "https://zap" || message.isTrusted) {
@@ -102,7 +91,9 @@ function isFromTrustedOrigin (message) {
 	return false;
 }
 
-/* parses the domain from a uri string */
+/* 
+ * Parses the domain from a uri string.
+ */
 function parseDomainFromUrl(url) {
 	var hostname;
 	var protocol;
@@ -128,7 +119,7 @@ function parseDomainFromUrl(url) {
 	return protocol + hostname;
 }
 
-// These functions don't work in SW - no document
+//todo change to be sw agnostic
 /* parses the path from a uri string */
 function parsePathFromUrl(url) {
 	var parser = document.createElement("a");
@@ -138,58 +129,21 @@ function parsePathFromUrl(url) {
 	return parser.pathname;
 }
 
-/* loads and returns HTML template, if templateLocation is included it will
-   look in a location other than document (i.e. nested templates) */
-function loadTemplate(templateId, templateLocation) {
-	var template;
-
-	if (templateLocation) {
-		template = templateLocation.getElementById(templateId);
-	}
-	else {
-		template = document.getElementById(templateId);
-	}
-	
-	return document.importNode(template.content, true);
-}
-
-/* checks wheher a frame on a sitecan be accessed */
-function checkFrame(frame, name) {
-	try {
-		return frame.name === name;
-	}
-	catch( e ) {
-		return false;
-	}
-}
-
-/* */
-function updateProgress(toolName, progress) {
-	if (progress !== "100") {
-		updateToolData(toolName, progress);
-	}
-	else if (progress === "100") {
-		updateToolData(toolName, "Start");
-		utils.setToolField(toolName, "isRunning", false);
-	}
-}
-
-
-/* STORAGE */
-var KEY_IS_CONFIG = "isHudConfigured";
-
+/*
+ * Return whether configureStorage has been run yet.
+ */
 function isStorageConfigured() {
-	return localforage.getItem(KEY_IS_CONFIG);
+	return localforage.getItem(IS_HUD_CONFIGURED);
 }
 
-//todo: could just be named "conigureFrames" 
+/*
+ * Initialize all of the info that will be stored in indexeddb.
+ */
 function configureStorage() {
 	var promises = [];
 
-
-	promises.push(localforage.setItem(KEY_IS_CONFIG, true));
+	promises.push(localforage.setItem(IS_HUD_CONFIGURED, true));
 		
-	// Configure Panels
 	promises.push(loadFrame("rightPanel").then(function(oldPanel) {
 		var panel = {};
 
@@ -213,7 +167,7 @@ function configureStorage() {
 			panel.clientId = oldPanel.clientId;
 		}
 
-		saveFrame(panel);
+		return saveFrame(panel);
 	}));
 	
 	promises.push(loadFrame("display").then(function(oldFrame) {
@@ -224,7 +178,7 @@ function configureStorage() {
 			frame.clientId = oldFrame.clientId;
 		}
 
-		saveFrame(frame);
+		return saveFrame(frame);
 	}));
 
 	promises.push(loadFrame("management").then(function(oldFrame) {
@@ -235,7 +189,7 @@ function configureStorage() {
 			frame.clientId = oldFrame.clientId;
 		}
 
-		saveFrame(frame);
+		return saveFrame(frame);
 	}));
 
 	promises.push(loadFrame("growlerAlerts").then(function(oldFrame) {
@@ -246,7 +200,7 @@ function configureStorage() {
 			frame.clientId = oldFrame.clientId;
 		}
 
-		saveFrame(frame);
+		return saveFrame(frame);
 	}));
 
 	promises.push(loadFrame("timelinePane").then(function(oldFrame) {
@@ -257,28 +211,26 @@ function configureStorage() {
 			frame.clientId = oldFrame.clientId;
 		}
 
-		saveFrame(frame);
+		return saveFrame(frame);
 	}));
 
 	return Promise.all(promises)
-		.catch(function(err) {
-			console.log(Error(err));
-		});
+		.catch(errorHandler);
 }
 
+/*
+ * Add the default tools to the panels.
+ */
 function setDefaultTools() {
-	// default tools
-	var leftTools = ["scope", "break", "site-alerts-high", "site-alerts-medium", "site-alerts-low", "site-alerts-informational"];
-	var rightTools = ["spider", "active-scan", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational"];
 
 	return new Promise(function(resolve) {
 		var promises = [];
 
-		leftTools.forEach(function(toolName) {
+		DEFAULT_TOOLS_LEFT.forEach(function(toolName) {
 			promises.push(function() { return addToolToPanel(toolName, "leftPanel");});
 		});
 
-		rightTools.forEach(function(toolName) {
+		DEFAULT_TOOLS_RIGHT.forEach(function(toolName) {
 			promises.push(function() { return addToolToPanel(toolName, "rightPanel");});
 		});
 
@@ -288,110 +240,111 @@ function setDefaultTools() {
 	});
 }
 
-/* loads and saves the "frame" object from local storage */
+/*
+ * Loads information about a frame as a blob from indexeddb.
+ */
 function loadFrame(key) {
-	return new Promise(function(resolve, reject) {
-		localforage.getItem(key).then(function(frame) {
-			resolve(frame);
-		}).catch(function(err) {
-			console.log(Error(err).stack);
-		});
-	});
+	return localforage.getItem(key)
+		.catch(errorHandler);
 }
 
+/*
+ * Save information about a frame as a blob in indexeddb.
+ */
 function saveFrame(frame) {
 	return localforage.setItem(frame.key, frame)
-		.catch(function(err) {
-			console.log(Error(err).stack);
-		});
+		.catch(errorHandler);
 }
 
+/*
+ * Add a singletoolname to the "tools" list in indexeddb.
+ */
 function registerTool(toolname) {
-	localforage.getItem("tools").then(function(tools) {
-		tools.push(toolname);
+	return localforage.getItem("tools")
+		.then(function(tools) {
+			tools.push(toolname);
 
-		localforage.setItem("tools", tools);
-	});
+			return localforage.setItem("tools", tools);
+		})
+		.catch(errorHandler);
 }
 
+/*
+ * Add a list of toolnames to the "tools" list in indexeddb.
+ */
 function registerTools(toolnames) {
-	localforage.getItem("tools").then(function(tools) {
-		tools = tools.concat(toolnames);
+	return localforage.getItem("tools")
+		.then(function(tools) {
+			tools = tools.concat(toolnames);
 
-		localforage.setItem("tools", tools);
-	});
+			return localforage.setItem("tools", tools);
+		})
+		.catch(errorHandler);
 }
 
-/* loads and saves the "tool" object from local storage */
-function loadTool(key) {
-	return new Promise(function(resolve) {
-		localforage.getItem(key).then(function(value) {
-			resolve(value);
-		}).catch(function(err) {
-			console.log(Error(err).stack);
-		});
-	});
+/* 
+ * loads the tool blob from indexeddb using the tool's name
+ */
+function loadTool(name) {
+	return localforage.getItem(name);
 }
 
+/* 
+ * saves the tool blob to indexeddb
+ */
 function saveTool(tool) {
-	return localforage.setItem(tool.name, tool).then(function(tool) {
-		// Notify Panel of Updated Data
-		if (tool.isSelected) {
-			messageFrame(tool.panel, {action:"updateData", tool:tool});
-		}
+	return localforage.setItem(tool.name, tool)
+		.then(function(tool) {
+			// Notify Panel of Updated Data
+			if (tool.isSelected) {
+				messageFrame(tool.panel, {action:"updateData", tool:tool});
+			}
 
-		return tool;
-	}).catch(function(err) {
-		console.log(Error(err));
-	});
+			return tool;
+		})
+		.catch(errorHandler);
 }
 
+/*
+ * Return all tools currently selected in a panel.
+ */
 function loadPanelTools(panelKey) {
-	return new Promise(function(resolve) {
-		loadFrame(panelKey).then(function(panel) {
+	return loadFrame(panelKey)
+		.then(function(panel) {
 			var toolPromises = [];
 
-			panel.tools.forEach(function(toolKey) {
-				
-				var p = new Promise(function(resolve) {
-					loadTool(toolKey).then(function(tool) {
-						resolve(tool);
-					});
-				});
+			panel.tools.forEach(function(toolname) {
+				var p = loadTool(toolname);
 				toolPromises.push(p);
 			});
 
-			Promise.all(toolPromises).then(function(tools) {
-				resolve(tools);
-			});
-		});
-	});
+			return Promise.all(toolPromises);
+		})
+		.catch(errorHandler);
 }
 
+/*
+ * Return all tools from indexdb.
+ */
 function loadAllTools() {
-	return new Promise(function(resolve) {
-
-		localforage.getItem("tools").then(function(toolnames) {
+	return localforage.getItem("tools")
+		.then(function(toolnames) {
 			var toolPromises = [];
 
 			toolnames.forEach(function(toolname) {
-				var p = new Promise(function(resolve) {
-					loadTool(toolname).then(function(tool) {
- 						resolve(tool);
-					});
-				});
+				var p = loadTool(toolname);
 				toolPromises.push(p);
-			});
+			})
 
-			Promise.all(toolPromises).then(function(tools) {
-				resolve(tools);
-			});
-		});
-	});
+			return Promise.all(toolPromises);
+		})
+		.catch(errorHandler);
 }
 
 
-/* adds a tool to specific panel */
+/* 
+ * Add a tool to a specific panel using the tool and panel keys.
+ */
 function addToolToPanel(toolKey, panelKey) {
 
 	var promises = [loadTool(toolKey), loadFrame(panelKey)];
@@ -408,9 +361,13 @@ function addToolToPanel(toolKey, panelKey) {
 			panel.tools.push(tool.name);
 
 			return Promise.all([saveTool(tool), saveFrame(panel)]);
-		});
+		})
+		.catch(errorHandler);
 }
 
+/*
+ * Remove a tool from a panel using the tool key.
+ */
 function removeToolFromPanel(toolKey) {
 
 	return loadTool(toolKey)
@@ -452,42 +409,39 @@ function removeToolFromPanel(toolKey) {
 
 			return messageFrame(panel.key, {action:"removeTool", tool:tool});
 		})
-		.catch(function(err) {
-			console.log(Error(err));
-		});
+		.catch(errorHandler);
 }
 
-// maybe add another function "messageFrameWithoutRespone" or something that doesn't depend on a repsonse
-// to the postMessage
+/*
+ * Send a postMessage to an iframe window using the custom stored frame key in indexdb.
+ */
 function messageFrame(key, message) {
-	return new Promise(function(resolve, reject) {
-		loadFrame(key).then(function(frame) {
-			clients.get(frame.clientId).then(function(client) {
-				if (client !== undefined) {
-
-					var channel = new MessageChannel();
-
-					channel.port1.onmessage = function(event) {
-						if (event.data.error) {
-							reject(event.data.error);
-						}
-						else {
-							resolve(event.data);
-						}
-					};
-
-					client.postMessage(message, [channel.port2]);
-				}
-				else {
-					console.log("info: client: " + key + " is unavailable. This is not an error.");
-				}
-			}).catch(function(err) {
-				console.log(Error(err));
-			});
-		});
-	});
+	return loadFrame(key)
+			.then(getWindowFromFrame)
+			.then(function(window) {
+				return messageWindow(window, message);
+			})
+			.catch(errorHandler);
 }
 
+/*
+ *	Get the window object from a stored frame blob.
+ */
+function getWindowFromFrame(frame) {
+	return clients.get(frame.clientId)
+		.then(function(client) {
+			if (client !== undefined) {
+				return client;
+			}
+			else {
+				throw new Error('No client with id: ' + frame.clientId + ' found.');
+			}
+		});
+}
+
+/*
+ * Send a postMessage to a window. 
+ */
 function messageWindow(window, message, origin) {
 	return new Promise(function(resolve, reject) {
 		var channel = new MessageChannel();
@@ -500,8 +454,13 @@ function messageWindow(window, message, origin) {
 				resolve(event.data);
 			}
 		};
-
-		window.postMessage(message, origin, [channel.port2]);
+		
+		if (origin) {
+			window.postMessage(message, origin, [channel.port2]);
+		}
+		else {
+			window.postMessage(message, [channel.port2]);
+		}
 	});
 }
 
@@ -522,6 +481,9 @@ function sortToolsByPosition(tools) {
 	});
 }
 
+/*
+ * Uses search and replace to construct the html for a tool's button.
+ */
 function configureButtonHtml(tool) {
 	var html = BUTTON_HTML;
 
@@ -538,12 +500,18 @@ function configureButtonHtml(tool) {
 	return html;
 }
 
-function utilCheck() {
-	console.log("LOADED FROM UTILS");
-}
-
-
 // todo: maybe needed instead of passing info through postmessage
 function getTargetDomain() {
 	return messageFrame("management", {action:"getTargetDomain"});
+}
+
+/*
+ * Log an error in a human readable way with a stack trace.
+ */
+function errorHandler(err) {
+	var message = err.toString() + '\n';
+
+	message += '\t' + err.stack.substring(0, err.stack.indexOf('/')) + ' (' + err.stack.substring(err.stack.indexOf('name=') + 5, err.stack.length - 1) + ')';
+
+	console.log(message);
 }

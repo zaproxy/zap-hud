@@ -9,26 +9,29 @@ var worker;
 function startServiceWorker() {
 	if ("serviceWorker" in navigator) {
 		
-		navigator.serviceWorker.register("<<ZAP_HUD_FILES>>?name=serviceworker.js").then(function(registration) {
-			console.log("Service worker registration successfully in scope: " + registration.scope);
-			return registration;
-			
-		}).then(function(registration) {
-			var wasInstall = registration.installing;
-			
-			navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
-				if (wasInstall && serviceWorkerRegistration.active) {
-					// force reload after installation
-					refreshTarget();
-				}
-				else {
-					onTargetLoadMessage();
-					startPollWorker();
-				}
+		navigator.serviceWorker.register("<<ZAP_HUD_FILES>>?name=serviceworker.js")
+			.then(function(registration) {
+				console.log("Service worker registration successfully in scope: " + registration.scope);
+				return registration;	
+			})
+			.then(function(registration) {
+				var wasInstall = registration.installing;
+				
+				navigator.serviceWorker.ready
+					.then(function(serviceWorkerRegistration) {
+						if (wasInstall && serviceWorkerRegistration.active) {
+							// force reload after installation
+							refreshTarget();
+						}
+						else {
+							onTargetLoadMessage();
+							startPollWorker();
+						}
+					});
+			})
+			.catch(function(err) {
+				console.log(Error("Service worker registration failed: " + err));
 			});
-		}).catch(function(err) {
-			console.log(Error("Service worker registration failed: " + err));
-		});
 	}
 }
 
