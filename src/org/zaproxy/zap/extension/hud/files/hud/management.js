@@ -29,9 +29,7 @@ function startServiceWorker() {
 						}
 					});
 			})
-			.catch(function(err) {
-				console.log(Error("Service worker registration failed: " + err));
-			});
+			.catch(errorHandler);
 	}
 }
 
@@ -40,9 +38,11 @@ function addButtonListener() {
 
 	// Reset HUD To Defaults
 	button.addEventListener("click", function() {
-		configureStorage().then(function() {
-			navigator.serviceWorker.controller.postMessage({action:"showHudSettings"});
-		});
+		configureStorage()
+			.then(function() {
+				navigator.serviceWorker.controller.postMessage({action:"showHudSettings"});
+			})
+			.catch(errorHandler);
 	});
 }
 
@@ -54,9 +54,11 @@ function startPollWorker() {
 	if (window.Worker) {
 		worker = new Worker("<<ZAP_HUD_FILES>>?name=pollWorker.js");
 
-		loadTool('timeline').then(function(tool) {
-			worker.postMessage({targetUrl: document.referrer, targetDomain: parseDomainFromUrl(document.referrer), lastMessage: tool.lastMessage});
-		});
+		loadTool('timeline')
+			.then(function(tool) {
+				worker.postMessage({targetUrl: document.referrer, targetDomain: parseDomainFromUrl(document.referrer), lastMessage: tool.lastMessage});
+			})
+			.catch(errorHandler);
 
 		worker.addEventListener("message", function(event) {
 			navigator.serviceWorker.controller.postMessage(event.data);
