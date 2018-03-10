@@ -5,6 +5,7 @@
  */
 
 var IS_HUD_CONFIGURED = "isHudConfigured";
+var IS_DEBUG_ENABLED = false;
 
 var CLIENT_LEFT = "left";
 var CLIENT_RIGHT = "right";
@@ -20,6 +21,8 @@ var IMAGE_NAME = /IMAGE_NAME/g;
 var DEFAULT_TOOLS_LEFT = ["scope", "break", "site-alerts-high", "site-alerts-medium", "site-alerts-low", "site-alerts-informational"];
 var DEFAULT_TOOLS_RIGHT = ["spider", "active-scan", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational"];
 
+
+class NoClientIdError extends Error {};
 
 /*
  * Given the text from an HTTP request header, returns a parsed object.
@@ -308,7 +311,10 @@ function saveTool(tool) {
 		.then(function(tool) {
 			// Notify Panel of Updated Data
 			if (tool.isSelected) {
-				messageFrame(tool.panel, {action:"updateData", tool:tool});
+				messageFrame(tool.panel, {action:"updateData", tool:tool})
+					.catch(function(err) {
+						// this is only catching the NoClientIdError 
+					});
 			}
 
 			return tool;
@@ -432,11 +438,20 @@ function messageFrame(key, message) {
 			.then(function(window) {
 				return messageWindow(window, message);
 			})
-			.catch(errorHandler);
+			.catch(function(err) {
+				// this catches all errors, unless it is a NoClientIdError
+				if (err instanceof NoClientIdError) {
+					throw err;
+				}
+				else {
+					errorHandler(err);
+				}
+			});
 }
 
 /*
- *	Get the window object from a stored frame blob.
+ * Get the window object from a stored frame blob. Throws NoClientIdError if
+ * the clientId doesn't exist.
  */
 function getWindowFromFrame(frame) {
 	return clients.get(frame.clientId)
@@ -445,7 +460,7 @@ function getWindowFromFrame(frame) {
 				return client;
 			}
 			else {
-				throw new Error('No client with id: ' + frame.clientId + ' found.');
+				throw new NoClientIdError('Could not find a client (window) of the service worker with id: ' + frame.clientId + ' found.');
 			}
 		});
 }
@@ -520,9 +535,38 @@ function getTargetDomain() {
  * Log an error in a human readable way with a stack trace.
  */
 function errorHandler(err) {
-	var message = err.toString() + '\n';
+	var message = err.toString();
 
-	message += '\t' + err.stack.substring(0, err.stack.indexOf('/')) + ' (' + err.stack.substring(err.stack.indexOf('name=') + 5, err.stack.length - 1) + ')';
+	// construct the stack trace
+	var lines = err.stack.split('\n').slice(0,-1);
+	lines.forEach(function(line) {
+		var functionName = line.substring(0, line.indexOf('/'));
+		var urlAndLineNo = line.substring(line.indexOf('http'), line.length - 1);
+		var parts = urlAndLineNo.split(':');
+		var url = parts[0] + ':' + parts[1];
+		var lineNo = parts[2] + ':' + parts[3];
 
-	console.log(message);
+		// if port is included in the url
+		if (parts.length > 4) {
+			var url = parts[0] + ':' + parts[1] + ':' + parts[2]
+			var lineNo = parts[3] + ':' + parts[4];
+		}
+
+		message += '\n\t ' + functionName + '    ' + url + ' ' + lineNo;
+	});
+
+	console.error(message);
+}
+
+/*
+ * Logs a debug message to the console.
+ */
+function debugHandler(message, object) {
+	if (IS_DEBUG_ENABLED) {
+		console.log(message);
+
+		if (object) {
+			console.log(object);
+		}
+	}
 }
