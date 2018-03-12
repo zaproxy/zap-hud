@@ -313,7 +313,9 @@ function saveTool(tool) {
 			if (tool.isSelected) {
 				messageFrame(tool.panel, {action:"updateData", tool:tool})
 					.catch(function(err) {
-						// this is only catching the NoClientIdError 
+						// this is only catching the NoClientIdError which occurs 
+						// when tools are added on startup and the panels haven't 
+						// been added yet
 					});
 			}
 
