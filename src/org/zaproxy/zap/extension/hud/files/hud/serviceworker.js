@@ -169,6 +169,8 @@ self.addEventListener("message", function(event) {
 	}
 });
 
+self.addEventListener('error', errorHandler);
+
 /* Set up WebSockets */
 
 webSocket = new WebSocket("<<ZAP_HUD_WS>>");
