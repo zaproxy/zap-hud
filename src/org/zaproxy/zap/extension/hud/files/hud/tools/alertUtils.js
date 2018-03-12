@@ -33,7 +33,6 @@ var alertUtils = (function() {
 	}
 
 	function showAlertDetails(id) {
-		console.log("id: " + id.toString())
 		// get the alert details given the id
 		fetch("<<ZAP_HUD_API>>/core/view/alert/?id=" + id)
 			.then(function(response) {
