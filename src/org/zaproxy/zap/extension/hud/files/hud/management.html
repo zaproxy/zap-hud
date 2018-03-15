@@ -1,23 +1,33 @@
 <html>
 <head>
+	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre.min.css"/>
 	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=management.css" />
 
+	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue.js"></script>
 	<script src="<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js"></script>
 	<script src="<<ZAP_HUD_FILES>>?name=utils.js"></script>
 	<script src="<<ZAP_HUD_FILES>>?name=management.js"></script>
 </head>
 <body>
-
-	<div class="button" id="settings-button">
-		<div class="button-icon" id="settings-button-icon"><img src="<<ZAP_HUD_FILES>>?image=gear.png" alt="gear.png" width="16" height="16"></div>
-		<div class="button-data" id="settings-button-data" style="display: none;"></div>
-		<div class="button-label" id="settings-button-label" style="display: none;">Settings</div>
+	<div id="app"> 
+		<hud-button v-show="isSettingsButtonShown" icon="<<ZAP_HUD_FILES>>?image=gear.png"></hud-button>
+		<loading-screen v-show="isLoadingScreenShown"></loading-screen>
 	</div>
 
-	<!-- for a loading/welcome screen on first run if needed
-	<div id="loading-background">
-	<h1> Loading HUD (insert cool loading visual) </h1>
-	</div>
-	-->
+	<template id="hud-button-template">
+		<div class="chip" @click="click" @mouseover="showData = true" @mouseleave="showData = false">
+			<img :src="icon">
+			<span>{{label}}</span>
+			<span v-show="showData">{{data}}</span>
+		</div>
+	</template>
+
+	<!-- TODO: make this a super cool loading screen -->
+	<template id="loading-screen-template">
+		<div>
+			<h1>The HUD is loading.</h1>
+		</div>
+	</template>
+
 </body>
 </html>

@@ -121,6 +121,15 @@
 		document.getElementById("main-display").style.display = "none";
 	}
 
+	function expandManagement() {
+		document.getElementById("management").style.width = "100%";
+		document.getElementById("management").style.height = "100%";
+	}
+
+	function contractManagement() {
+		document.getElementById("management").style.width = "50px";
+		document.getElementById("management").style.height = "50px";
+	}
 
 	/* COMMUNICATIONS */
 	function receiveMessages (event) {
@@ -159,6 +168,15 @@
 
 			case "contractPanel":
 				contractPanel(message.orientation);
+				break;
+
+			case "expandManagement":
+				console.log('expanding management')
+				expandManagement();
+				break;
+
+			case "contractManagement":
+				contractManagement();
 				break;
 
 			case "refresh":

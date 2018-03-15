@@ -177,9 +177,18 @@ function updateProgress(toolName, progress) {
 
 /* STORAGE */
 var KEY_IS_CONFIG = "isHudConfigured";
+var IS_FIRST_TIME = "isFirstTime";
 
 function isStorageConfigured() {
 	return localforage.getItem(KEY_IS_CONFIG);
+}
+
+function isFirstTime() {
+	return localforage.getItem(IS_FIRST_TIME);
+}
+
+function setFirstTime() {
+	return localforage.setItem(IS_FIRST_TIME, false);
 }
 
 //todo: could just be named "conigureFrames" 
@@ -188,6 +197,7 @@ function configureStorage() {
 
 
 	promises.push(localforage.setItem(KEY_IS_CONFIG, true));
+	promises.push(localforage.setItem(IS_FIRST_TIME, true));
 		
 	// Configure Panels
 	promises.push(loadFrame("rightPanel").then(function(oldPanel) {
