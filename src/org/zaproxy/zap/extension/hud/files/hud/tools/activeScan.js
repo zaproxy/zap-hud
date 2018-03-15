@@ -76,7 +76,8 @@ var ActiveScan = (function() {
 					self.tools.scope.addToScope(domain)
 						.then(
 							startActiveScan(domain)
-						);
+						)
+						.catch(errorHandler);
 				}
 				else if (response.id === "stop") {
 					stopActiveScan(domain);
@@ -85,39 +86,44 @@ var ActiveScan = (function() {
 					//cancel
 				}
 			})
-			.catch(function(error) {
-				console.log(Error(error));
-			});
+			.catch(errorHandler);
 	}
 
 	function startActiveScan(domain) {
 		fetch("<<ZAP_HUD_API>>/ascan/action/scan/?url=" + domain + "/").then(function(response) {
-			response.json().then(function(data) {
-				loadTool(NAME).then(function(tool) {
-					tool.isRunning = true;
-					tool.icon = ICONS.ON;
-					tool.data = "0";
-					tool.scanid = data.scan;
-					saveTool(tool);
-				});
-			});
+			response.json()
+				.then(function(data) {
+					loadTool(NAME)
+						.then(function(tool) {
+							tool.isRunning = true;
+							tool.icon = ICONS.ON;
+							tool.data = "0";
+							tool.scanid = data.scan;
+							saveTool(tool);
+						})
+						.catch(errorHandler);
+				})
+				.catch(errorHandler);
 		});
 
 		messageFrame("management", {action: "increaseDataPollRate"});
 	}
 
 	function stopActiveScan() {
-		loadTool(NAME).then(function(tool) {
-			fetch("<<ZAP_HUD_API>>/ascan/action/stop/?scanId=" + tool.scanId + "");
-			tool.isRunning = false;
-			tool.icon = ICONS.OFF;
-			tool.data = DATA.START;
-			tool.scanid = -1;
+		loadTool(NAME)
+			.then(function(tool) {
+				fetch("<<ZAP_HUD_API>>/ascan/action/stop/?scanId=" + tool.scanId + "");
+				tool.isRunning = false;
+				tool.icon = ICONS.OFF;
+				tool.data = DATA.START;
+				tool.scanid = -1;
 
-			saveTool(tool);
-		});
+				saveTool(tool);
+			})
+			.catch(errorHandler);
 
-		messageFrame("management", {action: "decreaseDataPollRate"});
+		messageFrame("management", {action: "decreaseDataPollRate"})
+			.catch(errorHandler);
 	}
 
 	function checkIsRunning() {
@@ -149,15 +155,17 @@ var ActiveScan = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: "Remove"};
 
-		messageFrame("display", {action:"showButtonOptions", config:config}).then(function(response) {
-			// Handle button choice
-			if (response.id == "remove") {
-				removeToolFromPanel(NAME);
-			}
-			else {
-				//cancel
-			}
-		});
+		messageFrame("display", {action:"showButtonOptions", config:config})
+			.then(function(response) {
+				// Handle button choice
+				if (response.id == "remove") {
+					removeToolFromPanel(NAME);
+				}
+				else {
+					//cancel
+				}
+			})
+			.catch(errorHandler);
 	}
 
 	self.addEventListener("activate", function(event) {

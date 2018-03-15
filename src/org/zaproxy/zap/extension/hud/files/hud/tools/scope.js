@@ -38,128 +38,138 @@ var Scope = (function() {
 
 	function showDialog(domain) {
 
-		checkDomainInScope(domain).then(function(isInScope) {
-			var config = {};
+		checkDomainInScope(domain)
+			.then(function(isInScope) {
+				var config = {};
 
-			if(!isInScope) {
-				config.title = LABEL;
-				config.text = DIALOG.OUT;
-				config.buttons = [
-					{text:"Add",
-					 id:"add"},
-					{text:"Cancel",
-					 id:"cancel"}
-				];
-			}
-			else {
-				config.text = DIALOG.IN;
-				config.buttons = [
-					{text:"Remove",
-					 id:"remove"},
-					{text:"Cancel",
-					 id:"cancel"}
-				];
-			}
-
-			messageFrame("display", {action:"showDialog", config:config}).then(function(response) {
-
-				// Handle button choice
-				if (response.id === "add") {
-					addToScope(domain);
-				}
-				else if (response.id === "remove") {
-					removeFromScope(domain);
+				if(!isInScope) {
+					config.title = LABEL;
+					config.text = DIALOG.OUT;
+					config.buttons = [
+						{text:"Add",
+						id:"add"},
+						{text:"Cancel",
+						id:"cancel"}
+					];
 				}
 				else {
-					//cancel
+					config.text = DIALOG.IN;
+					config.buttons = [
+						{text:"Remove",
+						id:"remove"},
+						{text:"Cancel",
+						id:"cancel"}
+					];
 				}
-			});
 
-		}).catch(function(error) {
-			console.log(Error(error));
-		});
+				messageFrame("display", {action:"showDialog", config:config})
+					.then(function(response) {
+
+						// Handle button choice
+						if (response.id === "add") {
+							addToScope(domain);
+						}
+						else if (response.id === "remove") {
+							removeFromScope(domain);
+						}
+						else {
+							//cancel
+						}
+					});
+
+			})
+			.catch(errorHandler);
 	}
 
 	function checkDomainInScope(domain) {
 		return new Promise(function(resolve) {
-			loadTool(NAME).then(function(tool) {
-				var isInScope = tool.urls.includes(domain);
-				resolve(isInScope);
-			});
+			loadTool(NAME)
+				.then(function(tool) {
+					var isInScope = tool.urls.includes(domain);
+					resolve(isInScope);
+				});
 		});
 	}
 
 	function addToScope(domain) {
-		return fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=Default%20Context&regex=" + domain + "/.*").then(function() {
-			// add to list and save
-			return loadTool(NAME).then(function(tool) {
-				tool.urls.push(domain);
-				tool.data = DATA.IN;
-				tool.icon = ICONS.IN;
+		return fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=Default%20Context&regex=" + domain + "/.*")
+			.then(function() {
+				// add to list and save
+				return loadTool(NAME)
+					.then(function(tool) {
+						tool.urls.push(domain);
+						tool.data = DATA.IN;
+						tool.icon = ICONS.IN;
 
-				return saveTool(tool).then(function() {
-					return true;
-				});
-			});
-		});
+						return saveTool(tool)
+							.then(function() {
+								return true;
+							});
+					});
+			})
+			.catch(errorHandler);
 	}
 
 	function removeFromScope(domain) {
-		fetch("<<ZAP_HUD_API>>/context/action/excludeFromContext/?contextName=Default%20Context&regex=" + domain + "/.*").then(function(response) {
-			response.json().then(function(json) {
-				//todo: handle response if needed
-			});
-		});
+		fetch("<<ZAP_HUD_API>>/context/action/excludeFromContext/?contextName=Default%20Context&regex=" + domain + "/.*");
 
 		// remove from list and save
-		loadTool(NAME).then(function(tool) {
-			tool.urls.splice(tool.urls.indexOf(domain), 1);
-			tool.data = DATA.OUT;
-			tool.icon = ICONS.OUT;
+		loadTool(NAME)
+			.then(function(tool) {
+				tool.urls.splice(tool.urls.indexOf(domain), 1);
+				tool.data = DATA.OUT;
+				tool.icon = ICONS.OUT;
 
-			saveTool(tool);
-		});
+				saveTool(tool);
+			})
+			.catch(errorHandler);
 	}
 
 	function requireScope(targetDomain) {
 		
 		return new Promise(function(resolve, reject) {
-			checkDomainInScope(targetDomain).then(function(isInScope) {
+			checkDomainInScope(targetDomain)
+				.then(function(isInScope) {
 
-				if (!isInScope) {
-					return showScopeRequiredDialog(targetDomain);
-				}
-				return true;
-			}).then(function(addedToScope) {
-				if (addedToScope) {
-					resolve();
-				}
-				else {
-					reject();
-				}
-			});
+					if (!isInScope) {
+						return showScopeRequiredDialog(targetDomain);
+					}
+					return true;
+				})
+				.then(function(addedToScope) {
+					if (addedToScope) {
+						resolve();
+					}
+					else {
+						reject();
+					}
+				});
 		});
 	}
 
 	function onPanelLoad(data) {
-		return checkDomainInScope(data.domain).then(function(isInScope) {
-			if (isInScope) {
-				loadTool(NAME).then(function(tool) {
-					tool.data = DATA.IN;
-					tool.icon = ICONS.IN;
+		return checkDomainInScope(data.domain)
+			.then(function(isInScope) {
+				if (isInScope) {
+					loadTool(NAME)
+						.then(function(tool) {
+							tool.data = DATA.IN;
+							tool.icon = ICONS.IN;
 
-					saveTool(tool);
-				});
-			}
-			else {
-				loadTool(NAME).then(function(tool) {
-					tool.data = DATA.OUT;
-					tool.icon = ICONS.OUT;
+							saveTool(tool);
+						});
+				}
+				else {
+					loadTool(NAME)
+						.then(function(tool) {
+							tool.data = DATA.OUT;
+							tool.icon = ICONS.OUT;
 
-					saveTool(tool);
-				});
-			}
-		});
+							saveTool(tool);
+						});
+				}
+			})
+			.catch(errorHandler);
 	}
 
 	function showOptions() {
@@ -169,15 +179,17 @@ var Scope = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: "Remove"};
 
-		messageFrame("display", {action:"showButtonOptions", config:config}).then(function(response) {
-			// Handle button choice
-			if (response.id == "remove") {
-				removeToolFromPanel(NAME);
-			}
-			else {
-				//cancel
-			}
-		});
+		messageFrame("display", {action:"showButtonOptions", config:config})
+			.then(function(response) {
+				// Handle button choice
+				if (response.id == "remove") {
+					removeToolFromPanel(NAME);
+				}
+				else {
+					//cancel
+				}
+			})
+			.catch(errorHandler);
 	}
 
 	self.addEventListener("activate", function(event) {
