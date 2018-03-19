@@ -217,7 +217,7 @@ function saveFrameId(event) {
 		clients.forEach(function(item) {
 			var client = item;
 
-			if (client.id === event.clientId) {
+			if ('{' + client.id + '}' === event.clientId) {
 
 				if (client.url.endsWith("left")) {
 					loadFrame("leftPanel")
