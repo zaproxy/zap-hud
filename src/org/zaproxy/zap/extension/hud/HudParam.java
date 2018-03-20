@@ -23,6 +23,7 @@ import java.io.File;
 
 import org.parosproxy.paros.Constant;
 import org.zaproxy.zap.common.VersionedAbstractParam;
+import org.zaproxy.zap.extension.api.ZapApiIgnore;
 
 public class HudParam extends VersionedAbstractParam {
 
@@ -31,7 +32,11 @@ public class HudParam extends VersionedAbstractParam {
      */
     private static final String PARAM_BASE_KEY = "hud";
 
+    private static final String PARAM_ENABLED = PARAM_BASE_KEY + ".enabled";
     private static final String PARAM_BASE_DIRECTORY = PARAM_BASE_KEY + ".dir";
+    private static final String PARAM_DEV_MODE = PARAM_BASE_KEY + ".devMode";
+    private static final String PARAM_ALLOW_UNSAFE_EVAL = PARAM_BASE_KEY + ".unsafeEval";
+    private static final String PARAM_IN_SCOPE_ONLY = PARAM_BASE_KEY + ".inScopeOnly";
 
     /**
      * The version of the configurations. Used to keep track of configurations changes between releases, if updates are needed.
@@ -42,6 +47,14 @@ public class HudParam extends VersionedAbstractParam {
     private static final int PARAM_CURRENT_VERSION = 1;
 
     private String baseDirectory;
+    
+    private boolean developmentMode;
+    
+    private boolean allowUnsafeEval;
+    
+    private boolean enabled;
+    
+    private boolean inScopeOnly;
 
     public String getBaseDirectory() {
         return baseDirectory;
@@ -50,6 +63,51 @@ public class HudParam extends VersionedAbstractParam {
     public void setBaseDirectory(String baseDirectory) {
         this.baseDirectory = baseDirectory;
         getConfig().setProperty(PARAM_BASE_DIRECTORY, baseDirectory);
+    }
+
+    
+    public boolean isDevelopmentMode() {
+        return developmentMode;
+    }
+
+    
+    public void setDevelopmentMode(boolean developmentMode) {
+        this.developmentMode = developmentMode;
+        getConfig().setProperty(PARAM_DEV_MODE, developmentMode);
+    }
+
+    
+    public boolean isAllowUnsafeEval() {
+        return allowUnsafeEval;
+    }
+
+    
+    @ZapApiIgnore   // Feels too dangerous to allow this
+    public void setAllowUnsafeEval(boolean allowUnsafeEval) {
+        this.allowUnsafeEval = allowUnsafeEval;
+        getConfig().setProperty(PARAM_ALLOW_UNSAFE_EVAL, allowUnsafeEval);
+    }
+
+    
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        getConfig().setProperty(PARAM_ENABLED, enabled);
+    }
+
+    
+    public boolean isInScopeOnly() {
+        return inScopeOnly;
+    }
+
+    
+    public void setInScopeOnly(boolean inScopeOnly) {
+        this.inScopeOnly = inScopeOnly;
+        getConfig().setProperty(PARAM_IN_SCOPE_ONLY, inScopeOnly);
     }
 
     @Override
@@ -66,6 +124,10 @@ public class HudParam extends VersionedAbstractParam {
     protected void parseImpl() {
         baseDirectory = getConfig()
                 .getString(PARAM_BASE_DIRECTORY, Constant.getZapHome() + File.separator + ExtensionHUD.DIRECTORY_NAME);
+        enabled = getConfig().getBoolean(PARAM_ENABLED, false);
+        developmentMode = getConfig().getBoolean(PARAM_DEV_MODE, false);
+        allowUnsafeEval = getConfig().getBoolean(PARAM_ALLOW_UNSAFE_EVAL, false);
+        inScopeOnly = getConfig().getBoolean(PARAM_IN_SCOPE_ONLY, false);
     }
 
     @Override
