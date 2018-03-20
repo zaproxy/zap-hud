@@ -27,6 +27,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -36,6 +37,8 @@ import javax.swing.border.EmptyBorder;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.model.OptionsParam;
 import org.parosproxy.paros.view.AbstractParamPanel;
+import org.zaproxy.zap.ZAP;
+import org.zaproxy.zap.eventBus.Event;
 import org.zaproxy.zap.view.LayoutHelper;
 
 /**
@@ -51,6 +54,9 @@ public class OptionsHudPanel extends AbstractParamPanel {
     private static final String NAME = Constant.messages.getString("hud.optionspanel.name");
 
     private JTextField baseDirectory;
+    private JCheckBox inScopeOnly = null;
+    private JCheckBox developmentMode = null;
+    private JCheckBox allowUnsafeEval = null;
 
     public OptionsHudPanel() {
         super();
@@ -69,8 +75,11 @@ public class OptionsHudPanel extends AbstractParamPanel {
         overridesPanel.add(getBaseDirectory());
         overridesPanel.add(directoryButton);
 
-        panel.add(directoryLabel, LayoutHelper.getGBC(0, 2, 1, 1.0, new Insets(2, 2, 2, 2)));
-        panel.add(overridesPanel, LayoutHelper.getGBC(1, 2, 1, 1.0, new Insets(2, 2, 2, 2)));
+        panel.add(directoryLabel, LayoutHelper.getGBC(0, 0, 1, 1.0, new Insets(2, 2, 2, 2)));
+        panel.add(overridesPanel, LayoutHelper.getGBC(1, 0, 1, 1.0, new Insets(2, 2, 2, 2)));
+        panel.add(getInScopeOnly(), LayoutHelper.getGBC(0, 1, 2, 1.0));
+        panel.add(getDevelopmentMode(), LayoutHelper.getGBC(0, 2, 2, 1.0));
+        panel.add(getAllowUnsafeEval(), LayoutHelper.getGBC(0, 3, 2, 1.0));
 
         add(panel);
     }
@@ -82,12 +91,45 @@ public class OptionsHudPanel extends AbstractParamPanel {
         return baseDirectory;
     }
 
+    private JCheckBox getInScopeOnly() {
+        if (inScopeOnly == null) {
+            inScopeOnly = new JCheckBox(Constant.messages.getString("hud.optionspanel.label.inScopeOnly"));
+        }
+        return inScopeOnly;
+    }
+
+    
+    private JCheckBox getDevelopmentMode() {
+        if (developmentMode == null) {
+            developmentMode = new JCheckBox(Constant.messages.getString("hud.optionspanel.label.developmentMode"));
+            developmentMode.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent event) {
+                    getAllowUnsafeEval().setEnabled(developmentMode.isSelected());
+                }});
+        }
+        return developmentMode;
+    }
+
+    
+    private JCheckBox getAllowUnsafeEval() {
+        if (allowUnsafeEval == null) {
+            allowUnsafeEval = new JCheckBox(Constant.messages.getString("hud.optionspanel.label.allowUnsafeEval"));
+        }
+        return allowUnsafeEval;
+    }
+
     @Override
     public void initParam(Object obj) {
         final OptionsParam options = (OptionsParam) obj;
         final HudParam param = options.getParamSet(HudParam.class);
 
         getBaseDirectory().setText(param.getBaseDirectory());
+        getInScopeOnly().setSelected(param.isInScopeOnly());
+        getDevelopmentMode().setSelected(param.isDevelopmentMode());
+        getAllowUnsafeEval().setSelected(param.isAllowUnsafeEval());
+        getAllowUnsafeEval().setEnabled(developmentMode.isSelected());
     }
 
     @Override
@@ -105,8 +147,24 @@ public class OptionsHudPanel extends AbstractParamPanel {
     public void saveParam(Object obj) throws Exception {
         final OptionsParam options = (OptionsParam) obj;
         final HudParam param = options.getParamSet(HudParam.class);
+        
+        // Raise any relevant events before saving
+        if (param.isDevelopmentMode() != getDevelopmentMode().isSelected()) {
+            String event;
+            if (getDevelopmentMode().isSelected()) {
+                event = HudEventPublisher.EVENT_DEV_MODE_ENABLED;
+            } else {
+                event = HudEventPublisher.EVENT_DEV_MODE_DISABLED;
+            }
+            ZAP.getEventBus().publishSyncEvent(
+                    HudEventPublisher.getPublisher(),
+                    new Event(HudEventPublisher.getPublisher(), event, null));
+        }
 
         param.setBaseDirectory(getBaseDirectory().getText());
+        param.setInScopeOnly(getInScopeOnly().isSelected());
+        param.setDevelopmentMode(getDevelopmentMode().isSelected());
+        param.setAllowUnsafeEval(getAllowUnsafeEval().isSelected());
     }
 
     @Override

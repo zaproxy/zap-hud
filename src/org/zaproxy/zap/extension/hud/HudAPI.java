@@ -68,6 +68,10 @@ public class HudAPI extends ApiImplementor {
 			"default-src 'none'; script-src 'self'; connect-src https://zap wss://zap; frame-src 'self'; img-src 'self' data:; "
 			+ "font-src 'self' data:; style-src 'self' 'unsafe-inline' ;";
 
+    protected static final String CSP_POLICY_UNSAFE_EVAL =
+            "default-src 'none'; script-src 'self' 'unsafe-eval'; connect-src https://zap wss://zap; frame-src 'self'; img-src 'self' data:; "
+            + "font-src 'self' data:; style-src 'self' 'unsafe-inline' ;";
+
     private static final String PREFIX = "hud";
     
     private Map<String, String> siteUrls = new HashMap<String, String>();
@@ -90,6 +94,8 @@ public class HudAPI extends ApiImplementor {
 	
 	private String hudFileUrl;
     private String hudApiUrl;
+
+    private String websocketUrl;
 
     private boolean isTimelineEnabled = false;
 
@@ -152,6 +158,10 @@ public class HudAPI extends ApiImplementor {
 	
 	public void reset() {
 		this.siteUrls.clear();
+	}
+	
+	public boolean allowUnsafeEval() {
+	    return this.extension.getHudParam().isDevelopmentMode() && this.extension.getHudParam().isAllowUnsafeEval();
 	}
 	
 	public boolean isTimelineEnabled() {
@@ -457,7 +467,6 @@ public class HudAPI extends ApiImplementor {
         }
     }
     
-    private String websocketUrl;
     private String getWebSocketUrl() {
         if (websocketUrl == null) {
             websocketUrl = Control.getSingleton().getExtensionLoader().getExtension(ExtensionWebSocket.class).getCallbackUrl();
