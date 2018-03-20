@@ -74,7 +74,11 @@ public class HudFileProxy extends ApiImplementor {
                     msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
                     
                     if (msg.getRequestHeader().getURI().toString().startsWith(API.API_URL_S)) {
-                        msg.getResponseHeader().setHeader("Content-Security-Policy", HudAPI.CSP_POLICY);
+                        if (api.allowUnsafeEval()) {
+                            msg.getResponseHeader().setHeader("Content-Security-Policy", HudAPI.CSP_POLICY_UNSAFE_EVAL);
+                        } else {
+                            msg.getResponseHeader().setHeader("Content-Security-Policy", HudAPI.CSP_POLICY);
+                        }
                     }
 
                     
