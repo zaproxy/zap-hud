@@ -104,9 +104,9 @@ function startServiceWorker() {
 						// refresh the target page
 						parent.postMessage( {action: 'refresh'} , document.referrer);
 					})
-					.catch(console.log);
+					.catch(errorHandler);
 			})
-			.catch(console.log);
+			.catch(errorHandler);
 	}
 	else {
 		alert('This browser does not support Service Workers. The HUD will not work properly.')
@@ -129,7 +129,7 @@ function startPollWorker() {
 					targetDomain: parseDomainFromUrl(document.referrer), 
 					lastMessage: tool.lastMessage});
 			})
-			.catch(console.log);
+			.catch(errorHandler);
 
 		worker.addEventListener('message', function(event) {
 			// forward messages from the web worker to the service worker

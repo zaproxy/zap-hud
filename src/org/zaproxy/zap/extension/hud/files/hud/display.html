@@ -121,12 +121,12 @@
             <div class="accordion">
                 <input type="checkbox" :id="title" name="accordion-checkbox" hidden>
                 <label class="accordion-header" :for="title">
-                    {{ title }}
+                    {{ title }} ({{ alerts.length }})
                 </label>
                 <div class="accordion-body">
                     <ul class="menu menu-nav">
                         <li class="menu-item" v-for="alert in alerts"> 
-                            <a @click="alertSelect(alert)"> {{ title }} ({{ alert.id }}) </a>
+                            <a @click="alertSelect(alert)"> {{ alert.uri }} </a>
                         </li>
                     </ul>
                 </div>

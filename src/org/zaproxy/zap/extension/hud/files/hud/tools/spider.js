@@ -83,25 +83,20 @@ var Spider = (function() {
 					//cancel
 				}
 			})
-			.catch(function(error) {
-				console.log(Error(error));
-			});
+			.catch(errorHandler);
 	}
 
 	function startSpider(domain) {
-		fetch("<<ZAP_HUD_API>>/spider/action/scan/?url=" + domain + "/").then(function(response) {
-			response.json().then(function(json) {
-				//todo: handle response if needed
-				//console.log(json)
-			});
-		});
+		fetch("<<ZAP_HUD_API>>/spider/action/scan/?url=" + domain + "/");
 
-		loadTool(NAME).then(function(tool) {
-			tool.isRunning = true;
-			tool.data = "0";
+		loadTool(NAME)
+			.then(function(tool) {
+				tool.isRunning = true;
+				tool.data = "0";
 
-			saveTool(tool);
-		});
+				saveTool(tool);
+			})
+			.catch(errorHandler);
 
 		messageFrame("management", {action: "increaseDataPollRate"});
 	}
@@ -109,21 +104,24 @@ var Spider = (function() {
 	function stopSpider() {
 		fetch("<<ZAP_HUD_API>>/spider/action/stop");
 
-		loadTool(NAME).then(function(tool) {
-			tool.isRunning = false;
-			tool.data = DATA.START;
+		loadTool(NAME)
+			.then(function(tool) {
+				tool.isRunning = false;
+				tool.data = DATA.START;
 
-			saveTool(tool);
-		});
+				saveTool(tool);
+			})
+			.catch(errorHandler);
 
 		messageFrame("management", {action: "decreaseDataPollRate"});
 	}
 
 	function checkIsRunning() {
 		return new Promise(function(resolve) {
-			loadTool(NAME).then(function(tool) {
-				resolve(tool.isRunning);
-			});
+			loadTool(NAME)
+				.then(function(tool) {
+					resolve(tool.isRunning);
+				});
 		});
 	}
 
@@ -133,11 +131,13 @@ var Spider = (function() {
 			stopSpider();
 		}
 		else if (data.progress !== "-1") {
-			loadTool(NAME).then(function(tool) {
-			tool.data = data.progress;
+			loadTool(NAME)
+				.then(function(tool) {
+					tool.data = data.progress;
 
-			saveTool(tool);
-		});
+					saveTool(tool);
+				})
+				.catch(errorHandler);
 		}
 	}
 
@@ -148,15 +148,17 @@ var Spider = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: "Remove"};
 
-		messageFrame("display", {action:"showButtonOptions", config:config}).then(function(response) {
-			// Handle button choice
-			if (response.id == "remove") {
-				removeToolFromPanel(NAME);
-			}
-			else {
-				//cancel
-			}
-		});
+		messageFrame("display", {action:"showButtonOptions", config:config})
+			.then(function(response) {
+				// Handle button choice
+				if (response.id == "remove") {
+					removeToolFromPanel(NAME);
+				}
+				else {
+					//cancel
+				}
+			})
+			.catch(errorHandler);
 	}
 
 	self.addEventListener("activate", function(event) {
