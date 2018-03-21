@@ -110,6 +110,7 @@ self.addEventListener("fetch", function(event) {
 		caches.match(event.request).then(function(response) {  
 			var reqUrl = event.request.url;
 
+			/*	
 			if (reqUrl.startsWith("<<ZAP_HUD_FILES>>?name=panel.html")) {
 				// Modify Panel HTML
 				return handlePanelHtmlFetch(reqUrl);
@@ -118,7 +119,9 @@ self.addEventListener("fetch", function(event) {
 				// Modify Panel CSS
 				return handlePanelCssFetch(reqUrl);
 			}
-			else if (reqUrl.indexOf("zapCallBackUrl/images") > 0) {
+			else 
+			*/
+			if (reqUrl.indexOf("zapCallBackUrl/images") > 0) {
 				// Need to rewrite jquery image URLs
 				var name = "<<ZAP_HUD_FILES>>?image=" + reqUrl.substring(reqUrl.lastIndexOf("/")+1);
 				return caches.match(name).then(function(response) {
@@ -185,7 +188,7 @@ webSocket.onopen = function (event) {
 };
 
 webSocket.onmessage = function (event) {
-	console.log("ServiceWorker received event: " + event.data);
+	//console.log("ServiceWorker received event: " + event.data);
 	// we now need to actually do something with this ;)
 }
 
@@ -219,7 +222,7 @@ function saveFrameId(event) {
 		clients.forEach(function(item) {
 			var client = item;
 
-			if (client.id === event.clientId) {
+			if ('{' + client.id + '}' === event.clientId) {
 				if (client.url.endsWith("left")) {
 					loadFrame("leftPanel").then(function(panel) {
 						panel.clientId = client.id;

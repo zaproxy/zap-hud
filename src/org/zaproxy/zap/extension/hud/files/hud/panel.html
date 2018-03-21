@@ -1,21 +1,31 @@
 <html>
 <head>
+	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre.css"/>
 	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=panel.css&amp;orientation=ORIENTATION" />
+
+	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js"></script>
+	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue.js"></script>
 	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=utils.js"></script>
 	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=panel.js"></script>
 </head>
 <body>
-	<div class="buttons-list">
+	<div id="app">
+		<hud-buttons></hud-buttons>
 	</div>
 
-	<!-- context menu -->
-	<!-- USE IF WE WANT CONTEXT MENU IN THE PANEL
-	<div class="hide" id="rmenu">
-		<ul>
-			<li>Options</li>
-			<li>Remove</li>
-		</ul>
-	</div>
-	-->
+	<template id="hud-buttons-template">
+		<div id="hud-buttons">
+			<hud-button v-for="tool in tools" :key="tool.name" :label="tool.label" :icon="'<<ZAP_HUD_FILES>>?image=' + tool.icon" :data="tool.data" :name="tool.name"></hud-button>
+			<hud-button icon="<<ZAP_HUD_FILES>>?image=plus.png" name="add-tool"></hud-button>
+		</div>
+	</template>
+
+	<template id="hud-button-template">
+		<div :class="{'hud-button': true, 'active': isActive}" @click="selectButton" @contextmenu="showContextMenu" @mouseover="mouseOver" @mouseleave="mouseLeave">
+			<img :src="currentIcon">
+			<span v-show="showData">{{currentData}}</span>
+			<span v-show="showLabel">{{label}}</span>
+		</div>
+	</template>
 </body>
 </html>
