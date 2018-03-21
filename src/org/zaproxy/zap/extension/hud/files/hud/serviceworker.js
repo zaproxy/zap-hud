@@ -215,9 +215,15 @@ function handlePanelCssFetch(reqUrl) {
 function saveFrameId(event) {
 	clients.matchAll().then(function(clients) {
 		clients.forEach(function(item) {
-			var client = item;
+			let client = item;
+			let clientId = event.clientId;
 
-			if (client.id === event.clientId) {
+			// handles firefox bug with adding brackets to the event clientID
+			if (clientId.indexOf('{') >= 0) {
+				clientId = clientId.substring(1, clientId.length - 1);
+			}
+
+			if (client.id === clientId) {
 
 				if (client.url.endsWith("left")) {
 					loadFrame("leftPanel")
