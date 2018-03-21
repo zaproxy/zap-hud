@@ -218,8 +218,8 @@ function saveFrameId(event) {
 			let client = item;
 			let clientId = event.clientId;
 
-			// if firefox remove the brackets on the event clientID
-			if (navigator.userAgent.indexOf('Firefox') >= 0) {
+			// handles firefox bug with adding brackets to the event clientID
+			if (clientId.indexOf('{') >= 0) {
 				clientId = clientId.substring(1, clientId.length - 1);
 			}
 
