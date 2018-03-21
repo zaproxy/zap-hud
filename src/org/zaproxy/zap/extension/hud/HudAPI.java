@@ -1,10 +1,10 @@
 /*
  * Zed Attack Proxy (ZAP) and its related class files.
- * 
+ *
  * ZAP is an HTTP/HTTPS proxy for assessing web application security.
- * 
- * Copyright 2018 The ZAP Development Team
- * 
+ *
+ * Copyright 2016 The ZAP Development Team
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,6 +68,10 @@ public class HudAPI extends ApiImplementor {
 			"default-src 'none'; script-src 'self'; connect-src https://zap wss://zap; frame-src 'self'; img-src 'self' data:; "
 			+ "font-src 'self' data:; style-src 'self' 'unsafe-inline' ;";
 
+    protected static final String CSP_POLICY_UNSAFE_EVAL =
+            "default-src 'none'; script-src 'self' 'unsafe-eval'; connect-src https://zap wss://zap; frame-src 'self'; img-src 'self' data:; "
+            + "font-src 'self' data:; style-src 'self' 'unsafe-inline' ;";
+
     private static final String PREFIX = "hud";
     
     private Map<String, String> siteUrls = new HashMap<String, String>();
@@ -90,6 +94,8 @@ public class HudAPI extends ApiImplementor {
 	
 	private String hudFileUrl;
     private String hudApiUrl;
+
+    private String websocketUrl;
 
     private boolean isTimelineEnabled = false;
 
@@ -152,6 +158,10 @@ public class HudAPI extends ApiImplementor {
 	
 	public void reset() {
 		this.siteUrls.clear();
+	}
+	
+	public boolean allowUnsafeEval() {
+	    return this.extension.getHudParam().isDevelopmentMode() && this.extension.getHudParam().isAllowUnsafeEval();
 	}
 	
 	public boolean isTimelineEnabled() {
@@ -230,6 +240,7 @@ public class HudAPI extends ApiImplementor {
 					alertAtts.put("risk", Alert.MSG_RISK[alert.getRisk()]);
 					alertAtts.put("param", alert.getParam());
 					alertAtts.put("id", Integer.toString(alert.getAlertId()));
+					alertAtts.put("uri", alert.getUri());
 					summary.add(alertAtts);
 				}
 				for (Entry<Integer, Map<String, Integer>> entry : alertCounts.entrySet()) {
@@ -269,6 +280,7 @@ public class HudAPI extends ApiImplementor {
 								alertAtts.put("param", alert.getParam());
 								alertAtts.put("id", Integer.toString(alert.getAlertId()));
 								//pageAlerts.addItem(new ApiResponseSet("alert", alertAtts));
+								alertAtts.put("uri", alert.getUri());
 								pageAlerts.add(alertAtts);
 							}
 						}
@@ -455,7 +467,6 @@ public class HudAPI extends ApiImplementor {
         }
     }
     
-    private String websocketUrl;
     private String getWebSocketUrl() {
         if (websocketUrl == null) {
             websocketUrl = Control.getSingleton().getExtensionLoader().getExtension(ExtensionWebSocket.class).getCallbackUrl();

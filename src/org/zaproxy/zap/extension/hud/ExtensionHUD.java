@@ -1,19 +1,21 @@
 /*
  * Zed Attack Proxy (ZAP) and its related class files.
- * 
+ *
  * ZAP is an HTTP/HTTPS proxy for assessing web application security.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
- * limitations under the License. 
+ *
+ * Copyright 2016 The ZAP Development Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.zaproxy.zap.extension.hud;
 
@@ -41,6 +43,9 @@ import org.parosproxy.paros.extension.ExtensionHook;
 import org.parosproxy.paros.extension.OptionsChangedListener;
 import org.parosproxy.paros.model.OptionsParam;
 import org.parosproxy.paros.network.HttpMessage;
+import org.parosproxy.paros.view.View;
+import org.zaproxy.zap.ZAP;
+import org.zaproxy.zap.eventBus.Event;
 import org.zaproxy.zap.extension.script.ExtensionScript;
 import org.zaproxy.zap.extension.script.ScriptEventListener;
 import org.zaproxy.zap.extension.script.ScriptType;
@@ -130,6 +135,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	public void hook(ExtensionHook extensionHook) {
 		super.hook(extensionHook);
 	    
+		this.api.addApiOptions(getHudParam());
 		extensionHook.addApiImplementor(this.api);
 		extensionHook.addApiImplementor(this.api.getHudApiProxy());
 		extensionHook.addApiImplementor(this.api.getHudFileProxy());
@@ -165,6 +171,15 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	@Override
 	public void optionsLoaded() {
 	    addHudScripts();
+	    this.hudEnabled = getHudParam().isEnabled();
+	    if (View.isInitialised()) {
+	        this.getHudButton().setSelected(hudEnabled);
+	    }
+	    if (getHudParam().isDevelopmentMode()) {
+            ZAP.getEventBus().publishSyncEvent(
+                    HudEventPublisher.getPublisher(),
+                    new Event(HudEventPublisher.getPublisher(), HudEventPublisher.EVENT_DEV_MODE_ENABLED, null));
+	    }
 	}
 	
 	private void addHudScripts() {
@@ -224,6 +239,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					hudEnabled = hudButton.isSelected();
+					getHudParam().setEnabled(hudEnabled);
 				}});
     	}
     	return hudButton;
@@ -263,6 +279,9 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	@Override
 	public boolean onHttpResponseReceive(HttpMessage msg) {
 		if (hudEnabled && msg.getResponseHeader().isHtml()) {
+			if (getHudParam().isInScopeOnly() && ! msg.isInScope()) {
+				return true;
+			}
 			try {
 				String header = msg.getResponseBody().toString();
 

@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		alertify.logPosition("bottom right");
 	} 
 	else {
-		console.log('hubInjectScript alertify is null :(');
+		errorHandler('Problem loading Alertify. Alertify is undefined.')
 	}
 });
 

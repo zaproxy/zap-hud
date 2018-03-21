@@ -37,86 +37,78 @@ var Break = (function() {
 
 	function showDialog(domain) {
 
-		checkIsRunning().then(function(isRunning) {
-			var config = {};
+		checkIsRunning()
+			.then(function(isRunning) {
+				var config = {};
 
-			if(!isRunning) {
-				config.text = DIALOG.START;
-				config.buttons = [
-					{text:"On",
-					 id:"on"},
-					{text:"Cancel",
-					 id:"cancel"}
-				];
-			}
-			else {
-				config.text = DIALOG.STOP;
-				config.buttons = [
-					{text:"Off",
-					 id:"off"},
-					{text:"Cancel",
-					 id:"cancel"}
-				];
-			}
-
-			messageFrame("display", {action:"showDialog", config:config}).then(function(response) {
-
-				// Handle button choice
-				if (response.id === "on") {
-					startBreaking();
-				}
-				else if (response.id === "off") {
-					stopBreaking();
+				if(!isRunning) {
+					config.text = DIALOG.START;
+					config.buttons = [
+						{text:"On",
+						id:"on"},
+						{text:"Cancel",
+						id:"cancel"}
+					];
 				}
 				else {
-					//cancel
+					config.text = DIALOG.STOP;
+					config.buttons = [
+						{text:"Off",
+						id:"off"},
+						{text:"Cancel",
+						id:"cancel"}
+					];
 				}
-			});
 
-		}).catch(function(error) {
-			console.log(Error(error));
-		});
+				messageFrame("display", {action:"showDialog", config:config}).then(function(response) {
+
+					// Handle button choice
+					if (response.id === "on") {
+						startBreaking();
+					}
+					else if (response.id === "off") {
+						stopBreaking();
+					}
+					else {
+						//cancel
+					}
+				});
+
+			})
+			.catch(errorHandler);
 	}
 
 	function startBreaking() {
-		fetch("<<ZAP_HUD_API>>/break/action/break/?type=http-all&state=true").then(function(response) {
-			response.json().then(function(json) {
-				//todo: handle response if needed
-			});
-		});
+		fetch("<<ZAP_HUD_API>>/break/action/break/?type=http-all&state=true");
 
-		loadTool(NAME).then(function(tool) {
-			tool.isRunning = true;
-			tool.data = DATA.ON;
-			tool.icon = ICONS.ON;
+		loadTool(NAME)
+			.then(function(tool) {
+				tool.isRunning = true;
+				tool.data = DATA.ON;
+				tool.icon = ICONS.ON;
 
-			saveTool(tool);
-		});
+				saveTool(tool);
+			})
+			.catch(errorHandler);
 	}
 
 	// todo: change this to 'continue' and figure out / fix stopBreaking
 	function stopBreaking() {
-		fetch("<<ZAP_HUD_API>>/break/action/continue").then(function(response) {
-			response.json().then(function(json) {
-				//todo: handle response if needed
-			});
-		});
+		fetch("<<ZAP_HUD_API>>/break/action/continue");
 
-		loadTool(NAME).then(function(tool) {
-			tool.isRunning = false;
-			tool.data = DATA.OFF;
-			tool.icon = ICONS.OFF;
+		loadTool(NAME)
+			.then(function(tool) {
+				tool.isRunning = false;
+				tool.data = DATA.OFF;
+				tool.icon = ICONS.OFF;
 
-			saveTool(tool);
-		});
+				saveTool(tool);
+			})
+			.catch(errorHandler);
 	}
 
 	function step() {
-		fetch("<<ZAP_HUD_API>>/break/action/step/").then(function(response) {
-			response.json().then(function(json) {
-				//todo: handle response if needed
-			});
-		});
+		fetch("<<ZAP_HUD_API>>/break/action/step/");
 	}
 
 	function setHttpMessage(method, header, body) {
@@ -125,9 +117,10 @@ var Break = (function() {
 
 	function checkIsRunning() {
 		return new Promise(function(resolve) {
-			loadTool(NAME).then(function(tool) {
-				resolve(tool.isRunning);
-			});
+			loadTool(NAME)
+				.then(function(tool) {
+					resolve(tool.isRunning);
+				});
 		});
 	}
 
@@ -155,22 +148,29 @@ var Break = (function() {
 			 id:"continue"}
 		];
 
-		messageFrame("display", {action:"showHttpMessage", config:config}).then(function(response) {
+		messageFrame("display", {action:"showHttpMessage", config:config})
+			.then(function(response) {
 
-			// Handle button choice
-			if (response.id === "step") {
-				setHttpMessage(response.method, response.header, response.body).then(function() {
-					step();
-				});
-			}
-			else if (response.id === "continue") {
-				setHttpMessage(response.method, response.header, response.body).then(function() {
-					stopBreaking();
-				});			}
-			else {
-				//cancel
-			}
-		});
+				// Handle button choice
+				if (response.id === "step") {
+					setHttpMessage(response.method, response.header, response.body)
+						.then(function() {
+							step();
+						})
+						.catch(errorHandler);
+				}
+				else if (response.id === "continue") {
+					setHttpMessage(response.method, response.header, response.body)
+						.then(function() {
+							stopBreaking();
+						})
+						.catch(errorHandler);
+				}
+				else {
+					//cancel
+				}
+			})
+			.catch(errorHandler);
 	}
 
 	function showOptions() {
@@ -180,15 +180,17 @@ var Break = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: "Remove"};
 
-		messageFrame("display", {action:"showButtonOptions", config:config}).then(function(response) {
-			// Handle button choice
-			if (response.id == "remove") {
-				removeToolFromPanel(NAME);
-			}
-			else {
-				//cancel
-			}
-		});
+		messageFrame("display", {action:"showButtonOptions", config:config})
+			.then(function(response) {
+				// Handle button choice
+				if (response.id == "remove") {
+					removeToolFromPanel(NAME);
+				}
+				else {
+					//cancel
+				}
+			})
+			.catch(errorHandler);
 	}
 
 	self.addEventListener("activate", function(event) {

@@ -29,13 +29,10 @@ var alertUtils = (function() {
 					}
 				});
 			})
-			.catch(function(err) {
-				console.log(Error(err));
-			});
+			.catch(errorHandler);
 	}
 
 	function showAlertDetails(id) {
-		console.log("id: " + id.toString())
 		// get the alert details given the id
 		fetch("<<ZAP_HUD_API>>/core/view/alert/?id=" + id)
 			.then(function(response) {
@@ -44,18 +41,14 @@ var alertUtils = (function() {
 					then(function(json) {
 
 						var config = {};
-						config.title = json.alert.alert + ' (' + json.alert.id + ')';
+						config.title = json.alert.alert;
 						config.details = json.alert;
 
 						messageFrame("display", {action: "showAlertDetails", config: config});
 					})
-					.catch(function(err) {
-						console.log(err);
-					});
+					.catch(errorHandler);
 			})
-			.catch(function(err) {
-				console.log(err);
-			});
+			.catch(errorHandler);
 	}
 
 	function updateAlertCount(toolname, target) {
@@ -78,7 +71,8 @@ var alertUtils = (function() {
 				tool.data = count.toString();
 				
 				return saveTool(tool);
-			});
+			})
+			.catch(errorHandler);
 	}
 
 	function onPollData(toolname, target, data, alertRisk) {
@@ -113,7 +107,8 @@ var alertUtils = (function() {
 
 							if (toolname === "site-alerts-all") {
 								// send growler alert (fine with it being async, can change later if its an issue)
-								showGrowlerAlert(alert);
+								showGrowlerAlert(alert)
+									.catch(errorHandler);
 							}
 						}
 						tool.alerts[target][alert.risk][alert.alert].push(alert);
@@ -125,9 +120,7 @@ var alertUtils = (function() {
 			.then(function() {
 				return updateAlertCount(toolname, target);
 			})
-			.catch(function(err) {
-				console.log(Error(err));
-			});
+			.catch(errorHandler);
 	}
 
 	function showGrowlerAlert(alert) {
@@ -141,21 +134,23 @@ var alertUtils = (function() {
 		config.toolLabel = toolLabel;
 		config.options = {opt1: "Option 1", opt2: "Option 2", remove: "Remove"};
 
-		messageFrame("display", {action:"showButtonOptions", config:config}).then(function(response) {
-			// Handle button choice
-			if (response.id == "opt1") {
-				console.log("Option 1 chosen");
-			}
-			else if (response.id == "opt2") {
-				console.log("Option 2 chosen");
-			}
-			else if (response.id == "remove") {
-				removeToolFromPanel(toolname);
-			}
-			else {
-				//cancel
-			}
-		});
+		messageFrame("display", {action:"showButtonOptions", config:config})
+			.then(function(response) {
+				// Handle button choice
+				if (response.id == "opt1") {
+					console.log("Option 1 chosen");
+				}
+				else if (response.id == "opt2") {
+					console.log("Option 2 chosen");
+				}
+				else if (response.id == "remove") {
+					removeToolFromPanel(toolname);
+				}
+				else {
+					//cancel
+				}
+			})
+			.catch(errorHandler);
 	}
 
 	return {

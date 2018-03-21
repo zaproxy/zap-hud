@@ -1,10 +1,10 @@
 /*
  * Zed Attack Proxy (ZAP) and its related class files.
- * 
+ *
  * ZAP is an HTTP/HTTPS proxy for assessing web application security.
- * 
+ *
  * Copyright 2018 The ZAP Development Team
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,11 @@ public class HudFileProxy extends ApiImplementor {
                     msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
                     
                     if (msg.getRequestHeader().getURI().toString().startsWith(API.API_URL_S)) {
-                        msg.getResponseHeader().setHeader("Content-Security-Policy", HudAPI.CSP_POLICY);
+                        if (api.allowUnsafeEval()) {
+                            msg.getResponseHeader().setHeader("Content-Security-Policy", HudAPI.CSP_POLICY_UNSAFE_EVAL);
+                        } else {
+                            msg.getResponseHeader().setHeader("Content-Security-Policy", HudAPI.CSP_POLICY);
+                        }
                     }
 
                     

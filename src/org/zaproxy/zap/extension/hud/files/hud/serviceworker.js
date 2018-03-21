@@ -53,19 +53,21 @@ var toolScripts = [
 self.tools = {};
 
 // Load Tool Scripts
-localforage.setItem("tools", []).then(function() {
-	toolScripts.forEach(function(script) {
-		importScripts(script); 
-	});
-})
-.then(function(){
-	var ts = [];
-	for (var tool in self.tools) {
-		ts.push(self.tools[tool].name);
-	}
-	registerTools(ts); 
+localforage.setItem("tools", [])
+	.then(function() {
+		toolScripts.forEach(function(script) {
+			importScripts(script); 
+		});
+	})
+	.then(function(){
+		var ts = [];
+		for (var tool in self.tools) {
+			ts.push(self.tools[tool].name);
+		}
+		return registerTools(ts); 
 
-});
+	})
+	.catch(errorHandler);
 
 /* Listeners */
 self.addEventListener("install", function(event) {
@@ -78,9 +80,7 @@ self.addEventListener("install", function(event) {
 				console.log("caching urls...");
 				return cache.addAll(urlsToCache);
 			})
-			.catch(function(err) {
-				console.log(Error(err));
-			})
+			.catch(errorHandler)
 	);
 }); 
 
@@ -98,17 +98,16 @@ self.addEventListener("activate", function(event) {
 				// set the default tools after configuring storage
 				setDefaultTools();
 			})
-			.catch(function(err) {
-				console.log(Error(err));
-			})
+			.catch(errorHandler)
 	);
 });
 
 self.addEventListener("fetch", function(event) {
 	// Check Cache
 	event.respondWith(
-		caches.match(event.request).then(function(response) {  
-			var reqUrl = event.request.url;
+		caches.match(event.request)
+			.then(function(response) {  
+				var reqUrl = event.request.url;
 
 			/*	
 			if (reqUrl.startsWith("<<ZAP_HUD_FILES>>?name=panel.html")) {
@@ -121,31 +120,28 @@ self.addEventListener("fetch", function(event) {
 			}
 			else 
 			*/
-			if (reqUrl.indexOf("zapCallBackUrl/images") > 0) {
-				// Need to rewrite jquery image URLs
-				var name = "<<ZAP_HUD_FILES>>?image=" + reqUrl.substring(reqUrl.lastIndexOf("/")+1);
-				return caches.match(name).then(function(response) {
-					if (!response) {
-						console.log("Could not find jquery image: " + name);
-					}
-					return response;
-				});
-			}
-			else if (response) {
-				// Record Client ID
-				if (reqUrl.endsWith(".js")) {
-					saveFrameId(event);
+				if (reqUrl.indexOf("zapCallBackUrl/images") > 0) {
+					// Need to rewrite jquery image URLs
+					var name = "<<ZAP_HUD_FILES>>?image=" + reqUrl.substring(reqUrl.lastIndexOf("/")+1);
+					return caches.match(name).then(function(response) {
+						if (!response) {
+							console.log("Could not find jquery image: " + name);
+						}
+						return response;
+					});
 				}
+				else if (response) {
+					// Record Client ID
+					if (reqUrl.endsWith(".js")) {
+						saveFrameId(event);
+					}
 
-				return response;
-			}
-			else {
-				return fetch(event.request);
-			}
-		}).catch(function() {
-			console.log(Error("Could not handle response from: " + event.request.url));
-			return "<html><body>Error: could not find page</body></html>";
-		})
+					return response;
+				}
+				else {
+					return fetch(event.request);
+				}
+			}).catch(errorHandler)
 	);
 });
 
@@ -176,6 +172,8 @@ self.addEventListener("message", function(event) {
 	}
 });
 
+self.addEventListener('error', errorHandler);
+
 /* Set up WebSockets */
 
 webSocket = new WebSocket("<<ZAP_HUD_WS>>");
@@ -192,15 +190,9 @@ webSocket.onmessage = function (event) {
 	// we now need to actually do something with this ;)
 }
 
-function getParamater(url, parameter) {
-	var start = url.indexOf(parameter) + parameter.length + 1;
-	var end = url.indexOf("&", start);
-	end = end == -1 ? url.length : end;
-
-	return url.substring(start, end);
-}
-
-/* Fetch Methods */
+/*
+ * Builds the html for a panel and returns a Response object.
+ */
 function handlePanelHtmlFetch(reqUrl) {
 	return caches.match("<<ZAP_HUD_FILES>>?name=panel.html").then(function(resp) {
 		var orientation = getParamater(reqUrl, PARAM_ORIENATATION);
@@ -210,6 +202,9 @@ function handlePanelHtmlFetch(reqUrl) {
 	});
 }
 
+/*
+ * Builds the css for a panel and returns a Response object.
+ */
 function handlePanelCssFetch(reqUrl) {
 	return caches.match("<<ZAP_HUD_FILES>>?name=panel.css").then(function(resp) {
 		var orientation = getParamater(reqUrl, PARAM_ORIENATATION);
@@ -217,6 +212,9 @@ function handlePanelCssFetch(reqUrl) {
 	});
 }
 
+/*
+ * Saves the clientId of a window which is used to send postMessages.
+ */
 function saveFrameId(event) {
 	clients.matchAll().then(function(clients) {
 		clients.forEach(function(item) {
@@ -224,46 +222,58 @@ function saveFrameId(event) {
 
 			if ('{' + client.id + '}' === event.clientId) {
 				if (client.url.endsWith("left")) {
-					loadFrame("leftPanel").then(function(panel) {
-						panel.clientId = client.id;
-					
-						saveFrame(panel);
-					});
+					loadFrame("leftPanel")
+						.then(function(panel) {
+							panel.clientId = client.id;
+						
+							return saveFrame(panel);
+						})
+						.catch(errorHandler);
 				}
 				else if (client.url.endsWith("right")) {
-					loadFrame("rightPanel").then(function(panel) {
-						panel.clientId = client.id;
-					
-						saveFrame(panel);
-					});
+					loadFrame("rightPanel")
+						.then(function(panel) {
+							panel.clientId = client.id;
+						
+							return saveFrame(panel);
+						})
+						.catch(errorHandler);
 				}
 				else if (client.url.endsWith("display.html")) {
-					loadFrame("display").then(function(panel) {
-						panel.clientId = client.id;
-					
-						saveFrame(panel);
-					});
+					loadFrame("display")
+						.then(function(panel) {
+							panel.clientId = client.id;
+						
+							return saveFrame(panel);
+						})
+						.catch(errorHandler);
 				}
 				else if (client.url.endsWith("management.html")) {
-					loadFrame("management").then(function(frame) {
-						frame.clientId = client.id;
+					loadFrame("management")
+						.then(function(frame) {
+							frame.clientId = client.id;
 
-						saveFrame(frame);
-					});
+							return saveFrame(frame);
+						})
+						.catch(errorHandler);
 				}
 				else if (client.url.endsWith("timelinePane.html")) {
-					loadFrame("timelinePane").then(function(frame) {
-						frame.clientId = client.id;
+					loadFrame("timelinePane")
+						.then(function(frame) {
+							frame.clientId = client.id;
 
-						saveFrame(frame);
-					});
+							return saveFrame(frame);
+						})
+						.catch(errorHandler);
 				}
 				else if (client.url.endsWith("growlerAlerts.html")) {
-					loadFrame("growlerAlerts").then(function(frame) {
-						frame.clientId = client.id;
+					loadFrame("growlerAlerts")
+						.then(function(frame) {
+							frame.clientId = client.id;
 
-						saveFrame(frame);
-					});
+							return saveFrame(frame);
+						})
+						.catch(errorHandler);
 				}
 			}
 		});
@@ -290,7 +300,8 @@ function buildPanelHtml(response, orientation, url) {
 				.then(function() {
 					// return the tools, and the results of response.text()
 					return Promise.all([tools, response.text()]);
-				});
+				})
+				.catch(errorHandler);
 		})
 		.then(function(results) {
 			var tools = results[0];
@@ -313,21 +324,19 @@ function buildPanelHtml(response, orientation, url) {
 
 			return new Response(body, init);
 		})
-		.catch(function(error) {
-			console.log(Error("Could not get text for response. " + error));
-		});
+		.catch(errorHandler);
 }
 
 function buildPanelCss(response, orientation) {
 
-	return response.text().then(function(text) {
-		var init = buildInit(response);
-		var body = text.replace(ORIENTATION, orientation);
+	return response.text()
+		.then(function(text) {
+			var init = buildInit(response);
+			var body = text.replace(ORIENTATION, orientation);
 
-		return new Response(body, init);
-	}).catch(function(error) {
-		console.log(Error("Could not get text for response. " + error));
-	});
+			return new Response(body, init);
+		})
+		.catch(errorHandler);
 }
 
 function buildInit(response) {
@@ -378,13 +387,12 @@ function showAddToolDialog(panelKey) {
 			config.tools = tools;
 
 			// display tools to select
-			messageFrame("display", {action: "showAddToolList", config: config}).then(function(response) {
-				addToolToPanel(response.toolname, panelKey);
-			});
+			return messageFrame("display", {action: "showAddToolList", config: config})
 		})
-		.catch(function(err) {
-			console.log(Error(err));
-		});
+		.then(function(response) {
+			addToolToPanel(response.toolname, panelKey);
+		})
+		.catch(errorHandler);
 }
 
 function showHudSettings() {
@@ -393,26 +401,27 @@ function showHudSettings() {
 		initialize: "Reset Configurations to Default",
 	};
 
-	messageFrame("display", {action: "showHudSettings", config: config}).then(function(response) {
-		if (response.id === "initialize") {
-			resetToDefault();
-		}
-	});
+	messageFrame("display", {action: "showHudSettings", config: config})
+		.then(function(response) {
+			if (response.id === "initialize") {
+				resetToDefault();
+			}
+		})
+		.catch(errorHandler);
 }
 
 function resetToDefault() {
-	loadAllTools().then(function(tools) {
-		// run onTargetLoad for any tools in the panel
-		var promises = [];
+	loadAllTools()
+		.then(function(tools) {
+			// run onTargetLoad for any tools in the panel
+			var promises = [];
 
-		for (var tool in tools) {
-			promises.push(self.tools[tools[tool].name].initialize());
-		}
+			for (var tool in tools) {
+				promises.push(self.tools[tools[tool].name].initialize());
+			}
 
-		Promise.all(promises).then(function() {
-			messageFrame("management", {action: "refreshTarget"});
-		});
-	}).catch(function(error) {
-		console.log(Error(error));
-	});
+			return Promise.all(promises)
+		})
+		.then(messageFrame("management", {action: "refreshTarget"}))
+		.catch(errorHandler);
 }

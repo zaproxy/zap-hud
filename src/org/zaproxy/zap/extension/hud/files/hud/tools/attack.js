@@ -37,81 +37,82 @@ var Attack = (function() {
 
 	function showDialog(domain) {
 
-		checkIsRunning().then(function(isAttackMode) {
-			var config = {};
+		checkIsRunning()
+			.then(function(isAttackMode) {
+				var config = {};
 
-			if(!isAttackMode) {
-				config.text = DIALOG.OFF;
-				config.buttons = [
-					{text:"Turn on",
-					 id:"turnon"},
-					{text:"Cancel",
-					 id:"cancel"}
-				];
-			}
-			else {
-				config.text = DIALOG.ON;
-				config.buttons = [
-					{text:"Turn off",
-					 id:"turnoff"},
-					{text:"Cancel",
-					 id:"cancel"}
-				];
-			}
-
-			messageFrame("display", {action:"showDialog", config:config}).then(function(response) {
-
-				// Handle button choice
-				if (response.id === "turnon") {
-					turnOnAttackMode();
-				}
-				else if (response.id === "turnoff") {
-					turnOffAttackMode();
+				if(!isAttackMode) {
+					config.text = DIALOG.OFF;
+					config.buttons = [
+						{text:"Turn on",
+						id:"turnon"},
+						{text:"Cancel",
+						id:"cancel"}
+					];
 				}
 				else {
-					//cancel
+					config.text = DIALOG.ON;
+					config.buttons = [
+						{text:"Turn off",
+						id:"turnoff"},
+						{text:"Cancel",
+						id:"cancel"}
+					];
 				}
-			});
 
-		}).catch(function(error) {
-			console.log(Error(error));
-		});
+				messageFrame("display", {action:"showDialog", config:config})
+					.then(function(response) {
+						// Handle button choice
+						if (response.id === "turnon") {
+							turnOnAttackMode();
+						}
+						else if (response.id === "turnoff") {
+							turnOffAttackMode();
+						}
+						else {
+							//cancel
+						}
+					})
+					.catch(errorHandler);
+
+			})
+			.catch(errorHandler);
 	}
 
 	function turnOnAttackMode(domain) {
-		fetch("<<ZAP_HUD_API>>/core/action/setMode/?mode=attack").then(function(response) {
-			response.json().then(function(json) {
-				//todo: handle response if needed
-				//console.log(json)
-			});
-		});
+			fetch("<<ZAP_HUD_API>>/core/action/setMode/?mode=attack");
 
-		loadTool(NAME).then(function(tool) {
-			tool.isRunning = true;
-			tool.icon = ICONS.ON;
-			tool.data = DATA.ON;
+			loadTool(NAME)
+				.then(function(tool) {
+					tool.isRunning = true;
+					tool.icon = ICONS.ON;
+					tool.data = DATA.ON;
 
-			saveTool(tool);
-		});
+					saveTool(tool);
+				})
+				.catch(errorHandler);
 	}
 
 	function turnOffAttackMode() {
 		fetch("<<ZAP_HUD_API>>/core/action/setMode/?mode=standard");
 
-		loadTool(NAME).then(function(tool) {
-			tool.isRunning = false;
-			tool.icon = ICONS.OFF;
-			tool.data = DATA.OFF;
+		loadTool(NAME)
+			.then(function(tool) {
+				tool.isRunning = false;
+				tool.icon = ICONS.OFF;
+				tool.data = DATA.OFF;
 
-			saveTool(tool);
-		});
+				saveTool(tool);
+			})
+			.catch(errorHandler);
 	}
 
 	function checkIsRunning() {
 		return new Promise(function(resolve) {
-			loadTool(NAME).then(function(tool) {
-				resolve(tool.isRunning);
-			});
+			loadTool(NAME)
+				.then(function(tool) {
+					resolve(tool.isRunning);
+				});
 		});
 	}
 
@@ -122,15 +123,17 @@ var Attack = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: "Remove"};
 
-		messageFrame("display", {action:"showButtonOptions", config:config}).then(function(response) {
-			// Handle button choice
-			if (response.id == "remove") {
-				removeToolFromPanel(NAME);
-			}
-			else {
-				//cancel
-			}
-		});
+		messageFrame("display", {action:"showButtonOptions", config:config})
+			.then(function(response) {
+				// Handle button choice
+				if (response.id == "remove") {
+					removeToolFromPanel(NAME);
+				}
+				else {
+					//cancel
+				}
+			})
+			.catch(errorHandler);
 	}
 
 	self.addEventListener("activate", function(event) {
