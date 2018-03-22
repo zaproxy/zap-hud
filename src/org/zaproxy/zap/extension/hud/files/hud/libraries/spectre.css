@@ -2290,26 +2290,34 @@ html {
     border-radius: 5rem;
     color: #667189;
     font-size: 90%;
-    height: 1.2rem;
+    height: 1.3rem;
     line-height: .8rem;
     margin: .1rem;
-    width: 75px;
+    min-width: 28px;
     max-width: 100%;
     padding: .2rem .4rem;
     text-decoration: none;
     vertical-align: middle;
+    clear: both;
+    cursor: pointer;
   }
   
   .hud-button.active {
     background: #e4e4f8;
-    width: 150px;
+    display: inline-block;
     color: #667189;
   }
-  
-  .hud-button .avatar {
-    margin-left: -.4rem;
-    margin-right: .2rem;
+
+  .hud-button.small {
+    min-width: 28px;
+    max-width: 28px;
   }
+  
+  .hud-button img {
+    margin-left: -.15rem;
+    margin-right: -.15rem;
+  }
+
   
   .chip {
     align-items: center;
