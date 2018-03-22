@@ -35,7 +35,15 @@ Vue.component('hud-button', {
 			currentIcon: this.icon,
 			showData: true,
 			showLabel: false,
-			isActive: false
+			orientation: orientation,
+			marginleft: '0rem',
+			marginright: '0rem',
+			isActive: false,
+		}
+	},
+	computed: {
+		isSmall: function() {
+			return this.currentData == null;
 		}
 	},
 	methods: {
@@ -66,6 +74,14 @@ Vue.component('hud-button', {
 	created() {
 		let self = this;
 
+		// set the margins depending on the orientation
+		if (orientation === 'left') {
+			self.marginleft = '.5rem';
+		}
+		else {
+			self.marginright = '.5rem'
+		}
+
 		Event.listen('updateButton', function(data) {
 			if (self.name === data.name) {
 				self.currentIcon = '<<ZAP_HUD_FILES>>?image=' + data.icon;
@@ -79,7 +95,8 @@ Vue.component('hud-buttons', {
 	template: '#hud-buttons-template',
 	data() {
 		return {
-			tools: {}
+			tools: {},
+			orientation: orientation
 		}
 	},
 	created() {

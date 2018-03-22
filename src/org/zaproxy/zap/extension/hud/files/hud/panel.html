@@ -21,10 +21,10 @@
 	</template>
 
 	<template id="hud-button-template">
-		<div :class="{'hud-button': true, 'active': isActive}" @click="selectButton" @contextmenu="showContextMenu" @mouseover="mouseOver" @mouseleave="mouseLeave">
-			<img :src="currentIcon">
-			<span v-show="showData">{{currentData}}</span>
-			<span v-show="showLabel">{{label}}</span>
+		<div :class="{'hud-button': true, 'small': isSmall,'active': isActive}" :style="{'float': orientation}" @click="selectButton" @contextmenu="showContextMenu" @mouseover="mouseOver" @mouseleave="mouseLeave">
+			<img :src="currentIcon" :style="{'float': orientation}">
+			<div v-show="showData" :style="{'float': orientation, 'margin-left': marginleft, 'margin-right': marginright}">{{currentData}}</div>
+			<div v-show="showLabel" :style="{'float': orientation, 'margin-left': marginleft, 'margin-right': marginright}">{{label}}</div>
 		</div>
 	</template>
 </body>
