@@ -1,6 +1,6 @@
 <html>
 <head>
-	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre.min.css"/>
+	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre.css"/>
 	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=management.css" />
 
 	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue.js"></script>
@@ -15,7 +15,7 @@
 	</div>
 
 	<template id="hud-button-template">
-		<div class="chip" @click="click" @mouseover="showData = true" @mouseleave="showData = false">
+		<div class="hud-button small" @click="click" @mouseover="showData = true" @mouseleave="showData = false">
 			<img :src="icon">
 			<span>{{label}}</span>
 			<span v-show="showData">{{data}}</span>
