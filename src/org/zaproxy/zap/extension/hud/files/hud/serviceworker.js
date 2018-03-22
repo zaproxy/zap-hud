@@ -109,17 +109,6 @@ self.addEventListener("fetch", function(event) {
 			.then(function(response) {  
 				var reqUrl = event.request.url;
 
-			/*	
-			if (reqUrl.startsWith("<<ZAP_HUD_FILES>>?name=panel.html")) {
-				// Modify Panel HTML
-				return handlePanelHtmlFetch(reqUrl);
-			}
-			else if (reqUrl.startsWith("<<ZAP_HUD_FILES>>?name=panel.css")) {
-				// Modify Panel CSS
-				return handlePanelCssFetch(reqUrl);
-			}
-			else 
-			*/
 				if (reqUrl.indexOf("zapCallBackUrl/images") > 0) {
 					// Need to rewrite jquery image URLs
 					var name = "<<ZAP_HUD_FILES>>?image=" + reqUrl.substring(reqUrl.lastIndexOf("/")+1);
