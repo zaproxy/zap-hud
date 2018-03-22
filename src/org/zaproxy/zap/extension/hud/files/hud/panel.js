@@ -52,7 +52,7 @@ Vue.component('hud-button', {
 				action: 'buttonClicked',
 				buttonLabel: this.name,
 				tool: this.name,
-				domain: getReferrerDomain(),
+				domain: parseDomainFromUrl(document.referrer),
 				url: document.referrer,
 				panelKey: panelKey});
 		},
@@ -192,19 +192,4 @@ function contractPanel() {
 	};
 
 	parent.postMessage(message, document.referrer);
-}
-
-/* parses the domain from a uri string */
-function getReferrerDomain() {
-	return parseDomainFromUrl(document.referrer);
-}
-
-function hasButton(tool) {
-	var buttonId = tool.name + "-button";
-	var hasButton = document.getElementById(buttonId);
-
-	if (hasButton) {
-		return true;
-	}
-	return false;
 }
