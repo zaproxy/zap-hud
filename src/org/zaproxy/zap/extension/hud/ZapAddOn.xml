@@ -26,7 +26,6 @@
 		<file>hud/growlerAlerts.js</file>
 		<file>hud/libraries/alertify.js</file>
 		<file>hud/libraries/localforage.min.js</file>
-		<file>hud/libraries/spectre.min.css</file>
 		<file>hud/libraries/spectre.css</file>
 		<file>hud/libraries/vue.js</file>
 		<file>hud/management.css</file>
