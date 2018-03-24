@@ -303,7 +303,9 @@ function showHudSettings() {
 }
 
 function resetToDefault() {
-	loadAllTools()
+	configureStorage()
+		.then(setDefaultTools)
+		.then(loadAllTools)
 		.then(function(tools) {
 			// run onTargetLoad for any tools in the panel
 			var promises = [];
