@@ -109,15 +109,7 @@ self.addEventListener("fetch", function(event) {
 			.then(function(response) {  
 				var reqUrl = event.request.url;
 
-				if (reqUrl.startsWith("<<ZAP_HUD_FILES>>?name=panel.html")) {
-					// Modify Panel HTML
-					return handlePanelHtmlFetch(reqUrl);
-				}
-				else if (reqUrl.startsWith("<<ZAP_HUD_FILES>>?name=panel.css")) {
-					// Modify Panel CSS
-					return handlePanelCssFetch(reqUrl);
-				}
-				else if (reqUrl.indexOf("zapCallBackUrl/images") > 0) {
+				if (reqUrl.indexOf("zapCallBackUrl/images") > 0) {
 					// Need to rewrite jquery image URLs
 					var name = "<<ZAP_HUD_FILES>>?image=" + reqUrl.substring(reqUrl.lastIndexOf("/")+1);
 					return caches.match(name).then(function(response) {
@@ -185,28 +177,6 @@ webSocket.onopen = function (event) {
 webSocket.onmessage = function (event) {
 	//console.log("ServiceWorker received event: " + event.data);
 	// we now need to actually do something with this ;)
-}
-
-/*
- * Builds the html for a panel and returns a Response object.
- */
-function handlePanelHtmlFetch(reqUrl) {
-	return caches.match("<<ZAP_HUD_FILES>>?name=panel.html").then(function(resp) {
-		var orientation = getParamater(reqUrl, PARAM_ORIENATATION);
-		var url = getParamater(reqUrl, PARAM_URL);
-
-		return buildPanelHtml(resp, orientation, url);
-	});
-}
-
-/*
- * Builds the css for a panel and returns a Response object.
- */
-function handlePanelCssFetch(reqUrl) {
-	return caches.match("<<ZAP_HUD_FILES>>?name=panel.css").then(function(resp) {
-		var orientation = getParamater(reqUrl, PARAM_ORIENATATION);
-		return buildPanelCss(resp, orientation);
-	});
 }
 
 /*
@@ -284,88 +254,6 @@ function saveFrameId(event) {
     });
 }
 
-function buildPanelHtml(response, orientation, url) {
-	var key = orientation + "Panel";
-
-	return loadPanelTools(key)
-		.then(function(tools) {
-			var promises = [];
-			var panelLoadData = {domain: parseDomainFromUrl(url), url:url};
-
-			tools.forEach(function(tool) {
-				var toolMod = self.tools[tool.name];
-				// if tool has onPanelLoad function, then call it
-				if (toolMod.onPanelLoad) {
-					promises.push(toolMod.onPanelLoad(panelLoadData));
-				}
-			});
-
-			return Promise.all(promises)
-				.then(function() {
-					// return the tools, and the results of response.text()
-					return Promise.all([tools, response.text()]);
-				})
-				.catch(errorHandler);
-		})
-		.then(function(results) {
-			var tools = results[0];
-			var text = results[1];
-
-			var init = buildInit(response);
-			var body = text.replace(ORIENTATION, orientation);
-
-			// Last, AddTool Button
-			var addToolButton = {name:"add-tool", label:"Add", icon:"plus.png"};
-			body = addButtonToBody(body, addToolButton);
-
-			// sort tools by position
-			tools = sortToolsByPosition(tools);
-
-			// Add Each Tool
-			tools.forEach(function(tool) {
-				body = addButtonToBody(body, tool);
-			});
-
-			return new Response(body, init);
-		})
-		.catch(errorHandler);
-}
-
-function buildPanelCss(response, orientation) {
-
-	return response.text()
-		.then(function(text) {
-			var init = buildInit(response);
-			var body = text.replace(ORIENTATION, orientation);
-
-			return new Response(body, init);
-		})
-		.catch(errorHandler);
-}
-
-function buildInit(response) {
-	var init = {
-		status: response.status,
-		statusText: response.statusText,
-		headers: {}
-	};
-
-	response.headers.forEach(function(v,k) {
-		init.headers[k] = v;
-	});
-
-	return init;
-}
- 
-//todo: home made parsing for now
-function addButtonToBody(body, tool) {
-	var insertAt = body.indexOf(BUTTON_LIST_HTML) + BUTTON_LIST_HTML.length;
-
-	var newBody = body.substring(0, insertAt) + configureButtonHtml(tool) + body.substring(insertAt, body.length);
-
-	return newBody;
-}
-
 function onTargetLoad() {
 	// anything to do when target loads goes here
 }
@@ -415,7 +303,9 @@ function showHudSettings() {
 }
 
 function resetToDefault() {
-	loadAllTools()
+	configureStorage()
+		.then(setDefaultTools)
+		.then(loadAllTools)
 		.then(function(tools) {
 			// run onTargetLoad for any tools in the panel
 			var promises = [];

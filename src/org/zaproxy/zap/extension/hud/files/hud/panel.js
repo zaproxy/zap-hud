@@ -8,9 +8,125 @@ var IMAGE_URL = "<<ZAP_HUD_FILES>>?image=";
 var orientation = "";
 var panelKey = "";
 
+// the Vue app
+var app;
+
+// the Event wrapper class will act as an Event dispatcher for Vue
+window.Event = new class {
+	constructor() {
+		this.vue = new Vue();
+	}
+
+	fire(event, data = null) {
+		this.vue.$emit(event, data);
+	}
+
+	listen(event, callback) {
+		this.vue.$on(event, callback);
+	}
+}
+
+Vue.component('hud-button', {
+	template: '#hud-button-template',
+	props: ['label', 'name', 'icon', 'data'],
+	data() {
+		return {
+			currentData: this.data,
+			currentIcon: this.icon,
+			showData: true,
+			showLabel: false,
+			orientation: orientation,
+			marginleft: '0rem',
+			marginright: '0rem',
+			isActive: false,
+		}
+	},
+	computed: {
+		isSmall: function() {
+			return this.currentData == null;
+		}
+	},
+	methods: {
+		selectButton() {
+			navigator.serviceWorker.controller.postMessage({
+				action: 'buttonClicked',
+				buttonLabel: this.name,
+				tool: this.name,
+				domain: parseDomainFromUrl(document.referrer),
+				url: document.referrer,
+				panelKey: panelKey});
+		},
+		showContextMenu(event) {
+			event.preventDefault();
+			navigator.serviceWorker.controller.postMessage({action: "buttonMenuClicked", tool: this.name});
+		},
+		mouseOver() {
+			this.showLabel = true;
+			this.isActive = true;
+			expandPanel();
+		},
+		mouseLeave() {
+			this.showLabel = false;
+			this.isActive = false;
+			contractPanel();
+		}
+	},
+	created() {
+		let self = this;
+
+		// set the margins depending on the orientation
+		if (orientation === 'left') {
+			self.marginleft = '.5rem';
+		}
+		else {
+			self.marginright = '.5rem'
+		}
+
+		Event.listen('updateButton', function(data) {
+			if (self.name === data.name) {
+				self.currentIcon = '<<ZAP_HUD_FILES>>?image=' + data.icon;
+				self.currentData = data.data;
+			}
+		})
+	}
+});
+
+Vue.component('hud-buttons', {
+	template: '#hud-buttons-template',
+	data() {
+		return {
+			tools: {},
+			orientation: orientation
+		}
+	},
+	created() {
+		let self = this;
+		var panel = orientation + 'Panel';
+
+		// initialize panels with tools		
+		loadPanelTools(panel)
+			.then(function(tools) {
+				self.tools = tools;
+			})
+			.catch(console.error);
+
+		// listen for update events to add new button
+		Event.listen('updateButton', function(data) {
+			if (self.tools.filter(function(tool) {return tool.name === data.name}).length === 0) {
+				self.tools.push(data.tool)
+			}
+		})
+
+		// listen to remove buttons
+		Event.listen('removeButton', function(data) {
+			self.tools = self.tools.filter(function(tool) {return tool.name !== data.name});
+		})
+	}
+
+})
 
 document.addEventListener("DOMContentLoaded", function() {
-	// Set Orientation
+	// set orientation
 	var params = document.location.search.substring(1).split("&");
 
 	for (var i=0; i<params.length; i++) {
@@ -23,18 +139,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	window.name = orientation+"Panel";
 
-	// Add Button Listeners
-	var buttons = document.getElementsByClassName("button");
+	// initialize vue app
+	app = new Vue({
+		el: '#app',
+		data: {
 
-	for (var button of buttons) {
-		var buttonName = button.id.substring(0, button.id.indexOf("-button"));
-
-		addListeners(button, buttonName);
-	}
-});
-
-document.addEventListener("message", function(event) {
-	//todo: anything from other frames here
+		}
+	}); 
 });
 
 navigator.serviceWorker.addEventListener("message", function(event) {
@@ -42,94 +153,28 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 	
 	switch(message.action) {
 		case "updateData":
-			if (hasButton(message.tool)) {
-				setButtonData(message.tool);
-			}
-			else {
-				addButton(message.tool);
-			}
+			var tool = message.tool;
+
+			Event.fire('updateButton', {
+				name: tool.name,
+				data: tool.data,
+				icon: tool.icon,
+				tool: tool
+			});
 			break;
 
 		case "removeTool":
-			removeButton(message.tool);
+			var tool = message.tool;
+
+			Event.fire('removeButton', {
+				name: tool.name
+			})
 			break;
 
 		default:
 			break;
 	}
 });
-
-
-function setButtonData(tool) {
-	var buttonId = tool.name + "-button";
-	var button = document.getElementById(buttonId);
-
-	button.querySelector(".button-data").innerText = tool.data;
-	button.querySelector("img").src = IMAGE_URL + tool.icon;
-}
-
-function addButton(tool) {
-	var template = document.createElement("template");
-	template.innerHTML = configureButtonHtml(tool);
-
-	var newButton = template.content.firstChild;
-
-	addListeners(newButton, tool.name);
-
-	var buttonList = document.querySelector(".buttons-list");
-	var lastButton = document.getElementById("add-tool-button");
-	buttonList.insertBefore(newButton, lastButton);
-}
-
-function removeButton(tool) {
-	var button = document.getElementById(tool.name + "-button");
-
-	button.parentNode.removeChild(button);
-}
-
-function handleButtonAction(name) {
-	return function() { 
-		doButtonAction(name);
-	};
-}
-
-function handleButtonMenu(event, name) {
-	event.preventDefault();
-	navigator.serviceWorker.controller.postMessage({action: "buttonMenuClicked", tool: name});
-
-	/* USE IF WE WANT CONTEXT MENU IN THE PANEL */
-	//document.getElementById("rmenu").className = "show";  
-	//document.getElementById("rmenu").style.top =  mouseY(event);
-	//document.getElementById("rmenu").style.left = mouseX(event);
-}
-
-function doButtonAction(buttonName) {
-	navigator.serviceWorker.controller.postMessage({
-		action:"buttonClicked",
-		buttonLabel:buttonName,
-		tool: buttonName,
-		domain:getReferrerDomain(),
-		url: document.referrer,
-		panelKey:panelKey});
-}
-
-function addListeners(button, name) {	
-	button.addEventListener("mouseenter", showButtonLabel);
-	button.addEventListener("mouseleave", hideButtonLabel);
-	button.addEventListener("click", handleButtonAction(name), true);
-	button.addEventListener("contextmenu", function(e) {handleButtonMenu(e, name);}, true);
-}
-
-/* shows or hides a button label and expands or shrinks panel */
-function showButtonLabel(event){
-	expandPanel();
-	event.target.querySelector(".button-label").style.display = "inline-block";
-}
-
-function hideButtonLabel(event){
-	event.target.querySelector(".button-label").style.display = "none";
-	contractPanel();
-}
 
 /* sends message to inject script to expand or contract width of panel iframe */
 function expandPanel() {
@@ -148,45 +193,3 @@ function contractPanel() {
 
 	parent.postMessage(message, document.referrer);
 }
-
-/* parses the domain from a uri string */
-function getReferrerDomain() {
-	return parseDomainFromUrl(document.referrer);
-}
-
-function hasButton(tool) {
-	var buttonId = tool.name + "-button";
-	var hasButton = document.getElementById(buttonId);
-
-	if (hasButton) {
-		return true;
-	}
-	return false;
-}
-
-// context menu
-/* USE IF WE WANT CONTEXT MENU IN THE PANEL
-function mouseX(evt) {
-    if (evt.pageX) {
-        return evt.pageX;
-    } else if (evt.clientX) {
-       return evt.clientX + (document.documentElement.scrollLeft ?
-           document.documentElement.scrollLeft :
-           document.body.scrollLeft);
-    } else {
-        return null;
-    }
-}
-
-function mouseY(evt) {
-    if (evt.pageY) {
-        return evt.pageY;
-    } else if (evt.clientY) {
-       return evt.clientY + (document.documentElement.scrollTop ?
-       document.documentElement.scrollTop :
-       document.body.scrollTop);
-    } else {
-        return null;
-    }
-}
-*/

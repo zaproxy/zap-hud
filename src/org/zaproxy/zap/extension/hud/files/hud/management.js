@@ -4,98 +4,81 @@
  * Description goes here...
  */
 
+var app;
 var worker;
 
-function startServiceWorker() {
-	if ("serviceWorker" in navigator) {
-		
-		navigator.serviceWorker.register("<<ZAP_HUD_FILES>>?name=serviceworker.js")
-			.then(function(registration) {
-				console.log("Service worker registration successfully in scope: " + registration.scope);
-				return registration;	
-			})
-			.then(function(registration) {
-				var wasInstall = registration.installing;
-				
-				navigator.serviceWorker.ready
-					.then(function(serviceWorkerRegistration) {
-						if (wasInstall && serviceWorkerRegistration.active) {
-							// force reload after installation
-							refreshTarget();
-						}
-						else {
-							onTargetLoadMessage();
-							startPollWorker();
-						}
-					});
-			})
-			.catch(errorHandler);
+Vue.component('hud-button', {
+	template: '#hud-button-template',
+	props: ['label', 'icon', 'data'],
+	data() {
+		return {
+			showData:false
+		}
+	},
+	methods: {
+		click: function() {
+			navigator.serviceWorker.controller.postMessage({action:'showHudSettings'});
+		},
 	}
-}
+})
 
-function addButtonListener() {
-	var button = document.getElementById("settings-button");
+// TODO: implement a super cool loading screen
+Vue.component('loading-screen', {
+	template: '#loading-screen-template',
+	props: []
+})
 
-	// Reset HUD To Defaults
-	button.addEventListener("click", function() {
-		configureStorage()
-			.then(function() {
-				navigator.serviceWorker.controller.postMessage({action:"showHudSettings"});
-			})
-			.catch(errorHandler);
+document.addEventListener('DOMContentLoaded', function() {
+	// initialize Vue app
+	app = new Vue({
+		el: '#app',
+		data: {
+			isSettingsButtonShown: false,
+			isLoadingScreenShown: false
+		}
 	});
-}
 
-function onTargetLoadMessage() {
-	navigator.serviceWorker.controller.postMessage({action:"onTargetLoad"});
-}
-
-function startPollWorker() {
-	if (window.Worker) {
-		worker = new Worker("<<ZAP_HUD_FILES>>?name=pollWorker.js");
-
-		loadTool('timeline')
-			.then(function(tool) {
-				worker.postMessage({targetUrl: document.referrer, targetDomain: parseDomainFromUrl(document.referrer), lastMessage: tool.lastMessage});
-			})
-			.catch(errorHandler);
-
-		worker.addEventListener("message", function(event) {
-			navigator.serviceWorker.controller.postMessage(event.data);
-		});
+	// if first time starting HUD boot up the service worker
+	if (navigator.serviceWorker.controller === null) {
+		/*
+		// TODO: turn this on for a cool loading screen
+		parent.postMessage( {action: 'expandManagement'} , document.referrer);
+		app.isLoadingScreenShown = true;
+		*/
+		startServiceWorker();
 	}
 	else {
-		alert("Web Workers not supported in this browser. HUD will not work properly");
+		// show the settings button
+		app.isSettingsButtonShown = true;
+
+		// send onTargetLoad message 
+		navigator.serviceWorker.controller.postMessage({action:'onTargetLoad'});
+		startPollWorker();
 	}
-}
+});
 
-function refreshTarget() {
-	var message = { action: "refresh" };
-	parent.postMessage(message, document.referrer);
-}
-
-navigator.serviceWorker.addEventListener("message", function(event) {
+navigator.serviceWorker.addEventListener('message', function(event) {
 	var message = event.data;
 	
 	switch(message.action) {
-		case "refreshTarget":
-			refreshTarget();
+		case 'refreshTarget':
+			parent.postMessage( {action: 'refresh'} , document.referrer);
 			break;
 
-		case "increaseDataPollRate":
+		case 'increaseDataPollRate':
 			worker.postMessage({dataDelay: 100});
 			break;
 
-		case "decreaseDataPollRate":
+		case 'decreaseDataPollRate':
 			worker.postMessage({dataDelay: 1000});
 			break;
 
-		case "showTimeline":
-			parent.postMessage({action: "showTimeline"}, document.referrer);
+		case 'showTimeline':
+			parent.postMessage({action: 'showTimeline'}, document.referrer);
 			break;
 
-		case "hideTimeline":
-			parent.postMessage({action: "hideTimeline"}, document.referrer);
+		case 'hideTimeline':
+			parent.postMessage({action: 'hideTimeline'}, document.referrer);
 			break;
 
 		default:
@@ -103,11 +86,57 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 	}
 });
 
-document.addEventListener("DOMContentLoaded", function() {
-	//todo: return promise from "startServiceWorker" that with a boolean
-	// whether the service worker was started or not. If so run "onTargetLoadMessage"
-	// and "startPollWorker"
-	startServiceWorker();
-	addButtonListener();
 
-});
+/*
+ * Starts the service worker and refreshes the target on success.
+ */ 
+function startServiceWorker() {
+	if ('serviceWorker' in navigator) {
+
+		navigator.serviceWorker.register('<<ZAP_HUD_FILES>>?name=serviceworker.js')
+			.then(function(registration) {
+				console.log('Service worker registration was successful for the scope: ' + registration.scope);
+
+				// wait until serviceworker is installed and activated
+				navigator.serviceWorker.ready
+					.then(function(serviceWorkerRegistration) {
+
+						// refresh the target page
+						parent.postMessage( {action: 'refresh'} , document.referrer);
+					})
+					.catch(errorHandler);
+			})
+			.catch(errorHandler);
+	}
+	else {
+		alert('This browser does not support Service Workers. The HUD will not work properly.')
+	}
+}
+
+/*
+ * TO BE DEPRECATED WITH WEB SOCKETS
+ * Starts the web worker that polls ZAP.
+ */
+function startPollWorker() {
+	if (window.Worker) {
+		worker = new Worker('<<ZAP_HUD_FILES>>?name=pollWorker.js');
+
+		loadTool('timeline')
+			.then(function(tool) {
+				// let the worker know where to start polling messages from
+				worker.postMessage({
+					targetUrl: document.referrer, 
+					targetDomain: parseDomainFromUrl(document.referrer), 
+					lastMessage: tool.lastMessage});
+			})
+			.catch(errorHandler);
+
+		worker.addEventListener('message', function(event) {
+			// forward messages from the web worker to the service worker
+			navigator.serviceWorker.controller.postMessage(event.data);
+		});
+	}
+	else {
+		alert('This browser does not support Web Workers. HUD will not work properly');
+	}
+}
