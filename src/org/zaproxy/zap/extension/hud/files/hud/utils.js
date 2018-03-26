@@ -6,6 +6,7 @@
 
 var IS_HUD_CONFIGURED = "isHudConfigured";
 var IS_DEBUG_ENABLED = false;
+var IS_FIRST_TIME = "isFirstTime";
 
 var CLIENT_LEFT = "left";
 var CLIENT_RIGHT = "right";
@@ -143,11 +144,23 @@ function getParamater(url, parameter) {
 	return url.substring(start, end);
 }
 
+
+/* STORAGE */
+var KEY_IS_CONFIG = "isHudConfigured";
+
 /*
  * Return whether configureStorage has been run yet.
  */
 function isStorageConfigured() {
 	return localforage.getItem(IS_HUD_CONFIGURED);
+}
+
+function isFirstTime() {
+	return localforage.getItem(IS_FIRST_TIME);
+}
+
+function setFirstTime() {
+	return localforage.setItem(IS_FIRST_TIME, false);
 }
 
 /*
@@ -157,6 +170,7 @@ function configureStorage() {
 	var promises = [];
 
 	promises.push(localforage.setItem(IS_HUD_CONFIGURED, true));
+	promises.push(localforage.setItem(IS_FIRST_TIME, true));
 		
 	promises.push(loadFrame("rightPanel").then(function(oldPanel) {
 		var panel = {};
