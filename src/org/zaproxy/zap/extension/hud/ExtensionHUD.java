@@ -41,6 +41,7 @@ import org.parosproxy.paros.extension.Extension;
 import org.parosproxy.paros.extension.ExtensionAdaptor;
 import org.parosproxy.paros.extension.ExtensionHook;
 import org.parosproxy.paros.extension.OptionsChangedListener;
+import org.parosproxy.paros.extension.history.ProxyListenerLog;
 import org.parosproxy.paros.model.OptionsParam;
 import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.view.View;
@@ -78,6 +79,9 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	protected static final String TARGET_DIRECTORY = "target";
 	protected static final String HUD_HTML = TARGET_DIRECTORY + "/injectionHtml.html";
 	protected static final String HUD_HTML_TIMELINE = TARGET_DIRECTORY + "/injectionHtmlTimeline.html";
+
+	// Change only after the message has been persisted, otherwise ZAP would see the HUD injections.
+	private static final int PROXY_LISTENER_ORDER = ProxyListenerLog.PROXY_LISTENER_ORDER + 1000;
 	
 	private static final List<Class<? extends Extension>> DEPENDENCIES;
 
@@ -267,7 +271,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 
 	@Override
 	public int getArrangeableListenerOrder() {
-		return 0;
+		return PROXY_LISTENER_ORDER;
 	}
 
 	@Override
