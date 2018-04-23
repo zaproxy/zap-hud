@@ -172,11 +172,22 @@ webSocket.onopen = function (event) {
 	webSocket.send("{ \"component\" : \"core\", \"type\" : \"view\", \"name\" : \"version\" }"); 
 	// Register for alert events
 	webSocket.send("{\"component\" : \"event\", \"type\" : \"register\", \"name\" : \"org.zaproxy.zap.extension.alert.AlertEventPublisher\"}");
+	// Tools should register for alerts via the registerForWebSockerEvents function - see the break tool
 };
 
 webSocket.onmessage = function (event) {
-	//console.log("ServiceWorker received event: " + event.data);
-	// we now need to actually do something with this ;)
+	console.log("ServiceWorker received event: " + event.data);
+	// Rebroadcast for the tools to pick up
+	jevent = JSON.parse(event.data);
+	if ('event.publisher' in jevent) {
+		console.log("EventPublisher : " + jevent['event.publisher'])
+		var ev = new CustomEvent(jevent['event.publisher'], {detail: jevent});
+		self.dispatchEvent(ev);
+	}
+}
+
+function registerForZapEvents(publisher) {
+	webSocket.send("{\"component\" : \"event\", \"type\" : \"register\", \"name\" : \"" + publisher + "\"}");
 }
 
 /*

@@ -33,6 +33,7 @@ var Break = (function() {
 		tool.position = 0;
 
 		saveTool(tool);
+		registerForZapEvents("org.zaproxy.zap.extension.brk.BreakEventPublisher");
 	}
 
 	function showDialog(domain) {
@@ -133,13 +134,13 @@ var Break = (function() {
 	function showBreakDisplay(data) {
 		var config = {};
 
-		if (data.response_body === "") {
-			config.headerText = data.request_header;
-			config.bodyText = data.request_body;
+		if (typeof data.responseBody != null) {
+			config.headerText = data.responseHeader;
+			config.bodyText = data.responseBody;
 		}
 		else {
-			config.headerText = data.response_header;
-			config.bodyText = data.response_body;
+			config.headerText = data.requestHeader;
+			config.bodyText = data.requestBody;
 		}
 		config.buttons = [
 			{text:"Step",
@@ -228,6 +229,12 @@ var Break = (function() {
 				default:
 					break;
 			}
+		}
+	});
+
+	self.addEventListener("org.zaproxy.zap.extension.brk.BreakEventPublisher", function(event) {
+		if (event.detail['event.type'] === 'break.active') {
+			showBreakDisplay(event.detail);
 		}
 	});
 
