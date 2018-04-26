@@ -80,7 +80,7 @@ var Break = (function() {
 	}
 
 	function startBreaking() {
-		fetch("<<ZAP_HUD_API>>/break/action/break/?type=http-all&state=true");
+		fetch("<<ZAP_HUD_API>>/break/action/break/?type=http-all&state=true")
 
 		loadTool(NAME)
 			.then(function(tool) {
@@ -109,7 +109,17 @@ var Break = (function() {
 	}
 
 	function step() {
-		fetch("<<ZAP_HUD_API>>/break/action/step/");
+		return fetch("<<ZAP_HUD_API>>/break/action/step/")
+			.then(function(response) {
+				response.json()
+					.then(function(data) {
+						console.log(data);
+					})
+			});
+	}
+
+	function drop() {
+		return fetch("<<ZAP_HUD_API>>/break/action/drop/");
 	}
 
 	function setHttpMessage(method, header, body) {
@@ -125,23 +135,28 @@ var Break = (function() {
 		});
 	}
 
-	function onPollData(data) {
-		if (data.isBreakingRequest === "true") {
-			showBreakDisplay(data);
-		}
-	}
-
 	function showBreakDisplay(data) {
-		var config = {};
+		var config = {
+			request: {
+				header: '',
+				body: ''
+			},
+			response: {
+				header: '',
+				body: ''
+			},
+			isResponse: false
+		};
 
-		if (typeof data.responseBody != null) {
-			config.headerText = data.responseHeader;
-			config.bodyText = data.responseBody;
+		if ('responseBody' in data) {
+			config.response.header = data.responseHeader;
+			config.response.body = data.responseBody;
+			config.isResponse = true;
 		}
-		else {
-			config.headerText = data.requestHeader;
-			config.bodyText = data.requestBody;
-		}
+		
+		config.request.header = data.requestHeader;
+		config.request.body = data.requestBody;
+
 		config.buttons = [
 			{text:"Step",
 			 id:"step"},
@@ -153,18 +168,22 @@ var Break = (function() {
 			.then(function(response) {
 
 				// Handle button choice
-				if (response.id === "step") {
+				if (response.buttonSelected === "step") {
 					setHttpMessage(response.method, response.header, response.body)
 						.then(function() {
 							step();
 						})
 						.catch(errorHandler);
 				}
-				else if (response.id === "continue") {
+				else if (response.buttonSelected === "continue") {
 					setHttpMessage(response.method, response.header, response.body)
 						.then(function() {
 							stopBreaking();
 						})
+						.catch(errorHandler);
+				}
+				else if (response.buttonSelected === "drop") {
+					drop()
 						.catch(errorHandler);
 				}
 				else {
@@ -207,10 +226,6 @@ var Break = (function() {
 				initializeStorage();
 				break;
 
-			case "pollData":
-				onPollData(message.pollData.break);
-				break;
-
 			default:
 				break;
 		}
@@ -233,7 +248,10 @@ var Break = (function() {
 	});
 
 	self.addEventListener("org.zaproxy.zap.extension.brk.BreakEventPublisher", function(event) {
-		if (event.detail['event.type'] === 'break.active') {
+		if (event.detail['event.type'] === 'break.active') { //} && event.detail['messageType'] === 'HTTP') {
+			console.log("BREAK EVENT")
+			console.log(event)
+			console.log(event.detail)
 			showBreakDisplay(event.detail);
 		}
 	});

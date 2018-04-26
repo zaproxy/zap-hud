@@ -17,6 +17,7 @@
             <all-alerts-modal :show="isAllAlertsModalShown" :title="allAlertsModalTitle" @close="isAllAlertsModalShown = false"></all-alerts-modal>
             <alert-details-modal :show="isAlertDetailsModalShown" :title="alertDetailsModalTitle" @close="isAlertDetailsModalShown = false"></alert-details-modal>
             <simple-menu-modal :show="isSimpleMenuModalShown" :title="simpleMenuModalTitle" @close="isSimpleMenuModalShown = false"></simple-menu-modal>
+            <http-message-modal :show="isHttpMessageModalShown" :title="httpMessageModalTitle" @close="isHttpMessageModalShown = false"></http-message-modal>
         </div>
         
         <!-- a base modal component -->
@@ -158,6 +159,41 @@
                     </ul>
                 </div>
             </modal>
+        </template>
+
+        <!-- http message modal component -->
+        <template id="http-message-modal-template">
+            <modal :title="title" :show="show" @close="close">
+                <div slot="body">
+                    <tabs>
+                        <tab name="Request" :selected="true">
+                            <http-message :header="request.header" :body="request.body"></http-message>
+                        </tab>
+            
+                        <tab name="Response">
+                            <http-message :header="response.header" :body="response.body"></http-message>               
+                        </tab>
+                    </tabs>
+                </div>
+                <div slot="footer">
+                    <button class="btn" @click="step">Step</button>
+                    <button class="btn" @click="continueOn">Continue</button>
+                    <button class="btn" @click="drop">Drop</button>
+                </div>
+            </modal>
+        </template>
+
+        <!-- http message component -->
+        <template id="http-message-template">
+            <div>
+                <textarea class="form-input" rows="10">
+                    {{ header }}
+                </textarea>
+
+                <textarea class="form-input" rows="10">
+                    {{ body }}
+                </textarea>
+            </div>
         </template>
 
         <!-- tabs component -->

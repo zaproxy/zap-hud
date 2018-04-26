@@ -239,6 +239,59 @@ Vue.component('simple-menu-modal', {
 	}
 })
 
+Vue.component('http-message-modal', {
+	template: '#http-message-modal-template',
+	props: ['show', 'title'],
+	methods: {
+		close: function() {
+			this.step();
+			this.$emit('close');
+		},
+		step: function() {
+			this.port.postMessage({'buttonSelected': 'step'});
+			this.$emit('close');
+		},
+		continueOn: function() {
+			this.port.postMessage({'buttonSelected': 'continue'});
+			this.$emit('close');
+		},
+		drop: function() {
+			this.port.postMessage({'buttonSelected': 'drop'});
+			this.$emit('close');
+		},
+	},
+	data() {
+		return {
+			port: null,
+			request: {},
+			response: {},
+			isResponse: false
+		}
+	},
+	created() {
+		let self = this;
+
+		Event.listen('showHttpMessageModal', function(data) {
+			console.log("RECEIVED AT COMPONENT")
+			console.log(data)
+			console.log(data.isResponse)
+
+			self.request = data.request;
+			self.response = data.response;
+			self.isResponse = data.isResponse;
+			self.port = data.port;
+			
+			app.isHttpMessageModalShown = true;
+			app.httpMessageModalTitle = data.title;
+		})
+	}
+})
+
+Vue.component('http-message', {
+	template: '#http-message-template',
+	props: ['header', 'body']
+})
+
 Vue.component('tabs', {
 	template: '#tabs-template',
     data() {
@@ -298,6 +351,8 @@ document.addEventListener("DOMContentLoaded", function() {
 			alertDetailsModalTitle: "Alert Details",
 			isSimpleMenuModalShown: false,
 			simpleMenuModalTitle: "Menu",
+			isHttpMessageModalShown: false,
+			httpMessageModalTitle: "HTTP Message",
 			keepShowing: false,
 		},
 	});
@@ -373,7 +428,16 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			break;
 
 		case "showHttpMessage":
-			//TODO: implement when fixing break & timeline
+			console.log("ABOUT TO FIRE EVENT")
+			console.log(config.request)
+			console.log(config.request.header)
+			Event.fire('showHttpMessageModal', {
+				title: 'HTTP Message',
+				request: config.request,
+				response: config.response,
+				isResponse: config.isResponse,
+				port: port
+			})
 			break;
 
 		default:
