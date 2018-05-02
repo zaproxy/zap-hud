@@ -36,6 +36,19 @@ var Break = (function() {
 		registerForZapEvents("org.zaproxy.zap.extension.brk.BreakEventPublisher");
 	}
 
+	function toggleBreak() {
+		loadTool(NAME)
+			.then(function(tool) {
+				if (tool.data === DATA.OFF) {
+					startBreaking();
+				}
+				else {
+					stopBreaking();
+				}
+			})
+			.catch(errorHandler)
+	}
+
 	function showDialog(domain) {
 
 		checkIsRunning()
@@ -149,13 +162,13 @@ var Break = (function() {
 		};
 
 		if ('responseBody' in data) {
-			config.response.header = data.responseHeader;
-			config.response.body = data.responseBody;
+			config.response.header = data.responseHeader.trim();
+			config.response.body = data.responseBody.trim();
 			config.isResponse = true;
 		}
 		
-		config.request.header = data.requestHeader;
-		config.request.body = data.requestBody;
+		config.request.header = data.requestHeader.trim();
+		config.request.body = data.requestBody.trim();
 
 		config.buttons = [
 			{text:"Step",
@@ -234,7 +247,7 @@ var Break = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showDialog(message.domain);
+					toggleBreak();
 					break;
 
 				case "buttonMenuClicked":
@@ -248,11 +261,14 @@ var Break = (function() {
 	});
 
 	self.addEventListener("org.zaproxy.zap.extension.brk.BreakEventPublisher", function(event) {
-		if (event.detail['event.type'] === 'break.active') { //} && event.detail['messageType'] === 'HTTP') {
+		if (event.detail['event.type'] === 'break.active' && event.detail['messageType'] === 'HTTP') {
 			console.log("BREAK EVENT")
 			console.log(event)
 			console.log(event.detail)
 			showBreakDisplay(event.detail);
+		}
+		else {
+			//step();
 		}
 	});
 

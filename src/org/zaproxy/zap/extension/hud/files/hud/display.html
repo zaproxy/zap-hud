@@ -23,7 +23,7 @@
         <!-- a base modal component -->
         <template id="modal-template">
             <transition name="modal" @after-leave="afterLeave">
-            <div class="modal active" id="modal-id" v-show="show">
+            <div :class="{ 'active': true, 'modal': true, 'modal-wd': isWide, 'modal-sm': isSmall }" id="modal-id" v-show="show">
                 <a href="#close" class="modal-overlay" aria-label="Close" @click="close"></a>
                 <div class="modal-container">
                     <div class="modal-header">
@@ -163,7 +163,7 @@
 
         <!-- http message modal component -->
         <template id="http-message-modal-template">
-            <modal :title="title" :show="show" @close="close">
+            <modal :title="title" :show="show" size="wide" @close="close">
                 <div slot="body">
                     <tabs>
                         <tab name="Request" :selected="true">
@@ -186,13 +186,9 @@
         <!-- http message component -->
         <template id="http-message-template">
             <div>
-                <textarea class="form-input" rows="10">
-                    {{ header }}
-                </textarea>
+                <textarea class="form-input hud-http-message" rows="10" spellcheck="false">{{ header }}</textarea>
 
-                <textarea class="form-input" rows="10">
-                    {{ body }}
-                </textarea>
+                <textarea class="form-input hud-http-message" rows="10" spellcheck="false">{{ body }}</textarea>
             </div>
         </template>
 

@@ -19,7 +19,15 @@ window.Event = new class {
 /* Vue Components */
 Vue.component('modal', {
 	template: '#modal-template',
-	props: ['show', 'title', 'text'],
+	props: ['show', 'title', 'text', 'size'],
+	computed: {
+		isWide: function() {
+			return this.size === 'wide';
+		},
+		isSmall: function() {
+			return this.size === 'small';
+		}
+	},
 	methods: {
 		close: function () {
 			this.$emit('close');

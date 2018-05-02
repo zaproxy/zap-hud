@@ -2317,8 +2317,13 @@ html {
     margin-left: -.15rem;
     margin-right: -.15rem;
   }
-
   
+  .hud-http-message {
+    font-family: sans-serif;
+    font-size: 12px;
+    font-family: "Courier New", Courier, monospace;
+  }
+
   .chip {
     align-items: center;
     background: #f0f1f4;
@@ -2522,6 +2527,17 @@ html {
   .modal.modal-lg .modal-container {
     box-shadow: none;
     max-width: 960px;
+  }
+
+  .modal.modal-wd .modal-container {
+    max-width: 750px;
+  }
+
+  .modal.modal-wd .modal-body {
+    padding-bottom: .8rem;
+    padding-left: .8rem;
+    padding-right: .8rem;
+    padding-top: 0rem;
   }
   
   .modal-container {
