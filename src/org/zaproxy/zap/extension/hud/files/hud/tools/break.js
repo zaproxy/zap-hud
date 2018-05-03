@@ -138,7 +138,11 @@ var Break = (function() {
 	function setHttpMessage(method, header, body) {
 		return fetch("<<ZAP_HUD_API>>/break/action/setHttpMessage/?formMethod=" + method + "&httpHeader=" + header + "&httpBody=" + body );
 	}
-
+/*
+	function addBreakFilter(method, header, body) {
+		return fetch("<<ZAP_HUD_API>>/break/action/setHttpMessage/?formMethod=" + method + "&httpHeader=" + header + "&httpBody=" + body );
+	}
+*/
 	function checkIsRunning() {
 		return new Promise(function(resolve) {
 			loadTool(NAME)
@@ -147,7 +151,20 @@ var Break = (function() {
 				});
 		});
 	}
+/*
+	function showBreakFilterModal() {
 
+		messageFrame("display", {action:"showBreakFilterModal"})
+			.then(function(response) {
+
+				// Handle button choice
+				if (response.buttonSelected === "add") {
+					addBreakFilter(response.filter);
+				}
+			})
+			.catch(errorHandler);
+	}
+*/
 	function showBreakDisplay(data) {
 		var config = {
 			request: {
@@ -163,12 +180,13 @@ var Break = (function() {
 
 		if ('responseBody' in data) {
 			config.response.header = data.responseHeader.trim();
-			config.response.body = data.responseBody.trim();
+			config.response.body = data.responseBody;
 			config.isResponse = true;
 		}
 		
+		config.request.method = parseRequestHeader(data.requestHeader).method;
 		config.request.header = data.requestHeader.trim();
-		config.request.body = data.requestBody.trim();
+		config.request.body = data.requestBody;
 
 		config.buttons = [
 			{text:"Step",
@@ -182,6 +200,7 @@ var Break = (function() {
 
 				// Handle button choice
 				if (response.buttonSelected === "step") {
+					console.log(response)
 					setHttpMessage(response.method, response.header, response.body)
 						.then(function() {
 							step();
@@ -211,14 +230,17 @@ var Break = (function() {
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
-		config.options = {remove: "Remove"};
+		config.options = {remove: "Remove", filter: "Add Filter"};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
 			.then(function(response) {
 				// Handle button choice
 				if (response.id == "remove") {
 					removeToolFromPanel(NAME);
-				}
+				}/*
+				if (response.id == "filter") {
+					showBreakFilterModal();
+				}*/
 				else {
 					//cancel
 				}

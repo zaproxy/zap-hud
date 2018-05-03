@@ -165,7 +165,7 @@
         <template id="http-message-modal-template">
             <modal :title="title" :show="show" size="wide" @close="close">
                 <div slot="body">
-                    <tabs>
+                    <tabs :activetab="activeTab">
                         <tab name="Request" :selected="true">
                             <http-message :header="request.header" :body="request.body"></http-message>
                         </tab>

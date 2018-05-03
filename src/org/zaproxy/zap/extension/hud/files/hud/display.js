@@ -255,12 +255,33 @@ Vue.component('http-message-modal', {
 			this.step();
 			this.$emit('close');
 		},
+		currentMessage() {
+			let method = '';
+			let header = '';
+			let body = '';
+
+			if (this.isResponse) {
+				header = this.response.header;
+				body = this.response.body;
+			}
+			else {
+				method = this.request.method;
+				header = this.request.header;
+				body = this.request.body;
+			}
+
+			return {'method': method, 'header': header, 'body': body};
+		},
 		step: function() {
-			this.port.postMessage({'buttonSelected': 'step'});
+			let message = this.currentMessage();
+
+			this.port.postMessage({'buttonSelected': 'step', 'method': message.method, 'header': message.header, 'body': message.body});
 			this.$emit('close');
 		},
 		continueOn: function() {
-			this.port.postMessage({'buttonSelected': 'continue'});
+			let message = this.currentMessage();
+
+			this.port.postMessage({'buttonSelected': 'continue', 'method': message.method, 'header': message.header, 'body': message.body});
 			this.$emit('close');
 		},
 		drop: function() {
@@ -273,22 +294,26 @@ Vue.component('http-message-modal', {
 			port: null,
 			request: {},
 			response: {},
-			isResponse: false
+			activeTab: "Request",
+			isResponse: "false"
 		}
 	},
 	created() {
 		let self = this;
 
 		Event.listen('showHttpMessageModal', function(data) {
-			console.log("RECEIVED AT COMPONENT")
-			console.log(data)
-			console.log(data.isResponse)
-
 			self.request = data.request;
 			self.response = data.response;
-			self.isResponse = data.isResponse;
 			self.port = data.port;
-			
+			self.isResponse = data.isResponse;
+
+			if (data.isResponse) {
+				self.activeTab = "Response";
+			}
+			else {
+				self.activeTab = "Request";
+			}
+
 			app.isHttpMessageModalShown = true;
 			app.httpMessageModalTitle = data.title;
 		})
@@ -302,6 +327,7 @@ Vue.component('http-message', {
 
 Vue.component('tabs', {
 	template: '#tabs-template',
+	props: ['activetab'],
     data() {
         return { 
 			tabs: [] 
@@ -312,8 +338,20 @@ Vue.component('tabs', {
             this.tabs.forEach(tab => {
                 tab.isActive = (tab.href == selectedTab.href);
             });
-        }
-    },
+		},
+		changeTab(tabName) {
+			let tabHref = '#' + tabName.toLowerCase().replace(/ /g, '-');
+
+			this.tabs.forEach(tab => {
+				tab.isActive = (tab.href == tabHref);
+			})
+		}
+	},
+	watch: {
+		activetab: function (tabName) {
+			this.changeTab(tabName)
+		}
+	},
     created() {
         this.tabs = this.$children;
     },
