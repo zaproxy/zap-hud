@@ -170,6 +170,8 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	public void unload() {
 		getExtScript().removeScripType(hudScriptType);
 		getExtScript().removeListener(this);
+
+		HudEventPublisher.unregister();
 	}
 
 	@Override
