@@ -36,19 +36,11 @@ var SiteAlertsLow = (function() {
 	}
 
 	function showAlerts(domain) {
-		alertUtils.showAlerts(NAME, domain, ALERT_RISK);
-	}
-
-	function updateAlertCount(domain) {
-		return alertUtils.updateAlertCount(NAME, domain);
+		alertUtils.showAlerts(LABEL, domain, ALERT_RISK);
 	}
 
 	function onPanelLoad(data) {
-		return alertUtils.updateAlertCount(NAME, data.domain);
-	}
-
-	function onPollData(domain, data) {
-		alertUtils.onPollData(NAME, domain, data, ALERT_RISK);
+		//return alertUtils.updateAlertCount(NAME, data.domain);
 	}
 
 	function showOptions() {
@@ -59,6 +51,15 @@ var SiteAlertsLow = (function() {
 		initializeStorage();
 	});
 
+	self.addEventListener("commonAlerts.Low", function(event) {
+		return loadTool(NAME)
+			.then(function(tool) {
+				tool.data = event.detail.count;
+				return saveTool(tool);
+			})
+			.catch(errorHandler);
+	});
+
 	self.addEventListener("message", function(event) {
 		var message = event.data;
 
@@ -66,10 +67,6 @@ var SiteAlertsLow = (function() {
 		switch(message.action) {
 			case "initializeTools":
 				initializeStorage();
-				break;
-
-			case "pollData":
-				onPollData(message.targetDomain, message.pollData.siteAlerts);
 				break;
 
 			default:

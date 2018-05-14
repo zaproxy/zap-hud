@@ -170,13 +170,20 @@ Vue.component('alert-accordion', {
 		close: function() {
 			this.$emit('close');
 		},
+		urlCount: function(alert) {
+			let count = 0;
+			for (var url in alert) {
+				count += 1;
+			}
+			return count;
+		},
 		alertSelect: function(alert) {
 			// set keepShowing so that we don't hide the display frame
 			app.keepShowing = true;
 			app.isAlertListModalShown = false;
 			app.isAllAlertsModalShown = false;
 
-			this.port.postMessage({'action': 'alertSelected', 'alertId': alert.id})
+			this.port.postMessage({'action': 'alertSelected', 'alertId': alert.alertId})
 		}
 	}
 })
@@ -328,6 +335,7 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			break;
 
 		case "showAlerts":
+			console.log('display.js message showAlerts'); // TODO
 			Event.fire('showAlertListModal', {
 				title: config.title,
 				alerts: config.alerts,
@@ -337,6 +345,7 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			break;
 
 		case "showAllAlerts":
+			console.log('display.js message showAllAlerts'); // TODO
 			Event.fire('showAllAlertsModal', {
 				title: config.title,
 				alerts: config.alerts,
@@ -346,6 +355,7 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			break;
 
 		case "showAlertDetails":
+			console.log('display.js message showAlertDetails'); // TODO
 			Event.fire('showAlertDetailsModal', {
 				title: config.title,
 				details: config.details,

@@ -46,10 +46,6 @@ var PageAlerts = (function() {
 		return alertUtils.updateAlertCount(NAME, data.url);
 	}
 
-	function onPollData(url, data) {
-		alertUtils.onPollData(NAME, url, data);
-	}
-
 	function showOptions() {
 		alertUtils.showOptions(NAME, LABEL)
 	}
@@ -65,10 +61,6 @@ var PageAlerts = (function() {
 		switch(message.action) {
 			case "initializeTools":
 				initializeStorage();
-				break;
-
-			case "pollData":
-				onPollData(message.targetUrl, message.pollData.pageAlerts);
 				break;
 
 			default:
