@@ -33,6 +33,7 @@ var Spider = (function() {
 		tool.isRunning = false;
 
 		saveTool(tool);
+		registerForZapEvents("org.zaproxy.zap.extension.spider.SpiderEventPublisher");
 	}
 
 	function showDialog(domain) {
@@ -88,22 +89,26 @@ var Spider = (function() {
 
 	function startSpider(domain) {
 		fetch("<<ZAP_HUD_API>>/spider/action/scan/?url=" + domain + "/");
-
+		spiderStarted();
+	}
+	
+	function spiderStarted() {
 		loadTool(NAME)
 			.then(function(tool) {
 				tool.isRunning = true;
-				tool.data = "0";
+				tool.data = "0%";
 
 				saveTool(tool);
 			})
 			.catch(errorHandler);
-
-		messageFrame("management", {action: "increaseDataPollRate"});
 	}
 
 	function stopSpider() {
 		fetch("<<ZAP_HUD_API>>/spider/action/stop");
-
+		spiderStopped();
+	}
+	
+	function spiderStopped() {
 		loadTool(NAME)
 			.then(function(tool) {
 				tool.isRunning = false;
@@ -112,8 +117,6 @@ var Spider = (function() {
 				saveTool(tool);
 			})
 			.catch(errorHandler);
-
-		messageFrame("management", {action: "decreaseDataPollRate"});
 	}
 
 	function checkIsRunning() {
@@ -125,15 +128,11 @@ var Spider = (function() {
 		});
 	}
 
-	function onPollData(data) {
-		// do something witht the data
-		if (data.progress == "100") {
-			stopSpider();
-		}
-		else if (data.progress !== "-1") {
+	function updateProgress(progress) {
+		if (progress !== "-1") {
 			loadTool(NAME)
 				.then(function(tool) {
-					tool.data = data.progress;
+					tool.data = progress;
 
 					saveTool(tool);
 				})
@@ -174,10 +173,6 @@ var Spider = (function() {
 				initializeStorage();
 				break;
 
-			case "pollData":
-				onPollData(message.pollData.spider);
-				break;
-
 			default:
 				break;
 		}
@@ -196,6 +191,18 @@ var Spider = (function() {
 				default:
 					break;
 			}
+		}
+	});
+
+	self.addEventListener("org.zaproxy.zap.extension.spider.SpiderEventPublisher", function(event) {
+		var eventType = event.detail['event.type'];
+		log (LOG_DEBUG, 'SpiderEventPublisher eventListener', 'Received ' + eventType + ' event');
+		if (eventType === 'scan.started') {
+			updateProgress("0%");
+		} else if (eventType === 'scan.progress') {
+			updateProgress(event.detail['scanProgress'] + '%');
+		} else  if (eventType === 'scan.stopped' || eventType === 'scan.completed') {
+			spiderStopped();
 		}
 	});
 
