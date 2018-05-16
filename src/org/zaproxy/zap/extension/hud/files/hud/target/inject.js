@@ -130,6 +130,47 @@
 		document.getElementById("management").style.width = "50px";
 		document.getElementById("management").style.height = "50px";
 	}
+	
+	// TODO put this code in a separate file and inject ?
+	var showEnableTypeHiddenFields = [];
+	var showEnableDisplayNoneFields = [];
+	var showEnableDisplayHiddenFields = [];
+
+	function showEnableOn() {
+		var inputs, index;
+
+		inputs = document.getElementsByTagName('input');
+		for (index = 0; index < inputs.length; ++index) {
+			if (inputs[index].type == "hidden") {
+				inputs[index].type = "";
+				showEnableTypeHiddenFields.push(inputs[index]);
+			}
+			if (inputs[index].style.display == "none") {
+				inputs[index].style.display = "";
+				showEnableDisplayNoneFields.push(inputs[index]);
+			}
+			if (inputs[index].style.visibility == "hidden") {
+				inputs[index].style.visibility = "";
+				showEnableTypeHiddenFields.push(inputs[index]);
+			}
+		}
+	}
+
+	function showEnableOff() {
+		var index;
+		for (index = 0; index < showEnableTypeHiddenFields.length; ++index) {
+			showEnableTypeHiddenFields[index].type = 'hidden';
+		}
+		showEnableTypeHiddenFields = [];
+		for (index = 0; index < showEnableDisplayNoneFields.length; ++index) {
+			showEnableDisplayNoneFields[index].style.display = 'none';
+		}
+		showEnableDisplayNoneFields = [];
+		for (index = 0; index < showEnableDisplayHiddenFields.length; ++index) {
+			showEnableDisplayHiddenFields[index].style.visibility = 'hidden';
+		}
+		showEnableDisplayHiddenFields = [];
+	}
 
 	/* COMMUNICATIONS */
 	function receiveMessages (event) {
@@ -197,6 +238,14 @@
 
 			case "shortenGrowlerFrame":
 				shortenGrowlerFrame();
+				break;
+
+			case "showEnable.on":
+				showEnableOn();
+				break;
+
+			case "showEnable.off":
+				showEnableOff();
 				break;
 
 			default:

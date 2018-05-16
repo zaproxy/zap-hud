@@ -72,7 +72,16 @@ navigator.serviceWorker.addEventListener('message', function(event) {
 			parent.postMessage({action: 'hideTimeline'}, document.referrer);
 			break;
 
+		case 'showEnable.on':
+			parent.postMessage({action: 'showEnable.on'}, document.referrer);
+			break;
+
+		case 'showEnable.off':
+			parent.postMessage({action: 'showEnable.off'}, document.referrer);
+			break;
+
 		default:
+			console.log('Unexpected action ' + message.action);
 			break;
 	}
 });
