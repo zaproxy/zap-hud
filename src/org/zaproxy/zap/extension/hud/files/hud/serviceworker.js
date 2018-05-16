@@ -35,23 +35,7 @@ var urlsToCache = [
 ];
 
 var toolScripts = [
-	"<<ZAP_HUD_FILES>>?name=tools/scope.js",
-	"<<ZAP_HUD_FILES>>?name=tools/spider.js",
-	"<<ZAP_HUD_FILES>>?name=tools/timeline.js",
-	"<<ZAP_HUD_FILES>>?name=tools/activeScan.js",
-	"<<ZAP_HUD_FILES>>?name=tools/commonAlerts.js",
-	"<<ZAP_HUD_FILES>>?name=tools/pageAlerts.js",
-	"<<ZAP_HUD_FILES>>?name=tools/pageAlertsHigh.js",
-	"<<ZAP_HUD_FILES>>?name=tools/pageAlertsMedium.js",
-	"<<ZAP_HUD_FILES>>?name=tools/pageAlertsLow.js",
-	"<<ZAP_HUD_FILES>>?name=tools/pageAlertsInformational.js",
-	"<<ZAP_HUD_FILES>>?name=tools/siteAlerts.js",
-	"<<ZAP_HUD_FILES>>?name=tools/siteAlertsHigh.js",
-	"<<ZAP_HUD_FILES>>?name=tools/siteAlertsMedium.js",
-	"<<ZAP_HUD_FILES>>?name=tools/siteAlertsLow.js",
-	"<<ZAP_HUD_FILES>>?name=tools/siteAlertsInformational.js",
-	"<<ZAP_HUD_FILES>>?name=tools/break.js",
-	"<<ZAP_HUD_FILES>>?name=tools/attack.js"
+<<ZAP_HUD_TOOLS>>
 ];
 
 self.tools = {};

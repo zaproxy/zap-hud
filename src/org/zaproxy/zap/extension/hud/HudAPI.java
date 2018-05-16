@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.httpclient.URIException;
@@ -245,6 +246,22 @@ public class HudAPI extends ApiImplementor {
                 // Only do this on the ZAP domain
                 contents = contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
                         .replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
+
+                if (file.equals("serviceworker.js")) {
+                    // Inject the tool filenames
+                    StringBuilder sb = new StringBuilder();
+                    File toolsDir = new File(this.extension.getHudParam().getBaseDirectory(), "tools");
+                    for (String tool : toolsDir.list()) {
+                        if (tool.toLowerCase(Locale.ROOT).endsWith(".js")) {
+                            sb.append("\t\"");
+                            sb.append(this.hudFileUrl);
+                            sb.append("?name=tools/");
+                            sb.append(tool);
+                            sb.append("\",\n");
+                        }
+                    }
+                    contents = contents.replace("<<ZAP_HUD_TOOLS>>", sb.toString());
+                }
             }
             
             return contents;
