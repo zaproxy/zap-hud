@@ -20,6 +20,7 @@ var ActiveScan = (function() {
 		DIALOG.START = "Start actively scanning this site?";
 		DIALOG.START_ADD_SCOPE = "This site is not in scope.\nIn order to Active Scan the site you must add it to the scope.\nAdd the site to the scope and start Active Scanning it?";
 		DIALOG.STOP = "The active scanner is currently running. Would you like to stop it?";
+	var ACTIVE_SCAN_EVENT = "org.zaproxy.zap.extension.ascan.ActiveScanEventPublisher" 
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -35,6 +36,7 @@ var ActiveScan = (function() {
 		tool.scanid = -1
 
 		saveTool(tool);
+		registerForZapEvents(ACTIVE_SCAN_EVENT);
 	}
 
 	function showDialog(domain) {
@@ -97,7 +99,7 @@ var ActiveScan = (function() {
 						.then(function(tool) {
 							tool.isRunning = true;
 							tool.icon = ICONS.ON;
-							tool.data = "0";
+							tool.data = "0%";
 							tool.scanid = data.scan;
 							saveTool(tool);
 						})
@@ -105,14 +107,20 @@ var ActiveScan = (function() {
 				})
 				.catch(errorHandler);
 		});
-
-		messageFrame("management", {action: "increaseDataPollRate"});
 	}
 
 	function stopActiveScan() {
 		loadTool(NAME)
 			.then(function(tool) {
 				fetch("<<ZAP_HUD_API>>/ascan/action/stop/?scanId=" + tool.scanId + "");
+			})
+			.catch(errorHandler);
+		activeScanStopped();
+	}
+
+	function activeScanStopped() {
+		loadTool(NAME)
+			.then(function(tool) {
 				tool.isRunning = false;
 				tool.icon = ICONS.OFF;
 				tool.data = DATA.START;
@@ -120,9 +128,6 @@ var ActiveScan = (function() {
 
 				saveTool(tool);
 			})
-			.catch(errorHandler);
-
-		messageFrame("management", {action: "decreaseDataPollRate"})
 			.catch(errorHandler);
 	}
 
@@ -134,17 +139,15 @@ var ActiveScan = (function() {
 		});
 	}
 
-	function onPollData(data) {
-		// do something witht the data
-		if (data.progress == "100") {
-			stopActiveScan();
-		}
-		else if (data.progress !== "-1") {
-			loadTool(NAME).then(function(tool) {
-			tool.data = data.progress;
+	function updateProgress(progress) {
+		if (progress !== "-1") {
+			loadTool(NAME)
+				.then(function(tool) {
+					tool.data = progress;
 
-			saveTool(tool);
-		});
+					saveTool(tool);
+				})
+				.catch(errorHandler);
 		}
 	}
 
@@ -181,10 +184,6 @@ var ActiveScan = (function() {
 				initializeStorage();
 				break;
 
-			case "pollData":
-				onPollData(message.pollData["active-scan"]);
-				break;
-
 			default:
 				break;
 		}
@@ -203,6 +202,18 @@ var ActiveScan = (function() {
 				default:
 					break;
 			}
+		}
+	});
+
+	self.addEventListener("org.zaproxy.zap.extension.ascan.ActiveScanEventPublisher", function(event) {
+		var eventType = event.detail.event.type;
+		log (LOG_DEBUG, 'ActiveScanEventPublisher eventListener', 'Received ' + eventType + ' event');
+		if (eventType === 'scan.started') {
+			updateProgress("0%");
+		} else if (eventType === 'scan.progress') {
+			updateProgress(event.detail['scanProgress'] + '%');
+		} else  if (eventType === 'scan.stopped' || eventType === 'scan.completed') {
+			activeScanStopped();
 		}
 	});
 

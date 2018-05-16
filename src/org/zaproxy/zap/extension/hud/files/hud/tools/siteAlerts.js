@@ -46,10 +46,6 @@ var SiteAlerts = (function() {
 		return alertUtils.updateAlertCount(NAME, data.domain);
 	}
 
-	function onPollData(domain, data) {
-		alertUtils.onPollData(NAME, domain, data);	
-	}
-		
 	function showOptions() {
 		alertUtils.showOptions(NAME, LABEL);
 	}
@@ -65,10 +61,6 @@ var SiteAlerts = (function() {
 		switch(message.action) {
 			case "initializeTools":
 				initializeStorage();
-				break;
-
-			case "pollData":
-				onPollData(message.targetDomain, message.pollData.siteAlerts);
 				break;
 
 			default:

@@ -15,7 +15,7 @@ var PageAlertsMedium = (function() {
 	var ICONS = {};
         ICONS.PA = "page-alerts-medium.png";
     var ALERT_TYPE = "page-alerts"
-    var ALERT_RISK = "medium"
+    var ALERT_RISK = "Medium"
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -36,7 +36,7 @@ var PageAlertsMedium = (function() {
 	}
 
 	function showAlerts(url) {
-		alertUtils.showAlerts(NAME, url, ALERT_RISK);
+		alertUtils.showPageAlerts(LABEL, url, ALERT_RISK);
 	}
 
 	function updateAlertCount(url) {
@@ -44,11 +44,6 @@ var PageAlertsMedium = (function() {
 	}
 
 	function onPanelLoad(data) {
-		return alertUtils.updateAlertCount(NAME, data.url);
-	}
-
-	function onPollData(url, data) {
-		alertUtils.onPollData(NAME, url, data, ALERT_RISK);
 	}
 
 	function showOptions() {
@@ -59,6 +54,10 @@ var PageAlertsMedium = (function() {
 		initializeStorage();
 	});
 
+	self.addEventListener("commonAlerts." + ALERT_RISK, function(event) {
+		return alertUtils.updatePageAlertCount(NAME, targetUrl, ALERT_RISK);
+	});
+
 	self.addEventListener("message", function(event) {
 		var message = event.data;
 
@@ -66,10 +65,6 @@ var PageAlertsMedium = (function() {
 		switch(message.action) {
 			case "initializeTools":
 				initializeStorage();
-				break;
-
-			case "pollData":
-				onPollData(message.targetUrl, message.pollData.pageAlerts);
 				break;
 
 			default:

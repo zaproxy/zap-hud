@@ -1,24 +1,20 @@
 var alertUtils = (function() {
-
-	function showAlerts(toolname, target, alertRisk) {
-		var config = {};
-
-		loadTool(toolname)
+	
+	function showAlerts(title, target, alertRisk) {
+		loadTool("common-alerts")
 			.then(function(tool) {
+				var config = {};
+
 				config.alerts = tool.alerts[target];
-				// build the string for the title
-				config.title = tool.alertType[0].toUpperCase() + tool.alertType.substring(1, tool.alertType.indexOf('-')) + " Alerts"
+				config.title = title;
 
 				// by default show ALL alert
 				var action = "showAllAlerts";
 				if (alertRisk) {
-					// TODO: capitalize the alert risk in the tools so that this just works
-					// capitalize the alert risk level 
 					alertRisk = alertRisk[0].toUpperCase() + alertRisk.substring(1);
 
 					// submit just the alerts for this risk level, change the title, and change the display action
 					config.alerts = config.alerts[alertRisk];
-					config.title = alertRisk + " " + config.title
 					action = "showAlerts";
 				}
 
@@ -29,10 +25,46 @@ var alertUtils = (function() {
 					}
 				});
 			})
-			.catch(errorHandler);
+		.catch(errorHandler);
+	}
+
+	function showPageAlerts(title, target, alertRisk) {
+		loadTool("common-alerts")
+			.then(function(tool) {
+				var config = {};
+
+				let targetDomain = parseDomainFromUrl(target);
+				config.alerts = {};
+				config.alerts[alertRisk] = {};
+				for (var alertName in tool.alerts[targetDomain][alertRisk]) {
+					if (target in tool.alerts[targetDomain][alertRisk][alertName]) {
+						config.alerts[alertRisk][alertName] = {};
+						config.alerts[alertRisk][alertName][target] = tool.alerts[targetDomain][alertRisk][alertName][target];
+					}
+				}
+
+				config.title = title;
+
+				// by default show ALL alert
+				var action = "showAllAlerts";
+				if (alertRisk) {
+					// submit just the alerts for this risk level, change the title, and change the display action
+					config.alerts = config.alerts[alertRisk];
+					action = "showAlerts";
+				}
+
+				messageFrame("display", {action: action, config:config}).then(function(response) {
+					// Handle button choice
+					if (response.alertId) {
+						showAlertDetails(response.alertId);
+					}
+				});
+			})
+		.catch(errorHandler);
 	}
 
 	function showAlertDetails(id) {
+		log (LOG_DEBUG, 'showAlertDetails', '' + id);
 		// get the alert details given the id
 		fetch("<<ZAP_HUD_API>>/core/view/alert/?id=" + id)
 			.then(function(response) {
@@ -51,74 +83,26 @@ var alertUtils = (function() {
 			.catch(errorHandler);
 	}
 
-	function updateAlertCount(toolname, target) {
-
-		return loadTool(toolname)
+	function updatePageAlertCount(toolname, target, alertRisk) {
+		loadTool("common-alerts")
 			.then(function(tool) {
-
-				var count = 0;
-				var targetAlerts = tool.alerts[target];
-
-				if (targetAlerts) {
-
-					for (var risk in tool.alerts[target]) {
-						var riskAlerts = targetAlerts[risk] || {};
-
-						count += Object.keys(riskAlerts).length;
+				let targetDomain = parseDomainFromUrl(target);
+				let count = 0;
+				for (var alert in tool.alerts[parseDomainFromUrl(targetDomain)][alertRisk]) {
+					if (target in tool.alerts[parseDomainFromUrl(targetDomain)][alertRisk][alert]) {
+						count += 1;
 					}
 				}
-
-				tool.data = count.toString();
-				
-				return saveTool(tool);
+				return updateAlertCount(toolname, count);
 			})
-			.catch(errorHandler);
+		.catch(errorHandler);
 	}
-
-	function onPollData(toolname, target, data, alertRisk) {
-
+	
+	function updateAlertCount(toolname, count) {
 		loadTool(toolname)
 			.then(function(tool) {
-				// if target not initialized
-				if (tool.alerts[target] === undefined) {
-					tool.alerts[target] = {};
-					tool.alerts[target].Low = {};
-					tool.alerts[target].Medium = {};
-					tool.alerts[target].High = {};
-					tool.alerts[target].Informational = {};
-				}
-
-				// filter out unrelated alerts for the risk-specific tools
-				if (alertRisk) {
-					data = data.filter(function(alert) {
-						return alert.risk.toLowerCase() === alertRisk;
-					})
-				}
-
-				data.forEach(function(alert) {
-					// not in cache
-					if (tool.cache[alert.id] === undefined) {
-						// add to cache
-						tool.cache[alert.id] = alert;
-
-						// first time seeing alert
-						if (tool.alerts[target][alert.risk][alert.alert] === undefined) {
-							tool.alerts[target][alert.risk][alert.alert] = [];
-
-							if (toolname === "site-alerts-all") {
-								// send growler alert (fine with it being async, can change later if its an issue)
-								showGrowlerAlert(alert)
-									.catch(errorHandler);
-							}
-						}
-						tool.alerts[target][alert.risk][alert.alert].push(alert);
-					}
-				});
-
+				tool.data = count;
 				return saveTool(tool);
-			})
-			.then(function() {
-				return updateAlertCount(toolname, target);
 			})
 			.catch(errorHandler);
 	}
@@ -154,10 +138,11 @@ var alertUtils = (function() {
 	}
 
 	return {
+		updatePageAlertCount: updatePageAlertCount,
 		showAlerts: showAlerts,
+		showPageAlerts: showPageAlerts,
 		showAlertDetails: showAlertDetails,
-		updateAlertCount: updateAlertCount,
-		onPollData: onPollData,
-		showOptions: showOptions
+		showOptions: showOptions,
+		updateAlertCount: updateAlertCount
 	};
 })();

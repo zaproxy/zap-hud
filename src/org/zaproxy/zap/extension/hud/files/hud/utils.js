@@ -8,6 +8,18 @@ var IS_HUD_CONFIGURED = "isHudConfigured";
 var IS_DEBUG_ENABLED = false;
 var IS_FIRST_TIME = "isFirstTime";
 
+var LOG_OFF = 0;	// Just use for setting the level, nothing will be logged
+var LOG_ERROR = 1;	// Errors that should be addressed
+var LOG_WARN = 2;	// A potential problem
+var LOG_INFO = 3;	// Significant but infrequent events
+var LOG_DEBUG = 4;	// Relatively fine grain events which can help debug problems
+var LOG_TRACE = 5;	// Very fine grain events, highest level
+var LOG_STRS = ['OFF', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'];
+
+var LOG_LEVEL = LOG_DEBUG;	// TODO change to INFO before release..
+var LOG_TO_CONSOLE = true;
+var LOG_TO_ZAP = true;
+
 var CLIENT_LEFT = "left";
 var CLIENT_RIGHT = "right";
 
@@ -314,6 +326,7 @@ function registerTools(toolnames) {
  * loads the tool blob from indexeddb using the tool's name
  */
 function loadTool(name) {
+	log(LOG_TRACE, 'utils.loadTool', name);
 	return localforage.getItem(name);
 }
 
@@ -321,6 +334,7 @@ function loadTool(name) {
  * saves the tool blob to indexeddb
  */
 function saveTool(tool) {
+	log(LOG_TRACE, 'utils.saveTool', tool.name);
 	return localforage.setItem(tool.name, tool)
 		.then(function(tool) {
 			// Notify Panel of Updated Data
@@ -342,12 +356,14 @@ function saveTool(tool) {
  * Return all tools currently selected in a panel.
  */
 function loadPanelTools(panelKey) {
+	log(LOG_DEBUG, 'utils.loadPanelTools', 'Panel ' + panelKey);
 	return loadFrame(panelKey)
 		.then(function(panel) {
 			var toolPromises = [];
 
 			panel.tools.forEach(function(toolname) {
 				var p = loadTool(toolname);
+				log(LOG_DEBUG, 'utils.loadPanelTools', 'Tool ' + toolname, p);
 				toolPromises.push(p);
 			});
 
@@ -379,6 +395,7 @@ function loadAllTools() {
  * Add a tool to a specific panel using the tool and panel keys.
  */
 function addToolToPanel(toolKey, panelKey) {
+	log(LOG_DEBUG, 'utils.addToolToPanel', toolKey);
 
 	var promises = [loadTool(toolKey), loadFrame(panelKey)];
 	
@@ -386,6 +403,10 @@ function addToolToPanel(toolKey, panelKey) {
 		.then(function(results) {
 			var tool = results[0];
 			var panel = results[1];
+			if (! tool) {
+				log(LOG_WARN, 'utils.addToolToPanel', 'Failed to load tool?', toolKey);
+				return;
+			}
 
 			tool.isSelected = true;
 			tool.panel = panelKey;
@@ -470,6 +491,9 @@ function messageFrame(key, message) {
  * the clientId doesn't exist.
  */
 function getWindowFromFrame(frame) {
+	if (!frame) {
+		throw new Error("null frame passed to getWindowFromFrame");
+	}
 	return clients.get(frame.clientId)
 		.then(function(client) {
 			if (client !== undefined) {
@@ -553,36 +577,44 @@ function getTargetDomain() {
 function errorHandler(err) {
 	var message = err.toString();
 
-	// construct the stack trace
-	var lines = err.stack.split('\n').slice(0,-1);
-	lines.forEach(function(line) {
-		var functionName = line.substring(0, line.indexOf('/'));
-		var urlAndLineNo = line.substring(line.indexOf('http'), line.length - 1);
-		var parts = urlAndLineNo.split(':');
-		var url = parts[0] + ':' + parts[1];
-		var lineNo = parts[2] + ':' + parts[3];
+	if (err.stack) {
+		// construct the stack trace
+		var lines = err.stack.split('\n').slice(0,-1);
+		lines.forEach(function(line) {
+			var functionName = line.substring(0, line.indexOf('/'));
+			var urlAndLineNo = line.substring(line.indexOf('http'), line.length - 1);
+			var parts = urlAndLineNo.split(':');
+			var url = parts[0] + ':' + parts[1];
+			var lineNo = parts[2] + ':' + parts[3];
+	
+			// if port is included in the url
+			if (parts.length > 4) {
+				var url = parts[0] + ':' + parts[1] + ':' + parts[2]
+				var lineNo = parts[3] + ':' + parts[4];
+			}
+	
+			message += '\n\t ' + functionName + '    ' + url + ' ' + lineNo;
+		});
+	}
 
-		// if port is included in the url
-		if (parts.length > 4) {
-			var url = parts[0] + ':' + parts[1] + ':' + parts[2]
-			var lineNo = parts[3] + ':' + parts[4];
-		}
-
-		message += '\n\t ' + functionName + '    ' + url + ' ' + lineNo;
-	});
-
-	console.error(message);
+	log(LOG_ERROR, 'errorHandler', message, err);
 }
 
 /*
  * Logs a debug message to the console.
  */
-function debugHandler(message, object) {
-	if (IS_DEBUG_ENABLED) {
-		console.log(message);
-
-		if (object) {
-			console.log(object);
-		}
+function log(level, method, message, object) {
+	if (level > LOG_LEVEL || (! LOG_TO_CONSOLE && ! LOG_TO_ZAP)) {
+		return;
+	}
+	var record = new Date().toTimeString() + ' ' + LOG_STRS[level] + ' ' + method + ': ' + message; 
+	if (object) {
+		record += ': ' + JSON.stringify(object);
+	}
+	if (LOG_TO_CONSOLE) {
+		console.log(record);
+	}
+	if (LOG_TO_ZAP) {
+		fetch("<<ZAP_HUD_API>>/hud/action/log/?record=" + record);
 	}
 }
