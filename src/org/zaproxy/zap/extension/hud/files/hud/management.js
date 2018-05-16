@@ -52,8 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		app.isSettingsButtonShown = true;
 
 		// send onTargetLoad message 
-		navigator.serviceWorker.controller.postMessage({action:'onTargetLoad'});
-		startPollWorker();
+		navigator.serviceWorker.controller.postMessage({action:"onTargetLoad", targetUrl: document.referrer});
 	}
 });
 
@@ -63,14 +62,6 @@ navigator.serviceWorker.addEventListener('message', function(event) {
 	switch(message.action) {
 		case 'refreshTarget':
 			parent.postMessage( {action: 'refresh'} , document.referrer);
-			break;
-
-		case 'increaseDataPollRate':
-			worker.postMessage({dataDelay: 100});
-			break;
-
-		case 'decreaseDataPollRate':
-			worker.postMessage({dataDelay: 1000});
 			break;
 
 		case 'showTimeline':
@@ -119,33 +110,5 @@ function startServiceWorker() {
 	}
 	else {
 		alert('This browser does not support Service Workers. The HUD will not work properly.')
-	}
-}
-
-/*
- * TO BE DEPRECATED WITH WEB SOCKETS
- * Starts the web worker that polls ZAP.
- */
-function startPollWorker() {
-	if (window.Worker) {
-		worker = new Worker('<<ZAP_HUD_FILES>>?name=pollWorker.js');
-
-		loadTool('timeline')
-			.then(function(tool) {
-				// let the worker know where to start polling messages from
-				worker.postMessage({
-					targetUrl: document.referrer, 
-					targetDomain: parseDomainFromUrl(document.referrer), 
-					lastMessage: tool.lastMessage});
-			})
-			.catch(errorHandler);
-
-		worker.addEventListener('message', function(event) {
-			// forward messages from the web worker to the service worker
-			navigator.serviceWorker.controller.postMessage(event.data);
-		});
-	}
-	else {
-		alert('This browser does not support Web Workers. HUD will not work properly');
 	}
 }
