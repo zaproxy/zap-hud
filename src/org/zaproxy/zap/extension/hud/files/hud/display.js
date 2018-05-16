@@ -335,7 +335,6 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			break;
 
 		case "showAlerts":
-			console.log('display.js message showAlerts'); // TODO
 			Event.fire('showAlertListModal', {
 				title: config.title,
 				alerts: config.alerts,
@@ -345,7 +344,6 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			break;
 
 		case "showAllAlerts":
-			console.log('display.js message showAllAlerts'); // TODO
 			Event.fire('showAllAlertsModal', {
 				title: config.title,
 				alerts: config.alerts,
@@ -355,7 +353,6 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			break;
 
 		case "showAlertDetails":
-			console.log('display.js message showAlertDetails'); // TODO
 			Event.fire('showAlertDetailsModal', {
 				title: config.title,
 				details: config.details,
