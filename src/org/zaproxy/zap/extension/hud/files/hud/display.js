@@ -178,13 +178,20 @@ Vue.component('alert-accordion', {
 		close: function() {
 			this.$emit('close');
 		},
+		urlCount: function(alert) {
+			let count = 0;
+			for (var url in alert) {
+				count += 1;
+			}
+			return count;
+		},
 		alertSelect: function(alert) {
 			// set keepShowing so that we don't hide the display frame
 			app.keepShowing = true;
 			app.isAlertListModalShown = false;
 			app.isAllAlertsModalShown = false;
 
-			this.port.postMessage({'action': 'alertSelected', 'alertId': alert.id})
+			this.port.postMessage({'action': 'alertSelected', 'alertId': alert.alertId})
 		}
 	}
 })

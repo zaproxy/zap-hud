@@ -34,7 +34,7 @@ function showGrowlerAlert(alert, port) {
 	expandFrame();
 
 	// build notification content
-	var content = getRiskFlag(alert.risk) + alert.alert + getHiddenId(alert.id);
+	var content = getRiskFlag(alert.riskString) + alert.name + getHiddenId(alert.alertId); 
 
 	// display and handle click
 	alertify

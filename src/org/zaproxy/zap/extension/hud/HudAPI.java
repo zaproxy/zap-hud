@@ -24,22 +24,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.control.Control;
-import org.parosproxy.paros.core.scanner.Alert;
-import org.parosproxy.paros.model.Model;
-import org.parosproxy.paros.model.SiteNode;
 import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.view.View;
 import org.zaproxy.zap.extension.api.API;
@@ -48,15 +42,7 @@ import org.zaproxy.zap.extension.api.ApiException;
 import org.zaproxy.zap.extension.api.ApiImplementor;
 import org.zaproxy.zap.extension.api.ApiResponse;
 import org.zaproxy.zap.extension.api.ApiResponseElement;
-import org.zaproxy.zap.extension.api.ApiResponseList;
-import org.zaproxy.zap.extension.api.ApiResponseSet;
-import org.zaproxy.zap.extension.api.ApiView;
-import org.zaproxy.zap.extension.ascan.ActiveScan;
-import org.zaproxy.zap.extension.ascan.ExtensionActiveScan;
-import org.zaproxy.zap.extension.brk.ExtensionBreak;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
-import org.zaproxy.zap.extension.spider.ExtensionSpider;
-import org.zaproxy.zap.extension.spider.SpiderScan;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 
 import net.sf.json.JSONObject;
@@ -77,12 +63,11 @@ public class HudAPI extends ApiImplementor {
     private Map<String, String> siteUrls = new HashMap<String, String>();
     private ExtensionHUD extension;
 
-	private static final String HUD_DATA = "hudData";
-
 	private static final String ACTION_ENABLE_TIMELINE = "enableTimeline";
 	private static final String ACTION_DISABLE_TIMELINE = "disableTimeline";
+    private static final String ACTION_LOG = "log";
 
-	private static final String PARAM_URL = "url";
+    private static final String PARAM_RECORD = "record";
 	
 	/**
 	 * The only files that can be included on domain
@@ -104,10 +89,9 @@ public class HudAPI extends ApiImplementor {
     public HudAPI(ExtensionHUD extension) {
     	this.extension = extension;
 
-    	this.addApiView(new ApiView(HUD_DATA, new String[] {PARAM_URL}));
-
     	this.addApiAction(new ApiAction(ACTION_ENABLE_TIMELINE));
     	this.addApiAction(new ApiAction(ACTION_DISABLE_TIMELINE));
+        this.addApiAction(new ApiAction(ACTION_LOG, new String[] {PARAM_RECORD}));
     	
     	hudFileProxy = new HudFileProxy(this);
     	hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S); 
@@ -192,209 +176,6 @@ public class HudAPI extends ApiImplementor {
 	}
 
 	@Override
-	public ApiResponse handleApiView (String name,
-			JSONObject params) throws ApiException {
-		ApiResponse result = null;
-		Map<String, Object> resultMap = null;
-
-		if (HUD_DATA.equals(name)) {
-			//result = new ApiResponseList(name);
-			resultMap = new HashMap<String, Object>();
-
-			String url = this.getParam(params, PARAM_URL, (String) null);
-			
-			SiteNode node = null;
-			SiteNode parent = null;
-			try {
-				URI uri = new URI(url, false);
-				node = Model.getSingleton().getSession().getSiteTree().findNode(uri);
-				parent = Model.getSingleton().getSession().getSiteTree().findClosestParent(uri);
-			} catch (URIException e) {
-				throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_URL);
-			}
-			if (parent != null) {
-				//ApiResponseList siteSummary = new ApiResponseList("siteSummary");
-				List<Map<String, String>> summary = new ArrayList<Map<String, String>>();
-
-				// find the top level site node
-				while (!parent.getParent().isRoot()) {
-					parent = parent.getParent();
-				}
-				Map<Integer, Map<String, Integer>> alertCounts = new HashMap<>(); 
-				for (Alert alert : parent.getAlerts() ) {
-					Map<String, Integer> alertCount = alertCounts.get(alert.getRisk());
-					if (alertCount == null) {
-						alertCount = new HashMap<String, Integer>();
-						alertCounts.put(alert.getRisk(), alertCount);
-					}
-					int count = 0;
-					if (alertCount.containsKey(alert.getName())) {
-						count = alertCount.get(alert.getName());
-					}
-					count++;
-					alertCount.put(alert.getName(), count);
-
-					// site alerts
-					Map<String, String> alertAtts = new HashMap<String, String>();
-					alertAtts.put("alert", alert.getName());
-					alertAtts.put("risk", Alert.MSG_RISK[alert.getRisk()]);
-					alertAtts.put("param", alert.getParam());
-					alertAtts.put("id", Integer.toString(alert.getAlertId()));
-					alertAtts.put("uri", alert.getUri());
-					summary.add(alertAtts);
-				}
-				for (Entry<Integer, Map<String, Integer>> entry : alertCounts.entrySet()) {
-					// loop through info, low, medium, high
-					Map<String, Integer> alertCount = entry.getValue();
-					if (alertCount != null) {
-						for (Map.Entry<String, Integer>alert : alertCount.entrySet()) {
-							// Loop through the alert counts for each level
-							Map<String, String> alertAtts = new HashMap<String, String>();
-							alertAtts.put("alert", alert.getKey());
-							alertAtts.put("risk", Alert.MSG_RISK[entry.getKey()]);
-							//alertAtts.put("param", alert.getKey().getParam());
-							//alertAtts.put("id", Integer.toString(alert.getAlertId()));
-							//siteSummary.addItem(new ApiResponseSet("alert", alertAtts));
-							//summary.add(alertAtts);
-						}
-					}
-				}
-				//((ApiResponseList)result).addItem(siteSummary);
-				resultMap.put("siteAlerts", summary);
-			}
-			if (node != null) {
-				// Loop through siblings to find nodes for the same url
-				List<Map<String, String>> pageAlerts = new ArrayList<Map<String, String>>();
-				String cleanName = node.getHierarchicNodeName();
-				@SuppressWarnings("rawtypes")
-				Enumeration en = node.getParent().children();
-				while (en.hasMoreElements()) {
-					SiteNode sibling = (SiteNode)en.nextElement();
-					if (sibling.getHierarchicNodeName().equals(cleanName)) {
-						for (Alert alert : sibling.getAlerts()) {
-							if (alert.getUri().startsWith(cleanName)) {
-								// TODO is this a good enough match? Could still match child alerts :/
-								Map<String, String> alertAtts = new HashMap<String, String>();
-								alertAtts.put("alert", alert.getName());
-								alertAtts.put("risk", Alert.MSG_RISK[alert.getRisk()]);
-								alertAtts.put("param", alert.getParam());
-								alertAtts.put("id", Integer.toString(alert.getAlertId()));
-								//pageAlerts.addItem(new ApiResponseSet("alert", alertAtts));
-								alertAtts.put("uri", alert.getUri());
-								pageAlerts.add(alertAtts);
-							}
-						}
-					}
-				}
-				//((ApiResponseList)result).addItem(pageAlerts);
-				resultMap.put("pageAlerts", pageAlerts);
-
-				// Report on scope
-				ApiResponseList scopeData = new ApiResponseList("scope");
-				Map<String, String> scopeAtts = new HashMap<String, String>();
-				scopeAtts.put("inscope", Boolean.toString(node.isIncludedInScope()));
-				scopeAtts.put("attack", Boolean.toString(Control.getSingleton().getMode().equals(Control.Mode.attack)));
-				scopeData.addItem(new ApiResponseSet<>("scope", scopeAtts));
-				scopeData.addItem(new ApiResponseSet<>("attack", scopeAtts));
-				//((ApiResponseList)result).addItem(scopeData);
-				resultMap.put("scope", scopeAtts);
-			}
-			
-			// Spider
-			ExtensionSpider extSpider = (ExtensionSpider) Control.getSingleton().getExtensionLoader().getExtension("ExtensionSpider");
-			if (extSpider != null) {
-				int progress = 0;
-				List<SpiderScan> scans = extSpider.getActiveScans();
-				if (scans.size() == 0) {
-					// No current scans, were there any before?
-					if (extSpider.getAllScans().size() > 0) {
-						// Yep, all must have finished
-						progress = 100;
-					} else {
-						// Use -1 to indicate no scans have been started
-						progress = -1;
-					}
-				} else {
-					for (SpiderScan scan : scans) {
-						progress += scan.getProgress();
-					}
-					progress = progress / scans.size();
-				}
-				ApiResponseList spiderData = new ApiResponseList("spider");
-				Map<String, String> spiderAtts = new HashMap<String, String>();
-				spiderAtts.put("progress", Integer.toString(progress));
-				spiderData.addItem(new ApiResponseSet<>("spider", spiderAtts));
-				//((ApiResponseList)result).addItem(spiderData);
-				resultMap.put("spider", spiderAtts);
-			}
-
-			// Active Scan
-			ExtensionActiveScan extAscan = (ExtensionActiveScan) Control.getSingleton().getExtensionLoader().getExtension("ExtensionActiveScan");
-			if (extAscan != null) {
-				int progress = 0;
-				List<ActiveScan> scans = extAscan.getActiveScans();
-				if (scans.size() == 0) {
-					// No current scans, were there any before?
-					if (extAscan.getAllScans().size() > 0) {
-						// Yep, all must have finished
-						progress = 100;
-					} else {
-						// Use -1 to indicate no scans have been started
-						progress = -1;
-					}
-				} else {
-					for (ActiveScan scan : scans) {
-						progress += scan.getProgress();
-					}
-					progress = progress / scans.size();
-				}
-				ApiResponseList ascanData = new ApiResponseList("ascan");
-				Map<String, String> ascanAtts = new HashMap<String, String>();
-				ascanAtts.put("progress", Integer.toString(progress));
-				ascanData.addItem(new ApiResponseSet<>("ascan", ascanAtts));
-				//((ApiResponseList)result).addItem(ascanData);
-				resultMap.put("active-scan", ascanAtts);
-			}
-
-			// Break
-			ExtensionBreak extBreak = (ExtensionBreak) Control.getSingleton().getExtensionLoader().getExtension("ExtensionBreak");
-			if (extBreak != null) {
-				Map<String, String> breakData = new HashMap<String, String>();
-				boolean isBreakingRequest = false;
-				HttpMessage message = (HttpMessage)extBreak.getBreakpointManagementInterface().getMessage();
-
-
-				if (message != null) {
-					logger.debug("break message: " + message.toString());
-
-					isBreakingRequest = true;
-					breakData.put("request_header", message.getRequestHeader().toString());
-					breakData.put("request_body", message.getRequestBody().toString());
-					breakData.put("response_header", message.getResponseHeader().toString());
-					breakData.put("response_body", message.getResponseBody().toString());
-				}
-				else {
-					breakData.put("request_header", "");
-					breakData.put("request_body", "");
-					breakData.put("response_header", "");
-					breakData.put("response_body", "");
-				}
-
-				breakData.put("isBreakingRequest", Boolean.toString(isBreakingRequest));
-
-				resultMap.put("break", breakData);
-			}
-
-			
-		} else {
-			throw new ApiException(ApiException.Type.BAD_VIEW);
-		}
-
-		result = new ApiResponseSet<>(name, resultMap);
-		return result;
-	}
-
-	@Override
 	public ApiResponse handleApiAction(String name, JSONObject params) throws ApiException {
 
 		switch (name) {
@@ -405,6 +186,14 @@ public class HudAPI extends ApiImplementor {
 			case ACTION_DISABLE_TIMELINE:
 				this.isTimelineEnabled = false;
 				break;
+
+            case ACTION_LOG:
+                String record = params.getString(PARAM_RECORD);
+                if (View.isInitialised()) {
+                    View.getSingleton().getOutputPanel().appendAsync(record + "\n");
+                }
+                logger.debug(record);
+                break;
 
 			default:
 				throw new ApiException(ApiException.Type.BAD_ACTION);
@@ -457,6 +246,22 @@ public class HudAPI extends ApiImplementor {
                 // Only do this on the ZAP domain
                 contents = contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
                         .replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
+
+                if (file.equals("serviceworker.js")) {
+                    // Inject the tool filenames
+                    StringBuilder sb = new StringBuilder();
+                    File toolsDir = new File(this.extension.getHudParam().getBaseDirectory(), "tools");
+                    for (String tool : toolsDir.list()) {
+                        if (tool.toLowerCase(Locale.ROOT).endsWith(".js")) {
+                            sb.append("\t\"");
+                            sb.append(this.hudFileUrl);
+                            sb.append("?name=tools/");
+                            sb.append(tool);
+                            sb.append("\",\n");
+                        }
+                    }
+                    contents = contents.replace("<<ZAP_HUD_TOOLS>>", sb.toString());
+                }
             }
             
             return contents;

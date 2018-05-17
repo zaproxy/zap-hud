@@ -122,7 +122,7 @@
             <div class="accordion">
                 <input type="checkbox" :id="title" name="accordion-checkbox" hidden>
                 <label class="accordion-header" :for="title">
-                    {{ title }} ({{ alerts.length }})
+                    {{ title }} ({{ urlCount(alerts) }})
                 </label>
                 <div class="accordion-body">
                     <ul class="menu menu-nav">

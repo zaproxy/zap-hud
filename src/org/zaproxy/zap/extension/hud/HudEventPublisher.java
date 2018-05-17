@@ -44,4 +44,10 @@ public class HudEventPublisher implements EventPublisher {
         }
         return publisher;
     }
+
+    static synchronized void unregister() {
+        if (publisher != null) {
+            ZAP.getEventBus().unregisterPublisher(publisher);
+        }
+    }
 }

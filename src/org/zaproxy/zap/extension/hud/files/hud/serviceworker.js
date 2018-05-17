@@ -7,8 +7,11 @@ var BUTTON_LIST_HTML = '<div class="buttons-list">';
 var PARAM_ORIENATATION = "orientation";
 var PARAM_URL = "url";
 var ORIENTATION = /ORIENTATION/g;
+var targetDomain = "";
+var targetUrl = "";
 
 var isDebugging = true;
+var sharedData = {};
 
 var webSocket;
 
@@ -28,26 +31,11 @@ var urlsToCache = [
 	"<<ZAP_HUD_FILES>>?name=timelinePane.html",
 	"<<ZAP_HUD_FILES>>?name=timelinePane.js",
 	"<<ZAP_HUD_FILES>>?name=growlerAlerts.html",
-	"<<ZAP_HUD_FILES>>?name=growlerAlerts.js",
+	"<<ZAP_HUD_FILES>>?name=growlerAlerts.js"
 ];
 
 var toolScripts = [
-	"<<ZAP_HUD_FILES>>?name=tools/scope.js",
-	"<<ZAP_HUD_FILES>>?name=tools/spider.js",
-	"<<ZAP_HUD_FILES>>?name=tools/timeline.js",
-	"<<ZAP_HUD_FILES>>?name=tools/activeScan.js",
-	"<<ZAP_HUD_FILES>>?name=tools/pageAlerts.js",
-	"<<ZAP_HUD_FILES>>?name=tools/pageAlertsHigh.js",
-	"<<ZAP_HUD_FILES>>?name=tools/pageAlertsMedium.js",
-	"<<ZAP_HUD_FILES>>?name=tools/pageAlertsLow.js",
-	"<<ZAP_HUD_FILES>>?name=tools/pageAlertsInformational.js",
-	"<<ZAP_HUD_FILES>>?name=tools/siteAlerts.js",
-	"<<ZAP_HUD_FILES>>?name=tools/siteAlertsHigh.js",
-	"<<ZAP_HUD_FILES>>?name=tools/siteAlertsMedium.js",
-	"<<ZAP_HUD_FILES>>?name=tools/siteAlertsLow.js",
-	"<<ZAP_HUD_FILES>>?name=tools/siteAlertsInformational.js",
-	"<<ZAP_HUD_FILES>>?name=tools/break.js",
-	"<<ZAP_HUD_FILES>>?name=tools/attack.js"
+<<ZAP_HUD_TOOLS>>
 ];
 
 self.tools = {};
@@ -71,7 +59,7 @@ localforage.setItem("tools", [])
 
 /* Listeners */
 self.addEventListener("install", function(event) {
-	console.log("installing...");
+	log(LOG_INFO, 'serviceworker.install', 'Installing...');
 
 	// Cache Files
 	event.waitUntil(
@@ -153,6 +141,10 @@ self.addEventListener("message", function(event) {
 			break;
 			
 		case "onTargetLoad":
+			if ('targetUrl' in message) {
+				targetUrl = message.targetUrl;
+				targetDomain = parseDomainFromUrl(targetUrl);
+			}
 			onTargetLoad();
 			break;
 
@@ -169,25 +161,22 @@ webSocket = new WebSocket("<<ZAP_HUD_WS>>");
 
 webSocket.onopen = function (event) {
 	// Basic test
-	webSocket.send("{ \"component\" : \"core\", \"type\" : \"view\", \"name\" : \"version\" }"); 
-	// Register for alert events
-	webSocket.send("{\"component\" : \"event\", \"type\" : \"register\", \"name\" : \"org.zaproxy.zap.extension.alert.AlertEventPublisher\"}");
+	webSocket.send('{ "component" : "core", "type" : "view", "name" : "version" }'); 
 	// Tools should register for alerts via the registerForWebSockerEvents function - see the break tool
 };
 
 webSocket.onmessage = function (event) {
-	console.log("ServiceWorker received event: " + event.data);
 	// Rebroadcast for the tools to pick up
 	let jevent = JSON.parse(event.data);
 	if ('event.publisher' in jevent) {
-		console.log("EventPublisher : " + jevent['event.publisher'])
+		log(LOG_DEBUG, 'serviceworker.webSocket.onmessage', jevent['event.publisher']);
 		var ev = new CustomEvent(jevent['event.publisher'], {detail: jevent});
 		self.dispatchEvent(ev);
 	}
 }
 
 function registerForZapEvents(publisher) {
-	webSocket.send("{\"component\" : \"event\", \"type\" : \"register\", \"name\" : \"" + publisher + "\"}");
+	webSocket.send('{"component" : "event", "type" : "register", "name" : "' + publisher + '"}');
 }
 
 /*
@@ -277,6 +266,8 @@ function showAddToolDialog(panelKey) {
 
 			// filter out unselected tools
 			tools = tools.filter(tool => !tool.isSelected);
+			// filter out hidden tools
+			tools = tools.filter(tool => !tool.isHidden);
 	
 			// reformat for displaying in list
 			tools = tools.map(function (tool) {
