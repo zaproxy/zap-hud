@@ -166,12 +166,14 @@
             <modal :title="title" :show="show" size="wide" @close="close">
                 <div slot="body">
                     <tabs :activetab="activeTab">
-                        <tab name="Request" :selected="true">
-                            <http-message :header="request.header" :body="request.body"></http-message>
+                        <tab name="Request" selected="true">
+                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="request.header"></textarea>
+                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="request.body"></textarea>
                         </tab>
             
-                        <tab name="Response">
-                            <http-message :header="response.header" :body="response.body"></http-message>               
+                        <tab name="Response" :disabled="isResponseDisabled">
+                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="response.header"></textarea>
+                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="response.body"></textarea>
                         </tab>
                     </tabs>
                 </div>
@@ -183,21 +185,12 @@
             </modal>
         </template>
 
-        <!-- http message component -->
-        <template id="http-message-template">
-            <div>
-                <textarea class="form-input hud-http-message" rows="10" spellcheck="false">{{ header }}</textarea>
-
-                <textarea class="form-input hud-http-message" rows="10" spellcheck="false">{{ body }}</textarea>
-            </div>
-        </template>
-
         <!-- tabs component -->
         <template id="tabs-template">
             <div>
                 <div class="tabs">
                     <ul class="tab tab-block">
-                        <li v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true }">
+                        <li v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true, 'disabled': tab.disabled }">
                             <a :href="tab.href" @click="selectTab(tab)">{{ tab.name }}</a>
                         </li>
                     </ul>

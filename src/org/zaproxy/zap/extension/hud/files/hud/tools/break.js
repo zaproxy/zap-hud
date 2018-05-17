@@ -200,7 +200,6 @@ var Break = (function() {
 
 				// Handle button choice
 				if (response.buttonSelected === "step") {
-					console.log(response)
 					setHttpMessage(response.method, response.header, response.body)
 						.then(function() {
 							step();

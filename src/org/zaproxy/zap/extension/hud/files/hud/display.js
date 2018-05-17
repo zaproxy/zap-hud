@@ -295,7 +295,8 @@ Vue.component('http-message-modal', {
 			request: {},
 			response: {},
 			activeTab: "Request",
-			isResponse: "false"
+			isResponse: false,
+			isResponseDisabled: true
 		}
 	},
 	created() {
@@ -309,20 +310,17 @@ Vue.component('http-message-modal', {
 
 			if (data.isResponse) {
 				self.activeTab = "Response";
+				self.isResponseDisabled = false;
 			}
 			else {
 				self.activeTab = "Request";
+				self.isResponseDisabled = true;
 			}
 
 			app.isHttpMessageModalShown = true;
 			app.httpMessageModalTitle = data.title;
 		})
 	}
-})
-
-Vue.component('http-message', {
-	template: '#http-message-template',
-	props: ['header', 'body']
 })
 
 Vue.component('tabs', {
@@ -362,20 +360,23 @@ Vue.component('tab', {
     template: '#tab-template',
     props: {
         name: { required: true },
-        selected: { default: false }
+		selected: { default: false },
+		disabled: { default: false }
     },
     data() {
         return {
-            isActive: false
+			isActive: false,
+			isDisabled: false
         };
     },
     computed: {
         href() {
-            return '#' + this.name.toLowerCase().replace(/ /g, '-');
+	        return '#' + this.name.toLowerCase().replace(/ /g, '-');
         }
     },
     mounted() {
-        this.isActive = this.selected;
+		this.isActive = this.selected;
+		this.isDisabled = this.disabled;
     },
 });
 

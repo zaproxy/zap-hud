@@ -2849,6 +2849,14 @@ html {
     border-bottom-color: #5755d9;
     color: #5755d9;
   }
+
+  .tab .tab-item.disabled a,
+  .tab .tab-item a.disabled {
+    color: #e7e9ed;
+    cursor: default;
+    pointer-events: none;
+    text-decoration: none;
+  }
   
   .tab .tab-item.tab-action {
     -ms-flex: 1 0 auto;
