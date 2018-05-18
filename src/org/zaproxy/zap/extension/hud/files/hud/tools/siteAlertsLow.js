@@ -39,10 +39,6 @@ var SiteAlertsLow = (function() {
 		alertUtils.showAlerts(LABEL, domain, ALERT_RISK);
 	}
 
-	function onPanelLoad(data) {
-		//return alertUtils.updateAlertCount(NAME, data.domain);
-	}
-
 	function showOptions() {
 		alertUtils.showOptions(NAME, LABEL)
 	}
@@ -92,7 +88,6 @@ var SiteAlertsLow = (function() {
 
 	return {
 		name: NAME,
-		onPanelLoad: onPanelLoad,
 		initialize: initializeStorage
 	};
 })();
