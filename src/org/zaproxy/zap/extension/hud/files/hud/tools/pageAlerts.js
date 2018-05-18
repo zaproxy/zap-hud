@@ -86,7 +86,6 @@ var PageAlerts = (function() {
 
 	return {
 		name: NAME,
-		onPanelLoad: onPanelLoad,
 		initialize: initializeStorage
 	};
 })();

@@ -90,7 +90,6 @@ var SiteAlerts = (function() {
 
 	return {
 		name: NAME,
-		onPanelLoad: onPanelLoad,
 		initialize: initializeStorage
 	};
 })();
