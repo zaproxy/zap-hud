@@ -95,7 +95,7 @@ public class HudApiProxy extends ApiImplementor {
             msg.setResponseHeader(API.getDefaultResponseHeader("application/json; charset=UTF-8", 0, false));
             String body = response.toJSON().toString();
             msg.setResponseBody(body);
-            msg.getResponseHeader().setContentLength(body.length());
+            msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
             return body;
         } catch (Exception e) {
             LOG.error("Failed at end " + e.getMessage(), e);
