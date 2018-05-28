@@ -482,9 +482,6 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			break;
 
 		case "showHttpMessage":
-			console.log("ABOUT TO FIRE EVENT")
-			console.log(config.request)
-			console.log(config.request.header)
 			Event.fire('showHttpMessageModal', {
 				title: 'HTTP Message',
 				request: config.request,

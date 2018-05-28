@@ -94,6 +94,7 @@ var Break = (function() {
 
 	function startBreaking() {
 		fetch("<<ZAP_HUD_API>>/break/action/break/?type=http-all&state=true")
+			.catch(errorHandler);
 
 		loadTool(NAME)
 			.then(function(tool) {
@@ -108,7 +109,8 @@ var Break = (function() {
 
 	// todo: change this to 'continue' and figure out / fix stopBreaking
 	function stopBreaking() {
-		fetch("<<ZAP_HUD_API>>/break/action/continue");
+		fetch("<<ZAP_HUD_API>>/break/action/continue")
+			.catch(errorHandler);
 
 		loadTool(NAME)
 			.then(function(tool) {
@@ -123,20 +125,25 @@ var Break = (function() {
 
 	function step() {
 		return fetch("<<ZAP_HUD_API>>/break/action/step/")
-			.then(function(response) {
-				response.json()
-					.then(function(data) {
-						console.log(data);
-					})
-			});
+			.catch(errorHandler);
 	}
 
 	function drop() {
 		return fetch("<<ZAP_HUD_API>>/break/action/drop/");
 	}
 
-	function setHttpMessage(method, header, body) {
-		return fetch("<<ZAP_HUD_API>>/break/action/setHttpMessage/?formMethod=" + method + "&httpHeader=" + header + "&httpBody=" + body );
+	function setHttpMessage(header, body) {
+		let url = "<<ZAP_HUD_API>>/break/action/setHttpMessage/";
+		let params = "httpHeader=" + encodeURIComponent(header) + "&httpBody=" + encodeURIComponent(body)
+
+		let init = {
+			method: "POST",
+			body: params,
+			headers: {'content-type': 'application/x-www-form-urlencoded'} 
+		};
+
+		return fetch(url, init)
+			.catch(errorHandler);
 	}
 /*
 	function addBreakFilter(method, header, body) {
@@ -197,17 +204,16 @@ var Break = (function() {
 
 		messageFrame("display", {action:"showHttpMessage", config:config})
 			.then(function(response) {
-
 				// Handle button choice
 				if (response.buttonSelected === "step") {
-					setHttpMessage(response.method, response.header, response.body)
+					setHttpMessage(response.header, response.body)
 						.then(function() {
 							step();
 						})
 						.catch(errorHandler);
 				}
 				else if (response.buttonSelected === "continue") {
-					setHttpMessage(response.method, response.header, response.body)
+					setHttpMessage(response.header, response.body)
 						.then(function() {
 							stopBreaking();
 						})
@@ -283,9 +289,6 @@ var Break = (function() {
 
 	self.addEventListener("org.zaproxy.zap.extension.brk.BreakEventPublisher", function(event) {
 		if (event.detail['event.type'] === 'break.active' && event.detail['messageType'] === 'HTTP') {
-			console.log("BREAK EVENT")
-			console.log(event)
-			console.log(event.detail)
 			showBreakDisplay(event.detail);
 		}
 		else {
