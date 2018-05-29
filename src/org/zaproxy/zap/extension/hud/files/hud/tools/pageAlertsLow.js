@@ -43,9 +43,6 @@ var PageAlertsLow = (function() {
 		return alertUtils.updateAlertCount(NAME, url);
 	}
 
-	function onPanelLoad(data) {
-	}
-
 	function showOptions() {
 		alertUtils.showOptions(NAME, LABEL)
 	}
@@ -90,7 +87,6 @@ var PageAlertsLow = (function() {
 
 	return {
 		name: NAME,
-		onPanelLoad: onPanelLoad,
 		initialize: initializeStorage
 	};
 })();

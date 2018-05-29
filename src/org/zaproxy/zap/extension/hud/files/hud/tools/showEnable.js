@@ -19,7 +19,6 @@ var ShowEnable = (function() {
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
-		console.log('Show/Enable initializeStorage');
 		var tool = {};
 		tool.name = NAME;
 		tool.label = LABEL;
@@ -108,6 +107,19 @@ var ShowEnable = (function() {
 		initializeStorage();
 	});
 
+	self.addEventListener("targetload", function(event) {
+			checkIsRunning()
+				.then(function(isRunning) {
+					if (isRunning) {
+						switchOn();
+					}
+					else {
+						switchOff();
+					}
+				})
+				.catch(errorHandler);
+	});
+
 	self.addEventListener("message", function(event) {
 		var message = event.data;
 
@@ -130,10 +142,6 @@ var ShowEnable = (function() {
 
 				case "buttonMenuClicked":
 					showOptions();
-					break;
-
-				case "onTargetLoad":
-					// TODO call switchOn/Off as appropriate (once this message is generated)
 					break;
 
 				default:

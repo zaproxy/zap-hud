@@ -51,8 +51,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		// show the settings button
 		app.isSettingsButtonShown = true;
 
-		// send onTargetLoad message 
-		navigator.serviceWorker.controller.postMessage({action:"onTargetLoad", targetUrl: document.referrer});
+		// send targetload message 
+		navigator.serviceWorker.controller.postMessage({action:"targetload", targetUrl: document.referrer});
+
 	}
 });
 

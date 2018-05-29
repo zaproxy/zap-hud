@@ -37,12 +37,6 @@ var CommonAlerts = (function() {
 		return messageFrame("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
 	}
 
-	function onPanelLoad(data) {
-	}
-
-	function showOptions() {
-	}
-
 	self.addEventListener("activate", function(event) {
 		initializeStorage();
 	});
@@ -125,7 +119,6 @@ var CommonAlerts = (function() {
 
 	return {
 		name: NAME,
-		onPanelLoad: onPanelLoad,
 		initialize: initializeStorage
 	};
 })();
