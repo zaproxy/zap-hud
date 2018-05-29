@@ -130,6 +130,10 @@ self.addEventListener("message", function(event) {
 			break;
 			
 		case 'targetload':
+
+			targetDomain = parseDomainFromUrl(message.targetUrl);
+			targetUrl = message.targetUrl;
+
 			let e = new CustomEvent('targetload', {detail: {url: message.targetUrl}});
 			self.dispatchEvent(e);	
 			break;
