@@ -55,6 +55,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		navigator.serviceWorker.controller.postMessage({action:"targetload", targetUrl: document.referrer});
 
 	}
+
+	startHeartBeat();
 });
 
 navigator.serviceWorker.addEventListener('message', function(event) {
@@ -112,4 +114,13 @@ function startServiceWorker() {
 	else {
 		alert('This browser does not support Service Workers. The HUD will not work properly.')
 	}
+}
+
+/*
+ * Starts sending heart beat messages to the ZAP API every 10 seconds
+ */
+function startHeartBeat() {
+	setInterval(function() {
+		log(LOG_INFO, 'heartbeat', 'heartbeat')
+	}, 10000)
 }
