@@ -21,6 +21,8 @@ package org.zaproxy.zap.extension.hud;
 
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.network.HttpMessage;
+import org.parosproxy.paros.network.HttpRequestHeader;
+import org.parosproxy.paros.network.HttpHeader;
 import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.api.API.RequestType;
 import org.zaproxy.zap.extension.api.ApiException;
@@ -69,7 +71,24 @@ public class HudApiProxy extends ApiImplementor {
                 throw new ApiException(ApiException.Type.NO_IMPLEMENTOR, component);
             }
             RequestType reqType;
-            JSONObject params = API.getParams(msg.getRequestHeader().getURI().getEscapedQuery());
+
+            // check http method type to get correct params
+            JSONObject params = null;
+
+            if (msg.getRequestHeader().getMethod().equalsIgnoreCase(HttpRequestHeader.GET)) {
+                params = API.getParams(msg.getRequestHeader().getURI().getEscapedQuery());
+            }
+            else if (msg.getRequestHeader().getMethod().equalsIgnoreCase(HttpRequestHeader.POST)) {
+                String contentTypeHeader = msg.getRequestHeader().getHeader(HttpHeader.CONTENT_TYPE);
+
+                if (contentTypeHeader != null
+                    && contentTypeHeader.equals(HttpHeader.FORM_URLENCODED_CONTENT_TYPE)) {
+                    params = API.getParams(msg.getRequestBody().toString());
+                } else {
+                    throw new ApiException(ApiException.Type.CONTENT_TYPE_NOT_SUPPORTED);
+                }
+            }
+
             ApiResponse response;
             try {
                 reqType = RequestType.valueOf(elements[7]);
