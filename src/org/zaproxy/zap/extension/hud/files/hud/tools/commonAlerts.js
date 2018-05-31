@@ -73,8 +73,7 @@ var CommonAlerts = (function() {
 
 	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", function(event) {
 		if (event.detail['event.type'] === 'alert.added') {
-			log (LOG_DEBUG, 'commonAlerts.js AlertEventPublisher eventListener', 'Received alert.added event', event.detail['alertId']);
-			if (event.detail.uri.startsWith(targetDomain)) {
+			if (parseDomainFromUrl(event.detail.uri) === targetDomain) {
 				if (sharedData.alerts[targetDomain] === undefined) {
 					sharedData.alerts[targetDomain] = {};
 					sharedData.alerts[targetDomain].Low = {};

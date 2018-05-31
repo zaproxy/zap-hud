@@ -132,7 +132,7 @@ function parseDomainFromUrl(url) {
 	hostname = hostname.split('?')[0];
 	hostname = hostname.split('#')[0];
 
-	return protocol + hostname;
+	return hostname;
 }
 
 //todo change to be sw agnostic
