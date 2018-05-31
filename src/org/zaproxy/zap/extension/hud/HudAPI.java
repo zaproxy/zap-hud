@@ -204,11 +204,8 @@ public class HudAPI extends ApiImplementor {
 
     protected String getSite(HttpMessage msg) throws URIException {
         StringBuilder site = new StringBuilder();
-        if (msg.getRequestHeader().isSecure()) {
-            site.append("https://");
-        } else {
-            site.append("http://");
-        }
+        // Always force to https - we fakw this for http sites
+        site.append("https://");
         site.append(msg.getRequestHeader().getURI().getHost());
         if (msg.getRequestHeader().getURI().getPort() > 0) {
             site.append(":");

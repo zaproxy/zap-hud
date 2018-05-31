@@ -27,7 +27,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -106,6 +108,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	
 	private ExtensionScript extScript = null;
 	private String baseDirectory;
+	private Set<String> upgradedHttpsDomains = new HashSet<String>();
 
 	/**
 	*
@@ -146,7 +149,9 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 
 		extensionHook.addOptionsParamSet(this.getHudParam());
 		extensionHook.addOptionsChangedListener(this);
-		
+
+	    extensionHook.addOverrideMessageProxyListener(new HttpUpgradeProxyListener(this));
+
 	    if (getView() != null) {
 	        extensionHook.getHookView().addOptionPanel(getOptionsPanel());
 	        extensionHook.getHookView().addMainToolBarComponent(getHudButton());
@@ -188,6 +193,10 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	    }
 	}
 	
+    protected boolean isHudEnabled() {
+        return hudEnabled;
+    }
+
 	private void addHudScripts() {
 		this.baseDirectory = this.getHudParam().getBaseDirectory();
 	    File hudDir = new File(this.baseDirectory);
@@ -213,6 +222,14 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 		}
 		return optionsPanel;
 	}
+
+    public void addUpgradedHttpsDomain(String domain) {
+        this.upgradedHttpsDomains.add(domain);
+    }
+    
+    public boolean isUpgradedHttpsDomain(String domain) {
+        return this.upgradedHttpsDomains.contains(domain);
+    }
 
     private void addScripts(File file, String prefix, ScriptType hudScriptType) {
         if (file.isFile()) {
