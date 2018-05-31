@@ -12,13 +12,20 @@ Vue.component('hud-button', {
 	props: ['label', 'icon', 'data'],
 	data() {
 		return {
-			showData:false
+			showData: false,
+			isActive: false
 		}
 	},
 	methods: {
 		click: function() {
 			navigator.serviceWorker.controller.postMessage({action:'showHudSettings'});
 		},
+		mouseOver() {
+			this.isActive = true;
+		},
+		mouseLeave() {
+			this.isActive = false;
+		}
 	}
 })
 
