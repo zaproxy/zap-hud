@@ -92,7 +92,8 @@ var Scope = (function() {
 	}
 
 	function addToScope(domain) {
-		return fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=Default%20Context&regex=" + domain + "/.*")
+		var scheme = sharedData.upgradedDomains.has(domain) ? "http" : "https";
+		return fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=Default%20Context&regex=" + scheme + "://" + domain + "/.*")
 			.then(function() {
 				// add to list and save
 				return loadTool(NAME)

@@ -19,8 +19,6 @@
  */
 package org.zaproxy.zap.extension.hud;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
 import org.parosproxy.paros.network.HttpHeader;
@@ -42,10 +40,6 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
         return 0;
     }
 
-    private String getHostPort(URI uri) throws URIException {
-        return uri.getHost() + ":" + uri.getPort();
-    }
-
     @Override
     public boolean onHttpRequestSend(HttpMessage msg) {
         if (this.extHud.isHudEnabled()) {
@@ -53,11 +47,9 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
                 return false;
             }
             try {
-                String hostPort = this.getHostPort(msg.getRequestHeader().getURI());
-
                 if (! msg.getRequestHeader().isSecure()) {
                     // 302 to the https version..
-                    this.extHud.addUpgradedHttpsDomain(hostPort);
+                    this.extHud.addUpgradedHttpsDomain(msg.getRequestHeader().getURI());
                     msg.setResponseHeader(
                             HudAPI.getAllowFramingResponseHeader("302 OK", "text/html; charset=UTF-8", 0, false));
                     String url = msg.getRequestHeader().getURI().toString().replaceFirst("(?i)http://", "https://");
@@ -68,7 +60,7 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
                     LOG.debug("onHttpRequestSend returning a 302 to " + url);
                     return true;
                 } else {
-                    if (this.extHud.isUpgradedHttpsDomain(hostPort)) {
+                    if (this.extHud.isUpgradedHttpsDomain(msg.getRequestHeader().getURI())) {
                         // Switch to using the HTTP version in the background
                         msg.getRequestHeader().setSecure(false);
                     }
