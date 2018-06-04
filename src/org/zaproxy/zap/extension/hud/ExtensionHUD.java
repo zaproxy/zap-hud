@@ -27,14 +27,18 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.control.Control;
@@ -223,12 +227,12 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 		return optionsPanel;
 	}
 
-    public void addUpgradedHttpsDomain(String domain) {
-        this.upgradedHttpsDomains.add(domain);
+    public void addUpgradedHttpsDomain(URI uri) throws URIException {
+        this.upgradedHttpsDomains.add(uri.getHost() + ":" + uri.getPort());
     }
     
-    public boolean isUpgradedHttpsDomain(String domain) {
-        return this.upgradedHttpsDomains.contains(domain);
+    public boolean isUpgradedHttpsDomain(URI uri) throws URIException {
+        return this.upgradedHttpsDomains.contains(uri.getHost() + ":" + uri.getPort());
     }
 
     private void addScripts(File file, String prefix, ScriptType hudScriptType) {
@@ -334,6 +338,18 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 					String newBody = sb.toString();
 					msg.getResponseBody().setBody(newBody);
 					msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
+					
+					URI uri = msg.getRequestHeader().getURI();
+					if (this.isUpgradedHttpsDomain(uri)) {
+						// Advise that we've upgraded this domain to https
+						Map<String, String> map = new HashMap<String, String>();
+						map.put(HudEventPublisher.FIELD_DOMAIN, uri.getHost() + ":" + uri.getPort());
+						ZAP.getEventBus().publishSyncEvent(
+								HudEventPublisher.getPublisher(),
+								new Event(HudEventPublisher.getPublisher(), 
+										HudEventPublisher.EVENT_DOMAIN_UPGRADED_TO_HTTPS,
+										null, map ));
+					}
 				}
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);

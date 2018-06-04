@@ -28,9 +28,11 @@ var CommonAlerts = (function() {
 		tool.alerts = {};
 		tool.cache = {};
 		sharedData.alerts = {};
+		sharedData.upgradedDomains = new Set();
 
 		saveTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.alert.AlertEventPublisher");
+		registerForZapEvents("org.zaproxy.zap.extension.hud.HudEventPublisher");
 	}
 
 	function showGrowlerAlert(alert) {
@@ -68,6 +70,12 @@ var CommonAlerts = (function() {
 				default:
 					break;
 			}
+		}
+	});
+
+	self.addEventListener("org.zaproxy.zap.extension.hud.HudEventPublisher", function(event) {
+		if (event.detail['event.type'] === 'domain.upgraded') {
+			sharedData.upgradedDomains.add(event.detail.domain);
 		}
 	});
 

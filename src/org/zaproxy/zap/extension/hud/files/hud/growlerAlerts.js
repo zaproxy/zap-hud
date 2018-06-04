@@ -2,11 +2,15 @@ var INFORMATIONAL_FLAG = "<img src='<<ZAP_HUD_FILES>>?image=flag-blue.png' >&nbs
 var LOW_FLAG = "<img src='<<ZAP_HUD_FILES>>?image=flag-yellow.png' >&nbsp";
 var MEDIUM_FLAG = "<img src='<<ZAP_HUD_FILES>>?image=flag-orange.png' >&nbsp";
 var HIGH_FLAG = "<img src='<<ZAP_HUD_FILES>>?image=flag-red.png' >&nbsp";
+var DELAY_MS = 3000;
+var QUEUE_SIZE = 5;
+var MAX_LINE_LENGTH = 45;
 
+var alertQueue = [];
 
 document.addEventListener("DOMContentLoaded", function() {
 	if (typeof alertify != "undefined") {
-		alertify.maxLogItems(5);
+		alertify.maxLogItems(QUEUE_SIZE);
 		alertify.logPosition("bottom right");
 	} 
 	else {
@@ -19,7 +23,7 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 	
 	switch(message.action) {
 		case "showGrowlerAlert":
-			showGrowlerAlert(message.alert, event.ports[0]);
+			enqueueGrowlerAlert(message.alert, event.ports[0]);
 			break;
 
 		default:
@@ -27,36 +31,60 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 	}
 });
 
-function showGrowlerAlert(alert, port) {
+/*
+ * Adds a growler alert to the queue, and manages when the alert should be displayed.
+ */
+function enqueueGrowlerAlert(alert, port) {
 	port.postMessage({action: "alertsReceived"});
 
-	// expands growler frame for one alert
-	expandFrame();
+	if (alertQueue.length < QUEUE_SIZE) {
+		alertQueue.push({'received': Date.now(), 'scheduled': 0});
 
-	// build notification content
+		showGrowlerAlert(alert);
+	}
+	else {
+		let ahead = alertQueue[alertQueue.length - QUEUE_SIZE];
+		let schedule = ahead.received + ahead.scheduled + DELAY_MS - Date.now();
+		
+		alertQueue.push({'received': Date.now(), 'scheduled': schedule});
+
+		setTimeout(function() {
+			showGrowlerAlert(alert);
+		}, schedule);
+	}
+}
+
+/*
+ * Displays a single growler alert for DELAY_MS milliseconds.
+ */
+function showGrowlerAlert(alert) {
+	let lines = Math.floor(alert.name.length/MAX_LINE_LENGTH); 
+
+	expandFrame(lines);
+
 	var content = getRiskFlag(alert.riskString) + alert.name + getHiddenId(alert.alertId); 
 
-	// display and handle click
 	alertify
-		.delay(3000)
+		.delay(DELAY_MS)
 		.closeLogOnClick(true)
 		.log(content, function(event) {
 			var alertId = event.target.querySelector("#alertId").value;
 
-			// todo: show alert details
 			navigator.serviceWorker.controller.postMessage({tool: "site-alerts-all", action: "showAlertDetails", "id": alertId});
 		});
 
-	// shrinks frame for one alert
-	setTimeout(function() {shrinkFrame();}, 3500);
+	setTimeout(function() {
+		shrinkFrame(lines);
+		alertQueue.shift();
+	}, DELAY_MS + 250);
 }
 
-function expandFrame() {	
-	parent.postMessage({action: "heightenGrowlerFrame"}, document.referrer);
+function expandFrame(lines) {	
+	parent.postMessage({action: "heightenGrowlerFrame", lines: lines}, document.referrer);
 }
 
-function shrinkFrame() {	
-	parent.postMessage({action: "shortenGrowlerFrame"}, document.referrer);
+function shrinkFrame(lines) {	
+	parent.postMessage({action: "shortenGrowlerFrame", lines: lines}, document.referrer);
 }
 
 function getRiskFlag(risk) {
