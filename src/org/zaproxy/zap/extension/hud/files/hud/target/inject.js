@@ -258,7 +258,7 @@
 	if (window.top == window.self) {
 		window.addEventListener("message", receiveMessages);
 		var template = document.createElement("template");
-		template.innerHTML = '<iframe id="management" src="<<ZAP_HUD_FILES>>?name=management.html" style="position: fixed; left: 0px; top: 0px; width:28px; height:28px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
+		template.innerHTML = '<iframe id="management" src="<<ZAP_HUD_FILES>>?name=management.html" scrolling="no" style="position: fixed; left: 0px; top: 0px; width:28px; height:28px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
 			'<iframe id="left-panel" src="<<ZAP_HUD_FILES>>?name=panel.html&amp;url=<<URL>>&amp;orientation=left" scrolling="no" style="position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
 			'<iframe id="right-panel" src="<<ZAP_HUD_FILES>>?name=panel.html&amp;url=<<URL>>&amp;orientation=right" scrolling="no" style="position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
 			'<iframe id="main-display" src="<<ZAP_HUD_FILES>>?name=display.html" style="position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;"></iframe>\n' +
