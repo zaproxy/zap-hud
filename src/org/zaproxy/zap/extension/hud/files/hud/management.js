@@ -66,6 +66,25 @@ document.addEventListener('DOMContentLoaded', function() {
 	startHeartBeat();
 });
 
+
+/*
+ * Receive messages from the target domain, which is not trusted.
+ * As a result we only accept messages that contain a shared secret generated and injected at runtime.
+ * The contents of the messages should still be treated as potentially malicious.
+ */
+window.addEventListener('message', function(event) {
+	if (! event.data.hasOwnProperty('sharedSecret')) {
+		log(LOG_WARN, 'management.receiveMessage', 'Message without sharedSecret rejected');
+		return;
+	}
+	if (event.data.sharedSecret === "<<ZAP_SHARED_SECRET>>") {
+		navigator.serviceWorker.controller.postMessage(event.data);
+	} else {
+		log(LOG_WARN, 'management.receiveMessage', 'Message with incorrect sharedSecret rejected ' + event.data.sharedSecret);
+	}
+});
+
+
 navigator.serviceWorker.addEventListener('message', function(event) {
 	var message = event.data;
 	
@@ -88,6 +107,10 @@ navigator.serviceWorker.addEventListener('message', function(event) {
 
 		case 'showEnable.off':
 			parent.postMessage({action: 'showEnable.off'}, document.referrer);
+			break;
+
+		case 'showEnable.count':
+			parent.postMessage({action: 'showEnable.count'}, document.referrer);
 			break;
 
 		default:
