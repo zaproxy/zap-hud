@@ -134,6 +134,8 @@
 	}
 	
 	// TODO put this code in a separate file and inject ?
+	var showEnabled = false;
+	var showEnabledCount = 0;
 	var showEnableTypeHiddenFields = [];
 	var showEnableDisplayNoneFields = [];
 	var showEnableDisplayHiddenFields = [];
@@ -143,19 +145,31 @@
 
 		inputs = document.getElementsByTagName('input');
 		for (index = 0; index < inputs.length; ++index) {
+			var counted = false;
 			if (inputs[index].type == "hidden") {
 				inputs[index].type = "";
 				showEnableTypeHiddenFields.push(inputs[index]);
+				showEnabledCount++;
+				counted = true;
 			}
 			if (inputs[index].style.display == "none") {
 				inputs[index].style.display = "";
 				showEnableDisplayNoneFields.push(inputs[index]);
+				if (! counted) {
+					showEnabledCount++;
+					counted = true;
+				}
 			}
 			if (inputs[index].style.visibility == "hidden") {
 				inputs[index].style.visibility = "";
 				showEnableTypeHiddenFields.push(inputs[index]);
+				if (! counted) {
+					showEnabledCount++;
+					counted = true;
+				}
 			}
 		}
+		showEnabled = true;
 	}
 
 	function showEnableOff() {
@@ -171,8 +185,36 @@
 		for (index = 0; index < showEnableDisplayHiddenFields.length; ++index) {
 			showEnableDisplayHiddenFields[index].style.visibility = 'hidden';
 		}
+		showEnableTypeHiddenFields = [];
+		showEnableDisplayNoneFields = [];
 		showEnableDisplayHiddenFields = [];
+		showEnabled = false;
+		showEnabledCount = 0
 	}
+	
+
+	function showEnableCount() {
+		var count = 0;
+		if (showEnabled) {
+			count = showEnabledCount;
+		} else {
+			// Count the number of hidden fields
+			var inputs = document.getElementsByTagName('input');
+			for (index = 0; index < inputs.length; ++index) {
+				if (inputs[index].type == "hidden") {
+					count++;
+				} else if (inputs[index].style.display == "none") {
+					count++;
+				} else if (inputs[index].style.visibility == "hidden") {
+					count++;
+				}
+			}
+		}
+		// Send to the management frame with the shared secret
+		var iframe = document.getElementById("management");
+		iframe.contentWindow.postMessage({action: 'showEnable.count', count: count, sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
+	}
+
 
 	/* COMMUNICATIONS */
 	function receiveMessages (event) {
@@ -247,6 +289,10 @@
 
 			case "showEnable.off":
 				showEnableOff();
+				break;
+
+			case "showEnable.count":
+				showEnableCount();
 				break;
 
 			default:
