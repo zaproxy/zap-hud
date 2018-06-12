@@ -39,10 +39,6 @@ var PageAlertsInformational = (function() {
 		alertUtils.showPageAlerts(LABEL, url, ALERT_RISK);
 	}
 
-	function updateAlertCount(url) {
-		return alertUtils.updateAlertCount(NAME, url);
-	}
-
 	function onPanelLoad(data) {
 	}
 
@@ -56,6 +52,10 @@ var PageAlertsInformational = (function() {
 
 	self.addEventListener("commonAlerts." + ALERT_RISK, function(event) {
 		return alertUtils.updatePageAlertCount(NAME, targetUrl, ALERT_RISK);
+	});
+
+	self.addEventListener("targetload", function(event) {
+		return alertUtils.updatePageAlertCount(NAME, event.detail.url, ALERT_RISK);
 	});
 
 	self.addEventListener("message", function(event) {
