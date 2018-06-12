@@ -214,6 +214,50 @@
 		var iframe = document.getElementById("management");
 		iframe.contentWindow.postMessage({action: 'showEnable.count', count: count, sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
 	}
+	
+	function highlightAlert(alert) {
+		var id = alert.param;
+		var el = document.getElementById(id);
+		if (!el) {
+			var els = document.getElementsByName(id);
+			for (var i=0; i < els.length; i++) {
+				if (els[i] instanceof HTMLInputElement) {
+					el = els[i];
+					break;
+				}
+			}
+		}
+		if (el) {
+			var colour = 'red';
+			switch (alert.riskString) {
+			case 'Informational': 
+				colour = 'blue';
+				break;
+			case 'Low': 
+				colour = 'yellow';
+				break;
+			case 'Medium': 
+				colour = 'orange';
+				break;
+			case 'High': 
+				colour = 'red';
+				break;
+			}
+			el.style.borderColor = colour;
+			el.insertAdjacentHTML('afterend', 
+				'<img src="<<ZAP_HUD_FILES>>?image=flag-' + colour + '.png" ' +
+				'id="zapHudAlert-' + alert.alertId + '" ' +
+				'title="' + alert.name + '" height="16" width="16" ' +
+				'onclick="injection.showZapAlert(' + alert.alertId + ');" />');
+		}
+	} 
+
+
+	function showZapAlertInternal (alertId) {
+		// Send to the management frame with the shared secret
+		var iframe = document.getElementById("management");
+		iframe.contentWindow.postMessage({action: 'commonAlerts.showAlert', alertId: alertId, sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
+	}
 
 
 	/* COMMUNICATIONS */
@@ -294,6 +338,10 @@
 			case "showEnable.count":
 				showEnableCount();
 				break;
+				
+			case "commonAlerts.alert":
+				highlightAlert(message);
+				break;
 
 			default:
 				break;
@@ -311,4 +359,10 @@
 			'<iframe id="growler-alerts" src="<<ZAP_HUD_FILES>>?name=growlerAlerts.html" style="position: fixed; right: 0px; bottom: 0px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;"></iframe>';
 		document.body.appendChild(template.content);
 	}
+	
+	return {
+		showZapAlert: function(alertId) {
+			showZapAlertInternal(alertId);
+		}
+	};
 })();

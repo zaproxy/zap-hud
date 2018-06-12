@@ -113,6 +113,10 @@ navigator.serviceWorker.addEventListener('message', function(event) {
 			parent.postMessage({action: 'showEnable.count'}, document.referrer);
 			break;
 
+		case 'commonAlerts.alert':
+			parent.postMessage(message, document.referrer);
+			break;
+
 		default:
 			console.log('Unexpected action ' + message.action);
 			break;
