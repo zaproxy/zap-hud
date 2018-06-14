@@ -29,6 +29,7 @@ public class HudEventPublisher implements EventPublisher {
     public static final String EVENT_DEV_MODE_ENABLED = "devMode.enabled";
     public static final String EVENT_DEV_MODE_DISABLED = "devMode.disabled";
     public static final String EVENT_DOMAIN_UPGRADED_TO_HTTPS = "domain.upgraded";
+    public static final String EVENT_DOMAIN_REDIRECTED_TO_HTTPS = "domain.redirected";
     
     public static final String FIELD_DOMAIN = "domain";
 
@@ -42,7 +43,8 @@ public class HudEventPublisher implements EventPublisher {
             publisher = new HudEventPublisher();
             ZAP.getEventBus().registerPublisher(
                     publisher,
-                    new String[] { EVENT_DEV_MODE_ENABLED, EVENT_DEV_MODE_DISABLED, EVENT_DOMAIN_UPGRADED_TO_HTTPS });
+                    new String[] { EVENT_DEV_MODE_ENABLED, EVENT_DEV_MODE_DISABLED, 
+                            EVENT_DOMAIN_UPGRADED_TO_HTTPS, EVENT_DOMAIN_REDIRECTED_TO_HTTPS });
 
         }
         return publisher;

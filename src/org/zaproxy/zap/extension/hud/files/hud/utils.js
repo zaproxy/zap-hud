@@ -567,6 +567,20 @@ function configureButtonHtml(tool) {
 	return html;
 }
 
+/*
+ * Adds the correct scheme to a domain, handling the fact the ZAP could be upgrading an http domain to https
+ * Is only available in the serviceworker and Should always be used when supplying a domain to the ZAP API.
+ */
+function domainWrapper(domain) {
+	var scheme = "https";
+	if (sharedData.upgradedDomains && sharedData.upgradedDomains.has(domain)) {
+		scheme = "http";
+	}
+	return scheme + "://" + domain + (domain.endsWith("/") ? "" : "/");
+}
+
+
+
 // todo: maybe needed instead of passing info through postmessage
 function getTargetDomain() {
 	return messageFrame("management", {action:"getTargetDomain"});

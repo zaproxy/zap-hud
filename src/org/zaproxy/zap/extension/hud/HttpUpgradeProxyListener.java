@@ -19,10 +19,18 @@
  */
 package org.zaproxy.zap.extension.hud;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
 import org.parosproxy.paros.network.HttpHeader;
 import org.parosproxy.paros.network.HttpMessage;
+import org.parosproxy.paros.network.HttpResponseHeader;
+import org.zaproxy.zap.ZAP;
+import org.zaproxy.zap.eventBus.Event;
 
 
 public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
@@ -73,7 +81,31 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
     }
 
     @Override
-    public boolean onHttpResponseReceived(HttpMessage arg0) {
+    public boolean onHttpResponseReceived(HttpMessage msg) {
+        if (this.extHud.isHudEnabled()) {
+            try {
+                URI url = msg.getRequestHeader().getURI();
+                if ((msg.getResponseHeader().getStatusCode() == 301 || msg.getResponseHeader().getStatusCode() == 302) &&
+                        this.extHud.isUpgradedHttpsDomain(url)) {
+                    String loc = msg.getResponseHeader().getHeader(HttpResponseHeader.LOCATION);
+                    if (loc != null && loc.toLowerCase().startsWith("https")) {
+                        // We've upgraded it, but its upgrading itself anyway - let it do that so we dont get into a browser loop
+                        LOG.debug("onHttpResponseReceived not upgrading " + url);
+                        this.extHud.removeUpgradedHttpsDomain(url);
+                        // Advise that we're no longer upgrading this domain to https
+                        Map<String, String> map = new HashMap<String, String>();
+                        map.put(HudEventPublisher.FIELD_DOMAIN, url.getHost() + ":" + url.getPort());
+                        ZAP.getEventBus().publishSyncEvent(
+                                HudEventPublisher.getPublisher(),
+                                new Event(HudEventPublisher.getPublisher(), 
+                                        HudEventPublisher.EVENT_DOMAIN_REDIRECTED_TO_HTTPS,
+                                        null, map ));
+                    }
+                }
+            } catch (URIException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
         return false;
     }
 

@@ -88,8 +88,7 @@ var Spider = (function() {
 	}
 
 	function startSpider(domain) {
-		var scheme = sharedData.upgradedDomains.has(domain) ? "http" : "https";
-		fetch("<<ZAP_HUD_API>>/spider/action/scan/?url=" + scheme + "://" + domain + "/");
+		fetch("<<ZAP_HUD_API>>/spider/action/scan/?url=" + domainWrapper(domain));
 		spiderStarted();
 	}
 	

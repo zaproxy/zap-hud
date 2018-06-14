@@ -28,6 +28,7 @@ var CommonAlerts = (function() {
 		tool.alerts = {};
 		tool.cache = {};
 		sharedData.alerts = {};
+		// upgradedDomains is used to keep a set of domains that ZAP has upgraded from http to https
 		sharedData.upgradedDomains = new Set();
 
 		saveTool(tool);
@@ -76,7 +77,9 @@ var CommonAlerts = (function() {
 	self.addEventListener("org.zaproxy.zap.extension.hud.HudEventPublisher", function(event) {
 		if (event.detail['event.type'] === 'domain.upgraded') {
 			sharedData.upgradedDomains.add(event.detail.domain);
-		}
+		} else if (event.detail['event.type'] === 'domain.redirected') {
+			sharedData.upgradedDomains.remove(event.detail.domain);
+		} 
 	});
 
 	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", function(event) {
