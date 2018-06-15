@@ -109,8 +109,12 @@ var alertUtils = (function() {
 	function updateAlertCount(toolname, count) {
 		loadTool(toolname)
 			.then(function(tool) {
-				tool.data = count;
-				return saveTool(tool);
+				if (tool.data == count) {
+					log (LOG_TRACE, 'alertUtils.updateAlertCount no save needed');
+				} else {
+					tool.data = count;
+					return saveTool(tool);
+				}
 			})
 			.catch(errorHandler);
 	}
