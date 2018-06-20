@@ -44,6 +44,9 @@ var alertUtils = (function() {
 					if (target in tool.alerts[targetDomain][alertRisk][alertName]) {
 						config.alerts[alertRisk][alertName] = {};
 						config.alerts[alertRisk][alertName][target] = tool.alerts[targetDomain][alertRisk][alertName][target];
+					} else if (target.replace("https://", "http://") in tool.alerts[targetDomain][alertRisk][alertName]) {
+						config.alerts[alertRisk][alertName] = {};
+						config.alerts[alertRisk][alertName][target.replace("https://", "http://")] = tool.alerts[targetDomain][alertRisk][alertName][target.replace("https://", "http://")];
 					}
 				}
 
