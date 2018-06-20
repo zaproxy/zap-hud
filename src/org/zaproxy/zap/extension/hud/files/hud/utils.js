@@ -254,6 +254,17 @@ function configureStorage() {
 		return saveFrame(frame);
 	}));
 
+	promises.push(loadFrame('drawer').then(function(oldFrame) {
+		var frame = {};
+
+		frame.key = "drawer";
+		if (oldFrame) {
+			frame.clientId = oldFrame.clientId;
+		}
+
+		return saveFrame(frame);
+	}));
+
 	return Promise.all(promises)
 		.catch(errorHandler);
 }
@@ -322,7 +333,7 @@ function registerTools(toolnames) {
 		.catch(errorHandler);
 }
 
-/* 
+/* drawer
  * loads the tool blob from indexeddb using the tool's name
  */
 function loadTool(name) {
