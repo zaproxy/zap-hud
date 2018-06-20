@@ -2802,6 +2802,11 @@ html {
     background: #e7e9ed;
   }
   
+  .tabs-details {
+    overflow-y: auto;
+    height: 100%;
+  }
+  
   .tab {
     align-items: center;
     border-bottom: .05rem solid #e7e9ed;
@@ -2813,7 +2818,7 @@ html {
     list-style: none;
     margin: .2rem 0 .15rem 0;
   }
-  
+
   .tab .tab-item {
     margin-top: 0;
   }
