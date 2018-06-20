@@ -48,6 +48,7 @@ import org.parosproxy.paros.extension.ExtensionAdaptor;
 import org.parosproxy.paros.extension.ExtensionHook;
 import org.parosproxy.paros.extension.OptionsChangedListener;
 import org.parosproxy.paros.extension.history.ProxyListenerLog;
+import org.parosproxy.paros.model.Model;
 import org.parosproxy.paros.model.OptionsParam;
 import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.view.View;
@@ -58,6 +59,7 @@ import org.zaproxy.zap.extension.script.ScriptEventListener;
 import org.zaproxy.zap.extension.script.ScriptType;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
+import org.zaproxy.zap.model.Context;
 import org.zaproxy.zap.view.ZapToggleButton;
 
 /*
@@ -311,7 +313,12 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	public boolean onHttpResponseReceive(HttpMessage msg) {
 		if (hudEnabled && msg.getResponseHeader().isHtml()) {
 			if (getHudParam().isInScopeOnly() && ! msg.isInScope()) {
-				return true;
+				List<Context> contexts = Model.getSingleton().getSession().getContexts();
+				if (contexts.size() != 1 ||
+						contexts.get(0).getIncludeInContextRegexs().size() > 0) {
+					// Dont exclude if theres only the default undefined context
+					return true;
+				}
 			}
 			try {
 				String header = msg.getResponseBody().toString();
