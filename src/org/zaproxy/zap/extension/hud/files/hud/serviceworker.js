@@ -178,7 +178,8 @@ function saveFrameId(event) {
 		"management.html": "management",
 		"panel.html": "Panel",
 		"display.html": "display",
-		"growlerAlerts.html": "growlerAlerts"
+		"growlerAlerts.html": "growlerAlerts",
+		"drawer.html": "drawer"
 	};
 
 	clients.get(event.clientId)
