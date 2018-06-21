@@ -616,21 +616,21 @@ function errorHandler(err) {
 }
 
 function log(level, method, message, object) {
-    if (level > LOG_LEVEL || (! LOG_TO_CONSOLE && ! LOG_TO_ZAP)) {
-        return;
-    }
+  if (level > LOG_LEVEL || (! LOG_TO_CONSOLE && ! LOG_TO_ZAP)) {
+    return;
+  }
 
-    const logLevel = LOG_STRS[level];
+  const logLevel = LOG_STRS[level];
 
-    var record = new Date().toTimeString() + ' ' + logLevel + ' ' + method + ': ' + message;
-    if (object) {
-        record += ': ' + JSON.stringify(object);
-    }
+  var record = new Date().toTimeString() + ' ' + logLevel + ' ' + method + ': ' + message;
+  if (object) {
+    record += ': ' + JSON.stringify(object);
+  }
 
-    if (LOG_TO_CONSOLE) {
-        console[logLevel.toLowerCase()](record);
-    }
-    if (LOG_TO_ZAP) {
-        fetch("<<ZAP_HUD_API>>/hud/action/log/?record=" + record);
-    }
+  if (LOG_TO_CONSOLE) {
+    console[logLevel.toLowerCase()](record);
+  }
+  if (LOG_TO_ZAP) {
+    fetch("<<ZAP_HUD_API>>/hud/action/log/?record=" + record);
+  }
 }
