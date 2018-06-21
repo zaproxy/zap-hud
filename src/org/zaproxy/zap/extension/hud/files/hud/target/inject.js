@@ -228,29 +228,20 @@
 			}
 		}
 		if (el) {
-			var colour = 'red';
-			switch (alert.riskString) {
-			case 'Informational': 
-				colour = 'blue';
-				break;
-			case 'Low': 
-				colour = 'yellow';
-				break;
-			case 'Medium': 
-				colour = 'orange';
-				break;
-			case 'High': 
-				colour = 'red';
-				break;
-			}
-			el.style.borderColor = colour;
-			el.insertAdjacentHTML('afterend', 
+			const colours = {
+				'Informational': 'blue',
+				'Low': 'yellow',
+				'Medium': 'orange',
+				'High': 'red'
+			};
+			el.style.borderColor = colours[alert.riskString] || 'red';
+			el.insertAdjacentHTML('afterend',
 				'<img src="<<ZAP_HUD_FILES>>?image=flag-' + colour + '.png" ' +
 				'id="zapHudAlert-' + alert.alertId + '" ' +
 				'title="' + alert.name + '" height="16" width="16" ' +
 				'onclick="injection.showZapAlert(' + alert.alertId + ');" />');
 		}
-	} 
+	}
 
 
 	function showZapAlertInternal (alertId) {
