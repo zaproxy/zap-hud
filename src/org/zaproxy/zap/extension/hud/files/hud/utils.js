@@ -628,6 +628,9 @@ function log(level, method, message, object) {
   }
 
   if (LOG_TO_CONSOLE) {
+    if (logLevel == 'OFF' || logLevel == 'TRACE') {
+      logLevel = 'LOG';
+    }
     console[logLevel.toLowerCase()](record);
   }
   if (LOG_TO_ZAP) {
