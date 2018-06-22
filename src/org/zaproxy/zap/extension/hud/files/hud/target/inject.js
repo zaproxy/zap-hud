@@ -10,6 +10,7 @@ var injection  = (function () {
 		return (
 			message.origin === "https://zap"
 			|| message.isTrusted
+			|| message.data.secret === "<<ZAP_SHARED_SECRET>>"
 		);
 	}
 
@@ -216,7 +217,6 @@ var injection  = (function () {
 
 	/* COMMUNICATIONS */
 	function receiveMessages (event) {
-
 		if (!isFromTrustedOrigin(event)) {
 			return;
 		}
@@ -224,6 +224,16 @@ var injection  = (function () {
 		var message = event.data;
 
 		switch(message.action) {
+			case "appendEvent":
+				document.getElementById('bottom-drawer').contentWindow.postMessage(
+					{
+						action: 'appendEvent',
+						event: message.content
+					},
+					'https://zap'
+				);
+				break;
+
 			case "showPanel":
 				showPanel(message.orientation);
 				break;

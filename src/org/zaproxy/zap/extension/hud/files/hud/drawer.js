@@ -16,6 +16,28 @@ window.Event = new class {
 	}
 }
 
+Vue.component('dom-events', {
+  template: '#dom-events-template',
+  data() {
+    return {
+      events: []
+    }
+  },
+  created() {
+    let self = this;
+
+    loadTool('dom-events')
+      .then(function(tool) {
+        self.events = tool.events
+      })
+      .catch(errorHandler)
+
+    Event.listen('appendEvent', function(data) {
+      self.events.push(data.event);
+    })
+  }
+});
+
 Vue.component('history', {
     template: '#history-template',
     data() {
@@ -186,6 +208,12 @@ document.addEventListener("DOMContentLoaded", function() {
         action: 'frameload',
         name: 'drawer'
     });
+});
+
+self.addEventListener('message', function(event) {
+  Event.fire('appendEvent', {
+    event: event.data.event
+  });
 });
 
 navigator.serviceWorker.addEventListener('message', function(event) {

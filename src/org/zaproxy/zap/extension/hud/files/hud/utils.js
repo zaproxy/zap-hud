@@ -109,6 +109,7 @@ function isFromTrustedOrigin (message) {
   return (
     message.origin === "https://zap"
     || message.isTrusted
+    || message.data.secret === "<<ZAP_SHARED_SECRET>>"
   );
 }
 
