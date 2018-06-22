@@ -262,7 +262,7 @@
 
 		switch(message.action) {
 			case "showPanel":
-				createPanel(message.orientation);
+				showPanel(message.orientation);
 				break;
 
 			case "showTimeline":
