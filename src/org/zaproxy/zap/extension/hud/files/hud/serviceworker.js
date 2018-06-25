@@ -157,7 +157,7 @@ webSocket.onopen = function (event) {
 
 webSocket.onmessage = function (event) {
 	// Rebroadcast for the tools to pick up
-	jevent = JSON.parse(event.data);
+	let jevent = JSON.parse(event.data);
 	if ('event.publisher' in jevent) {
 		log(LOG_DEBUG, 'serviceworker.webSocket.onmessage', jevent['event.publisher']);
 		var ev = new CustomEvent(jevent['event.publisher'], {detail: jevent});

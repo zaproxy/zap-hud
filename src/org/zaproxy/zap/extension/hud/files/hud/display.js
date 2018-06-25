@@ -19,7 +19,15 @@ window.Event = new class {
 /* Vue Components */
 Vue.component('modal', {
 	template: '#modal-template',
-	props: ['show', 'title', 'text'],
+	props: ['show', 'title', 'text', 'size'],
+	computed: {
+		isWide: function() {
+			return this.size === 'wide';
+		},
+		isSmall: function() {
+			return this.size === 'small';
+		}
+	},
 	methods: {
 		close: function () {
 			this.$emit('close');
@@ -246,8 +254,85 @@ Vue.component('simple-menu-modal', {
 	}
 })
 
+Vue.component('http-message-modal', {
+	template: '#http-message-modal-template',
+	props: ['show', 'title'],
+	methods: {
+		close: function() {
+			this.step();
+			this.$emit('close');
+		},
+		currentMessage() {
+			let method = '';
+			let header = '';
+			let body = '';
+
+			if (this.isResponse) {
+				header = this.response.header;
+				body = this.response.body;
+			}
+			else {
+				method = this.request.method;
+				header = this.request.header;
+				body = this.request.body;
+			}
+
+			return {'method': method, 'header': header, 'body': body};
+		},
+		step: function() {
+			let message = this.currentMessage();
+
+			this.port.postMessage({'buttonSelected': 'step', 'method': message.method, 'header': message.header, 'body': message.body});
+			this.$emit('close');
+		},
+		continueOn: function() {
+			let message = this.currentMessage();
+
+			this.port.postMessage({'buttonSelected': 'continue', 'method': message.method, 'header': message.header, 'body': message.body});
+			this.$emit('close');
+		},
+		drop: function() {
+			this.port.postMessage({'buttonSelected': 'drop'});
+			this.$emit('close');
+		},
+	},
+	data() {
+		return {
+			port: null,
+			request: {},
+			response: {},
+			activeTab: "Request",
+			isResponse: false,
+			isResponseDisabled: true
+		}
+	},
+	created() {
+		let self = this;
+
+		Event.listen('showHttpMessageModal', function(data) {
+			self.request = data.request;
+			self.response = data.response;
+			self.port = data.port;
+			self.isResponse = data.isResponse;
+
+			if (data.isResponse) {
+				self.activeTab = "Response";
+				self.isResponseDisabled = false;
+			}
+			else {
+				self.activeTab = "Request";
+				self.isResponseDisabled = true;
+			}
+
+			app.isHttpMessageModalShown = true;
+			app.httpMessageModalTitle = data.title;
+		})
+	}
+})
+
 Vue.component('tabs', {
 	template: '#tabs-template',
+	props: ['activetab'],
     data() {
         return { 
 			tabs: [] 
@@ -258,8 +343,20 @@ Vue.component('tabs', {
             this.tabs.forEach(tab => {
                 tab.isActive = (tab.href == selectedTab.href);
             });
-        }
-    },
+		},
+		changeTab(tabName) {
+			let tabHref = '#' + tabName.toLowerCase().replace(/ /g, '-');
+
+			this.tabs.forEach(tab => {
+				tab.isActive = (tab.href == tabHref);
+			})
+		}
+	},
+	watch: {
+		activetab: function (tabName) {
+			this.changeTab(tabName)
+		}
+	},
     created() {
         this.tabs = this.$children;
     },
@@ -270,20 +367,23 @@ Vue.component('tab', {
     template: '#tab-template',
     props: {
         name: { required: true },
-        selected: { default: false }
+		selected: { default: false },
+		disabled: { default: false }
     },
     data() {
         return {
-            isActive: false
+			isActive: false,
+			isDisabled: false
         };
     },
     computed: {
         href() {
-            return '#' + this.name.toLowerCase().replace(/ /g, '-');
+	        return '#' + this.name.toLowerCase().replace(/ /g, '-');
         }
     },
     mounted() {
-        this.isActive = this.selected;
+		this.isActive = this.selected;
+		this.isDisabled = this.disabled;
     },
 });
 
@@ -305,6 +405,8 @@ document.addEventListener("DOMContentLoaded", function() {
 			alertDetailsModalTitle: "Alert Details",
 			isSimpleMenuModalShown: false,
 			simpleMenuModalTitle: "Menu",
+			isHttpMessageModalShown: false,
+			httpMessageModalTitle: "HTTP Message",
 			keepShowing: false,
 		},
 	});
@@ -380,7 +482,13 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			break;
 
 		case "showHttpMessage":
-			//TODO: implement when fixing break & timeline
+			Event.fire('showHttpMessageModal', {
+				title: 'HTTP Message',
+				request: config.request,
+				response: config.response,
+				isResponse: config.isResponse,
+				port: port
+			})
 			break;
 
 		default:

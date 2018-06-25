@@ -36,6 +36,19 @@ var Break = (function() {
 		registerForZapEvents("org.zaproxy.zap.extension.brk.BreakEventPublisher");
 	}
 
+	function toggleBreak() {
+		loadTool(NAME)
+			.then(function(tool) {
+				if (tool.data === DATA.OFF) {
+					startBreaking();
+				}
+				else {
+					stopBreaking();
+				}
+			})
+			.catch(errorHandler)
+	}
+
 	function showDialog(domain) {
 
 		checkIsRunning()
@@ -80,7 +93,8 @@ var Break = (function() {
 	}
 
 	function startBreaking() {
-		fetch("<<ZAP_HUD_API>>/break/action/break/?type=http-all&state=true");
+		fetch("<<ZAP_HUD_API>>/break/action/break/?type=http-all&state=true")
+			.catch(errorHandler);
 
 		loadTool(NAME)
 			.then(function(tool) {
@@ -95,7 +109,8 @@ var Break = (function() {
 
 	// todo: change this to 'continue' and figure out / fix stopBreaking
 	function stopBreaking() {
-		fetch("<<ZAP_HUD_API>>/break/action/continue");
+		fetch("<<ZAP_HUD_API>>/break/action/continue")
+			.catch(errorHandler);
 
 		loadTool(NAME)
 			.then(function(tool) {
@@ -109,13 +124,32 @@ var Break = (function() {
 	}
 
 	function step() {
-		fetch("<<ZAP_HUD_API>>/break/action/step/");
+		return fetch("<<ZAP_HUD_API>>/break/action/step/")
+			.catch(errorHandler);
 	}
 
-	function setHttpMessage(method, header, body) {
+	function drop() {
+		return fetch("<<ZAP_HUD_API>>/break/action/drop/");
+	}
+
+	function setHttpMessage(header, body) {
+		let url = "<<ZAP_HUD_API>>/break/action/setHttpMessage/";
+		let params = "httpHeader=" + encodeURIComponent(header) + "&httpBody=" + encodeURIComponent(body)
+
+		let init = {
+			method: "POST",
+			body: params,
+			headers: {'content-type': 'application/x-www-form-urlencoded'} 
+		};
+
+		return fetch(url, init)
+			.catch(errorHandler);
+	}
+/*
+	function addBreakFilter(method, header, body) {
 		return fetch("<<ZAP_HUD_API>>/break/action/setHttpMessage/?formMethod=" + method + "&httpHeader=" + header + "&httpBody=" + body );
 	}
-
+*/
 	function checkIsRunning() {
 		return new Promise(function(resolve) {
 			loadTool(NAME)
@@ -124,24 +158,43 @@ var Break = (function() {
 				});
 		});
 	}
+/*
+	function showBreakFilterModal() {
 
-	function onPollData(data) {
-		if (data.isBreakingRequest === "true") {
-			showBreakDisplay(data);
-		}
+		messageFrame("display", {action:"showBreakFilterModal"})
+			.then(function(response) {
+
+				// Handle button choice
+				if (response.buttonSelected === "add") {
+					addBreakFilter(response.filter);
+				}
+			})
+			.catch(errorHandler);
 	}
-
+*/
 	function showBreakDisplay(data) {
-		var config = {};
+		var config = {
+			request: {
+				header: '',
+				body: ''
+			},
+			response: {
+				header: '',
+				body: ''
+			},
+			isResponse: false
+		};
 
-		if (typeof data.responseBody != null) {
-			config.headerText = data.responseHeader;
-			config.bodyText = data.responseBody;
+		if ('responseBody' in data) {
+			config.response.header = data.responseHeader.trim();
+			config.response.body = data.responseBody;
+			config.isResponse = true;
 		}
-		else {
-			config.headerText = data.requestHeader;
-			config.bodyText = data.requestBody;
-		}
+		
+		config.request.method = parseRequestHeader(data.requestHeader).method;
+		config.request.header = data.requestHeader.trim();
+		config.request.body = data.requestBody;
+
 		config.buttons = [
 			{text:"Step",
 			 id:"step"},
@@ -151,20 +204,23 @@ var Break = (function() {
 
 		messageFrame("display", {action:"showHttpMessage", config:config})
 			.then(function(response) {
-
 				// Handle button choice
-				if (response.id === "step") {
-					setHttpMessage(response.method, response.header, response.body)
+				if (response.buttonSelected === "step") {
+					setHttpMessage(response.header, response.body)
 						.then(function() {
 							step();
 						})
 						.catch(errorHandler);
 				}
-				else if (response.id === "continue") {
-					setHttpMessage(response.method, response.header, response.body)
+				else if (response.buttonSelected === "continue") {
+					setHttpMessage(response.header, response.body)
 						.then(function() {
 							stopBreaking();
 						})
+						.catch(errorHandler);
+				}
+				else if (response.buttonSelected === "drop") {
+					drop()
 						.catch(errorHandler);
 				}
 				else {
@@ -179,14 +235,17 @@ var Break = (function() {
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
-		config.options = {remove: "Remove"};
+		config.options = {remove: "Remove", filter: "Add Filter"};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
 			.then(function(response) {
 				// Handle button choice
 				if (response.id == "remove") {
 					removeToolFromPanel(NAME);
-				}
+				}/*
+				if (response.id == "filter") {
+					showBreakFilterModal();
+				}*/
 				else {
 					//cancel
 				}
@@ -207,10 +266,6 @@ var Break = (function() {
 				initializeStorage();
 				break;
 
-			case "pollData":
-				onPollData(message.pollData.break);
-				break;
-
 			default:
 				break;
 		}
@@ -219,7 +274,7 @@ var Break = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showDialog(message.domain);
+					toggleBreak();
 					break;
 
 				case "buttonMenuClicked":
@@ -233,8 +288,11 @@ var Break = (function() {
 	});
 
 	self.addEventListener("org.zaproxy.zap.extension.brk.BreakEventPublisher", function(event) {
-		if (event.detail['event.type'] === 'break.active') {
+		if (event.detail['event.type'] === 'break.active' && event.detail['messageType'] === 'HTTP') {
 			showBreakDisplay(event.detail);
+		}
+		else {
+			//step();
 		}
 	});
 
