@@ -2317,12 +2317,18 @@ html {
     margin-left: -.15rem;
     margin-right: -.15rem;
   }
-  
+
   .hud-button.small img {
     margin-left: -.20rem;
     margin-right: -.20rem;
   }
   
+  .hud-http-message {
+    font-family: sans-serif;
+    font-size: 12px;
+    font-family: "Courier New", Courier, monospace;
+  }
+
   .chip {
     align-items: center;
     background: #f0f1f4;
@@ -2526,6 +2532,17 @@ html {
   .modal.modal-lg .modal-container {
     box-shadow: none;
     max-width: 960px;
+  }
+
+  .modal.modal-wd .modal-container {
+    max-width: 750px;
+  }
+
+  .modal.modal-wd .modal-body {
+    padding-bottom: .8rem;
+    padding-left: .8rem;
+    padding-right: .8rem;
+    padding-top: 0rem;
   }
   
   .modal-container {
@@ -2836,6 +2853,14 @@ html {
   .tab .tab-item a.active {
     border-bottom-color: #5755d9;
     color: #5755d9;
+  }
+
+  .tab .tab-item.disabled a,
+  .tab .tab-item a.disabled {
+    color: #e7e9ed;
+    cursor: default;
+    pointer-events: none;
+    text-decoration: none;
   }
   
   .tab .tab-item.tab-action {

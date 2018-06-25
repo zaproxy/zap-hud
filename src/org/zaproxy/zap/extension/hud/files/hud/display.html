@@ -17,12 +17,13 @@
             <all-alerts-modal :show="isAllAlertsModalShown" :title="allAlertsModalTitle" @close="isAllAlertsModalShown = false"></all-alerts-modal>
             <alert-details-modal :show="isAlertDetailsModalShown" :title="alertDetailsModalTitle" @close="isAlertDetailsModalShown = false"></alert-details-modal>
             <simple-menu-modal :show="isSimpleMenuModalShown" :title="simpleMenuModalTitle" @close="isSimpleMenuModalShown = false"></simple-menu-modal>
+            <http-message-modal :show="isHttpMessageModalShown" :title="httpMessageModalTitle" @close="isHttpMessageModalShown = false"></http-message-modal>
         </div>
         
         <!-- a base modal component -->
         <template id="modal-template">
             <transition name="modal" @after-leave="afterLeave">
-            <div class="modal active" id="modal-id" v-show="show">
+            <div :class="{ 'active': true, 'modal': true, 'modal-wd': isWide, 'modal-sm': isSmall }" id="modal-id" v-show="show">
                 <a href="#close" class="modal-overlay" aria-label="Close" @click="close"></a>
                 <div class="modal-container">
                     <div class="modal-header">
@@ -160,12 +161,36 @@
             </modal>
         </template>
 
+        <!-- http message modal component -->
+        <template id="http-message-modal-template">
+            <modal :title="title" :show="show" size="wide" @close="close">
+                <div slot="body">
+                    <tabs :activetab="activeTab">
+                        <tab name="Request" selected="true">
+                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="request.header"></textarea>
+                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="request.body"></textarea>
+                        </tab>
+            
+                        <tab name="Response" :disabled="isResponseDisabled">
+                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="response.header"></textarea>
+                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="response.body"></textarea>
+                        </tab>
+                    </tabs>
+                </div>
+                <div slot="footer">
+                    <button class="btn" @click="step">Step</button>
+                    <button class="btn" @click="continueOn">Continue</button>
+                    <button class="btn" @click="drop">Drop</button>
+                </div>
+            </modal>
+        </template>
+
         <!-- tabs component -->
         <template id="tabs-template">
             <div>
                 <div class="tabs">
                     <ul class="tab tab-block">
-                        <li v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true }">
+                        <li v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true, 'disabled': tab.disabled }">
                             <a :href="tab.href" @click="selectTab(tab)">{{ tab.name }}</a>
                         </li>
                     </ul>
