@@ -95,21 +95,10 @@ self.addEventListener("fetch", function(event) {
 	event.respondWith(
 		caches.match(event.request)
 			.then(function(response) {  
-				var reqUrl = event.request.url;
 
-				if (reqUrl.indexOf("zapCallBackUrl/images") > 0) {
-					// Need to rewrite jquery image URLs
-					var name = "<<ZAP_HUD_FILES>>?image=" + reqUrl.substring(reqUrl.lastIndexOf("/")+1);
-					return caches.match(name).then(function(response) {
-						if (!response) {
-							console.log("Could not find jquery image: " + name);
-						}
-						return response;
-					});
-				}
-				else if (response) {
-					// Record Client ID
-					if (reqUrl.endsWith(".js")) {
+				if (response) {
+					// save the frame id as a destination for postmesssaging later
+					if (event.request.url.endsWith(".js")) {
 						saveFrameId(event);
 					}
 
@@ -140,12 +129,13 @@ self.addEventListener("message", function(event) {
 			showHudSettings();
 			break;
 			
-		case "onTargetLoad":
-			if ('targetUrl' in message) {
-				targetUrl = message.targetUrl;
-				targetDomain = parseDomainFromUrl(targetUrl);
-			}
-			onTargetLoad();
+		case 'targetload':
+
+			targetDomain = parseDomainFromUrl(message.targetUrl);
+			targetUrl = message.targetUrl;
+
+			let e = new CustomEvent('targetload', {detail: {url: message.targetUrl}});
+			self.dispatchEvent(e);	
 			break;
 
 		default:
@@ -183,81 +173,35 @@ function registerForZapEvents(publisher) {
  * Saves the clientId of a window which is used to send postMessages.
  */
 function saveFrameId(event) {
-	clients.matchAll().then(function(clients) {
-		clients.forEach(function(item) {
-			let client = item;
-			let clientId = event.clientId;
 
-			// handles firefox bug with adding brackets to the event clientID
-			if (clientId.indexOf('{') >= 0) {
-				clientId = clientId.substring(1, clientId.length - 1);
+	let frameNames = {
+		"management.html": "management",
+		"panel.html": "Panel",
+		"display.html": "display",
+		"growlerAlerts.html": "growlerAlerts"
+	};
+
+	clients.get(event.clientId)
+		.then(function(client) {
+			let params = new URL(client.url).searchParams;
+
+			let key = frameNames[params.get('name')];
+
+			if (key === "Panel") {
+				key = params.get('orientation') + key;
 			}
 
-			if (client.id === clientId) {
+			loadFrame(key)
+				.then(function(frame) {
+					frame.clientId = client.id;
 
-				if (client.url.endsWith("left")) {
-					loadFrame("leftPanel")
-						.then(function(panel) {
-							panel.clientId = client.id;
-						
-							return saveFrame(panel);
-						})
-						.catch(errorHandler);
-				}
-				else if (client.url.endsWith("right")) {
-					loadFrame("rightPanel")
-						.then(function(panel) {
-							panel.clientId = client.id;
-						
-							return saveFrame(panel);
-						})
-						.catch(errorHandler);
-				}
-				else if (client.url.endsWith("display.html")) {
-					loadFrame("display")
-						.then(function(panel) {
-							panel.clientId = client.id;
-						
-							return saveFrame(panel);
-						})
-						.catch(errorHandler);
-				}
-				else if (client.url.endsWith("management.html")) {
-					loadFrame("management")
-						.then(function(frame) {
-							frame.clientId = client.id;
-
-							return saveFrame(frame);
-						})
-						.catch(errorHandler);
-				}
-				else if (client.url.endsWith("timelinePane.html")) {
-					loadFrame("timelinePane")
-						.then(function(frame) {
-							frame.clientId = client.id;
-
-							return saveFrame(frame);
-						})
-						.catch(errorHandler);
-				}
-				else if (client.url.endsWith("growlerAlerts.html")) {
-					loadFrame("growlerAlerts")
-						.then(function(frame) {
-							frame.clientId = client.id;
-
-							return saveFrame(frame);
-						})
-						.catch(errorHandler);
-				}
-			}
-		});
-    });
+					return saveFrame(frame);
+				})
+				.catch(errorHandler);
+		})
+		.catch(errorHandler);
 }
 
-function onTargetLoad() {
-	// anything to do when target loads goes here
-}
- 
 function showAddToolDialog(panelKey) {
 	var config = {};
 
@@ -309,7 +253,6 @@ function resetToDefault() {
 		.then(setDefaultTools)
 		.then(loadAllTools)
 		.then(function(tools) {
-			// run onTargetLoad for any tools in the panel
 			var promises = [];
 
 			for (var tool in tools) {

@@ -78,15 +78,15 @@ public class HudApiProxy extends ApiImplementor {
             if (msg.getRequestHeader().getMethod().equalsIgnoreCase(HttpRequestHeader.GET)) {
                 params = API.getParams(msg.getRequestHeader().getURI().getEscapedQuery());
             }
-			else if (msg.getRequestHeader().getMethod().equalsIgnoreCase(HttpRequestHeader.POST)) {
+            else if (msg.getRequestHeader().getMethod().equalsIgnoreCase(HttpRequestHeader.POST)) {
                 String contentTypeHeader = msg.getRequestHeader().getHeader(HttpHeader.CONTENT_TYPE);
 
-				if (contentTypeHeader != null
-					&& contentTypeHeader.equals(HttpHeader.FORM_URLENCODED_CONTENT_TYPE)) {
+                if (contentTypeHeader != null
+                    && contentTypeHeader.equals(HttpHeader.FORM_URLENCODED_CONTENT_TYPE)) {
                     params = API.getParams(msg.getRequestBody().toString());
-				} else {
-					throw new ApiException(ApiException.Type.CONTENT_TYPE_NOT_SUPPORTED);
-				}
+                } else {
+                    throw new ApiException(ApiException.Type.CONTENT_TYPE_NOT_SUPPORTED);
+                }
             }
 
             ApiResponse response;

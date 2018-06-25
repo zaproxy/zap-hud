@@ -92,7 +92,7 @@ var ActiveScan = (function() {
 	}
 
 	function startActiveScan(domain) {
-		fetch("<<ZAP_HUD_API>>/ascan/action/scan/?url=" + domain + "/").then(function(response) {
+		fetch("<<ZAP_HUD_API>>/ascan/action/scan/?url=" + domainWrapper(domain)).then(function(response) {
 			response.json()
 				.then(function(data) {
 					loadTool(NAME)
@@ -206,7 +206,7 @@ var ActiveScan = (function() {
 	});
 
 	self.addEventListener("org.zaproxy.zap.extension.ascan.ActiveScanEventPublisher", function(event) {
-		var eventType = event.detail.event.type;
+		var eventType = event.detail['event.type'];
 		log (LOG_DEBUG, 'ActiveScanEventPublisher eventListener', 'Received ' + eventType + ' event');
 		if (eventType === 'scan.started') {
 			updateProgress("0%");

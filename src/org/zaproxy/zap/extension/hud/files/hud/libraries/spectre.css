@@ -2293,7 +2293,7 @@ html {
     height: 1.3rem;
     line-height: .8rem;
     margin: .1rem;
-    min-width: 28px;
+    min-width: 26px;
     max-width: 100%;
     padding: .2rem .4rem;
     text-decoration: none;
@@ -2309,13 +2309,18 @@ html {
   }
 
   .hud-button.small {
-    min-width: 28px;
-    max-width: 28px;
+    min-width: 26px;
+    max-width: 26px;
   }
   
   .hud-button img {
     margin-left: -.15rem;
     margin-right: -.15rem;
+  }
+
+  .hud-button.small img {
+    margin-left: -.20rem;
+    margin-right: -.20rem;
   }
   
   .hud-http-message {

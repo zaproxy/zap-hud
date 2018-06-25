@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.io.IOUtils;
@@ -83,6 +84,11 @@ public class HudAPI extends ApiImplementor {
     private String websocketUrl;
 
     private boolean isTimelineEnabled = false;
+    
+    /**
+     * Shared secret used to ensure that we only accept messages from the ZAP code running on the target domain
+     */
+    private final String sharedSecret = UUID.randomUUID().toString();
 
     private static Logger logger = Logger.getLogger(HudAPI.class);
     
@@ -204,11 +210,8 @@ public class HudAPI extends ApiImplementor {
 
     protected String getSite(HttpMessage msg) throws URIException {
         StringBuilder site = new StringBuilder();
-        if (msg.getRequestHeader().isSecure()) {
-            site.append("https://");
-        } else {
-            site.append("http://");
-        }
+        // Always force to https - we fakw this for http sites
+        site.append("https://");
         site.append(msg.getRequestHeader().getURI().getHost());
         if (msg.getRequestHeader().getURI().getPort() > 0) {
             site.append(":");
@@ -239,8 +242,10 @@ public class HudAPI extends ApiImplementor {
                 // Strip off the callback path
                 url = url.substring(0, url.indexOf("/zapCallBackUrl"));
             }
-            contents = contents.replace("<<ZAP_HUD_FILES>>", this.hudFileUrl)
-                    .replace("<<URL>>", url);
+            contents = contents
+                    .replace("<<ZAP_HUD_FILES>>", this.hudFileUrl)
+                    .replace("<<URL>>", url)
+                    .replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
 
             if (url.startsWith(API.API_URL_S)) {
                 // Only do this on the ZAP domain

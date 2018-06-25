@@ -87,16 +87,18 @@
 	}
 
 	/* dynamically size growler iframes with number of alerts */
-	function heightenGrowlerFrame() {
+	function heightenGrowlerFrame(lines) {
 		var panel = document.getElementById("growler-alerts");
+		var offset = 56 + 30 * lines;
 
-		panel.style.height = (panel.offsetHeight + 55) + "px";
+		panel.style.height = (panel.offsetHeight + offset) + "px";
 	}
 
-	function shortenGrowlerFrame() {
+	function shortenGrowlerFrame(lines) {
 		var panel = document.getElementById("growler-alerts");
+		var offset = 56 + 30 * lines;
 
-		panel.style.height = (panel.offsetHeight - 55) + "px";
+		panel.style.height = (panel.offsetHeight - offset) + "px";
 	}
 
 	/* dynamically size iframes with number of buttons */
@@ -132,6 +134,8 @@
 	}
 	
 	// TODO put this code in a separate file and inject ?
+	var showEnabled = false;
+	var showEnabledCount = 0;
 	var showEnableTypeHiddenFields = [];
 	var showEnableDisplayNoneFields = [];
 	var showEnableDisplayHiddenFields = [];
@@ -141,19 +145,31 @@
 
 		inputs = document.getElementsByTagName('input');
 		for (index = 0; index < inputs.length; ++index) {
+			var counted = false;
 			if (inputs[index].type == "hidden") {
 				inputs[index].type = "";
 				showEnableTypeHiddenFields.push(inputs[index]);
+				showEnabledCount++;
+				counted = true;
 			}
 			if (inputs[index].style.display == "none") {
 				inputs[index].style.display = "";
 				showEnableDisplayNoneFields.push(inputs[index]);
+				if (! counted) {
+					showEnabledCount++;
+					counted = true;
+				}
 			}
 			if (inputs[index].style.visibility == "hidden") {
 				inputs[index].style.visibility = "";
 				showEnableTypeHiddenFields.push(inputs[index]);
+				if (! counted) {
+					showEnabledCount++;
+					counted = true;
+				}
 			}
 		}
+		showEnabled = true;
 	}
 
 	function showEnableOff() {
@@ -169,8 +185,80 @@
 		for (index = 0; index < showEnableDisplayHiddenFields.length; ++index) {
 			showEnableDisplayHiddenFields[index].style.visibility = 'hidden';
 		}
+		showEnableTypeHiddenFields = [];
+		showEnableDisplayNoneFields = [];
 		showEnableDisplayHiddenFields = [];
+		showEnabled = false;
+		showEnabledCount = 0
 	}
+	
+
+	function showEnableCount() {
+		var count = 0;
+		if (showEnabled) {
+			count = showEnabledCount;
+		} else {
+			// Count the number of hidden fields
+			var inputs = document.getElementsByTagName('input');
+			for (index = 0; index < inputs.length; ++index) {
+				if (inputs[index].type == "hidden") {
+					count++;
+				} else if (inputs[index].style.display == "none") {
+					count++;
+				} else if (inputs[index].style.visibility == "hidden") {
+					count++;
+				}
+			}
+		}
+		// Send to the management frame with the shared secret
+		var iframe = document.getElementById("management");
+		iframe.contentWindow.postMessage({action: 'showEnable.count', count: count, sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
+	}
+	
+	function highlightAlert(alert) {
+		var id = alert.param;
+		var el = document.getElementById(id);
+		if (!el) {
+			var els = document.getElementsByName(id);
+			for (var i=0; i < els.length; i++) {
+				if (els[i] instanceof HTMLInputElement) {
+					el = els[i];
+					break;
+				}
+			}
+		}
+		if (el) {
+			var colour = 'red';
+			switch (alert.riskString) {
+			case 'Informational': 
+				colour = 'blue';
+				break;
+			case 'Low': 
+				colour = 'yellow';
+				break;
+			case 'Medium': 
+				colour = 'orange';
+				break;
+			case 'High': 
+				colour = 'red';
+				break;
+			}
+			el.style.borderColor = colour;
+			el.insertAdjacentHTML('afterend', 
+				'<img src="<<ZAP_HUD_FILES>>?image=flag-' + colour + '.png" ' +
+				'id="zapHudAlert-' + alert.alertId + '" ' +
+				'title="' + alert.name + '" height="16" width="16" ' +
+				'onclick="injection.showZapAlert(' + alert.alertId + ');" />');
+		}
+	} 
+
+
+	function showZapAlertInternal (alertId) {
+		// Send to the management frame with the shared secret
+		var iframe = document.getElementById("management");
+		iframe.contentWindow.postMessage({action: 'commonAlerts.showAlert', alertId: alertId, sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
+	}
+
 
 	/* COMMUNICATIONS */
 	function receiveMessages (event) {
@@ -212,7 +300,6 @@
 				break;
 
 			case "expandManagement":
-				console.log('expanding management')
 				expandManagement();
 				break;
 
@@ -233,11 +320,11 @@
 				break;
 
 			case "heightenGrowlerFrame":
-				heightenGrowlerFrame();
+				heightenGrowlerFrame(message.lines);
 				break;
 
 			case "shortenGrowlerFrame":
-				shortenGrowlerFrame();
+				shortenGrowlerFrame(message.lines);
 				break;
 
 			case "showEnable.on":
@@ -246,6 +333,14 @@
 
 			case "showEnable.off":
 				showEnableOff();
+				break;
+
+			case "showEnable.count":
+				showEnableCount();
+				break;
+				
+			case "commonAlerts.alert":
+				highlightAlert(message);
 				break;
 
 			default:
@@ -257,11 +352,17 @@
 	if (window.top == window.self) {
 		window.addEventListener("message", receiveMessages);
 		var template = document.createElement("template");
-		template.innerHTML = '<iframe id="management" src="<<ZAP_HUD_FILES>>?name=management.html" style="position: fixed; left: 0px; top: 0px; width:50px; height:50px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
+		template.innerHTML = '<iframe id="management" src="<<ZAP_HUD_FILES>>?name=management.html" scrolling="no" style="position: fixed; left: 0px; top: 0px; width:28px; height:28px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
 			'<iframe id="left-panel" src="<<ZAP_HUD_FILES>>?name=panel.html&amp;url=<<URL>>&amp;orientation=left" scrolling="no" style="position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
 			'<iframe id="right-panel" src="<<ZAP_HUD_FILES>>?name=panel.html&amp;url=<<URL>>&amp;orientation=right" scrolling="no" style="position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
 			'<iframe id="main-display" src="<<ZAP_HUD_FILES>>?name=display.html" style="position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;"></iframe>\n' +
-			'<iframe id="growler-alerts" src="<<ZAP_HUD_FILES>>?name=growlerAlerts.html" style="position: fixed; right: 0px; bottom: 0px; width: 500px; height: 0px; border: 0px none; z-index: 2147483647;"></iframe>';
+			'<iframe id="growler-alerts" src="<<ZAP_HUD_FILES>>?name=growlerAlerts.html" style="position: fixed; right: 0px; bottom: 0px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;"></iframe>';
 		document.body.appendChild(template.content);
 	}
+	
+	return {
+		showZapAlert: function(alertId) {
+			showZapAlertInternal(alertId);
+		}
+	};
 })();

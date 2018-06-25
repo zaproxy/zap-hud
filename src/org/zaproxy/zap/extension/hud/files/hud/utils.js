@@ -132,7 +132,7 @@ function parseDomainFromUrl(url) {
 	hostname = hostname.split('?')[0];
 	hostname = hostname.split('#')[0];
 
-	return protocol + hostname;
+	return hostname;
 }
 
 //todo change to be sw agnostic
@@ -344,6 +344,7 @@ function saveTool(tool) {
 						// this is only catching the NoClientIdError which occurs 
 						// when tools are added on startup and the panels haven't 
 						// been added yet
+						log(LOG_WARN, "messageFrame", "NoClientIdError - panel: " + tool.panel + " not yet available to be messaged", err);
 					});
 			}
 
@@ -565,6 +566,20 @@ function configureButtonHtml(tool) {
 
 	return html;
 }
+
+/*
+ * Adds the correct scheme to a domain, handling the fact the ZAP could be upgrading an http domain to https
+ * Is only available in the serviceworker and Should always be used when supplying a domain to the ZAP API.
+ */
+function domainWrapper(domain) {
+	var scheme = "https";
+	if (sharedData.upgradedDomains && sharedData.upgradedDomains.has(domain)) {
+		scheme = "http";
+	}
+	return scheme + "://" + domain + (domain.endsWith("/") ? "" : "/");
+}
+
+
 
 // todo: maybe needed instead of passing info through postmessage
 function getTargetDomain() {

@@ -11,24 +11,22 @@ var ShowEnable = (function() {
 	var NAME = "showEnable";
 	var LABEL = "Show / Enable";
 	var DATA = {};
-		DATA.OFF = "Off";
-		DATA.ON = "On";
 	var ICONS = {};
 		ICONS.OFF = "show-off.png";
 		ICONS.ON = "show-on.png";
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
-		console.log('Show/Enable initializeStorage');
 		var tool = {};
 		tool.name = NAME;
 		tool.label = LABEL;
-		tool.data = DATA.OFF;
+		tool.data = 0;
 		tool.icon = ICONS.OFF;
 		tool.isSelected = false;
 		tool.isRunning = false;
 		tool.panel = "";
 		tool.position = 0;
+		tool.count = 0;
 
 		saveTool(tool);
 	}
@@ -62,7 +60,6 @@ var ShowEnable = (function() {
 		loadTool(NAME)
 			.then(function(tool) {
 				tool.isRunning = true;
-				tool.data = DATA.ON;
 				tool.icon = ICONS.ON;
 
 				saveTool(tool);
@@ -76,9 +73,17 @@ var ShowEnable = (function() {
 		loadTool(NAME)
 			.then(function(tool) {
 				tool.isRunning = false;
-				tool.data = DATA.OFF;
 				tool.icon = ICONS.OFF;
 
+				saveTool(tool);
+			})
+			.catch(errorHandler);
+	}
+	
+	function setCount(count) {
+		loadTool(NAME)
+			.then(function(tool) {
+				tool.data = count;
 				saveTool(tool);
 			})
 			.catch(errorHandler);
@@ -108,6 +113,21 @@ var ShowEnable = (function() {
 		initializeStorage();
 	});
 
+	self.addEventListener("targetload", function(event) {
+			checkIsRunning()
+				.then(function(isRunning) {
+					if (isRunning) {
+						switchOn();
+					}
+					else {
+						switchOff();
+					}
+					// Ask for the count of hidden fields
+					messageFrame("management", {action:"showEnable.count"});
+				})
+				.catch(errorHandler);
+	});
+
 	self.addEventListener("message", function(event) {
 		var message = event.data;
 
@@ -115,6 +135,13 @@ var ShowEnable = (function() {
 		switch(message.action) {
 			case "initializeTools":
 				initializeStorage();
+				break;
+
+			case "showEnable.count":
+				// Check its an int - its been supplied by the target domain so in theory could have been tampered with
+				if (message.count === parseInt(message.count, 10)) {
+					setCount(message.count);
+				}
 				break;
 
 			default:
@@ -130,10 +157,6 @@ var ShowEnable = (function() {
 
 				case "buttonMenuClicked":
 					showOptions();
-					break;
-
-				case "onTargetLoad":
-					// TODO call switchOn/Off as appropriate (once this message is generated)
 					break;
 
 				default:

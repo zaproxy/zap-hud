@@ -37,9 +37,16 @@ var alertUtils = (function() {
 				config.alerts = {};
 				config.alerts[alertRisk] = {};
 				for (var alertName in tool.alerts[targetDomain][alertRisk]) {
+					if (sharedData.upgradedDomains.has(targetDomain)) {
+						// Its been upgraded to https by ZAP, but the alerts wont have been
+						target = target.replace("https://", "http://");
+					}
 					if (target in tool.alerts[targetDomain][alertRisk][alertName]) {
 						config.alerts[alertRisk][alertName] = {};
 						config.alerts[alertRisk][alertName][target] = tool.alerts[targetDomain][alertRisk][alertName][target];
+					} else if (target.replace("https://", "http://") in tool.alerts[targetDomain][alertRisk][alertName]) {
+						config.alerts[alertRisk][alertName] = {};
+						config.alerts[alertRisk][alertName][target.replace("https://", "http://")] = tool.alerts[targetDomain][alertRisk][alertName][target.replace("https://", "http://")];
 					}
 				}
 
@@ -89,9 +96,13 @@ var alertUtils = (function() {
 				let targetDomain = parseDomainFromUrl(target);
 				let count = 0;
 				for (var alert in tool.alerts[parseDomainFromUrl(targetDomain)][alertRisk]) {
+					if (sharedData.upgradedDomains.has(targetDomain)) {
+						// Its been upgraded to https by ZAP, but the alerts wont have been
+						target = target.replace("https://", "http://");
+					}
 					if (target in tool.alerts[parseDomainFromUrl(targetDomain)][alertRisk][alert]) {
 						count += 1;
-					}
+					} 
 				}
 				return updateAlertCount(toolname, count);
 			})

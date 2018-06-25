@@ -88,7 +88,7 @@ var Spider = (function() {
 	}
 
 	function startSpider(domain) {
-		fetch("<<ZAP_HUD_API>>/spider/action/scan/?url=" + domain + "/");
+		fetch("<<ZAP_HUD_API>>/spider/action/scan/?url=" + domainWrapper(domain));
 		spiderStarted();
 	}
 	

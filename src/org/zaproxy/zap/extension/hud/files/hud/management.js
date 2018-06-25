@@ -12,13 +12,20 @@ Vue.component('hud-button', {
 	props: ['label', 'icon', 'data'],
 	data() {
 		return {
-			showData:false
+			showData: false,
+			isActive: false
 		}
 	},
 	methods: {
 		click: function() {
 			navigator.serviceWorker.controller.postMessage({action:'showHudSettings'});
 		},
+		mouseOver() {
+			this.isActive = true;
+		},
+		mouseLeave() {
+			this.isActive = false;
+		}
 	}
 })
 
@@ -51,12 +58,32 @@ document.addEventListener('DOMContentLoaded', function() {
 		// show the settings button
 		app.isSettingsButtonShown = true;
 
-		// send onTargetLoad message 
-		navigator.serviceWorker.controller.postMessage({action:"onTargetLoad", targetUrl: document.referrer});
+		// send targetload message 
+		navigator.serviceWorker.controller.postMessage({action:"targetload", targetUrl: document.referrer});
+
 	}
 
 	startHeartBeat();
 });
+
+
+/*
+ * Receive messages from the target domain, which is not trusted.
+ * As a result we only accept messages that contain a shared secret generated and injected at runtime.
+ * The contents of the messages should still be treated as potentially malicious.
+ */
+window.addEventListener('message', function(event) {
+	if (! event.data.hasOwnProperty('sharedSecret')) {
+		log(LOG_WARN, 'management.receiveMessage', 'Message without sharedSecret rejected');
+		return;
+	}
+	if (event.data.sharedSecret === "<<ZAP_SHARED_SECRET>>") {
+		navigator.serviceWorker.controller.postMessage(event.data);
+	} else {
+		log(LOG_WARN, 'management.receiveMessage', 'Message with incorrect sharedSecret rejected ' + event.data.sharedSecret);
+	}
+});
+
 
 navigator.serviceWorker.addEventListener('message', function(event) {
 	var message = event.data;
@@ -80,6 +107,14 @@ navigator.serviceWorker.addEventListener('message', function(event) {
 
 		case 'showEnable.off':
 			parent.postMessage({action: 'showEnable.off'}, document.referrer);
+			break;
+
+		case 'showEnable.count':
+			parent.postMessage({action: 'showEnable.count'}, document.referrer);
+			break;
+
+		case 'commonAlerts.alert':
+			parent.postMessage(message, document.referrer);
 			break;
 
 		default:

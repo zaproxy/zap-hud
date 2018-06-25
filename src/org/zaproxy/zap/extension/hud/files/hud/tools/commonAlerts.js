@@ -14,6 +14,7 @@ var CommonAlerts = (function() {
 		DATA.NONE = "0";
 	var ICONS = {};
 	var alertCache = {};
+	var RISKS = ["Informational", "Low", "Medium", "High"];
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -28,19 +29,16 @@ var CommonAlerts = (function() {
 		tool.alerts = {};
 		tool.cache = {};
 		sharedData.alerts = {};
+		// upgradedDomains is used to keep a set of domains that ZAP has upgraded from http to https
+		sharedData.upgradedDomains = new Set();
 
 		saveTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.alert.AlertEventPublisher");
+		registerForZapEvents("org.zaproxy.zap.extension.hud.HudEventPublisher");
 	}
 
 	function showGrowlerAlert(alert) {
 		return messageFrame("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
-	}
-
-	function onPanelLoad(data) {
-	}
-
-	function showOptions() {
 	}
 
 	self.addEventListener("activate", function(event) {
@@ -54,6 +52,13 @@ var CommonAlerts = (function() {
 		switch(message.action) {
 			case "initializeTools":
 				initializeStorage();
+				break;
+
+			case "commonAlerts.showAlert":
+				// Check its an int - its been supplied by the target domain so in theory could have been tampered with
+				if (message.alertId === parseInt(message.alertId, 10)) {
+					alertUtils.showAlertDetails(message.alertId);
+				}
 				break;
 
 			default:
@@ -77,10 +82,46 @@ var CommonAlerts = (function() {
 		}
 	});
 
+	self.addEventListener("targetload", function(event) {
+		loadTool(NAME)
+			.then(function(tool) {
+				let target = event.detail.url;
+				let targetDomain = parseDomainFromUrl(target);
+				for (var risk in RISKS) {
+					var alertRisk = RISKS[risk];
+					for (var alert in tool.alerts[parseDomainFromUrl(targetDomain)][alertRisk]) {
+						if (sharedData.upgradedDomains.has(targetDomain)) {
+							// Its been upgraded to https by ZAP, but the alerts wont have been
+							target = target.replace("https://", "http://");
+						}
+						if (target in tool.alerts[parseDomainFromUrl(targetDomain)][alertRisk][alert]) {
+							var alert = tool.alerts[parseDomainFromUrl(targetDomain)][alertRisk][alert][target];
+							if (alert.param.length > 0) {
+								messageFrame("management", {
+									action: "commonAlerts.alert",
+									name: alert.name,
+									alertId: alert.alertId,
+									riskString: alert.riskString,
+									param: alert.param});
+							}
+						} 
+					}
+				}
+			})
+		.catch(errorHandler);
+	});
+
+	self.addEventListener("org.zaproxy.zap.extension.hud.HudEventPublisher", function(event) {
+		if (event.detail['event.type'] === 'domain.upgraded') {
+			sharedData.upgradedDomains.add(event.detail.domain);
+		} else if (event.detail['event.type'] === 'domain.redirected') {
+			sharedData.upgradedDomains.remove(event.detail.domain);
+		} 
+	});
+
 	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", function(event) {
 		if (event.detail['event.type'] === 'alert.added') {
-			log (LOG_DEBUG, 'commonAlerts.js AlertEventPublisher eventListener', 'Received alert.added event', event.detail['alertId']);
-			if (event.detail.uri.startsWith(targetDomain)) {
+			if (parseDomainFromUrl(event.detail.uri) === targetDomain) {
 				if (sharedData.alerts[targetDomain] === undefined) {
 					sharedData.alerts[targetDomain] = {};
 					sharedData.alerts[targetDomain].Low = {};
@@ -97,8 +138,9 @@ var CommonAlerts = (function() {
 					showGrowlerAlert(event.detail)
 						.catch(errorHandler);
 				}
-				if ( !(event.detail.uri in sharedData.alerts[targetDomain][risk][name])) {
-					sharedData.alerts[targetDomain][risk][name][event.detail.uri] = event.detail;
+				let url = event.detail.uri.substring(0, event.detail.uri.indexOf('?')); 
+				if ( !(url in sharedData.alerts[targetDomain][risk][name])) {
+					sharedData.alerts[targetDomain][risk][name][url] = event.detail;
 				}
 				loadTool(NAME)
 					.then(function(tool) {
@@ -125,7 +167,6 @@ var CommonAlerts = (function() {
 
 	return {
 		name: NAME,
-		onPanelLoad: onPanelLoad,
 		initialize: initializeStorage
 	};
 })();

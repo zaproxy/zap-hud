@@ -92,7 +92,7 @@ var Scope = (function() {
 	}
 
 	function addToScope(domain) {
-		return fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=Default%20Context&regex=" + domain + "/.*")
+		return fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=Default%20Context&regex=" + domainWrapper(domain) + ".*")
 			.then(function() {
 				// add to list and save
 				return loadTool(NAME)
@@ -111,7 +111,7 @@ var Scope = (function() {
 	}
 
 	function removeFromScope(domain) {
-		fetch("<<ZAP_HUD_API>>/context/action/excludeFromContext/?contextName=Default%20Context&regex=" + domain + "/.*");
+		fetch("<<ZAP_HUD_API>>/context/action/excludeFromContext/?contextName=Default%20Context&regex=" + domainWrapper(domain) + ".*");
 
 		// remove from list and save
 		loadTool(NAME)
