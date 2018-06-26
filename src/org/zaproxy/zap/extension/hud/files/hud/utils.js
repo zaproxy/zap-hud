@@ -615,19 +615,23 @@ function errorHandler(err) {
 	log(LOG_ERROR, 'errorHandler', message, err);
 }
 
-/*
- * Logs a debug message to the console.
- */
 function log(level, method, message, object) {
 	if (level > LOG_LEVEL || (! LOG_TO_CONSOLE && ! LOG_TO_ZAP)) {
 		return;
 	}
-	var record = new Date().toTimeString() + ' ' + LOG_STRS[level] + ' ' + method + ': ' + message; 
+
+	const logLevel = LOG_STRS[level];
+
+	var record = new Date().toTimeString() + ' ' + logLevel + ' ' + method + ': ' + message;
 	if (object) {
 		record += ': ' + JSON.stringify(object);
 	}
+
 	if (LOG_TO_CONSOLE) {
-		console.log(record);
+		if (logLevel == 'OFF' || logLevel == 'TRACE') {
+			logLevel = 'LOG';
+		}
+		console[logLevel.toLowerCase()](record);
 	}
 	if (LOG_TO_ZAP) {
 		fetch("<<ZAP_HUD_API>>/hud/action/log/?record=" + record);
