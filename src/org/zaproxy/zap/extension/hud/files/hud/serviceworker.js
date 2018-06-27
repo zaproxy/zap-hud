@@ -3,10 +3,7 @@ importScripts("<<ZAP_HUD_FILES>>?name=utils.js");
 importScripts("<<ZAP_HUD_FILES>>?name=tools/alertUtils.js");
 
 var CACHE_NAME = "hud-cache-1.0";
-var BUTTON_LIST_HTML = '<div class="buttons-list">';
-var PARAM_ORIENATATION = "orientation";
-var PARAM_URL = "url";
-var ORIENTATION = /ORIENTATION/g;
+
 var targetDomain = "";
 var targetUrl = "";
 

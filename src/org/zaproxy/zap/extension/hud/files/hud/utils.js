@@ -99,12 +99,10 @@ function parseResponseHeader(headerText) {
  * Checks whether a message is from the ZAP domain or is a worker.
  */
 function isFromTrustedOrigin (message) {
-
-	if (message.origin === "https://zap" || message.isTrusted) {
-		return true;
-	}
-
-	return false;
+  return (
+    message.origin === "https://zap"
+    || message.isTrusted
+  );
 }
 
 /* 
