@@ -1,6 +1,7 @@
 <html>
 <head>
 	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre.css"/>
+	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre-icons.css"/>
 
 	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js"></script>
 	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue.js"></script>
@@ -12,20 +13,6 @@
         <tabs>
             <tab name="History">
                 <history></history>
-            </tab>
-            <tab name="Local Storage">
-                <table class="table table-striped table-hover">
-                    <tbody>
-                        <tr>
-                            <td>someKey</td>
-                            <td>someValue</td>
-                        </tr>
-                        <tr>
-                            <td>someOtherKey</td>
-                            <td>someOtherValue</td>
-                        </tr>
-                    </tbody>
-                </table>
             </tab>
         </tabs>
     </div>
@@ -60,7 +47,9 @@
                         <a :href="tab.href" @click="selectTab(tab)">{{ tab.name }}</a>
                     </li>
                     <li class="tab-item tab-action">
-                        <button class="btn btn-action btn-sm" @click="toggleOpenClose">{{openSymbol}}</button>
+                        <button class="btn btn-action btn-sm"  @click="toggleOpenClose">
+                            <i :class="{ 'icon': true, 'icon-arrow-up': isArrowUp, 'icon-arrow-down': !isArrowUp }"></i>
+                        </button>
                     </li>
                 </ul>
             </div>
@@ -75,4 +64,4 @@
         <div v-show="isActive"><slot></slot></div>
     </template>
 </body>
-</html>
+</html>>
