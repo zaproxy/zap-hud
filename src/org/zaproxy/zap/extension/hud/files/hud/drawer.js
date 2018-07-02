@@ -42,8 +42,7 @@ Vue.component('history', {
         })
 
 		Event.listen('updateMessages', function(data) {
-            console.log('we updating')
-			self.messages.concat(data.messages);
+            self.messages = self.messages.concat(data.messages);
 		});
     }
 });
@@ -170,7 +169,6 @@ navigator.serviceWorker.addEventListener('message', function(event) {
 	
 	switch(action) {
         case 'updateMessages':
-            console.log('lets update')
 			Event.fire('updateMessages', {
                 messages: event.data.messages,
 				port: port
