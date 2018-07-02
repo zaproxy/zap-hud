@@ -54,20 +54,20 @@ Vue.component('tabs', {
         return { 
             tabs: [],
             isOpen: false,
-            openSymbol: '^' 
+            isArrowUp: true  
 		};
     },
     methods: {
         closeDrawer() {
             this.isOpen = false;
-            this.openSymbol = '^';
+            this.isArrowUp = true;
             localforage.setItem('drawer.isDrawerOpen', false)
                 .catch(errorHandler);
             parent.postMessage({action:"hideBottomDrawer"}, document.referrer);
         },
         openDrawer() {
             this.isOpen = true;
-            this.openSymbol = 'v';
+            this.isArrowUp = false;
             localforage.setItem('drawer.isDrawerOpen', true)
                 .catch(errorHandler);
             parent.postMessage({action:"showBottomDrawer"}, document.referrer);
