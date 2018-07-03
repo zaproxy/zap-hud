@@ -124,7 +124,7 @@
 	}
 	
 	function showBottomDrawer() {
-		document.getElementById("bottom-drawer").style.height = "300px";
+		document.getElementById("bottom-drawer").style.height = "30%";
 	}
 
 	function hideBottomDrawer() {
