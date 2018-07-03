@@ -12,6 +12,18 @@
     "build": "webpack --config build/webpack.config.dev.js",
     "lint": "xo"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "xo --fix",
+      "ava",
+      "git add"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/psiinon/zap-hud.git"
@@ -29,6 +41,8 @@
   "devDependencies": {
     "ava": "^1.0.0-beta.6",
     "css-loader": "^0.28.11",
+    "husky": "^1.0.0-rc.10",
+    "lint-staged": "^7.2.0",
     "vue-loader": "^15.2.4",
     "vue-style-loader": "^4.1.0",
     "vue-template-compiler": "^2.5.16",
