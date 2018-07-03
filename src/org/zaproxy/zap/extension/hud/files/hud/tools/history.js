@@ -1,5 +1,5 @@
 /*
- * Show / Enable Tool
+ * History Tool
  *
  * Description goes here...
  */
@@ -43,9 +43,6 @@ var History = (function() {
 				// Handle button choice
 				if (response.id == "remove") {
 					removeToolFromPanel(NAME);
-				}
-				else {
-					//cancel
 				}
 			})
 			.catch(errorHandler);
