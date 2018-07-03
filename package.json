@@ -14,20 +14,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dscrobonia/zap-hud.git"
+    "url": "git+https://github.com/psiinon/zap-hud.git"
   },
   "author": "David Scrobonia",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/dscrobonia/zap-hud/issues"
+    "url": "https://github.com/psiinon/zap-hud/issues"
   },
-  "homepage": "https://github.com/dscrobonia/zap-hud#readme",
+  "homepage": "https://github.com/psiinon/zap-hud#wiki",
   "dependencies": {
     "vue": "^2.5.16",
     "vue-router": "^3.0.1"
   },
   "devDependencies": {
-    "ava": "1.0.0-beta.6",
+    "ava": "^1.0.0-beta.6",
     "css-loader": "^0.28.11",
     "vue-loader": "^15.2.4",
     "vue-style-loader": "^4.1.0",
