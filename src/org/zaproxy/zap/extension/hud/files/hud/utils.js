@@ -333,7 +333,7 @@ function registerTools(toolnames) {
 		.catch(errorHandler);
 }
 
-/* drawer
+/* 
  * loads the tool blob from indexeddb using the tool's name
  */
 function loadTool(name) {
