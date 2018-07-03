@@ -6,3 +6,5 @@ build/temp/
 build/zap-exts/
 .idea/
 *.iml
+node_modules/
+dist/
