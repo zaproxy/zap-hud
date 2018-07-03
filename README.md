@@ -21,7 +21,7 @@ The HUD uses `ava` as its testing framework.
 Run all tests with:
 `npm run test`
 
-Test are found in the `test` directory.
+Tests are found in the `test` directory.
 
 **Linting**
 The HUD uses `xo` as its linter.
