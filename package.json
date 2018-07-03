@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "xo",
+    "test": "ava",
     "build": "webpack --config build/webpack.config.dev.js",
     "lint": "xo"
   },
@@ -27,6 +27,7 @@
     "vue-router": "^3.0.1"
   },
   "devDependencies": {
+    "ava": "1.0.0-beta.6",
     "css-loader": "^0.28.11",
     "vue-loader": "^15.2.4",
     "vue-style-loader": "^4.1.0",
