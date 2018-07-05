@@ -17,6 +17,9 @@
             <tab name="History">
                 <history></history>
             </tab>
+            <tab name="Storage">
+                <storage></storage>
+            </tab>
         </tabs>
     </div>
 
@@ -60,7 +63,6 @@
         </table>
     </template>
 
-    <!-- tabs component -->
     <template id="tabs-template">
         <div style="height: 100%;">
             <div class="tabs">
@@ -80,6 +82,27 @@
             </div>
         </div>
     </template>
+
+    <template id="storage-template">
+       <table class="table table-striped table-hover" style="table-layout: fixed">
+           <thead>
+               <tr>
+                   <th style="width: 25%;">Time</th>
+                   <th style="width: 25%;">Action</th>
+                   <th style="width: 25%;">Key</th>
+                   <th style="width: 25%;">Value</th>
+               </tr>
+           </thead>
+           <tbody>
+               <tr v-for="event in storageEvents">
+                   <td>{{ event.timestamp }}</td>
+                   <td>{{ event.action }}</td>
+                   <td>{{ event.key }}</td>
+                   <td>{{ event.value }}</td>
+               </tr>
+           </tbody>
+       </table>
+   </template>
 
     <!-- tab component -->
     <template id="tab-template">

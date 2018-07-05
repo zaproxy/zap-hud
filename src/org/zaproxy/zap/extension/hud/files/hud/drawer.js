@@ -159,6 +159,28 @@ Vue.component('tabs', {
     }
 });
 
+Vue.component('storage', {
+  template: '#storage-template',
+  data() {
+    return {
+      storageEvents: []
+    }
+  },
+  created() {
+    let self = this;
+
+    loadTool('storage')
+      .then(function(tool) {
+        self.storageEvents = tool.events
+      })
+      .catch(errorHandler)
+
+    Event.listen('appendStorageEvent', function(data) {
+      self.storageEvents.push(data.event);
+    })
+  }
+});
+
 Vue.component('tab', {
     template: '#tab-template',
     props: {
@@ -211,9 +233,19 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 self.addEventListener('message', function(event) {
-  Event.fire('appendEvent', {
-    event: event.data.event
-  });
+  const eventData = event.data.event;
+  const topic = eventData.topic;
+  delete eventData.topic;
+
+  const eventsToFire = {
+    'storage': 'appendStorageEvent',
+    'dom-events': 'appendDomEvent'
+  };
+
+  Event.fire(
+    eventsToFire[topic],
+    { event: eventData }
+  );
 });
 
 navigator.serviceWorker.addEventListener('message', function(event) {
