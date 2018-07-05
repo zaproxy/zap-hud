@@ -27,14 +27,12 @@
        <table class="table table-striped table-hover" style="table-layout: fixed">
            <thead>
                <tr>
-                   <th style="width: 33%;">Time</th>
-                   <th style="width: 33%;">Element</th>
-                   <th style="width: 33%;">Event</th>
+                   <th style="width: 50%;">Element</th>
+                   <th style="width: 50%;">Event</th>
                </tr>
            </thead>
            <tbody>
                <tr v-for="event in events">
-                   <td> {{ event.timestamp }}</td>
                    <td> {{ event.element }}</td>
                    <td> {{ event.event }}</td>
                </tr>
@@ -87,15 +85,13 @@
        <table class="table table-striped table-hover" style="table-layout: fixed">
            <thead>
                <tr>
-                   <th style="width: 25%;">Time</th>
-                   <th style="width: 25%;">Action</th>
-                   <th style="width: 25%;">Key</th>
-                   <th style="width: 25%;">Value</th>
+                   <th style="width: 33%;">Action</th>
+                   <th style="width: 33%;">Key</th>
+                   <th style="width: 33%;">Value</th>
                </tr>
            </thead>
            <tbody>
                <tr v-for="event in storageEvents">
-                   <td>{{ event.timestamp }}</td>
                    <td>{{ event.action }}</td>
                    <td>{{ event.key }}</td>
                    <td>{{ event.value }}</td>
