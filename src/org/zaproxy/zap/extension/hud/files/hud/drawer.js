@@ -43,6 +43,7 @@ Vue.component('history', {
 
 		Event.listen('updateMessages', function(data) {
             self.messages = self.messages.concat(data.messages);
+            
 		});
     }
 });

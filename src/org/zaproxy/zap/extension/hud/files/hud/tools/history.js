@@ -57,12 +57,13 @@ var History = (function() {
         // unary `+` to convert string to int
         let date = new Date(+event.detail.timeSentInMs);
 
-        message.time = date.toTimeString();
+		let dateStr = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
+
+		message.time = dateStr;
         message.method = event.detail.method;
         message.url = event.detail.uri;
         message.code = event.detail.statusCode;
 
-        // TODO: may want to encapsulate into a single "update" function?
         messageFrame('drawer', {action: 'updateMessages', messages: [message]})
             .catch(errorHandler);
 
