@@ -13,11 +13,6 @@
     "lint": "xo",
     "lint-staged": "lint-staged"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
     "*.js": [
       "xo --fix",
@@ -42,7 +37,6 @@
   "devDependencies": {
     "ava": "^1.0.0-beta.6",
     "css-loader": "^0.28.11",
-    "husky": "^1.0.0-rc.10",
     "lint-staged": "^7.2.0",
     "vue-loader": "^15.2.4",
     "vue-style-loader": "^4.1.0",
