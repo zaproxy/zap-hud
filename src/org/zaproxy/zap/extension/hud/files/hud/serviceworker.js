@@ -3,10 +3,7 @@ importScripts("<<ZAP_HUD_FILES>>?name=utils.js");
 importScripts("<<ZAP_HUD_FILES>>?name=tools/alertUtils.js");
 
 var CACHE_NAME = "hud-cache-1.0";
-var BUTTON_LIST_HTML = '<div class="buttons-list">';
-var PARAM_ORIENATATION = "orientation";
-var PARAM_URL = "url";
-var ORIENTATION = /ORIENTATION/g;
+
 var targetDomain = "";
 var targetUrl = "";
 
@@ -157,7 +154,7 @@ webSocket.onopen = function (event) {
 
 webSocket.onmessage = function (event) {
 	// Rebroadcast for the tools to pick up
-	jevent = JSON.parse(event.data);
+	let jevent = JSON.parse(event.data);
 	if ('event.publisher' in jevent) {
 		log(LOG_DEBUG, 'serviceworker.webSocket.onmessage', jevent['event.publisher']);
 		var ev = new CustomEvent(jevent['event.publisher'], {detail: jevent});

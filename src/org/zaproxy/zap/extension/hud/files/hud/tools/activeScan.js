@@ -92,8 +92,7 @@ var ActiveScan = (function() {
 	}
 
 	function startActiveScan(domain) {
-		var scheme = sharedData.upgradedDomains.has(domain) ? "http" : "https";
-		fetch("<<ZAP_HUD_API>>/ascan/action/scan/?url=" + scheme + "://" + domain + "/").then(function(response) {
+		fetch("<<ZAP_HUD_API>>/ascan/action/scan/?url=" + domainWrapper(domain)).then(function(response) {
 			response.json()
 				.then(function(data) {
 					loadTool(NAME)

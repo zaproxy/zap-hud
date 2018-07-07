@@ -99,12 +99,10 @@ function parseResponseHeader(headerText) {
  * Checks whether a message is from the ZAP domain or is a worker.
  */
 function isFromTrustedOrigin (message) {
-
-	if (message.origin === "https://zap" || message.isTrusted) {
-		return true;
-	}
-
-	return false;
+  return (
+    message.origin === "https://zap"
+    || message.isTrusted
+  );
 }
 
 /* 
@@ -578,6 +576,20 @@ function configureButtonHtml(tool) {
 	return html;
 }
 
+/*
+ * Adds the correct scheme to a domain, handling the fact the ZAP could be upgrading an http domain to https
+ * Is only available in the serviceworker and Should always be used when supplying a domain to the ZAP API.
+ */
+function domainWrapper(domain) {
+	var scheme = "https";
+	if (sharedData.upgradedDomains && sharedData.upgradedDomains.has(domain)) {
+		scheme = "http";
+	}
+	return scheme + "://" + domain + (domain.endsWith("/") ? "" : "/");
+}
+
+
+
 // todo: maybe needed instead of passing info through postmessage
 function getTargetDomain() {
 	return messageFrame("management", {action:"getTargetDomain"});
@@ -612,19 +624,23 @@ function errorHandler(err) {
 	log(LOG_ERROR, 'errorHandler', message, err);
 }
 
-/*
- * Logs a debug message to the console.
- */
 function log(level, method, message, object) {
 	if (level > LOG_LEVEL || (! LOG_TO_CONSOLE && ! LOG_TO_ZAP)) {
 		return;
 	}
-	var record = new Date().toTimeString() + ' ' + LOG_STRS[level] + ' ' + method + ': ' + message; 
+
+	const logLevel = LOG_STRS[level];
+
+	var record = new Date().toTimeString() + ' ' + logLevel + ' ' + method + ': ' + message;
 	if (object) {
 		record += ': ' + JSON.stringify(object);
 	}
+
 	if (LOG_TO_CONSOLE) {
-		console.log(record);
+		if (logLevel == 'OFF' || logLevel == 'TRACE') {
+			logLevel = 'LOG';
+		}
+		console[logLevel.toLowerCase()](record);
 	}
 	if (LOG_TO_ZAP) {
 		fetch("<<ZAP_HUD_API>>/hud/action/log/?record=" + record);

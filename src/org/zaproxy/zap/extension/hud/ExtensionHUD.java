@@ -231,6 +231,10 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
         this.upgradedHttpsDomains.add(uri.getHost() + ":" + uri.getPort());
     }
     
+    public void removeUpgradedHttpsDomain(URI uri) throws URIException {
+        this.upgradedHttpsDomains.remove(uri.getHost() + ":" + uri.getPort());
+    }
+    
     public boolean isUpgradedHttpsDomain(URI uri) throws URIException {
         return this.upgradedHttpsDomains.contains(uri.getHost() + ":" + uri.getPort());
     }
