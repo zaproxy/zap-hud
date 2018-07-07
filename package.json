@@ -10,7 +10,8 @@
   "scripts": {
     "test": "ava",
     "build": "webpack --config build/webpack.config.dev.js",
-    "lint": "xo"
+    "lint": "xo",
+    "lint-staged": "lint-staged"
   },
   "husky": {
     "hooks": {
