@@ -497,7 +497,7 @@ html {
   .cjk u + u {
     margin-left: .125em;
   }
-  
+ 
   .table {
     border-collapse: collapse;
     border-spacing: 0;
@@ -534,7 +534,31 @@ html {
   .table th {
     border-bottom-width: .1rem;
   }
+
+  .table-history {
+    table-layout: fixed;
+  }
+  /*
+    display: block;
+    height: 100%;
+  }
+
+  .table-history thead {
+    display: block;
+  }
+
+  .table-history tbody {
+    display: block;
+    overflow-y: scroll;
+    height: calc(100% - 90px)
+  }
+*/
+  .table-history td {
+    padding: .1em .1em;
+    white-space: nowrap;
+  }
   
+
   .btn {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -2801,12 +2825,16 @@ html {
   .step .step-item.active ~ .step-item a::before {
     background: #e7e9ed;
   }
-  
+
   .tabs-details {
     overflow-y: auto;
     height: 100%;
   }
-  
+
+  .drawer-details {
+    overflow-y: hidden;
+  }
+
   .tab {
     align-items: center;
     border-bottom: .05rem solid #e7e9ed;
