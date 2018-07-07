@@ -46,7 +46,18 @@ var History = (function() {
 				}
 			})
 			.catch(errorHandler);
-    }
+	}
+	
+	function showHttpMessageDetails(id) {
+		return fetch('<<ZAP_HUD_API>>/context/view/message/?id=' + id)
+			.then(function(response) {
+				response.json()
+					.then(function(json) {
+						messageFrame('display', {action: ''})
+					})
+			})
+			.catch(errorHandler);
+	}
     
     self.addEventListener("org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher", function(event) {
 		var eventType = event.detail['event.type'];
@@ -56,13 +67,13 @@ var History = (function() {
         
         // unary `+` to convert string to int
         let date = new Date(+event.detail.timeSentInMs);
-
 		let dateStr = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
 
 		message.time = dateStr;
         message.method = event.detail.method;
         message.url = event.detail.uri;
         message.code = event.detail.statusCode;
+		message.id = event.detail.historyReferenceId;
 
         messageFrame('drawer', {action: 'updateMessages', messages: [message]})
             .catch(errorHandler);
@@ -103,6 +114,10 @@ var History = (function() {
 			switch(message.action) {
 				case "buttonMenuClicked":
 					showOptions();
+					break;
+
+				case "showHttpMessageDetails":
+					showHttpMessageDetails(message.id);
 					break;
 
 				default:

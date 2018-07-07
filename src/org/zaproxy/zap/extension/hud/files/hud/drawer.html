@@ -28,7 +28,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="message in messages">
+                <tr v-for="message in messages" @click="messageSelected(message.id)" >
                     <td> {{ message.time }}</td>
                     <td> {{ message.code }}</td>
                     <td> {{ message.method }}</td>
@@ -53,7 +53,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="tabs-details drawer-details">
+            <div class="tabs-details drawer-details" style="overflow-y: scroll;"> <!-- temporary til we gt a scroll fix-->
                 <slot></slot>
             </div>
         </div>

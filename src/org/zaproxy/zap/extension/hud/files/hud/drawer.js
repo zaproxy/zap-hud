@@ -26,7 +26,13 @@ Vue.component('history', {
     computed: {
         timeDescendingMessages() {
             return this.messages.slice().reverse();
-      }     
+        }     
+    },
+    methods: {
+        messageSelected(id) {
+            console.log("selected " + id)
+            navigator.serviceWorker.controller.postMessage({action: "showHttpMessageDetails", tool: "history", id:id});
+        }
     },
     created() {
         let self = this;
@@ -43,7 +49,6 @@ Vue.component('history', {
 
 		Event.listen('updateMessages', function(data) {
             self.messages = self.messages.concat(data.messages);
-            
 		});
     }
 });
