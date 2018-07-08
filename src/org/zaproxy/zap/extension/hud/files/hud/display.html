@@ -17,7 +17,8 @@
             <all-alerts-modal :show="isAllAlertsModalShown" :title="allAlertsModalTitle" @close="isAllAlertsModalShown = false"></all-alerts-modal>
             <alert-details-modal :show="isAlertDetailsModalShown" :title="alertDetailsModalTitle" @close="isAlertDetailsModalShown = false"></alert-details-modal>
             <simple-menu-modal :show="isSimpleMenuModalShown" :title="simpleMenuModalTitle" @close="isSimpleMenuModalShown = false"></simple-menu-modal>
-            <http-message-modal :show="isHttpMessageModalShown" :title="httpMessageModalTitle" @close="isHttpMessageModalShown = false"></http-message-modal>
+            <break-message-modal :show="isBreakMessageModalShown" :title="breakMessageModalTitle" @close="isBreakMessageModalShown = false"></break-message-modal>
+            <history-message-modal :show="isHistoryMessageModalShown" :title="historyMessageModalTitle" @close="isHistoryMessageModalShown = false"></history-message-modal>
         </div>
         
         <!-- a base modal component -->
@@ -167,22 +168,39 @@
                 <div slot="body">
                     <tabs :activetab="activeTab">
                         <tab name="Request" selected="true">
-                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="request.header"></textarea>
-                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="request.body"></textarea>
+                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="request.header" :readonly="request.isReadonly"></textarea>
+                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="request.body" :readonly="request.isReadonly"></textarea>
                         </tab>
             
                         <tab name="Response" :disabled="isResponseDisabled">
-                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="response.header"></textarea>
-                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="response.body"></textarea>
+                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="response.header" :readonly="response.isReadonly"></textarea>
+                            <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="response.body" :readonly="response.isReadonly"></textarea>
                         </tab>
                     </tabs>
                 </div>
                 <div slot="footer">
-                    <button class="btn" @click="step">Step</button>
-                    <button class="btn" @click="continueOn">Continue</button>
-                    <button class="btn" @click="drop">Drop</button>
+                    <slot name="footer"></slot>
                 </div>
             </modal>
+        </template>
+
+        <template id="break-message-modal-template">
+            <http-message-modal ref="messageModal" :title="title" :show="show" @close="close" :request="request" :response="response" :is-response-disabled="isResponseDisabled" :active-tab="activeTab">
+                <div slot="footer">
+                    <button class="btn btn-primary" @click="step">Step</button>
+                    <button class="btn btn-primary" @click="continueOn">Continue</button>
+                    <button class="btn" @click="drop">Drop</button>
+                </div>
+            </http-message-modal>
+        </template>
+
+        <template id="history-message-modal-template">
+            <http-message-modal ref="messageModal" :title="title" :show="show" @close="close" :request="request" :response="response" :is-response-disabled="isResponseDisabled" :active-tab="activeTab">
+                <div slot="footer">
+                    <button class="btn btn-primary" @click="replay">Replay in Console</button>
+                    <button class="btn disabled" @click="replayInBrowser">Replay in Browser</button>
+                </div>
+            </http-message-modal>
         </template>
 
         <!-- tabs component -->

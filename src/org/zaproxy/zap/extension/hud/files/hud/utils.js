@@ -57,8 +57,14 @@ function parseRequestHeader(headerText) {
 		var field = headerText.substring(0, headerText.indexOf(":"));
 		headerText = headerText.substring(headerText.indexOf(":") + 2);
 
-		var value = headerText.substring(0, headerText.indexOf("\n"));
-		headerText = headerText.substring(headerText.indexOf("\n") + 1);
+		if (headerText.indexOf("\n") < 0) {
+			value = headerText;
+			headerText = "";
+		}
+		else {
+			var value = headerText.substring(0, headerText.indexOf("\n"));
+			headerText = headerText.substring(headerText.indexOf("\n") + 1);
+		}
 
 		header.fields[field] = value;
 	}
