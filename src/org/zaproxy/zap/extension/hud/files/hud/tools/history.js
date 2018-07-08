@@ -47,15 +47,72 @@ var History = (function() {
 			})
 			.catch(errorHandler);
 	}
-	
-	function showHttpMessageDetails(id) {
-		return fetch('<<ZAP_HUD_API>>/context/view/message/?id=' + id)
+
+	function getMessageDetails(id) {
+		return fetch('<<ZAP_HUD_API>>/core/view/message/?id=' + id)
 			.then(function(response) {
-				response.json()
+				return response.json()
 					.then(function(json) {
-						messageFrame('display', {action: ''})
+						return json.message;
 					})
 			})
+	}
+
+	function showHttpMessageDetails(data) {
+		var config = {
+			request: {
+				method: parseRequestHeader(data.requestHeader).method,
+				header: data.requestHeader.trim(),
+				body: data.requestBody
+			},
+			response: {
+				header: data.responseHeader.trim(),
+				body: data.responseBody
+			},
+			isResponseDisabled: false,
+			activeTab: "Request"
+		};
+
+		if ('activeTab' in data) {
+			config.activeTab = data.activeTab;
+		}
+
+		return messageFrame("display", {action:"showHistoryMessage", config:config})
+			.then(function(data) {
+				// Handle button choice
+				if (data.buttonSelected === "replay") {
+					sendRequest(data.header, data.body)
+					.then(function(response) {
+						return response.json();
+					})
+					.then(function(json) {
+						let data = json.sendRequest[0];
+						data.activeTab = "Response"
+						return showHttpMessageDetails(data);
+					})
+					.catch(errorHandler)
+				}
+			})
+			.catch(errorHandler);
+	}
+
+	function sendRequest(header, body) {
+		let url = "<<ZAP_HUD_API>>/core/action/sendRequest/";
+		let req = header;
+
+		if (body) {
+			req = req + "\n\n" + encodeURIComponent(body)
+		}
+
+		let params = "request=" + encodeURIComponent(req)
+
+		let init = {
+			method: "POST",
+			body: params,
+			headers: {'content-type': 'application/x-www-form-urlencoded'}
+		};
+
+		return fetch(url, init)
 			.catch(errorHandler);
 	}
     
@@ -101,7 +158,7 @@ var History = (function() {
                 
             case "frameload":
                 if (message.name === "drawer") {
-                    //TODO: ?
+                    //TODO: need to figure out how to get time of first request sent on this page
                 }
                 break;
 
@@ -112,12 +169,14 @@ var History = (function() {
 		// Directed
 		if (message.tool === NAME) {
 			switch(message.action) {
-				case "buttonMenuClicked":
+				case "buttonMenuCicked":
 					showOptions();
 					break;
 
 				case "showHttpMessageDetails":
-					showHttpMessageDetails(message.id);
+					getMessageDetails(message.id)
+						.then(showHttpMessageDetails)
+						.catch(errorHandler)
 					break;
 
 				default:
