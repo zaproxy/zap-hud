@@ -30,7 +30,6 @@ Vue.component('history', {
     },
     methods: {
         messageSelected(id) {
-            console.log("selected " + id)
             navigator.serviceWorker.controller.postMessage({action: "showHttpMessageDetails", tool: "history", id:id});
         }
     },
@@ -49,7 +48,10 @@ Vue.component('history', {
 
 		Event.listen('updateMessages', function(data) {
             self.messages = self.messages.concat(data.messages);
-		});
+
+            let count = data.messages.length;
+            self.$parent.$emit('badgeDataEvent', {data: count}) 
+        });
     }
 });
 
@@ -59,7 +61,7 @@ Vue.component('tabs', {
         return { 
             tabs: [],
             isOpen: false,
-            isArrowUp: true  
+            isArrowUp: true
 		};
     },
     methods: {
@@ -88,6 +90,7 @@ Vue.component('tabs', {
         selectTab(selectedTab) {
             if (!this.isOpen) {
                 this.openDrawer();
+                selectedTab.badgeData = 0;
             }
             else {
                 if (selectedTab.isActive) {
@@ -139,17 +142,30 @@ Vue.component('tab', {
     },
     data() {
         return {
-            isActive: false
+            isActive: false,
+            badgeData: 0
         };
     },
     computed: {
         href() {
             return '#' + this.name.toLowerCase().replace(/ /g, '-');
+        },
+        isBadgeData() {
+            return this.badgeData > 0;
         }
     },
     mounted() {
         this.isActive = this.selected;
     },
+    created() {
+        let self = this;
+
+        this.$on('badgeDataEvent', function(message) {
+            if (!self.$parent.isOpen) {
+                self.badgeData += message.data;
+            }
+        })
+    }
 });
 
 document.addEventListener("DOMContentLoaded", function() {
