@@ -19,6 +19,7 @@
             <alert-details-modal :show="isAlertDetailsModalShown" :title="alertDetailsModalTitle" @close="isAlertDetailsModalShown = false"></alert-details-modal>
             <simple-menu-modal :show="isSimpleMenuModalShown" :title="simpleMenuModalTitle" @close="isSimpleMenuModalShown = false"></simple-menu-modal>
             <http-message-modal :show="isHttpMessageModalShown" :title="httpMessageModalTitle" @close="isHttpMessageModalShown = false"></http-message-modal>
+            <site-tree-modal :show="isSiteTreeModalShown" :title="siteTreeModalTitle" @close="isSiteTreeModalShown = false"></http-message-modal>
         </div>
         
         <!-- a base modal component -->
@@ -223,5 +224,39 @@
         <template id="tab-template">
             <div v-show="isActive"><slot></slot></div>
         </template>
+        
+        <!-- site tree modal component -->
+        <template id="site-tree-modal-template">
+            <modal :title="title" :show="show" size="wide" @close="close">
+            <div slot="body">
+				<ul id="site-tree-top">
+				  <site-tree-node
+				    class="site-tree-node"
+				    :model="model">
+				  </site-tree-node>
+				</ul>
+            </div>
+            </modal>
+        </template>
+
+        <template id="site-tree-node-template">
+			  <li>
+			    <div
+			      :class="{bold: ! model.isLeaf}"
+			      @click="toggle">
+			      <span v-if="! model.isLeaf">[{{ open ? '-' : '+' }}]</span>
+			      {{ model.name }}
+			    </div>
+			    <ul v-show="open" v-if="! model.isLeaf && open">
+			      <site-tree-node
+			        class="site-tree-node"
+			        v-for="(model, index) in model.children"
+			        :key="index"
+			        :model="model">
+			      </site-tree-node>
+			    </ul>
+			  </li>
+        </template>
+        
     </body>
 </html>
