@@ -52,6 +52,12 @@ Vue.component('history', {
             let count = data.messages.length;
             self.$parent.$emit('badgeDataEvent', {data: count}) 
         });
+    },
+    updated() {
+        let lastMessage = this.messages[this.messages.length - 1]
+        let lastid = 'message-tr-' + lastMessage.id
+
+        document.getElementById(lastid).scrollIntoView({block:'end', behaviour:'smooth'});
     }
 });
 

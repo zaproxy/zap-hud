@@ -520,8 +520,7 @@ html {
   
   .table.table-scroll {
     display: block;
-    overflow-x: auto;
-    padding-bottom: .75rem;
+    overflow-x: hidden;
     white-space: nowrap;
   }
   
@@ -535,24 +534,9 @@ html {
     border-bottom-width: .1rem;
   }
 
-  .table-history {
-    display: block;
-    height: 100%;
-  }
-
-  .table-history thead {
-    display: block;
-  }
-
-  .table-history tbody {
-    display: block;
-    overflow-y: scroll;
-    height: calc(100% - 90px)
-  }
-
   .table-history td,
   .table-history th {
-    padding: .1em .1em;
+    padding: .1em .6em .1em .6em;
     white-space: nowrap;
   }
 
@@ -2840,13 +2824,17 @@ html {
     background: #e7e9ed;
   }
 
-  .tabs-details {
-    overflow-y: auto;
-    height: 100%;
-  }
-
   .drawer-details {
     overflow-y: hidden;
+  }
+
+  .tabs {
+    height: 50px;
+  }
+
+  .tabs-details {
+    overflow-y: auto;
+    height: calc(100% - 50px);
   }
 
   .tab {
