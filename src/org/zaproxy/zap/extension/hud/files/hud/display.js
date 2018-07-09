@@ -41,6 +41,19 @@ Vue.component('modal', {
 	}
 })
 
+Vue.component('nav-modal', {
+	template: '#nav-modal-template',
+	props: ['show', 'title', 'text'],
+	methods: {
+		close: function () {
+			this.$emit('close');
+		},
+		back() {
+			this.$emit('back');
+		},
+	}
+})
+
 Vue.component('dialog-modal', {
 	template: '#dialog-modal-template',
 	props: ['show', 'title', 'text'],
@@ -202,6 +215,11 @@ Vue.component('alert-details-modal', {
 	methods: {
 		close: function() {
 			this.$emit('close');
+		},
+		back: function() {
+			app.keepShowing = true;
+			app.isAlertDetailsModalShown = false;
+			this.port.postMessage({'back': true});
 		}
 	},
 	data() {
