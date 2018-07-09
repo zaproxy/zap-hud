@@ -536,9 +536,6 @@ html {
   }
 
   .table-history {
-    table-layout: fixed;
-  }
-  /*
     display: block;
     height: 100%;
   }
@@ -552,12 +549,12 @@ html {
     overflow-y: scroll;
     height: calc(100% - 90px)
   }
-*/
-  .table-history td {
+
+  .table-history td,
+  .table-history th {
     padding: .1em .1em;
     white-space: nowrap;
   }
-  
 
   .btn {
     -webkit-appearance: none;
