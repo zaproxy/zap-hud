@@ -21,9 +21,11 @@ var alertUtils = (function() {
 				messageFrame("display", {action: action, config:config}).then(function(response) {
 					// Handle button choice
 					if (response.alertId) {
-						showAlertDetails(response.alertId);
+						let backFunction = function() {showAlerts(title, target, alertRisk)};
+						showAlertDetails(response.alertId, backFunction);
 					}
-				});
+				})
+				.catch(errorHandler);
 			})
 		.catch(errorHandler);
 	}
@@ -63,16 +65,18 @@ var alertUtils = (function() {
 				messageFrame("display", {action: action, config:config}).then(function(response) {
 					// Handle button choice
 					if (response.alertId) {
-						showAlertDetails(response.alertId);
+						let backFunction = function() {showPageAlerts(title, target, alertRisk)};
+						showAlertDetails(response.alertId, backFunction);
 					}
-				});
+				})
+				.catch(errorHandler);
 			})
 		.catch(errorHandler);
 	}
 
-	function showAlertDetails(id) {
+	function showAlertDetails(id, backFunction) { 
 		log (LOG_DEBUG, 'showAlertDetails', '' + id);
-		// get the alert details given the id
+
 		fetch("<<ZAP_HUD_API>>/core/view/alert/?id=" + id)
 			.then(function(response) {
 
@@ -83,7 +87,13 @@ var alertUtils = (function() {
 						config.title = json.alert.alert;
 						config.details = json.alert;
 
-						messageFrame("display", {action: "showAlertDetails", config: config});
+						messageFrame("display", {action: "showAlertDetails", config: config})
+							.then(function(response) {
+								if (response.back) {
+									backFunction();
+								}
+							})
+							.catch(errorHandler);
 					})
 					.catch(errorHandler);
 			})
