@@ -141,7 +141,8 @@ Vue.component('all-alerts-modal', {
 	data() {
 		return {
 			port: null,
-			alerts: {}
+			alerts: {},
+			activeTab: "High"
 		}
 	},
 	created: function() {
@@ -153,6 +154,7 @@ Vue.component('all-alerts-modal', {
 
 			self.alerts = data.alerts;
 			self.port = data.port;
+			self.activeTab = data.risk;
 		})
 	}
 })
@@ -204,7 +206,7 @@ Vue.component('alert-accordion', {
 			app.isAlertListModalShown = false;
 			app.isAllAlertsModalShown = false;
 
-			this.port.postMessage({'action': 'alertSelected', 'alertId': alert.alertId})
+			this.port.postMessage({'action': 'alertSelected', 'alertId': alert.id})
 		}
 	}
 })
@@ -569,7 +571,8 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 			Event.fire('showAllAlertsModal', {
 				title: config.title,
 				alerts: config.alerts,
-				port: port
+				port: port,
+				risk: config.risk
 			});
 		
 			break;

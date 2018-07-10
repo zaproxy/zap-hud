@@ -1,77 +1,89 @@
 var alertUtils = (function() {
 	
-	function showAlerts(title, target, alertRisk) {
-		loadTool("common-alerts")
-			.then(function(tool) {
-				var config = {};
+	function showSiteAlerts(title, target, alertRisk) {
+		// Note that theres no need to load any tool data here
+		var config = {};
 
-				config.alerts = tool.alerts[target];
-				config.title = title;
-
-				// by default show ALL alert
-				var action = "showAllAlerts";
-				if (alertRisk) {
-					alertRisk = alertRisk[0].toUpperCase() + alertRisk.substring(1);
-
-					// submit just the alerts for this risk level, change the title, and change the display action
-					config.alerts = config.alerts[alertRisk];
-					action = "showAlerts";
-				}
-
-				messageFrame("display", {action: action, config:config}).then(function(response) {
-					// Handle button choice
-					if (response.alertId) {
-						let backFunction = function() {showAlerts(title, target, alertRisk)};
-						showAlertDetails(response.alertId, backFunction);
-					}
+		config.title = title;
+		config.risk = alertRisk;
+		
+		fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + domainWrapper(target) + "&recurse=true")
+		.then(function(response) {
+			response.json().
+				then(function(json) {
+					config.alerts = flattenAllAlerts(json);
+					
+					messageFrame("display", {action: "showAllAlerts", config:config}).then(function(response) {
+						// Handle button choice
+						if (response.alertId) {
+							let backFunction = function() {showSiteAlerts(title, target, alertRisk)};
+							showAlertDetails(response.alertId, backFunction);
+						}
+					})
+					.catch(errorHandler);
+					
 				})
 				.catch(errorHandler);
 			})
-		.catch(errorHandler);
+			.catch(errorHandler);
+	}
+	
+	function flattenAllAlerts(alerts) {
+		var json = {};
+		json['Informational'] = flattenAlerts(alerts['alertsByRisk'][0]['Informational']);
+		json['Low'] = flattenAlerts(alerts['alertsByRisk'][1]['Low']);
+		json['Medium'] = flattenAlerts(alerts['alertsByRisk'][2]['Medium']);
+		json['High'] = flattenAlerts(alerts['alertsByRisk'][3]['High']);
+		return json;
+	}
+	
+	function flattenAlerts(alerts) {
+		var json = {};
+		for(var i = 0; i < alerts.length; i++) {
+    		var alert = alerts[i];
+			for (var key in alert) {
+				json[key] = alert[key];
+			}
+		}
+		return json;
 	}
 
 	function showPageAlerts(title, target, alertRisk) {
-		loadTool("common-alerts")
-			.then(function(tool) {
-				var config = {};
+		// Note that theres no need to load any tool data here
+		var config = {};
 
-				let targetDomain = parseDomainFromUrl(target);
-				config.alerts = {};
-				config.alerts[alertRisk] = {};
-				for (var alertName in tool.alerts[targetDomain][alertRisk]) {
-					if (sharedData.upgradedDomains.has(targetDomain)) {
-						// Its been upgraded to https by ZAP, but the alerts wont have been
-						target = target.replace("https://", "http://");
-					}
-					if (target in tool.alerts[targetDomain][alertRisk][alertName]) {
-						config.alerts[alertRisk][alertName] = {};
-						config.alerts[alertRisk][alertName][target] = tool.alerts[targetDomain][alertRisk][alertName][target];
-					} else if (target.replace("https://", "http://") in tool.alerts[targetDomain][alertRisk][alertName]) {
-						config.alerts[alertRisk][alertName] = {};
-						config.alerts[alertRisk][alertName][target.replace("https://", "http://")] = tool.alerts[targetDomain][alertRisk][alertName][target.replace("https://", "http://")];
-					}
-				}
+		config.title = title;
+		config.risk = alertRisk;
 
-				config.title = title;
-
-				// by default show ALL alert
-				var action = "showAllAlerts";
-				if (alertRisk) {
-					// submit just the alerts for this risk level, change the title, and change the display action
-					config.alerts = config.alerts[alertRisk];
-					action = "showAlerts";
-				}
-
-				messageFrame("display", {action: action, config:config}).then(function(response) {
-					// Handle button choice
-					if (response.alertId) {
-						let backFunction = function() {showPageAlerts(title, target, alertRisk)};
-						showAlertDetails(response.alertId, backFunction);
-					}
+		let targetDomain = parseDomainFromUrl(target);
+		if (sharedData.upgradedDomains.has(targetDomain)) {
+			// Its been upgraded to https by ZAP, but the alerts wont have been
+			target = target.replace("https://", "http://");
+		}
+		if (target.indexOf("?") > 0) {
+			// Remove any url params
+			target = target.substring(0, target.indexOf("?"));
+		}
+		
+		fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
+		.then(function(response) {
+			response.json().
+				then(function(json) {
+					config.alerts = flattenAllAlerts(json);
+					
+					messageFrame("display", {action: "showAllAlerts", config:config}).then(function(response) {
+						// Handle button choice
+						if (response.alertId) {
+							let backFunction = function() {showPageAlerts(title, target, alertRisk)};
+							showAlertDetails(response.alertId, backFunction);
+						}
+					})
+					.catch(errorHandler);
+					
 				})
 				.catch(errorHandler);
 			})
-		.catch(errorHandler);
+			.catch(errorHandler);
 	}
 
 	function showAlertDetails(id, backFunction) { 
@@ -100,23 +112,40 @@ var alertUtils = (function() {
 			.catch(errorHandler);
 	}
 
-	function updatePageAlertCount(toolname, target, alertRisk) {
-		loadTool("common-alerts")
-			.then(function(tool) {
-				let targetDomain = parseDomainFromUrl(target);
-				let count = 0;
-				for (var alert in tool.alerts[parseDomainFromUrl(targetDomain)][alertRisk]) {
-					if (sharedData.upgradedDomains.has(targetDomain)) {
-						// Its been upgraded to https by ZAP, but the alerts wont have been
-						target = target.replace("https://", "http://");
+	function updatePageAlertCount(toolname, target, alertEvent, risk) {
+		let alertUrl = alertEvent.uri;
+		if (alertUrl.startsWith("http://")) {
+			// It will have been upgraded to https in the HUD
+			alertUrl = alertUrl.replace("http://", "https://");
+		}
+		if (targetUrl === alertUrl && risk === alertEvent.riskString) {
+			loadTool(toolname)
+				.then(function(tool) {
+					let alertData = tool.alerts[alertEvent.name];
+					if (!alertData) {
+						// Don't need to add much, its the fact its here that matters
+						tool.alerts[alertEvent.name] = [{
+								"confidence": alertEvent["confidence"],
+								"name": alertEvent["name"],
+								"id": alertEvent["alertId"],
+								"url": alertEvent["uri"]
+							}];
+						tool.data = Object.keys(tool.alerts).length;
+						return saveTool(tool);	
 					}
-					if (target in tool.alerts[parseDomainFromUrl(targetDomain)][alertRisk][alert]) {
-						count += 1;
-					} 
-				}
-				return updateAlertCount(toolname, count);
+				})
+			.catch(errorHandler);
+		}
+	}
+
+	function setPageAlerts(toolname, alerts) {
+		loadTool(toolname)
+			.then(function(tool) {
+				tool.alerts = alerts;
+				tool.data = Object.keys(alerts).length;
+				return saveTool(tool);
 			})
-		.catch(errorHandler);
+			.catch(errorHandler);
 	}
 	
 	function updateAlertCount(toolname, count) {
@@ -160,10 +189,12 @@ var alertUtils = (function() {
 
 	return {
 		updatePageAlertCount: updatePageAlertCount,
-		showAlerts: showAlerts,
+		showSiteAlerts: showSiteAlerts,
 		showPageAlerts: showPageAlerts,
 		showAlertDetails: showAlertDetails,
 		showOptions: showOptions,
-		updateAlertCount: updateAlertCount
+		updateAlertCount: updateAlertCount,
+		flattenAllAlerts: flattenAllAlerts,
+		setPageAlerts: setPageAlerts
 	};
 })();

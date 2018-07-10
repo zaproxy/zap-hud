@@ -106,7 +106,7 @@
         <template id="all-alerts-modal-template">
             <modal :title="title" :show="show" @close="close">
                 <div slot="body">
-                    <tabs>
+                    <tabs :activetab="activeTab">
                         <tab name="High" :selected="true">
                             <alert-accordion v-for="(value, key) in alerts['High']" :key="key" :title="key" :alerts="value" :port="port" @close="close"></alert-accordion>
                         </tab>
@@ -131,7 +131,7 @@
         <template id="alert-list-modal-template">
             <modal :title="title" :show="show" @close="close">
                 <div slot="body">
-                    <alert-accordion v-for="(value, key) in alerts" :key="key" :title="key" :alerts="value" :port="port" @close="close"></alert-accordion>
+                    <alert-accordion v-for="(value, key) in alerts" :key="key" :title="key" :alerts="value" :port="port" @close="close"  @open="open"></alert-accordion>
                 </div>
             </modal>
         </template>
@@ -146,7 +146,7 @@
                 <div class="accordion-body">
                     <ul class="menu menu-nav">
                         <li class="menu-item" v-for="alert in alerts"> 
-                            <a @click="alertSelect(alert)"> {{ alert.uri }} </a>
+                            <a @click="alertSelect(alert)"> {{ alert.url }} </a>
                         </li>
                     </ul>
                 </div>
