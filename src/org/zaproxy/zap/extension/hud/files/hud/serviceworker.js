@@ -125,7 +125,7 @@ self.addEventListener("message", function(event) {
 		case "showHudSettings":
 			showHudSettings();
 			break;
-			
+
 		case 'targetload':
 
 			targetDomain = parseDomainFromUrl(message.targetUrl);
