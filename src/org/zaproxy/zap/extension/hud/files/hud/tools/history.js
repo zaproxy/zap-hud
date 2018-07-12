@@ -126,6 +126,7 @@ var History = (function() {
         let date = new Date(+event.detail.timeSentInMs);
 		let dateStr = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
 
+		message.timeInMs = event.detail.timeSentInMs;
 		message.time = dateStr;
         message.method = event.detail.method;
         message.url = event.detail.uri;
@@ -147,6 +148,13 @@ var History = (function() {
         
 	});
 
+	function trimMessages(lastPageUnloadTime) {
+		tool.messages = tool.messages.filter(function(message) {
+			return message.timeInMs > lastPageUnloadTime;
+		})
+		saveTool(tool);
+	}
+
 	self.addEventListener("message", function(event) {
 		var message = event.data;
 
@@ -154,14 +162,12 @@ var History = (function() {
 		switch(message.action) {
 			case "initializeTools":
 				initializeStorage();
-                break;
+				break;
+			
+			case "unload":
+				trimMessages(message.time)
+				break;
                 
-            case "frameload":
-                if (message.name === "drawer") {
-                    //TODO: need to figure out how to get time of first request sent on this page
-                }
-                break;
-
 			default:
 				break;
 		}

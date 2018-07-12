@@ -84,6 +84,12 @@ window.addEventListener('message', function(event) {
 	}
 });
 
+window.addEventListener('beforeunload', function() {
+	let currentTimeInMs = new Date().getTime();
+
+	navigator.serviceWorker.controller.postMessage({action: 'unload', time: currentTimeInMs})
+		.catch(errorHandler)
+});
 
 navigator.serviceWorker.addEventListener('message', function(event) {
 	var message = event.data;
