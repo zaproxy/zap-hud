@@ -1,0 +1,48 @@
+{
+  "name": "zap-hud",
+  "version": "1.0.0",
+  "description": "ZAP Heads Up Display (HUD).",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "ava",
+    "build": "webpack --config build/webpack.config.dev.js",
+    "lint": "xo",
+    "lint-staged": "lint-staged"
+  },
+  "lint-staged": {
+    "*.js": [
+      "xo --fix",
+      "ava",
+      "git add"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/psiinon/zap-hud.git"
+  },
+  "author": "David Scrobonia",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/psiinon/zap-hud/issues"
+  },
+  "homepage": "https://github.com/psiinon/zap-hud/wiki",
+  "dependencies": {
+    "vue": "^2.5.16",
+    "vue-router": "^3.0.1"
+  },
+  "devDependencies": {
+    "ava": "^1.0.0-beta.6",
+    "css-loader": "^0.28.11",
+    "lint-staged": "^7.2.0",
+    "vue-loader": "^15.2.4",
+    "vue-style-loader": "^4.1.0",
+    "vue-template-compiler": "^2.5.16",
+    "webpack": "^4.14.0",
+    "webpack-cli": "^3.0.8",
+    "xo": "^0.21.1"
+  }
+}
