@@ -429,7 +429,7 @@
 		</exec>		
 	</target>
 
-	<target name="lint-all-hud" description="run the XO linter on the staged hud extension">
+	<target name="lint-all-hud" description="run the XO linter on all files of the hud extension">
 		<exec executable="npm">
 			<arg line="run lint" />
 		</exec>		
