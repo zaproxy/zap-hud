@@ -29,7 +29,7 @@
   "bugs": {
     "url": "https://github.com/psiinon/zap-hud/issues"
   },
-  "homepage": "https://github.com/psiinon/zap-hud#wiki",
+  "homepage": "https://github.com/psiinon/zap-hud/wiki",
   "dependencies": {
     "vue": "^2.5.16",
     "vue-router": "^3.0.1"
