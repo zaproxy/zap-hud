@@ -31,8 +31,8 @@ var BUTTON_LABEL = /BUTTON_LABEL/g;
 var IMAGE_NAME = /IMAGE_NAME/g;
 
 // default tools
-var DEFAULT_TOOLS_LEFT = ["scope", "break", "site-alerts-high", "site-alerts-medium", "site-alerts-low", "site-alerts-informational"];
-var DEFAULT_TOOLS_RIGHT = ["site-tree", "spider", "active-scan", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational"];
+var DEFAULT_TOOLS_LEFT = [<<ZAP_HUD_TOOLS_LEFT>>];
+var DEFAULT_TOOLS_RIGHT = [<<ZAP_HUD_TOOLS_RIGHT>>];
 
 
 class NoClientIdError extends Error {};
@@ -393,7 +393,7 @@ function loadAllTools() {
 /* 
  * Add a tool to a specific panel using the tool and panel keys.
  */
-function addToolToPanel(toolKey, panelKey) {
+function addToolToPanel(toolKey, panelKey, saveToZap) {
 	log(LOG_DEBUG, 'utils.addToolToPanel', toolKey);
 
 	var promises = [loadTool(toolKey), loadFrame(panelKey)];
@@ -412,6 +412,9 @@ function addToolToPanel(toolKey, panelKey) {
 			tool.position = panel.tools.length;
 
 			panel.tools.push(tool.name);
+			if (saveToZap) {
+				fetch("<<ZAP_HUD_API>>/hud/action/setPanelTools/?panel=" + panel.key + "&tools=" + JSON.stringify(panel.tools));
+			}
 
 			return Promise.all([saveTool(tool), saveFrame(panel)]);
 		})
@@ -442,6 +445,9 @@ function removeToolFromPanel(toolKey) {
 
 			// update panel
 			panel.tools.splice(panel.tools.indexOf(removedTool.name), 1);
+
+			// Save to ZAP
+			fetch("<<ZAP_HUD_API>>/hud/action/setPanelTools/?panel=" + panel.key + "&tools=" + JSON.stringify(panel.tools));
 			
 			promises.push(saveFrame(panel));
 
