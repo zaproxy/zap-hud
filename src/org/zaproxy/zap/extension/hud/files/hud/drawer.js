@@ -54,10 +54,12 @@ Vue.component('history', {
         });
     },
     updated() {
-        let lastMessage = this.messages[this.messages.length - 1]
-        let lastid = 'message-tr-' + lastMessage.id
+        if (this.messages.length > 0) {
+            let lastMessage = this.messages[this.messages.length - 1]
+            let lastid = 'message-tr-' + lastMessage.id
 
-        document.getElementById(lastid).scrollIntoView({block:'end', behaviour:'smooth'});
+            document.getElementById(lastid).scrollIntoView({block:'end', behaviour:'smooth'});
+        }
     }
 });
 

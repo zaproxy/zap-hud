@@ -122,8 +122,7 @@ var History = (function() {
 
         let message = {};
         
-        // unary `+` to convert string to int
-        let date = new Date(+event.detail.timeSentInMs);
+        let date = new Date(Number(event.detail.timeSentInMs));
 		let dateStr = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
 
 		message.timeInMs = event.detail.timeSentInMs;
@@ -142,10 +141,6 @@ var History = (function() {
 
 	self.addEventListener("activate", function(event) {
 		initializeStorage();
-	});
-
-	self.addEventListener("targetload", function(event) {
-        
 	});
 
 	function trimMessages(lastPageUnloadTime) {

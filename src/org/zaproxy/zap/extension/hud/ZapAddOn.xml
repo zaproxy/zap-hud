@@ -22,11 +22,14 @@
 		<file>hud/display.css</file>
 		<file>hud/display.html</file>
 		<file>hud/display.js</file>
+		<file>hud/drawer.html</file>
+		<file>hud/drawer.js</file>
 		<file>hud/growlerAlerts.html</file>
 		<file>hud/growlerAlerts.js</file>
 		<file>hud/libraries/alertify.js</file>
 		<file>hud/libraries/localforage.min.js</file>
 		<file>hud/libraries/spectre.css</file>
+		<file>hud/libraries/spectre-icons.css</file>
 		<file>hud/libraries/vue.js</file>
 		<file>hud/management.css</file>
 		<file>hud/management.html</file>
