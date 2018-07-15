@@ -366,6 +366,7 @@
 			'<iframe id="main-display" src="<<ZAP_HUD_FILES>>?name=display.html" style="position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;"></iframe>\n' +
 			'<iframe id="growler-alerts" src="<<ZAP_HUD_FILES>>?name=growlerAlerts.html" style="position: fixed; right: 0px; bottom: 0px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;"></iframe>';
 		document.body.appendChild(template.content);
+		document.body.style.marginBottom = "50px";
 	}
 	
 	return {
