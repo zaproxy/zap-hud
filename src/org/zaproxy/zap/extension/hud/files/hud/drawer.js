@@ -88,12 +88,7 @@ Vue.component('tabs', {
             parent.postMessage({action:"showBottomDrawer"}, document.referrer);
         },
         toggleOpenClose() {
-            if (this.isOpen) {
-                this.closeDrawer();
-            }
-            else {
-                this.openDrawer();
-            }
+            this.isOpen ? this.closeDrawer() : this.openDrawer();
         },
         selectTab(selectedTab) {
             if (!this.isOpen) {
@@ -127,10 +122,10 @@ Vue.component('tabs', {
 
         Promise.all(promises)
             .then(function(results) {
-                let isDrawerOpen = results[0];
+                let shouldOpenDrawer = results[0];
                 let activeTab = results[1];
 
-                if (isDrawerOpen) {
+                if (shouldOpenDrawer) {
                     self.openDrawer();
 
                     if (activeTab) {
