@@ -51,14 +51,24 @@ var History = (function() {
 	function getMessageDetails(id) {
 		return fetch('<<ZAP_HUD_API>>/core/view/message/?id=' + id)
 			.then(function(response) {
-				return response.json()
-					.then(function(json) {
-						return json.message;
-					})
+				return response.json();
 			})
+			.then(function(json) {
+				if (json.hasOwnProperty('code')) {
+					throw new Error('Could not find a message with id: ' + id);
+				}
+				return json.message;
+			})
+			.catch(errorHandler);
 	}
 
 	function showHttpMessageDetails(data) {
+		if (!data) {
+			throw new Error('Coud not load HTTP message details')
+		} else if (!data.hasOwnProperty('requestHeader')) {
+			throw new Error('Could not find field "requestHeader" in the HTTP message details');
+		}
+
 		var config = {
 			request: {
 				method: parseRequestHeader(data.requestHeader).method,
