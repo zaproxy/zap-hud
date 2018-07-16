@@ -84,7 +84,6 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	protected static final String DIRECTORY_NAME = "hud";
 	protected static final String TARGET_DIRECTORY = "target";
 	protected static final String HUD_HTML = TARGET_DIRECTORY + "/injectionHtml.html";
-	protected static final String HUD_HTML_TIMELINE = TARGET_DIRECTORY + "/injectionHtmlTimeline.html";
 
 	// Change only after the message has been persisted, otherwise ZAP would see the HUD injections.
 	private static final int PROXY_LISTENER_ORDER = ProxyListenerLog.PROXY_LISTENER_ORDER + 1000;
@@ -322,11 +321,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 
 				// TODO: can do more elegantly
 				String htmlFile = "";
-				if (api.isTimelineEnabled()) {
-					htmlFile = HUD_HTML_TIMELINE;
-				} else {
-					htmlFile = HUD_HTML;
-				}
+				htmlFile = HUD_HTML;
 
 				String hudScript = this.api.getFile(msg, htmlFile);
 

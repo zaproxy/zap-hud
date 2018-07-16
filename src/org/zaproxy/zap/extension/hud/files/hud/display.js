@@ -274,18 +274,19 @@ Vue.component('simple-menu-modal', {
 
 Vue.component('http-message-modal', {
 	template: '#http-message-modal-template',
-	props: ['show', 'title'],
+	props: ['show', 'title', 'request', 'response', 'is-response-disabled', 'active-tab'],
 	methods: {
 		close: function() {
-			this.step();
 			this.$emit('close');
 		},
+	},
+	computed:{
 		currentMessage() {
 			let method = '';
 			let header = '';
 			let body = '';
 
-			if (this.isResponse) {
+			if (!this.response.isReadonly) {
 				header = this.response.header;
 				body = this.response.body;
 			}
@@ -297,14 +298,26 @@ Vue.component('http-message-modal', {
 
 			return {'method': method, 'header': header, 'body': body};
 		},
+
+	}
+})
+
+Vue.component('break-message-modal', {
+	template: '#break-message-modal-template',
+	props: ['show', 'title'],
+	methods: {
+		close: function() {
+			this.step();
+			this.$emit('close');
+		},
 		step: function() {
-			let message = this.currentMessage();
+			let message = this.$refs.messageModal.currentMessage;
 
 			this.port.postMessage({'buttonSelected': 'step', 'method': message.method, 'header': message.header, 'body': message.body});
 			this.$emit('close');
 		},
 		continueOn: function() {
-			let message = this.currentMessage();
+			let message = this.$refs.messageModal.currentMessage;
 
 			this.port.postMessage({'buttonSelected': 'continue', 'method': message.method, 'header': message.header, 'body': message.body});
 			this.$emit('close');
@@ -312,38 +325,77 @@ Vue.component('http-message-modal', {
 		drop: function() {
 			this.port.postMessage({'buttonSelected': 'drop'});
 			this.$emit('close');
-		},
+		}
 	},
 	data() {
 		return {
 			port: null,
 			request: {},
 			response: {},
-			activeTab: "Request",
-			isResponse: false,
-			isResponseDisabled: true
+			isResponseDisabled: false,
+			activeTab: "Request"
 		}
 	},
 	created() {
 		let self = this;
 
-		Event.listen('showHttpMessageModal', function(data) {
+		Event.listen('showBreakMessageModal', function(data) {
 			self.request = data.request;
 			self.response = data.response;
 			self.port = data.port;
-			self.isResponse = data.isResponse;
+			self.isResponseDisabled = data.isResponseDisabled;
+			self.activeTab = data.activeTab;
+			
+			self.request.isReadonly = !data.isResponseDisabled;
+			self.response.isReadonly = data.isResponseDisabled;
 
-			if (data.isResponse) {
-				self.activeTab = "Response";
-				self.isResponseDisabled = false;
-			}
-			else {
-				self.activeTab = "Request";
-				self.isResponseDisabled = true;
-			}
+			app.isBreakMessageModalShown = true;
+			app.BreakMessageModalTitle = data.title;
+		})
+	}
+})
 
-			app.isHttpMessageModalShown = true;
-			app.httpMessageModalTitle = data.title;
+Vue.component('history-message-modal', {
+	template: '#history-message-modal-template',
+	props: ['show', 'title'],
+	methods: {
+		close: function() {
+			this.$emit('close');
+		},
+		replay: function() {
+			let message = this.request;
+
+			this.port.postMessage({'buttonSelected': 'replay', 'method': message.method, 'header': message.header, 'body': message.body});
+			this.$emit('close');
+		},
+		replayInBrowser: function() {
+			console.log('this functionality isn\'t supported yet');
+		}
+	},
+	data() {
+		return {
+			port: null,
+			request: {},
+			response: {},
+			isResponseDisabled: false,
+			activeTab: "Request"
+		}
+	},
+	created() {
+		let self = this;
+
+		Event.listen('showHistoryMessageModal', function(data) {
+			self.request = data.request;
+			self.response = data.response;
+			self.port = data.port;
+			self.isResponseDisabled = data.isResponseDisabled;
+			self.activeTab = data.activeTab;
+
+			self.request.isReadonly = false;
+			self.response.isReadonly = true;
+
+			app.isHistoryMessageModalShown = true;
+			app.HistoryMessageModalTitle = data.title;
 		})
 	}
 })
@@ -523,8 +575,10 @@ document.addEventListener("DOMContentLoaded", function() {
 			alertDetailsModalTitle: "Alert Details",
 			isSimpleMenuModalShown: false,
 			simpleMenuModalTitle: "Menu",
-			isHttpMessageModalShown: false,
-			httpMessageModalTitle: "HTTP Message",
+			isBreakMessageModalShown: false,
+			breakMessageModalTitle: "HTTP Message",
+			isHistoryMessageModalShown: false,
+			historyMessageModalTitle: "HTTP Message",
 			isSiteTreeModalShown: false,
 			siteTreeModalTitle: "Sites Tree",
 			keepShowing: false,
@@ -601,12 +655,24 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 		
 			break;
 
-		case "showHttpMessage":
-			Event.fire('showHttpMessageModal', {
+		case "showBreakMessage":
+			Event.fire('showBreakMessageModal', {
+				title: 'Intercepted HTTP Message',
+				request: config.request,
+				response: config.response,
+				isResponseDisabled: config.isResponseDisabled,
+				activeTab: config.activeTab,
+				port: port
+			})
+			break;
+
+		case "showHistoryMessage":
+			Event.fire('showHistoryMessageModal', {
 				title: 'HTTP Message',
 				request: config.request,
 				response: config.response,
-				isResponse: config.isResponse,
+				isResponseDisabled: config.isResponseDisabled,
+				activeTab: config.activeTab,
 				port: port
 			})
 			break;
