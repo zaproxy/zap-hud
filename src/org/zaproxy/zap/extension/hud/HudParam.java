@@ -37,6 +37,13 @@ public class HudParam extends VersionedAbstractParam {
     private static final String PARAM_DEV_MODE = PARAM_BASE_KEY + ".devMode";
     private static final String PARAM_ALLOW_UNSAFE_EVAL = PARAM_BASE_KEY + ".unsafeEval";
     private static final String PARAM_IN_SCOPE_ONLY = PARAM_BASE_KEY + ".inScopeOnly";
+    private static final String PARAM_TOOLS_LEFT_PANEL = PARAM_BASE_KEY + ".toolsLeftPanel";
+    private static final String PARAM_TOOLS_RIGHT_PANEL = PARAM_BASE_KEY + ".toolsRightPanel";
+    
+    private static final String[] DEFAULT_TOOLS_LEFT_PANEL = 
+        {"scope", "break", "showEnable", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational"};
+    private static final String[] DEFAULT_TOOLS_RIGHT_PANEL =
+        {"site-tree", "spider", "active-scan", "attack", "site-alerts-high", "site-alerts-medium", "site-alerts-low", "site-alerts-informational"};
 
     /**
      * The version of the configurations. Used to keep track of configurations changes between releases, if updates are needed.
@@ -55,6 +62,10 @@ public class HudParam extends VersionedAbstractParam {
     private boolean enabled;
     
     private boolean inScopeOnly;
+    
+    private String[] toolsLeftPanel;
+
+    private String[] toolsRightPanel;
 
     public String getBaseDirectory() {
         return baseDirectory;
@@ -128,6 +139,32 @@ public class HudParam extends VersionedAbstractParam {
         developmentMode = getConfig().getBoolean(PARAM_DEV_MODE, false);
         allowUnsafeEval = getConfig().getBoolean(PARAM_ALLOW_UNSAFE_EVAL, false);
         inScopeOnly = getConfig().getBoolean(PARAM_IN_SCOPE_ONLY, false);
+        toolsLeftPanel = getConfig().getStringArray(PARAM_TOOLS_LEFT_PANEL);
+        if (toolsLeftPanel.length == 0) {
+            toolsLeftPanel = DEFAULT_TOOLS_LEFT_PANEL;
+        }
+        toolsRightPanel = getConfig().getStringArray(PARAM_TOOLS_RIGHT_PANEL);
+        if (toolsRightPanel.length == 0) {
+            toolsRightPanel = DEFAULT_TOOLS_RIGHT_PANEL;
+        }
+    }
+    
+    public String[] getToolsLeftPanel() {
+        return toolsLeftPanel;
+    }
+    
+    public void setToolsLeftPanel(String[] toolsLeftPanel) {
+        this.toolsLeftPanel = toolsLeftPanel;
+        getConfig().setProperty(PARAM_TOOLS_LEFT_PANEL, toolsLeftPanel);
+    }
+    
+    public String[] getToolsRightPanel() {
+        return toolsRightPanel;
+    }
+    
+    public void setToolsRightPanel(String[] toolsRightPanel) {
+        this.toolsRightPanel = toolsRightPanel;
+        getConfig().setProperty(PARAM_TOOLS_RIGHT_PANEL, toolsRightPanel);
     }
 
     @Override

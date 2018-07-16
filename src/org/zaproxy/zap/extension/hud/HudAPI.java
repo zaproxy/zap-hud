@@ -46,6 +46,7 @@ import org.zaproxy.zap.extension.api.ApiResponseElement;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class HudAPI extends ApiImplementor {
@@ -67,8 +68,11 @@ public class HudAPI extends ApiImplementor {
 	private static final String ACTION_ENABLE_TIMELINE = "enableTimeline";
 	private static final String ACTION_DISABLE_TIMELINE = "disableTimeline";
     private static final String ACTION_LOG = "log";
+    private static final String ACTION_SET_PANEL_TOOLS = "setPanelTools";
 
     private static final String PARAM_RECORD = "record";
+    private static final String PARAM_PANEL = "panel";
+    private static final String PARAM_TOOLS = "tools";
 	
 	/**
 	 * The only files that can be included on domain
@@ -98,6 +102,8 @@ public class HudAPI extends ApiImplementor {
     	this.addApiAction(new ApiAction(ACTION_ENABLE_TIMELINE));
     	this.addApiAction(new ApiAction(ACTION_DISABLE_TIMELINE));
         this.addApiAction(new ApiAction(ACTION_LOG, new String[] {PARAM_RECORD}));
+        this.addApiAction(new ApiAction(ACTION_SET_PANEL_TOOLS, 
+                new String[] {PARAM_PANEL, PARAM_TOOLS}));
     	
     	hudFileProxy = new HudFileProxy(this);
     	hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S); 
@@ -184,7 +190,7 @@ public class HudAPI extends ApiImplementor {
 	@Override
 	public ApiResponse handleApiAction(String name, JSONObject params) throws ApiException {
 
-		switch (name) {
+        switch (name) {
 			case ACTION_ENABLE_TIMELINE:
 				this.isTimelineEnabled = true;
 				break;
@@ -201,11 +207,45 @@ public class HudAPI extends ApiImplementor {
                 logger.debug(record);
                 break;
 
+            case ACTION_SET_PANEL_TOOLS:
+                String panel = params.getString(PARAM_PANEL);
+                JSONArray tools = params.getJSONArray(PARAM_TOOLS);
+                String [] strArray;
+                try {
+                    strArray = this.jsonArrayToStrArray(tools);
+                } catch (Exception e) {
+                    logger.debug("Exception: " + e.getMessage(), e);
+                    throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_TOOLS);
+                }
+                if ("leftPanel".equals(panel)) {
+                    this.extension.getHudParam().setToolsLeftPanel(strArray);
+                } else if ("rightPanel".equals(panel)) {
+                    this.extension.getHudParam().setToolsRightPanel(strArray);
+                } else {
+                    logger.debug("Unexpected panel: " + panel);
+                    throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_PANEL);
+                }
+                try {
+                    this.extension.getHudParam().getConfig().save();
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                }
+                break;
+
 			default:
 				throw new ApiException(ApiException.Type.BAD_ACTION);
 		}
 
 		return ApiResponseElement.OK;
+	}
+	
+	private String[] jsonArrayToStrArray(JSONArray array) {
+	    Object[] objArray = array.toArray();
+	    String[] strArray = new String[array.size()];
+	    for (int i=0; i < objArray.length; i++) {
+	        strArray[i] = objArray[i].toString();
+	    }
+	    return strArray;
 	}
 
     protected String getSite(HttpMessage msg) throws URIException {
@@ -266,6 +306,13 @@ public class HudAPI extends ApiImplementor {
                         }
                     }
                     contents = contents.replace("<<ZAP_HUD_TOOLS>>", sb.toString());
+                } else if (file.equals("utils.js")) {
+                    // Inject the panel tools
+                    contents = contents
+                            .replace("<<ZAP_HUD_TOOLS_LEFT>>", this.arrayToJsArray(
+                                    this.extension.getHudParam().getToolsLeftPanel()))
+                            .replace("<<ZAP_HUD_TOOLS_RIGHT>>", this.arrayToJsArray(
+                                    this.extension.getHudParam().getToolsRightPanel()));
                 }
             }
             
@@ -275,6 +322,19 @@ public class HudAPI extends ApiImplementor {
             logger.error(e.getMessage(), e);
             return null;
         }
+    }
+    
+    private String arrayToJsArray(String [] array) {
+        StringBuilder sb = new StringBuilder();
+        for (String str : array) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append("\"");
+            sb.append(str);
+            sb.append("\"");
+        }
+        return sb.toString();
     }
     
     private String getWebSocketUrl() {
