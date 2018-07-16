@@ -57,6 +57,7 @@
 		<file>hud/tools/siteAlertsInformational.js</file>
 		<file>hud/tools/siteAlertsLow.js</file>
 		<file>hud/tools/siteAlertsMedium.js</file>
+		<file>hud/tools/siteTree.js</file>
 		<file>hud/tools/showEnable.js</file>
 		<file>hud/tools/spider.js</file>
 		<file>hud/utils.js</file>

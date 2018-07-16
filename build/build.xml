@@ -423,6 +423,24 @@
 		<build-deploy-addon name="hud" />
 	</target>
 
+	<target name="lint-staged-hud" description="run the XO linter on the staged hud extension">
+		<exec executable="npm">
+			<arg line="run lint-staged" />
+		</exec>		
+	</target>
+
+	<target name="lint-all-hud" description="run the XO linter on all files of the hud extension">
+		<exec executable="npm">
+			<arg line="run lint" />
+		</exec>		
+	</target>
+	
+	<target name="test-hud" description="run the ava tests for the hud extension">
+		<exec executable="npm">
+			<arg line="run test" />
+		</exec>		
+	</target>
+
 	<target name="deploy-and-reset-hud" description="deploy the hud extension and delete the config directory">
 		<build-deploy-addon name="hud" />
 		<delete dir="${hud.config.dir}"/>

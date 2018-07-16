@@ -1,6 +1,7 @@
 <html>
     <head>   
         <link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre.css"/>
+        <link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre-icons.css"/>
         <link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=display.css"/>
 
         <script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue.js"></script>
@@ -19,6 +20,7 @@
             <simple-menu-modal :show="isSimpleMenuModalShown" :title="simpleMenuModalTitle" @close="isSimpleMenuModalShown = false"></simple-menu-modal>
             <break-message-modal :show="isBreakMessageModalShown" :title="breakMessageModalTitle" @close="isBreakMessageModalShown = false"></break-message-modal>
             <history-message-modal :show="isHistoryMessageModalShown" :title="historyMessageModalTitle" @close="isHistoryMessageModalShown = false"></history-message-modal>
+            <site-tree-modal :show="isSiteTreeModalShown" :title="siteTreeModalTitle" @close="isSiteTreeModalShown = false"></http-message-modal>
         </div>
         
         <!-- a base modal component -->
@@ -28,6 +30,7 @@
                 <a href="#close" class="modal-overlay" aria-label="Close" @click="close"></a>
                 <div class="modal-container">
                     <div class="modal-header">
+                        <slot name="header"></slot>
                         <a href="#close" class="btn btn-clear float-right" aria-label="Close" @click="close"></a>
                         <div class="modal-title h5">{{title}}</div>
                     </div>
@@ -42,6 +45,22 @@
                 </div>
             </div>
             </transition>
+        </template>
+
+        <template id="nav-modal-template">
+            <modal :title="title" :show="show" @close="close">
+                <div slot="header">
+                    <button class="btn btn-action btn-sm float-left"  @click="back">
+                        <i class="icon icon-back"></i>
+                    </button>
+                </div>
+                <div slot="body">
+                    <slot name="body"></slot>
+                </div>
+                <div slot="footer">
+                    <slot name="footer"></slot>
+                </div>
+            </modal>
         </template>
 
         <!-- a simple dialog modal component -->
@@ -137,7 +156,7 @@
 
         <!-- alert details component -->
         <template id="alert-details-modal-template">
-            <modal :title="title" :show="show" @close="close">
+            <nav-modal :title="title" :show="show" @close="close" @back="back">
                 <div slot="body">
                     <table class="table table-striped table-hover">
                         <tbody>
@@ -148,7 +167,7 @@
                         </tbody>
                     </table>
                 </div>
-            </modal>
+            </nav-modal>
         </template>
 
         <!-- simple menu modal component -->
@@ -223,5 +242,39 @@
         <template id="tab-template">
             <div v-show="isActive"><slot></slot></div>
         </template>
+        
+        <!-- site tree modal component -->
+        <template id="site-tree-modal-template">
+            <modal :title="title" :show="show" size="wide" @close="close">
+            <div slot="body">
+				<ul id="site-tree-top">
+				  <site-tree-node
+				    class="site-tree-node"
+				    :model="model">
+				  </site-tree-node>
+				</ul>
+            </div>
+            </modal>
+        </template>
+
+        <template id="site-tree-node-template">
+			  <li>
+			    <div
+			      :class="{bold: ! model.isLeaf}"
+			      @click="toggle">
+			      <span v-if="! model.isLeaf">[{{ open ? '-' : '+' }}]</span>
+			      {{ model.name }}
+			    </div>
+			    <ul v-show="open" v-if="! model.isLeaf && open">
+			      <site-tree-node
+			        class="site-tree-node"
+			        v-for="(model, index) in model.children"
+			        :key="index"
+			        :model="model">
+			      </site-tree-node>
+			    </ul>
+			  </li>
+        </template>
+        
     </body>
 </html>
