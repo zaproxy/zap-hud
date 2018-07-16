@@ -530,19 +530,11 @@ function messageWindow(window, message, origin) {
 }
 
 /*
- * Sorts an array of tool objects by their position property
+ * Sorts an array of tool objects by their position in descending order.
  */
 function sortToolsByPosition(tools) {
-	return tools.sort(function (a, b) {
-		if (a.position < b.position) {
-			return 1;
-		}
-		else if (a.position > b.position) {
-			return -1;
-		}
-		else {
-			return 0;
-		}
+	tools.sort(function (a, b) {
+		return b.position - a.position;
 	});
 }
 
