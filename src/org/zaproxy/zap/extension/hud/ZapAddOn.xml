@@ -40,16 +40,12 @@
 		<file>hud/serviceworker.js</file>
 		<file>hud/target/inject.js</file>
 		<file>hud/target/injectionHtml.html</file>
-		<file>hud/target/injectionHtmlTimeline.html</file>
-		<file>hud/timelinePane.css</file>
-		<file>hud/timelinePane.html</file>
-		<file>hud/timelinePane.js</file>
-		<file>hud/timelinePaneWorker.js</file>
 		<file>hud/tools/activeScan.js</file>
 		<file>hud/tools/alertUtils.js</file>
 		<file>hud/tools/attack.js</file>
 		<file>hud/tools/break.js</file>
 		<file>hud/tools/commonAlerts.js</file>
+		<file>hud/tools/history.js</file>
 		<file>hud/tools/pageAlerts.js</file>
 		<file>hud/tools/pageAlertsHigh.js</file>
 		<file>hud/tools/pageAlertsInformational.js</file>
@@ -63,7 +59,6 @@
 		<file>hud/tools/siteAlertsMedium.js</file>
 		<file>hud/tools/showEnable.js</file>
 		<file>hud/tools/spider.js</file>
-		<file>hud/tools/timeline.js</file>
 		<file>hud/utils.js</file>
 		<file>hud/websockettest.html</file>
 		<file>hud/websockettest.js</file>

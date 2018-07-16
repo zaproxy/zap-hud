@@ -248,17 +248,6 @@ function configureStorage() {
 		return saveFrame(frame);
 	}));
 
-	promises.push(loadFrame("timelinePane").then(function(oldFrame) {
-		var frame = {};
-
-		frame.key = "timelinePane";
-		if (oldFrame) {
-			frame.clientId = oldFrame.clientId;
-		}
-
-		return saveFrame(frame);
-	}));
-
 	promises.push(loadFrame('drawer').then(function(oldFrame) {
 		var frame = {};
 
