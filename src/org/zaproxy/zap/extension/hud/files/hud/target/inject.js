@@ -23,44 +23,6 @@
 		panel.parentNode.removeChild(panel);
 	}
 
-	function createTimeline() {
-		var timelineFrame = document.createElement("iframe");
-
-		timelineFrame.id = "timeline";
-		timelineFrame.src = "<<ZAP_HUD_FILES>>?name=timelinePane.html&parentUrl=" + document.location.toString();
-		timelineFrame.scrolling = "no";
-		timelineFrame.style.cssText = "position: fixed; top: 0; right: 0; width: 300px; height: 100%; overflow: hidden; border: none; z-index: 2000;";
-
-		// shift target body
-		document.body.style.marginRight = "300px";
-
-		// shift right panel
-		var rightPanel = document.getElementById("right-panel");
-
-		if (rightPanel) {
-			rightPanel.style.right = "300px";
-		}
-
-		document.body.appendChild(timelineFrame);		
-	}
-
-	function removeTimeline() {
-		var timelineFrame = document.getElementById("timeline");
-		timelineFrame.parentNode.removeChild(timelineFrame);
-
-		// shift original page back
-		document.body.style.marginRight = "0px";
-
-		// shift right panel back
-		var rightPanel = document.getElementById("right-panel");
-
-		if (rightPanel) {
-			rightPanel.style.right = "0px";
-		}
-
-	}
-
-
 	/* PRESENTATION */
 	// todo: implement hide/show panels
 	function hidePanel(panel) {
@@ -271,14 +233,6 @@
 		switch(message.action) {
 			case "showPanel":
 				showPanel(message.orientation);
-				break;
-
-			case "showTimeline":
-				createTimeline();
-				break;
-
-			case "hideTimeline":
-				removeTimeline();
 				break;
 
 			case "showMainDisplay":

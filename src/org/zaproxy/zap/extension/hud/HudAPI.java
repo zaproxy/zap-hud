@@ -64,8 +64,6 @@ public class HudAPI extends ApiImplementor {
     private Map<String, String> siteUrls = new HashMap<String, String>();
     private ExtensionHUD extension;
 
-	private static final String ACTION_ENABLE_TIMELINE = "enableTimeline";
-	private static final String ACTION_DISABLE_TIMELINE = "disableTimeline";
     private static final String ACTION_LOG = "log";
 
     private static final String PARAM_RECORD = "record";
@@ -83,8 +81,6 @@ public class HudAPI extends ApiImplementor {
 
     private String websocketUrl;
 
-    private boolean isTimelineEnabled = false;
-    
     /**
      * Shared secret used to ensure that we only accept messages from the ZAP code running on the target domain
      */
@@ -95,8 +91,6 @@ public class HudAPI extends ApiImplementor {
     public HudAPI(ExtensionHUD extension) {
     	this.extension = extension;
 
-    	this.addApiAction(new ApiAction(ACTION_ENABLE_TIMELINE));
-    	this.addApiAction(new ApiAction(ACTION_DISABLE_TIMELINE));
         this.addApiAction(new ApiAction(ACTION_LOG, new String[] {PARAM_RECORD}));
     	
     	hudFileProxy = new HudFileProxy(this);
@@ -154,10 +148,6 @@ public class HudAPI extends ApiImplementor {
 	    return this.extension.getHudParam().isDevelopmentMode() && this.extension.getHudParam().isAllowUnsafeEval();
 	}
 	
-	public boolean isTimelineEnabled() {
-		return this.isTimelineEnabled;
-	}
-	
 	@Override
 	public String handleCallBack(HttpMessage msg)  throws ApiException {
 		// Just used to handle files which need to be on the target domain
@@ -185,14 +175,6 @@ public class HudAPI extends ApiImplementor {
 	public ApiResponse handleApiAction(String name, JSONObject params) throws ApiException {
 
 		switch (name) {
-			case ACTION_ENABLE_TIMELINE:
-				this.isTimelineEnabled = true;
-				break;
-
-			case ACTION_DISABLE_TIMELINE:
-				this.isTimelineEnabled = false;
-				break;
-
             case ACTION_LOG:
                 String record = params.getString(PARAM_RECORD);
                 if (View.isInitialised()) {

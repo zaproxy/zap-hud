@@ -104,14 +104,6 @@ function serviceWorkerMessageListener(event) {
 			parent.postMessage( {action: 'refresh'} , document.referrer);
 			break;
 
-		case 'showTimeline':
-			parent.postMessage({action: 'showTimeline'}, document.referrer);
-			break;
-
-		case 'hideTimeline':
-			parent.postMessage({action: 'hideTimeline'}, document.referrer);
-			break;
-
 		case 'showEnable.on':
 			parent.postMessage({action: 'showEnable.on'}, document.referrer);
 			break;
