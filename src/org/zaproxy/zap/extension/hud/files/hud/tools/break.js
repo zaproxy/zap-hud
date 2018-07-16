@@ -267,8 +267,7 @@ var Break = (function() {
 
 	return {
 		name: NAME,
-		initialize: initializeStorage,
-		sendHttpMessage: sendHttpMessage
+		initialize: initializeStorage
 	};
 })();
 
