@@ -5,7 +5,6 @@
  */
 
 var app;
-var worker;
 
 Vue.component('hud-button', {
 	template: '#hud-button-template',

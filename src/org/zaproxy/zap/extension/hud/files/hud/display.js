@@ -41,6 +41,19 @@ Vue.component('modal', {
 	}
 })
 
+Vue.component('nav-modal', {
+	template: '#nav-modal-template',
+	props: ['show', 'title', 'text'],
+	methods: {
+		close: function () {
+			this.$emit('close');
+		},
+		back() {
+			this.$emit('back');
+		},
+	}
+})
+
 Vue.component('dialog-modal', {
 	template: '#dialog-modal-template',
 	props: ['show', 'title', 'text'],
@@ -202,6 +215,11 @@ Vue.component('alert-details-modal', {
 	methods: {
 		close: function() {
 			this.$emit('close');
+		},
+		back: function() {
+			app.keepShowing = true;
+			app.isAlertDetailsModalShown = false;
+			this.port.postMessage({'back': true});
 		}
 	},
 	data() {
@@ -382,6 +400,106 @@ Vue.component('history-message-modal', {
 	}
 })
 
+Vue.component('site-tree-node', {
+	template: '#site-tree-node-template',
+	props: {
+		model : Object },
+	methods: {
+	    toggle: function () {
+	      if (! this.model.isLeaf) {
+	        this.open = !this.open
+	        if (this.open) {
+	          this.showChildren();
+	        } else {
+	          // We always want to query ZAP when expanding a node
+	          Vue.set(this.model, 'children', [])
+	        }
+	      }
+	    },
+	    showChildren: function () {
+	      this.addChild('..Loading..', false);
+			var treeNode = this;
+			fetch("<<ZAP_HUD_API>>/core/view/childNodes/?url=" + this.model.url)
+			.then(function(response) {
+
+				response.json().
+					then(function(json) {
+						// Remove the ..loading.. child
+						Vue.set(treeNode.model, 'children', [])
+						for(var i = 0; i < json.childNodes.length; i++) {
+							var child = json.childNodes[i];
+							treeNode.addChild(child.name, child.method, child.isLeaf);
+						} 
+					})
+					.catch(errorHandler);
+			})
+			.catch(errorHandler);
+	    },
+	    addChild: function (name, method, isLeaf) {
+	      if (name.slice(-1) == '/') {
+	      	name = name.slice(0, -1);
+	      }
+	      if ((name.match(/\//g) || []).length > 2) {
+	        // If there are more than 2 slashes just show last url element
+	        // The first 2 slashes will be http(s)://...
+	        name = name.substring(name.lastIndexOf('/') +1);
+	      }
+	      if (isLeaf) {
+	        name = method + ": " + name;
+	      }
+	      this.model.children.push({
+	        name: name,
+	        isLeaf: isLeaf,
+	        method: method,
+	        children: [],
+	        url: this.model.url === '' ? name : this.model.url + '/' + name
+	      })
+		}
+	},
+	data() {
+		return {
+		  name: 'Sites Tree',
+		  open: false,
+		}
+	}
+})
+
+Vue.component('site-tree-modal', {
+	template: '#site-tree-modal-template',
+	props: {
+		title : '',
+		show : ''},
+	methods: {
+		close: function() {
+			this.$emit('close');
+		}
+	},
+	data() {
+		return {
+		  port: null,
+		  name: 'Sites Tree',
+		  open: false,
+		  model: {
+		    name: 'Sites',
+		    isLeaf: false,
+		    url: '',
+		    method: '',
+		    children: []
+		  }
+		}
+	},
+	created() {
+		let self = this;
+
+		Event.listen('showSiteTreeModal', function(data) {
+			self.port = data.port;
+
+			app.isSiteTreeModalShown = true;
+			app.siteTreeModalTitle = data.title;
+		})
+	}
+})
+
 Vue.component('tabs', {
 	template: '#tabs-template',
 	props: ['activetab'],
@@ -461,6 +579,8 @@ document.addEventListener("DOMContentLoaded", function() {
 			breakMessageModalTitle: "HTTP Message",
 			isHistoryMessageModalShown: false,
 			historyMessageModalTitle: "HTTP Message",
+			isSiteTreeModalShown: false,
+			siteTreeModalTitle: "Sites Tree",
 			keepShowing: false,
 		},
 	});
@@ -555,6 +675,14 @@ navigator.serviceWorker.addEventListener("message", function(event) {
 				activeTab: config.activeTab,
 				port: port
 			})
+			break;
+
+		case "showSiteTree":
+			Event.fire('showSiteTreeModal', {
+				title: "Sites Tree", 
+				port: port
+			});
+			
 			break;
 
 		default:
