@@ -23,6 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -188,6 +189,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	    this.hudEnabled = getHudParam().isEnabled();
 	    if (View.isInitialised()) {
 	        this.getHudButton().setSelected(hudEnabled);
+	        setZapCanGetFocus(! this.hudEnabled);
 	    }
 	    if (getHudParam().isDevelopmentMode()) {
             ZAP.getEventBus().publishSyncEvent(
@@ -199,6 +201,21 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
     protected boolean isHudEnabled() {
         return hudEnabled;
     }
+
+    /**
+     * Tell ZAP if it can grab the focus or not - should only be called if the 
+     * View has been initialised.
+     * @param canGetFocus
+     */
+    private void setZapCanGetFocus(boolean canGetFocus) {
+        // Post 2.7.0 so for now try to access via reflection
+        try {
+            Method m = View.class.getMethod("setCanGetFocus", boolean.class);
+            m.invoke(View.getSingleton(), canGetFocus);
+        } catch (Exception e) {
+            log.debug(e.getMessage(), e);
+        }
+   }
 
 	private void addHudScripts() {
 		this.baseDirectory = this.getHudParam().getBaseDirectory();
@@ -270,6 +287,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 				public void actionPerformed(ActionEvent e) {
 					hudEnabled = hudButton.isSelected();
 					getHudParam().setEnabled(hudEnabled);
+					setZapCanGetFocus(! hudEnabled);
 				}});
     	}
     	return hudButton;
