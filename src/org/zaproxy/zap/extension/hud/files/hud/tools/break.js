@@ -145,11 +145,7 @@ var Break = (function() {
 		return fetch(url, init)
 			.catch(errorHandler);
 	}
-/*
-	function addBreakFilter(method, header, body) {
-		return fetch("<<ZAP_HUD_API>>/break/action/setHttpMessage/?formMethod=" + method + "&httpHeader=" + header + "&httpBody=" + body );
-	}
-*/
+
 	function checkIsRunning() {
 		return new Promise(function(resolve) {
 			loadTool(NAME)
@@ -158,20 +154,7 @@ var Break = (function() {
 				});
 		});
 	}
-/*
-	function showBreakFilterModal() {
 
-		messageFrame("display", {action:"showBreakFilterModal"})
-			.then(function(response) {
-
-				// Handle button choice
-				if (response.buttonSelected === "add") {
-					addBreakFilter(response.filter);
-				}
-			})
-			.catch(errorHandler);
-	}
-*/
 	function showBreakDisplay(data) {
 		var config = {
 			request: {
@@ -182,27 +165,22 @@ var Break = (function() {
 				header: '',
 				body: ''
 			},
-			isResponse: false
+			isResponseDisabled: true,
+			activeTab: "Request"
 		};
 
 		if ('responseBody' in data) {
 			config.response.header = data.responseHeader.trim();
 			config.response.body = data.responseBody;
-			config.isResponse = true;
+			config.isResponseDisabled = false;
+			config.activeTab = "Response";
 		}
 		
 		config.request.method = parseRequestHeader(data.requestHeader).method;
 		config.request.header = data.requestHeader.trim();
 		config.request.body = data.requestBody;
 
-		config.buttons = [
-			{text:"Step",
-			 id:"step"},
-			{text:"Continue",
-			 id:"continue"}
-		];
-
-		messageFrame("display", {action:"showHttpMessage", config:config})
+		messageFrame("display", {action:"showBreakMessage", config:config})
 			.then(function(response) {
 				// Handle button choice
 				if (response.buttonSelected === "step") {
@@ -242,12 +220,6 @@ var Break = (function() {
 				// Handle button choice
 				if (response.id == "remove") {
 					removeToolFromPanel(NAME);
-				}/*
-				if (response.id == "filter") {
-					showBreakFilterModal();
-				}*/
-				else {
-					//cancel
 				}
 			})
 			.catch(errorHandler);
@@ -290,9 +262,6 @@ var Break = (function() {
 	self.addEventListener("org.zaproxy.zap.extension.brk.BreakEventPublisher", function(event) {
 		if (event.detail['event.type'] === 'break.active' && event.detail['messageType'] === 'HTTP') {
 			showBreakDisplay(event.detail);
-		}
-		else {
-			//step();
 		}
 	});
 
