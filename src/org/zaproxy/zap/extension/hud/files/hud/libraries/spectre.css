@@ -497,7 +497,7 @@ html {
   .cjk u + u {
     margin-left: .125em;
   }
-  
+ 
   .table {
     border-collapse: collapse;
     border-spacing: 0;
@@ -520,8 +520,7 @@ html {
   
   .table.table-scroll {
     display: block;
-    overflow-x: auto;
-    padding-bottom: .75rem;
+    overflow-x: hidden;
     white-space: nowrap;
   }
   
@@ -534,7 +533,13 @@ html {
   .table th {
     border-bottom-width: .1rem;
   }
-  
+
+  .table-history td,
+  .table-history th {
+    padding: .1em .6em .1em .6em;
+    white-space: nowrap;
+  }
+
   .btn {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -2822,7 +2827,20 @@ html {
   .step .step-item.active ~ .step-item a::before {
     background: #e7e9ed;
   }
-  
+
+  .drawer-details {
+    overflow-y: hidden;
+  }
+
+  .tabs {
+    height: 50px;
+  }
+
+  .tabs-details {
+    overflow-y: auto;
+    height: calc(100% - 50px);
+  }
+
   .tab {
     align-items: center;
     border-bottom: .05rem solid #e7e9ed;
@@ -2834,7 +2852,7 @@ html {
     list-style: none;
     margin: .2rem 0 .15rem 0;
   }
-  
+
   .tab .tab-item {
     margin-top: 0;
   }

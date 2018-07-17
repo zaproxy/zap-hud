@@ -56,9 +56,16 @@ function parseRequestHeader(headerText) {
 	while (headerText !== "") {
 		var field = headerText.substring(0, headerText.indexOf(":"));
 		headerText = headerText.substring(headerText.indexOf(":") + 2);
+		var value;
 
-		var value = headerText.substring(0, headerText.indexOf("\n"));
-		headerText = headerText.substring(headerText.indexOf("\n") + 1);
+		if (headerText.indexOf("\n") < 0) {
+			value = headerText;
+			headerText = "";
+		}
+		else {
+			value = headerText.substring(0, headerText.indexOf("\n"));
+			headerText = headerText.substring(headerText.indexOf("\n") + 1);
+		}
 
 		header.fields[field] = value;
 	}
@@ -241,10 +248,10 @@ function configureStorage() {
 		return saveFrame(frame);
 	}));
 
-	promises.push(loadFrame("timelinePane").then(function(oldFrame) {
+	promises.push(loadFrame('drawer').then(function(oldFrame) {
 		var frame = {};
 
-		frame.key = "timelinePane";
+		frame.key = "drawer";
 		if (oldFrame) {
 			frame.clientId = oldFrame.clientId;
 		}
@@ -530,19 +537,11 @@ function messageWindow(window, message, origin) {
 }
 
 /*
- * Sorts an array of tool objects by their position property
+ * Sorts an array of tool objects by their position in descending order.
  */
 function sortToolsByPosition(tools) {
-	return tools.sort(function (a, b) {
-		if (a.position < b.position) {
-			return 1;
-		}
-		else if (a.position > b.position) {
-			return -1;
-		}
-		else {
-			return 0;
-		}
+	tools.sort(function (a, b) {
+		return b.position - a.position;
 	});
 }
 

@@ -5,7 +5,6 @@
  */
 
 var app;
-var worker;
 
 Vue.component('hud-button', {
 	template: '#hud-button-template',
@@ -58,6 +57,11 @@ document.addEventListener('DOMContentLoaded', function() {
 		// show the settings button
 		app.isSettingsButtonShown = true;
 
+		window.addEventListener('message', windowMessageListener)
+		window.addEventListener('beforeunload', beforeunloadListener)
+
+		navigator.serviceWorker.addEventListener('message', serviceWorkerMessageListener)
+
 		// send targetload message 
 		navigator.serviceWorker.controller.postMessage({action:"targetload", targetUrl: document.referrer});
 
@@ -72,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * As a result we only accept messages that contain a shared secret generated and injected at runtime.
  * The contents of the messages should still be treated as potentially malicious.
  */
-window.addEventListener('message', function(event) {
+function windowMessageListener(event) {
 	if (! event.data.hasOwnProperty('sharedSecret')) {
 		log(LOG_WARN, 'management.receiveMessage', 'Message without sharedSecret rejected');
 		return;
@@ -82,23 +86,21 @@ window.addEventListener('message', function(event) {
 	} else {
 		log(LOG_WARN, 'management.receiveMessage', 'Message with incorrect sharedSecret rejected ' + event.data.sharedSecret);
 	}
-});
+}
 
+function beforeunloadListener() {
+	let currentTimeInMs = new Date().getTime();
 
-navigator.serviceWorker.addEventListener('message', function(event) {
+	navigator.serviceWorker.controller.postMessage({action: 'unload', time: currentTimeInMs})
+		.catch(errorHandler)
+}
+
+function serviceWorkerMessageListener(event) {
 	var message = event.data;
 	
 	switch(message.action) {
 		case 'refreshTarget':
 			parent.postMessage( {action: 'refresh'} , document.referrer);
-			break;
-
-		case 'showTimeline':
-			parent.postMessage({action: 'showTimeline'}, document.referrer);
-			break;
-
-		case 'hideTimeline':
-			parent.postMessage({action: 'hideTimeline'}, document.referrer);
 			break;
 
 		case 'showEnable.on':
@@ -121,7 +123,7 @@ navigator.serviceWorker.addEventListener('message', function(event) {
 			console.log('Unexpected action ' + message.action);
 			break;
 	}
-});
+}
 
 
 /*

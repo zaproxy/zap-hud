@@ -24,9 +24,6 @@ var urlsToCache = [
 	"<<ZAP_HUD_FILES>>?name=management.css",
 	"<<ZAP_HUD_FILES>>?name=management.html",
 	"<<ZAP_HUD_FILES>>?name=management.js",
-	"<<ZAP_HUD_FILES>>?name=timelinePane.css",
-	"<<ZAP_HUD_FILES>>?name=timelinePane.html",
-	"<<ZAP_HUD_FILES>>?name=timelinePane.js",
 	"<<ZAP_HUD_FILES>>?name=growlerAlerts.html",
 	"<<ZAP_HUD_FILES>>?name=growlerAlerts.js"
 ];
@@ -125,7 +122,7 @@ self.addEventListener("message", function(event) {
 		case "showHudSettings":
 			showHudSettings();
 			break;
-			
+
 		case 'targetload':
 
 			targetDomain = parseDomainFromUrl(message.targetUrl);
@@ -175,7 +172,8 @@ function saveFrameId(event) {
 		"management.html": "management",
 		"panel.html": "Panel",
 		"display.html": "display",
-		"growlerAlerts.html": "growlerAlerts"
+		"growlerAlerts.html": "growlerAlerts",
+		"drawer.html": "drawer"
 	};
 
 	clients.get(event.clientId)
