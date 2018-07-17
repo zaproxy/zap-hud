@@ -71,7 +71,8 @@ public class HudAPI extends ApiImplementor {
 	/**
 	 * The only files that can be included on domain
 	 */
-	private static final List<String> DOMAIN_FILE_WHITELIST = Arrays.asList(new String[] { "inject.bundle.js", "inject.bundle.js.map" });
+	private static final List<String> DOMAIN_FILE_WHITELIST = Arrays.asList(new String[] { "inject.bundle.js" });
+	private static final List<String> DOMAIN_FILE_WHITELIST_DEV = Arrays.asList(new String[] { "inject.bundle.js.map" });
 
     private ApiImplementor hudFileProxy;
 	private ApiImplementor hudApiProxy;
@@ -157,7 +158,7 @@ public class HudAPI extends ApiImplementor {
 			if (query != null) {
 				if (query.indexOf("zapfile=") > 0) {
 					String fileName = query.substring(query.indexOf("zapfile=") + 8);
-					if (DOMAIN_FILE_WHITELIST.contains(fileName)) {
+					if (fileIsWhiteListed(fileName)) {
 						msg.setResponseBody(this.getFile(msg, ExtensionHUD.TARGET_DIRECTORY + "/" + fileName));
 						// Currently only javascript files are returned
 						msg.setResponseHeader(API.getDefaultResponseHeader("application/javascript; charset=UTF-8", msg.getResponseBody().length(), false));
@@ -284,7 +285,6 @@ public class HudAPI extends ApiImplementor {
         }
     }
 
-    
 	public static String getAllowFramingResponseHeader(String responseStatus, String contentType, int contentLength, boolean canCache) {
 		StringBuilder sb = new StringBuilder(250);
 
@@ -307,5 +307,12 @@ public class HudAPI extends ApiImplementor {
 		sb.append("Content-Type: ").append(contentType).append("\r\n");
 
 		return sb.toString();
+	}
+
+	private Boolean fileIsWhiteListed(String fileName) {
+		return
+			(this.extension.getHudParam().isDevelopmentMode()
+				&& DOMAIN_FILE_WHITELIST_DEV.contains(fileName))
+			|| DOMAIN_FILE_WHITELIST.contains(fileName);
 	}
 }
