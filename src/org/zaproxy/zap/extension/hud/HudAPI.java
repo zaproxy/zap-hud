@@ -71,7 +71,7 @@ public class HudAPI extends ApiImplementor {
 	/**
 	 * The only files that can be included on domain
 	 */
-	private static final List<String> DOMAIN_FILE_WHITELIST = Arrays.asList(new String[] { "inject.js", "front-end-tracker.js" });
+	private static final List<String> DOMAIN_FILE_WHITELIST = Arrays.asList(new String[] { "inject.bundle.js", "inject.bundle.js.map" });
 
     private ApiImplementor hudFileProxy;
 	private ApiImplementor hudApiProxy;

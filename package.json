@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/psiinon/zap-hud/wiki",
   "dependencies": {
+    "@pamplemousse/front-end-tracker": "^1.0.0",
     "vue": "^2.5.16",
     "vue-router": "^3.0.1"
   },

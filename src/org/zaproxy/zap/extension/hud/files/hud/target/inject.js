@@ -323,6 +323,22 @@ var injection  = (function () {
 	};
 })();
 
+require('@pamplemousse/front-end-tracker');
+
+/* Subscribe to "the tracker" reports */
+['dom-events', 'storage'].forEach(function(topic) {
+  mailbox.subscribe(topic, function(_, data) {
+    window.postMessage(
+      {
+        'action': 'appendEvent',
+        'content': data,
+        'secret': '<<ZAP_SHARED_SECRET>>'
+      },
+      document.defaultView.origin
+    );
+  });
+});
+
 window.onload = function () {
 	/* initializes the HUD Frames */
 	if (window.top == window.self) {

@@ -38,7 +38,8 @@
 		<file>hud/panel.html</file>
 		<file>hud/panel.js</file>
 		<file>hud/serviceworker.js</file>
-		<file>hud/target/inject.js</file>
+		<file>hud/target/inject.bundle.js</file>
+		<file>hud/target/inject.bundle.js.map</file>
 		<file>hud/target/injectionHtml.html</file>
 		<file>hud/tools/activeScan.js</file>
 		<file>hud/tools/alertUtils.js</file>

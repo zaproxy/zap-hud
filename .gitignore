@@ -8,3 +8,5 @@ build/zap-exts/
 *.iml
 node_modules/
 dist/
+src/org/zaproxy/zap/extension/hud/files/hud/target/inject.bundle.js
+src/org/zaproxy/zap/extension/hud/files/hud/target/inject.bundle.js.map
