@@ -38,6 +38,10 @@ import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 
+import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.OutputDocument;
+import net.htmlparser.jericho.Source;
+
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.log4j.Logger;
@@ -323,7 +327,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 		// Do nothing
 		return true;
 	}
-	
+
 	@Override
 	public boolean onHttpResponseReceive(HttpMessage msg) {
 		if (hudEnabled && msg.getResponseHeader().isHtml()) {
@@ -331,31 +335,28 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 				return true;
 			}
 			try {
-				String header = msg.getResponseBody().toString();
+				String html = msg.getResponseBody().toString();
 
-				// TODO: confirm correct regex
-				Pattern pattern = Pattern.compile("<(\\s*?)body+(>|.*?[^?]>)");
-				int openBodyTag = regexEndOf(pattern, header.toLowerCase());
+				Source document = new Source(html);
+				List<Element> heads = document.getAllElements("head");
+				Element head = (heads.size() > 0) ? heads.get(0) : null;
 
-				// TODO: can do more elegantly
-				String htmlFile = "";
-				htmlFile = HUD_HTML;
-
+				String htmlFile = HUD_HTML;
 				String hudScript = this.api.getFile(msg, htmlFile);
 
-				if (openBodyTag > -1  && hudScript != null) {
+				if (head != null) {
 					// These are the only files that use FILE_PREFIX
 					hudScript = hudScript.replace("<<FILE_PREFIX>>", api.getUrlPrefix(api.getSite(msg)));
-					
-					StringBuilder sb = new StringBuilder();
-					sb.append(header.substring(0, openBodyTag));
-					sb.append(hudScript);
-					sb.append(header.substring(openBodyTag));
 
-					String newBody = sb.toString();
-					msg.getResponseBody().setBody(newBody);
-					msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
-					
+					OutputDocument newResponseBody = new OutputDocument(document);
+					int insertPosition = head.getChildElements().get(0).getBegin();
+					newResponseBody.insert(insertPosition, hudScript);
+
+					msg.getResponseBody()
+						 .setBody(newResponseBody.toString());
+					int newLength = msg.getResponseBody().length();
+					msg.getResponseHeader().setContentLength(newLength);
+
 					URI uri = msg.getRequestHeader().getURI();
 					if (this.isUpgradedHttpsDomain(uri)) {
 						// Advise that we've upgraded this domain to https
@@ -363,7 +364,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 						map.put(HudEventPublisher.FIELD_DOMAIN, uri.getHost() + ":" + uri.getPort());
 						ZAP.getEventBus().publishSyncEvent(
 								HudEventPublisher.getPublisher(),
-								new Event(HudEventPublisher.getPublisher(), 
+								new Event(HudEventPublisher.getPublisher(),
 										HudEventPublisher.EVENT_DOMAIN_UPGRADED_TO_HTTPS,
 										null, map ));
 					}
