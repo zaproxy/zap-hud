@@ -11,7 +11,8 @@
     "test": "ava",
     "build": "webpack --config build/webpack.config.dev.js",
     "lint": "xo",
-    "lint-staged": "lint-staged"
+    "lint-staged": "lint-staged",
+    "watch": "webpack --config build/webpack.config.dev.js --watch"
   },
   "lint-staged": {
     "*.js": [
