@@ -76,6 +76,10 @@ var CommonAlerts = (function() {
 					showOptions();
 					break;
 
+				case "showAlertDetails":
+					alertUtils.showAlertDetails(message.id);
+					break;
+
 				default:
 					break;
 			}
@@ -85,28 +89,46 @@ var CommonAlerts = (function() {
 	self.addEventListener("targetload", function(event) {
 		loadTool(NAME)
 			.then(function(tool) {
-				let target = event.detail.url;
+				let origTarget = event.detail.url;
+				let target = origTarget;
 				let targetDomain = parseDomainFromUrl(target);
-				for (var risk in RISKS) {
-					var alertRisk = RISKS[risk];
-					for (var alert in tool.alerts[parseDomainFromUrl(targetDomain)][alertRisk]) {
-						if (sharedData.upgradedDomains.has(targetDomain)) {
-							// Its been upgraded to https by ZAP, but the alerts wont have been
-							target = target.replace("https://", "http://");
+				if (sharedData.upgradedDomains.has(targetDomain)) {
+					// Its been upgraded to https by ZAP, but the alerts wont have been
+					target = target.replace("https://", "http://");
+				}
+
+				if (targetDomain in tool.alerts) {
+					for (var risk in RISKS) {
+						var alertRisk = RISKS[risk];
+						for (var alert in tool.alerts[targetDomain][alertRisk]) {
+							if (target in tool.alerts[targetDomain][alertRisk][alert]) {
+								var alert = tool.alerts[targetDomain][alertRisk][alert][target];
+								if (alert.param.length > 0) {
+									messageFrame("management", {
+										action: "commonAlerts.alert",
+										name: alert.name,
+										alertId: alert.alertId,
+										riskString: alert.riskString,
+										param: alert.param});
+								}
+							} 
 						}
-						if (target in tool.alerts[parseDomainFromUrl(targetDomain)][alertRisk][alert]) {
-							var alert = tool.alerts[parseDomainFromUrl(targetDomain)][alertRisk][alert][target];
-							if (alert.param.length > 0) {
-								messageFrame("management", {
-									action: "commonAlerts.alert",
-									name: alert.name,
-									alertId: alert.alertId,
-									riskString: alert.riskString,
-									param: alert.param});
-							}
-						} 
 					}
 				}
+
+				// Fetch all of the alerts on this page
+				fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
+				.then(function(response) {
+					response.json().
+						then(function(json) {
+							let pageAlerts = alertUtils.flattenAllAlerts(json);
+							let raisedEventDetails = {target: origTarget, pageAlerts : pageAlerts};
+							var ev = new CustomEvent("commonAlerts.pageAlerts", {detail: raisedEventDetails});
+							self.dispatchEvent(ev);
+						})
+						.catch(errorHandler);
+					})
+					.catch(errorHandler);
 			})
 		.catch(errorHandler);
 	});
@@ -122,12 +144,14 @@ var CommonAlerts = (function() {
 	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", function(event) {
 		if (event.detail['event.type'] === 'alert.added') {
 			if (parseDomainFromUrl(event.detail.uri) === targetDomain) {
+				let save = false;
 				if (sharedData.alerts[targetDomain] === undefined) {
 					sharedData.alerts[targetDomain] = {};
 					sharedData.alerts[targetDomain].Low = {};
 					sharedData.alerts[targetDomain].Medium = {};
 					sharedData.alerts[targetDomain].High = {};
 					sharedData.alerts[targetDomain].Informational = {};
+					save = true;
 				}
 				risk = event.detail['riskString'];
 				name = event.detail['name'];
@@ -137,26 +161,25 @@ var CommonAlerts = (function() {
 					log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'Show growler alert', risk + ' ' + name);
 					showGrowlerAlert(event.detail)
 						.catch(errorHandler);
+					save = true;
 				}
-				let url = event.detail.uri.substring(0, event.detail.uri.indexOf('?')); 
-				if ( !(url in sharedData.alerts[targetDomain][risk][name])) {
-					sharedData.alerts[targetDomain][risk][name][url] = event.detail;
+				if (save) {
+					loadTool(NAME)
+						.then(function(tool) {
+							// backup to localstorage in case the serviceworker dies
+							tool.alerts = sharedData.alerts;
+							return saveTool(tool);
+						}).then(function() {
+							// Raise the event after the data is saved
+							let raisedEventName = 'commonAlerts.' + risk;
+							// This is the number of the relevant type of risk :)
+							let raisedEventDetails = {count : Object.keys(sharedData.alerts[targetDomain][risk]).length};
+							log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
+							var ev = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
+							self.dispatchEvent(ev);
+						})
+						.catch(errorHandler);
 				}
-				loadTool(NAME)
-					.then(function(tool) {
-						// backup to localstorage in case the serviceworker dies
-						tool.alerts = sharedData.alerts;
-						return saveTool(tool);
-					}).then(function() {
-						// Raise the event after the data is saved
-						let raisedEventName = 'commonAlerts.' + risk;
-						// This is the number of the relevant type of risk :)
-						let raisedEventDetails = {count : Object.keys(sharedData.alerts[targetDomain][risk]).length};
-						log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
-						var ev = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
-						self.dispatchEvent(ev);
-					})
-					.catch(errorHandler);
 			} else {
 				log (LOG_TRACE, 'AlertEventPublisher eventListener', 'Ignoring alert.added event', event.detail['alertId']);
 			}

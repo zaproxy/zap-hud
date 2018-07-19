@@ -9,7 +9,7 @@ var PageAlertsLow = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "page-alerts-low";
-	var LABEL = "Low Risk Page Alerts";
+	var LABEL = "Page Alerts";
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
@@ -47,12 +47,16 @@ var PageAlertsLow = (function() {
 		initializeStorage();
 	});
 
-	self.addEventListener("commonAlerts." + ALERT_RISK, function(event) {
-		return alertUtils.updatePageAlertCount(NAME, targetUrl, ALERT_RISK);
+	self.addEventListener("commonAlerts.pageAlerts", function(event) {
+		if (targetUrl === event.detail.target) {
+			return alertUtils.setPageAlerts(NAME, event.detail.pageAlerts[ALERT_RISK]);
+		}
 	});
 
-	self.addEventListener("targetload", function(event) {
-		return alertUtils.updatePageAlertCount(NAME, event.detail.url, ALERT_RISK);
+	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", function(event) {
+		if (event.detail['event.type'] === 'alert.added') {
+			return alertUtils.updatePageAlertCount(NAME, targetUrl, event.detail, ALERT_RISK);
+		}
 	});
 
 	self.addEventListener("message", function(event) {

@@ -70,7 +70,7 @@ function showGrowlerAlert(alert) {
 		.log(content, function(event) {
 			var alertId = event.target.querySelector("#alertId").value;
 
-			navigator.serviceWorker.controller.postMessage({tool: "site-alerts-all", action: "showAlertDetails", "id": alertId});
+			navigator.serviceWorker.controller.postMessage({tool: "common-alerts", action: "showAlertDetails", "id": alertId});
 		});
 
 	setTimeout(function() {
