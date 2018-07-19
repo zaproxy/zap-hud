@@ -9,13 +9,13 @@ var SiteAlertsInformational = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "site-alerts-informational";
-	var LABEL = "Informational Risk Site Alerts";
+	var LABEL = "Site Alerts";
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
         ICONS.PA = "site-alerts-informational.png";
     var ALERT_TYPE = "site-alerts"
-    var ALERT_RISK = "informational"
+    var ALERT_RISK = "Informational"
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -36,7 +36,7 @@ var SiteAlertsInformational = (function() {
 	}
 
 	function showAlerts(domain) {
-		alertUtils.showAlerts(LABEL, domain, ALERT_RISK);
+		alertUtils.showSiteAlerts(LABEL, domain, ALERT_RISK);
 	}
 
 	function onPanelLoad(data) {
