@@ -423,19 +423,6 @@
 		<build-deploy-addon name="hud" />
 	</target>
 
-	<macrodef name="build-hud-addon" description="Builds the HUD add-on">
-		<sequential>
-			<build-addon name="hud">
-				<!-- Add the extra classes required -->
-				<jar jarfile="${dist}/${file}" update="true" compress="true">
-					<zipfileset dir="${build}" prefix="">
-						<include name="net/htmlparser/jericho/**"/>
-					</zipfileset>
-				</jar>
-			</build-addon>
-		</sequential>
-	</macrodef>
-
 	<target name="lint-staged-hud" description="run the XO linter on the staged hud extension">
 		<exec executable="npm">
 			<arg line="run lint-staged" />
