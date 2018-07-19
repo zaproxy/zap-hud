@@ -339,12 +339,12 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 
 				Source document = new Source(html);
 				List<Element> heads = document.getAllElements("head");
-				Element head = (heads.size() > 0) ? heads.get(0) : null;
+				Element head = heads.isEmpty() ? null: heads.get(0);
 
 				String htmlFile = HUD_HTML;
 				String hudScript = this.api.getFile(msg, htmlFile);
 
-				if (head != null) {
+				if (head != null && hudScript != null) {
 					// These are the only files that use FILE_PREFIX
 					hudScript = hudScript.replace("<<FILE_PREFIX>>", api.getUrlPrefix(api.getSite(msg)));
 
@@ -353,7 +353,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 					newResponseBody.insert(insertPosition, hudScript);
 
 					msg.getResponseBody()
-						 .setBody(newResponseBody.toString());
+						.setBody(newResponseBody.toString());
 					int newLength = msg.getResponseBody().length();
 					msg.getResponseHeader().setContentLength(newLength);
 
