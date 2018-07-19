@@ -31,8 +31,8 @@ var BUTTON_LABEL = /BUTTON_LABEL/g;
 var IMAGE_NAME = /IMAGE_NAME/g;
 
 // default tools
-var DEFAULT_TOOLS_LEFT = ["scope", "break", "site-alerts-high", "site-alerts-medium", "site-alerts-low", "site-alerts-informational"];
-var DEFAULT_TOOLS_RIGHT = ["site-tree", "spider", "active-scan", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational"];
+var DEFAULT_TOOLS_LEFT = ["scope", "break", "showEnable", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational"];
+var DEFAULT_TOOLS_RIGHT = ["site-tree", "spider", "active-scan", "attack", "site-alerts-high", "site-alerts-medium", "site-alerts-low", "site-alerts-informational"];
 
 
 class NoClientIdError extends Error {};
