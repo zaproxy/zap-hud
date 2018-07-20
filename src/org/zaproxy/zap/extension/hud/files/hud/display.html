@@ -216,8 +216,9 @@
         <template id="history-message-modal-template">
             <http-message-modal ref="messageModal" :title="title" :show="show" @close="close" :request="request" :response="response" :is-response-disabled="isResponseDisabled" :active-tab="activeTab">
                 <div slot="footer">
+                	<div><span class="errorMessages">{{errors}}</span></div>
                     <button class="btn btn-primary" @click="replay">Replay in Console</button>
-                    <button class="btn disabled" @click="replayInBrowser">Replay in Browser</button>
+                    <button class="btn" @click="replayInBrowser">Replay in Browser</button>
                 </div>
             </http-message-modal>
         </template>

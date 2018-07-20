@@ -321,6 +321,12 @@
 			'<iframe id="growler-alerts" src="<<ZAP_HUD_FILES>>?name=growlerAlerts.html" style="position: fixed; right: 0px; bottom: 0px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;"></iframe>';
 		document.body.appendChild(template.content);
 		document.body.style.marginBottom = "50px";
+		
+		let zapReplaceOffset = window.location.href.indexOf('zapHudReplaceReq=');
+		if (zapReplaceOffset > 0) {
+			// Hide the zapHudReplaceReq injected when resending a message in the browser
+			history.pushState({},document.title,window.location.href.substring(0, zapReplaceOffset-1));
+		}
 	}
 	
 	return {
