@@ -34,6 +34,7 @@ Vue.component('dom-events', {
 
     Event.listen('appendEvent', function(data) {
       self.events.push(data.event);
+      self.$parent.$emit('badgeDataEvent', {data: 1});
     })
   }
 });
@@ -68,11 +69,11 @@ Vue.component('history', {
             self.messages = data.messages;
         })
 
-		Event.listen('updateMessages', function(data) {
+		    Event.listen('updateMessages', function(data) {
             self.messages = self.messages.concat(data.messages);
 
             let count = data.messages.length;
-            self.$parent.$emit('badgeDataEvent', {data: count}) 
+            self.$parent.$emit('badgeDataEvent', {data: count});
         });
     },
     updated() {
@@ -177,6 +178,7 @@ Vue.component('storage', {
 
     Event.listen('appendStorageEvent', function(data) {
       self.storageEvents.push(data.event);
+      self.$parent.$emit('badgeDataEvent', {data: 1});
     })
   }
 });
