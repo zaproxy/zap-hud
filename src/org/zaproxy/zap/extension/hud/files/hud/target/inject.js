@@ -4,7 +4,7 @@
  * Description goes here...
  */
 
- var injection  = (function () {
+var injection  = (function () {
 	/* HELPERS */
 	function isFromTrustedOrigin (message) {
 		return (
@@ -15,7 +15,6 @@
 
 	/* TARGET INTERACTIONS */
 	// code that will interact with the target domain will go here
-
 
 	/* FRAMES */
 	// todo: standardize z-indexes. they will need to be really high, see youtube and espn for why
@@ -37,13 +36,11 @@
 	function expandPanel(panelOrientation){
 		// todo: is this too hacky?
 		var panel = document.getElementById(panelOrientation+"-panel");
-
 		panel.style.width = "300px";
 	}
 
 	function contractPanel(panelOrientation){
 		var panel = document.getElementById(panelOrientation+"-panel");
-		
 		panel.style.width = "110px";
 	}
 
@@ -83,7 +80,7 @@
 	function hideMainDisplay() {
 		document.getElementById("main-display").style.display = "none";
 	}
-	
+
 	function showBottomDrawer() {
 		document.getElementById("bottom-drawer").style.height = "30%";
 	}
@@ -91,7 +88,6 @@
 	function hideBottomDrawer() {
 		document.getElementById("bottom-drawer").style.height = "50px";
 	}
-
 
 	function expandManagement() {
 		document.getElementById("management").style.width = "100%";
@@ -102,7 +98,7 @@
 		document.getElementById("management").style.width = "50px";
 		document.getElementById("management").style.height = "50px";
 	}
-	
+
 	// TODO put this code in a separate file and inject ?
 	var showEnabled = false;
 	var showEnabledCount = 0;
@@ -161,7 +157,6 @@
 		showEnabled = false;
 		showEnabledCount = 0
 	}
-	
 
 	function showEnableCount() {
 		var count = 0;
@@ -184,7 +179,7 @@
 		var iframe = document.getElementById("management");
 		iframe.contentWindow.postMessage({action: 'showEnable.count', count: count, sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
 	}
-	
+
 	function highlightAlert(alert) {
 		var id = alert.param;
 		var el = document.getElementById(id);
@@ -213,13 +208,11 @@
 		}
 	}
 
-
 	function showZapAlertInternal (alertId) {
 		// Send to the management frame with the shared secret
 		var iframe = document.getElementById("management");
 		iframe.contentWindow.postMessage({action: 'commonAlerts.showAlert', alertId: alertId, sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
 	}
-
 
 	/* COMMUNICATIONS */
 	function receiveMessages (event) {
@@ -243,7 +236,7 @@
 			case "hideMainDisplay":
 				hideMainDisplay();
 				break;
-			
+
 			case "showBottomDrawer":
 				showBottomDrawer();
 				break;
@@ -299,7 +292,7 @@
 			case "showEnable.count":
 				showEnableCount();
 				break;
-				
+
 			case "commonAlerts.alert":
 				highlightAlert(message);
 				break;
@@ -308,10 +301,21 @@
 				break;
 		}
 	}
-	
-	/* initializes the HUD Frames */
+
 	if (window.top == window.self) {
 		window.addEventListener("message", receiveMessages);
+  }
+
+	return {
+		showZapAlert: function(alertId) {
+			showZapAlertInternal(alertId);
+		}
+	};
+})();
+
+window.onload = function () {
+	/* initializes the HUD Frames */
+	if (window.top == window.self) {
 		var template = document.createElement("template");
 		template.innerHTML = '<iframe id="management" src="<<ZAP_HUD_FILES>>?name=management.html" scrolling="no" style="position: fixed; left: 0px; top: 0px; width:28px; height:28px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
 			'<iframe id="left-panel" src="<<ZAP_HUD_FILES>>?name=panel.html&amp;url=<<URL>>&amp;orientation=left" scrolling="no" style="position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
@@ -322,10 +326,4 @@
 		document.body.appendChild(template.content);
 		document.body.style.marginBottom = "50px";
 	}
-	
-	return {
-		showZapAlert: function(alertId) {
-			showZapAlertInternal(alertId);
-		}
-	};
-})();
+};
