@@ -3084,15 +3084,12 @@ html {
     transform: translate(-.2rem, 50%);
   }
 
-  @keyframes fadeinout {
+  @keyframes fadein {
     0% {
       opacity: 0;
     }
-    50% {
-      opacity: 1;
-    }
     100% {
-      opacity: 0;
+      opacity: 1;
     }
   }
   
@@ -3119,7 +3116,7 @@ html {
   .loading-screen {
     height: 100%;
     width: 100%;
-    animation: fadeinout 6s;
+    animation: fadein 2s;
     background: rgba(248, 249, 250, .8);
     cursor: default;
   }

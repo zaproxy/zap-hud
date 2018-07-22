@@ -139,7 +139,7 @@ function startServiceWorker() {
 						parent.postMessage( {action: 'refreshStartupFrames'} , document.referrer);
 						setInterval(function() {
 							parent.postMessage( {action: 'refreshManagement'}, document.referrer)
-						}, 4500)
+						}, 3000)
 					})
 					.catch(errorHandler);
 			})
