@@ -28,7 +28,6 @@ Vue.component('hud-button', {
 	}
 })
 
-// TODO: implement a super cool loading screen
 Vue.component('loading-screen', {
 	template: '#loading-screen-template',
 	props: []
@@ -46,11 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// if first time starting HUD boot up the service worker
 	if (navigator.serviceWorker.controller === null) {
-		/*
-		// TODO: turn this on for a cool loading screen
 		parent.postMessage( {action: 'expandManagement'} , document.referrer);
 		app.isLoadingScreenShown = true;
-		*/
 		startServiceWorker();
 	}
 	else {
@@ -139,9 +135,11 @@ function startServiceWorker() {
 				// wait until serviceworker is installed and activated
 				navigator.serviceWorker.ready
 					.then(function(serviceWorkerRegistration) {
-
 						// refresh the target page
-						parent.postMessage( {action: 'refresh'} , document.referrer);
+						parent.postMessage( {action: 'refreshStartupFrames'} , document.referrer);
+						setInterval(function() {
+							parent.postMessage( {action: 'refreshManagement'}, document.referrer)
+						}, 4500)
 					})
 					.catch(errorHandler);
 			})

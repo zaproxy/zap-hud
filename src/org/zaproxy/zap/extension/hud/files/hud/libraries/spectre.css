@@ -3083,6 +3083,18 @@ html {
   .tooltip.tooltip-left:hover::after {
     transform: translate(-.2rem, 50%);
   }
+
+  @keyframes fadeinout {
+    0% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
   
   @keyframes loading {
     0% {
@@ -3102,6 +3114,33 @@ html {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  .loading-screen {
+    height: 100%;
+    width: 100%;
+    animation: fadeinout 6s;
+    background: rgba(248, 249, 250, .8);
+    cursor: default;
+  }
+
+  .loading-screen-message {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    animation: slide-down 3s ease 1;
+  }
+
+  .loading-screen-message img {
+    height: 200px;
+    width: 200px;
+    display:block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .loading-screen-message h1 {
+    text-align: center;
   }
   
   .text-primary {

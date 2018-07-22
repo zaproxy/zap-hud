@@ -272,6 +272,19 @@
 				window.location.reload(false);
 				break;
 
+			case "refreshStartupFrames":
+				document.getElementById("bottom-drawer").src = document.getElementById("bottom-drawer").src;
+				document.getElementById("left-panel").src = document.getElementById("left-panel").src;
+				document.getElementById("right-panel").src = document.getElementById("right-panel").src;
+				document.getElementById("main-display").src = document.getElementById("main-display").src;
+				document.getElementById("growler-alerts").src = document.getElementById("growler-alerts").src;
+				break;
+
+			case "refreshManagement":
+				document.getElementById("management").src = document.getElementById("management").src;
+				contractManagement();
+				break;
+
 			case "heighten":
 				heighten(message.orientation);
 				break;

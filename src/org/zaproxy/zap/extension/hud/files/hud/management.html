@@ -11,8 +11,7 @@
 <body>
 	<div id="app"> 
 		<hud-button v-show="isSettingsButtonShown" icon="<<ZAP_HUD_FILES>>?image=gear.png"></hud-button>
-		<!--TODO: implement this for splash screen on first time load-->
-		<!-- <loading-screen v-show="isLoadingScreenShown"></loading-screen> -->
+		<loading-screen v-show="isLoadingScreenShown"></loading-screen>
 	</div>
 
 	<template id="hud-button-template">
@@ -22,13 +21,13 @@
 		</div>
 	</template>
 
-	<!-- TODO: make this a super cool loading screen -->
-	<!--
 	<template id="loading-screen-template">
-		<div>
-			<h1>The HUD is loading.</h1>
+		<div class="loading-screen">
+			<div class="loading-screen-message">
+				<img src="<<ZAP_HUD_FILES>>?image=zap-hud-large.png" />
+				<h1>The HUD is loading.</h1>
+			</div>
 		</div>
 	</template>
-	-->
 </body>
 </html>

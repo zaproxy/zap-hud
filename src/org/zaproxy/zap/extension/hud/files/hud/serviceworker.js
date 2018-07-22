@@ -91,8 +91,7 @@ self.addEventListener("fetch", function(event) {
 			.then(function(response) {  
 
 				if (response) {
-					// save the frame id as a destination for postmesssaging later
-					if (event.request.url.endsWith(".js")) {
+					if (event.request.url.endsWith('.js')) {
 						saveFrameId(event);
 					}
 
