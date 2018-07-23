@@ -86,6 +86,10 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	protected static final String TARGET_DIRECTORY = "target";
 	protected static final String HUD_HTML = TARGET_DIRECTORY + "/injectionHtml.html";
 
+	private static final String HTTP_HEADER_CSP = "Content-Security-Policy";
+	private static final String HTTP_HEADER_XCSP = "X-Content-Security-Policy";
+	private static final String HTTP_HEADER_WEBKIT_CSP = "X-WebKit-CSP";
+
 	// Change only after the message has been persisted, otherwise ZAP would see the HUD injections.
 	private static final int PROXY_LISTENER_ORDER = ProxyListenerLog.PROXY_LISTENER_ORDER + 1000;
 	
@@ -366,6 +370,13 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 								new Event(HudEventPublisher.getPublisher(), 
 										HudEventPublisher.EVENT_DOMAIN_UPGRADED_TO_HTTPS,
 										null, map ));
+					}
+					
+					if (this.getHudParam().isRemoveCSP()) {
+						// Remove all of them, just in case
+						msg.getResponseHeader().setHeader(HTTP_HEADER_CSP, null);
+						msg.getResponseHeader().setHeader(HTTP_HEADER_XCSP, null);
+						msg.getResponseHeader().setHeader(HTTP_HEADER_WEBKIT_CSP, null);
 					}
 				}
 			} catch (Exception e) {
