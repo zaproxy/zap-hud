@@ -37,6 +37,7 @@ public class HudParam extends VersionedAbstractParam {
     private static final String PARAM_DEV_MODE = PARAM_BASE_KEY + ".devMode";
     private static final String PARAM_ALLOW_UNSAFE_EVAL = PARAM_BASE_KEY + ".unsafeEval";
     private static final String PARAM_IN_SCOPE_ONLY = PARAM_BASE_KEY + ".inScopeOnly";
+    private static final String PARAM_REMOVE_CSP = PARAM_BASE_KEY + ".removeCsp";
 
     /**
      * The version of the configurations. Used to keep track of configurations changes between releases, if updates are needed.
@@ -55,6 +56,8 @@ public class HudParam extends VersionedAbstractParam {
     private boolean enabled;
     
     private boolean inScopeOnly;
+    
+    private boolean removeCSP;
 
     public String getBaseDirectory() {
         return baseDirectory;
@@ -110,6 +113,17 @@ public class HudParam extends VersionedAbstractParam {
         getConfig().setProperty(PARAM_IN_SCOPE_ONLY, inScopeOnly);
     }
 
+    
+    public boolean isRemoveCSP() {
+        return removeCSP;
+    }
+
+    
+    public void setRemoveCSP(boolean removeCSP) {
+        this.removeCSP = removeCSP;
+        getConfig().setProperty(PARAM_REMOVE_CSP, inScopeOnly);
+    }
+
     @Override
     protected String getConfigVersionKey() {
         return PARAM_BASE_KEY + VERSION_ATTRIBUTE;
@@ -128,6 +142,7 @@ public class HudParam extends VersionedAbstractParam {
         developmentMode = getConfig().getBoolean(PARAM_DEV_MODE, false);
         allowUnsafeEval = getConfig().getBoolean(PARAM_ALLOW_UNSAFE_EVAL, false);
         inScopeOnly = getConfig().getBoolean(PARAM_IN_SCOPE_ONLY, false);
+        removeCSP = getConfig().getBoolean(PARAM_REMOVE_CSP, true);
     }
 
     @Override
