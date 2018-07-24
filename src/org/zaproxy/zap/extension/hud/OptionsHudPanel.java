@@ -55,6 +55,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
 
     private JTextField baseDirectory;
     private JCheckBox inScopeOnly = null;
+    private JCheckBox removeCsp = null;
     private JCheckBox developmentMode = null;
     private JCheckBox allowUnsafeEval = null;
 
@@ -78,8 +79,9 @@ public class OptionsHudPanel extends AbstractParamPanel {
         panel.add(directoryLabel, LayoutHelper.getGBC(0, 0, 1, 1.0, new Insets(2, 2, 2, 2)));
         panel.add(overridesPanel, LayoutHelper.getGBC(1, 0, 1, 1.0, new Insets(2, 2, 2, 2)));
         panel.add(getInScopeOnly(), LayoutHelper.getGBC(0, 1, 2, 1.0));
-        panel.add(getDevelopmentMode(), LayoutHelper.getGBC(0, 2, 2, 1.0));
-        panel.add(getAllowUnsafeEval(), LayoutHelper.getGBC(0, 3, 2, 1.0));
+        panel.add(getRemoveCsp(), LayoutHelper.getGBC(0, 2, 2, 1.0));
+        panel.add(getDevelopmentMode(), LayoutHelper.getGBC(0, 3, 2, 1.0));
+        panel.add(getAllowUnsafeEval(), LayoutHelper.getGBC(0, 4, 2, 1.0));
 
         add(panel);
     }
@@ -96,6 +98,13 @@ public class OptionsHudPanel extends AbstractParamPanel {
             inScopeOnly = new JCheckBox(Constant.messages.getString("hud.optionspanel.label.inScopeOnly"));
         }
         return inScopeOnly;
+    }
+
+    private JCheckBox getRemoveCsp() {
+        if (removeCsp == null) {
+            removeCsp = new JCheckBox(Constant.messages.getString("hud.optionspanel.label.removeCsp"));
+        }
+        return removeCsp;
     }
 
     
@@ -127,6 +136,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
 
         getBaseDirectory().setText(param.getBaseDirectory());
         getInScopeOnly().setSelected(param.isInScopeOnly());
+        getRemoveCsp().setSelected(param.isRemoveCSP());
         getDevelopmentMode().setSelected(param.isDevelopmentMode());
         getAllowUnsafeEval().setSelected(param.isAllowUnsafeEval());
         getAllowUnsafeEval().setEnabled(developmentMode.isSelected());
@@ -163,6 +173,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
 
         param.setBaseDirectory(getBaseDirectory().getText());
         param.setInScopeOnly(getInScopeOnly().isSelected());
+        param.setRemoveCSP(getRemoveCsp().isSelected());
         param.setDevelopmentMode(getDevelopmentMode().isSelected());
         param.setAllowUnsafeEval(getAllowUnsafeEval().isSelected());
     }
