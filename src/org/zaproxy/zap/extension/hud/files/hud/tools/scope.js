@@ -147,8 +147,8 @@ var Scope = (function() {
 		});
 	}
 
-	function onPanelLoad(data) {
-		return checkDomainInScope(data.domain)
+	self.addEventListener('targetload', function(event){
+		return checkDomainInScope(event.detail.domain)
 			.then(function(isInScope) {
 				if (isInScope) {
 					loadTool(NAME)
@@ -170,7 +170,7 @@ var Scope = (function() {
 				}
 			})
 			.catch(errorHandler);
-	}
+	});
 
 	function showOptions() {
 		var config = {};
@@ -228,7 +228,6 @@ var Scope = (function() {
 
 	return {
 		name: NAME,
-		onPanelLoad: onPanelLoad,
 		initialize: initializeStorage,
 		addToScope: addToScope,
 		isInScope: checkDomainInScope
