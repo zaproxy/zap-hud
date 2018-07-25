@@ -208,13 +208,19 @@ var ActiveScan = (function() {
 	self.addEventListener("org.zaproxy.zap.extension.ascan.ActiveScanEventPublisher", function(event) {
 		var eventType = event.detail['event.type'];
 		log (LOG_DEBUG, 'ActiveScanEventPublisher eventListener', 'Received ' + eventType + ' event');
-		if (eventType === 'scan.started') {
-			updateProgress("0%");
-		} else if (eventType === 'scan.progress') {
-			updateProgress(event.detail['scanProgress'] + '%');
-		} else  if (eventType === 'scan.stopped' || eventType === 'scan.completed') {
-			activeScanStopped();
-		}
+		checkIsRunning()
+			.then(function(isRunning) {
+				if (isRunning) {
+					if (eventType === 'scan.started') {
+						updateProgress("0%");
+					} else if (eventType === 'scan.progress') {
+						updateProgress(event.detail['scanProgress'] + '%');
+					} else  if (eventType === 'scan.stopped' || eventType === 'scan.completed') {
+						activeScanStopped();
+					}
+				}
+			})
+			.catch(errorHandler);
 	});
 
 	return {
