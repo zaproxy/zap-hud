@@ -97,25 +97,6 @@ var CommonAlerts = (function() {
 					target = target.replace("https://", "http://");
 				}
 
-				if (targetDomain in tool.alerts) {
-					for (var risk in RISKS) {
-						var alertRisk = RISKS[risk];
-						for (var alert in tool.alerts[targetDomain][alertRisk]) {
-							if (target in tool.alerts[targetDomain][alertRisk][alert]) {
-								var alert = tool.alerts[targetDomain][alertRisk][alert][target];
-								if (alert.param.length > 0) {
-									messageFrame("management", {
-										action: "commonAlerts.alert",
-										name: alert.name,
-										alertId: alert.alertId,
-										riskString: alert.riskString,
-										param: alert.param});
-								}
-							} 
-						}
-					}
-				}
-
 				// Fetch all of the alerts on this page
 				fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
 				.then(function(response) {
@@ -125,6 +106,24 @@ var CommonAlerts = (function() {
 							let raisedEventDetails = {target: origTarget, pageAlerts : pageAlerts};
 							var ev = new CustomEvent("commonAlerts.pageAlerts", {detail: raisedEventDetails});
 							self.dispatchEvent(ev);
+							
+							// Highlight any alerts related to form params
+							for (var risk in RISKS) {
+								var alertRisk = RISKS[risk];
+								for (var alertName in pageAlerts[alertRisk]) {
+									for (var i = 0; i < pageAlerts[alertRisk][alertName].length; i++) {
+										var alert = pageAlerts[alertRisk][alertName][i];
+										if (alert.param.length > 0) {
+											messageFrame("management", {
+												action: "commonAlerts.alert",
+												name: alert.name,
+												id: alert.id,
+												risk: alert.risk,
+												param: alert.param});
+										}
+									} 
+								}
+							}
 						})
 						.catch(errorHandler);
 					})

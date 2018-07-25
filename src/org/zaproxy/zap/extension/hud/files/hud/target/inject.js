@@ -204,12 +204,13 @@
 				'Medium': 'orange',
 				'High': 'red'
 			};
-			el.style.borderColor = colours[alert.riskString] || 'red';
+			let colour = colours[alert.risk];
+			el.style.borderColor = colour || 'red';
 			el.insertAdjacentHTML('afterend',
 				'<img src="<<ZAP_HUD_FILES>>?image=flag-' + colour + '.png" ' +
-				'id="zapHudAlert-' + alert.alertId + '" ' +
+				'id="zapHudAlert-' + alert.id + '" ' +
 				'title="' + alert.name + '" height="16" width="16" ' +
-				'onclick="injection.showZapAlert(' + alert.alertId + ');" />');
+				'onclick="injection.showZapAlert(' + alert.id + ');" />');
 		}
 	}
 
