@@ -359,7 +359,7 @@ Vue.component('break-message-modal', {
 
 Vue.component('history-message-modal', {
 	template: '#history-message-modal-template',
-	props: ['show', 'title'],
+	props: ['show', 'title', 'errors'],
 	methods: {
 		close: function() {
 			this.$emit('close');
@@ -371,7 +371,20 @@ Vue.component('history-message-modal', {
 			this.$emit('close');
 		},
 		replayInBrowser: function() {
-			console.log('this functionality isn\'t supported yet');
+			let dialog = this;
+			let message = this.request;
+			fetch("<<ZAP_HUD_API>>/hud/action/recordRequest/?header=" + encodeURIComponent(message.header) + "&body=" + encodeURIComponent(message.body))
+			.then(function(response) {
+				return response.json();
+			})
+			.then(function(json) {
+				if (json.requestUrl) {
+					window.top.location.href = json.requestUrl;
+				} else {
+					dialog.errors = "Invalid HTML header";
+				}
+			})
+			.catch(errorHandler)
 		}
 	},
 	data() {
@@ -380,7 +393,8 @@ Vue.component('history-message-modal', {
 			request: {},
 			response: {},
 			isResponseDisabled: false,
-			activeTab: "Request"
+			activeTab: 'Request',
+			errors: ''
 		}
 	},
 	created() {

@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -94,6 +95,9 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	private static final int PROXY_LISTENER_ORDER = ProxyListenerLog.PROXY_LISTENER_ORDER + 1000;
 	
 	private static final List<Class<? extends Extension>> DEPENDENCIES;
+
+	private static final String REPLACE_REQUEST_PARAM = "zapHudReplaceReq=";
+	private Map<String, HttpMessage> recordedRequests = new HashMap<String, HttpMessage>();
 
 	static {
 	    List<Class<? extends Extension>> dependencies = new ArrayList<>(1);
@@ -324,7 +328,22 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 
 	@Override
 	public boolean onHttpRequestSend(HttpMessage msg) {
-		// Do nothing
+		// Check for a replaced request
+        try {
+            if (this.recordedRequests.size() > 0) {
+                String url = msg.getRequestHeader().getURI().toString();
+                HttpMessage replacedMsg = this.recordedRequests.remove(url);
+                if (replacedMsg != null) {
+                    msg.setRequestHeader(replacedMsg.getRequestHeader());
+                    msg.setRequestBody(replacedMsg.getRequestBody());
+                    log.debug("Replaced full message " + msg.getRequestHeader().getMethod());
+                } else {
+                    log.warn("Failed to find request with url " + url);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
 		return true;
 	}
 	
@@ -385,6 +404,34 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 		}
 		return true;
 	}
+	
+    protected String setRecordedRequest(HttpMessage request) {
+        /*
+         * The HUD UI calls the API endpoint that calls this function and then
+         * immediately calls the URL this function returns, which removes the
+         * recorded request. If that ever changes then there might be a requirement
+         * to delete any requests that have not been consumed.
+         */
+        String key = UUID.randomUUID().toString();
+        String url = request.getRequestHeader().getURI().toString();
+        StringBuilder sb = new StringBuilder();
+        if (url.indexOf(REPLACE_REQUEST_PARAM) > 0) {
+            sb.append(url.substring(0, url.indexOf(REPLACE_REQUEST_PARAM)));
+        } else {
+            sb.append(url);
+            if (url.contains("?")) {
+                sb.append('&');
+            } else {
+                sb.append('?');
+            }
+        }
+        sb.append(REPLACE_REQUEST_PARAM);
+        sb.append(key);
+        String reqUrl = sb.toString();
+        
+        this.recordedRequests.put(reqUrl, request);
+        return reqUrl;
+    }
 
     /** @return index of pattern in s or -1, if not found */
 	public static int regexEndOf(Pattern pattern, String s) {
