@@ -35,6 +35,7 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.control.Control;
+import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.view.View;
 import org.zaproxy.zap.extension.api.API;
@@ -65,8 +66,11 @@ public class HudAPI extends ApiImplementor {
     private ExtensionHUD extension;
 
     private static final String ACTION_LOG = "log";
+    private static final String ACTION_RECORD_REQUEST = "recordRequest";
 
     private static final String PARAM_RECORD = "record";
+    private static final String PARAM_HEADER = "header";
+    private static final String PARAM_BODY = "body";
 	
 	/**
 	 * The only files that can be included on domain
@@ -92,6 +96,7 @@ public class HudAPI extends ApiImplementor {
     	this.extension = extension;
 
         this.addApiAction(new ApiAction(ACTION_LOG, new String[] {PARAM_RECORD}));
+        this.addApiAction(new ApiAction(ACTION_RECORD_REQUEST, new String[] {PARAM_HEADER, PARAM_BODY}));
     	
     	hudFileProxy = new HudFileProxy(this);
     	hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S); 
@@ -182,13 +187,25 @@ public class HudAPI extends ApiImplementor {
                 }
                 logger.debug(record);
                 break;
+            case ACTION_RECORD_REQUEST:
+                String header = params.getString(PARAM_HEADER);
+                String body = params.getString(PARAM_BODY);
+                try {
+                    HttpMessage requestMsg = new HttpMessage();
+                    requestMsg.setRequestHeader(header);
+                    requestMsg.setRequestBody(body);
+                    requestMsg.getRequestHeader().setContentLength(requestMsg.getRequestBody().length());
+                    return new ApiResponseElement("requestUrl", this.extension.setRecordedRequest(requestMsg));
+                } catch (HttpMalformedHeaderException e) {
+                    throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_HEADER);
+                }
+                
+            default:
+                throw new ApiException(ApiException.Type.BAD_ACTION);
+        }
 
-			default:
-				throw new ApiException(ApiException.Type.BAD_ACTION);
-		}
-
-		return ApiResponseElement.OK;
-	}
+        return ApiResponseElement.OK;
+    }
 
     protected String getSite(HttpMessage msg) throws URIException {
         StringBuilder site = new StringBuilder();
