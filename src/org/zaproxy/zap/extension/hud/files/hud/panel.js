@@ -95,7 +95,7 @@ Vue.component('hud-buttons', {
 	template: '#hud-buttons-template',
 	data() {
 		return {
-			tools: {},
+			tools: [],
 			orientation: orientation
 		}
 	},
