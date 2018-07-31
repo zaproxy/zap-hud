@@ -196,7 +196,7 @@ public class HudAPI extends ApiImplementor {
                     requestMsg.setRequestBody(body);
                     requestMsg.getRequestHeader().setContentLength(requestMsg.getRequestBody().length());
                     return new ApiResponseElement("requestUrl", this.extension.setRecordedRequest(requestMsg));
-                } catch (HttpMalformedHeaderException e) {
+                } catch (HttpMalformedHeaderException | URIException e) {
                     throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_HEADER);
                 }
                 
