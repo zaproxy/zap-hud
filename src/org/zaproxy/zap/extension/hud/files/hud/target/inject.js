@@ -326,7 +326,13 @@
 		let zapReplaceOffset = window.location.href.indexOf('zapHudReplaceReq=');
 		if (zapReplaceOffset > 0) {
 			// Hide the zapHudReplaceReq injected when resending a message in the browser
-			history.pushState({},document.title,window.location.href.substring(0, zapReplaceOffset-1));
+			// But dont loose any fragment
+			var fragment = window.location.hash.substr(1);
+			var origUrl = window.location.href.substring(0, zapReplaceOffset-1);
+			if (fragment) {
+				origUrl += "#" + fragment;
+			}
+			history.pushState({},document.title,origUrl);
 		}
 	}
 	
