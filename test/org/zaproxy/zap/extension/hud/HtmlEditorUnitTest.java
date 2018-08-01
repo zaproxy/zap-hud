@@ -84,7 +84,7 @@ public class HtmlEditorUnitTest {
         htmlEd.injectAtStartOfBody(INJECT_TOKEN);
         htmlEd.rewriteHttpMessage();
 
-        // Then = Exception
+        // Then
         assertTrue(htmlEd.isChanged());
         assertTrue(msg.getResponseBody().toString().indexOf(INJECT_TOKEN + EOB_TOKEN) > 0);
     }
@@ -99,7 +99,8 @@ public class HtmlEditorUnitTest {
         htmlEd.injectAtStartOfBody(INJECT_TOKEN);
         htmlEd.rewriteHttpMessage();
 
-        // Then = Exception
+        // Then
         assertFalse(htmlEd.isChanged());
+        assertTrue(msg.getResponseBody().toString().equals(htmlBody));
     }
 }

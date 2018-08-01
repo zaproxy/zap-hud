@@ -345,8 +345,8 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	public boolean onHttpRequestSend(HttpMessage msg) {
 		// Check for a replaced request
         try {
-            if (this.recordedRequests.size() > 0) {
-                String url = msg.getRequestHeader().getURI().toString();
+            String url = msg.getRequestHeader().getURI().toString();
+            if (this.recordedRequests.size() > 0 && url.indexOf(REPLACE_REQUEST_PARAM) > 0) {
                 HttpMessage replacedMsg = this.recordedRequests.remove(url);
                 if (replacedMsg != null) {
                     msg.setRequestHeader(replacedMsg.getRequestHeader());
@@ -406,7 +406,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 		return true;
 	}
 	
-    protected String setRecordedRequest(HttpMessage request) {
+    protected String setRecordedRequest(HttpMessage request) throws URIException {
         /*
          * The HUD UI calls the API endpoint that calls this function and then
          * immediately calls the URL this function returns, which removes the
@@ -415,7 +415,17 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
          */
         String key = UUID.randomUUID().toString();
         String url = request.getRequestHeader().getURI().toString();
+        String fragment = null;
         StringBuilder sb = new StringBuilder();
+        int fragmentOffset = url.indexOf("%23");
+        if (fragmentOffset > 0) {
+            // %23 is the # character, so this is really a fragment
+            fragment = url.substring(fragmentOffset+3);
+            // Replace in the header
+            request.getRequestHeader().setURI(new URI(url.replace("%23", "#"), true));
+            // Remove from the local copy - it will be added again at the end
+            url = url.substring(0, fragmentOffset);
+        }
         if (url.indexOf(REPLACE_REQUEST_PARAM) > 0) {
             sb.append(url.substring(0, url.indexOf(REPLACE_REQUEST_PARAM)));
         } else {
@@ -428,9 +438,16 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
         }
         sb.append(REPLACE_REQUEST_PARAM);
         sb.append(key);
-        String reqUrl = sb.toString();
-        
-        this.recordedRequests.put(reqUrl, request);
+        // The request we get from the browser wont contain the fragment
+        // and will have been downgraded from https -> http is relevant
+        this.recordedRequests.put(sb.toString(), request);
+
+        if (fragment != null) {
+            sb.append("#");
+            sb.append(fragment);
+        }
+        String reqUrl = sb.toString().replace("http://", "https://");
+        log.debug("setRecordedRequest returning " + reqUrl);
         return reqUrl;
     }
 
