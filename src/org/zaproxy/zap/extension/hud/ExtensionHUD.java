@@ -354,31 +354,14 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 				return true;
 			}
 			try {
-				String header = msg.getResponseBody().toString();
-
-				// TODO: confirm correct regex
-				Pattern pattern = Pattern.compile("<(\\s*?)body+(>|.*?[^?]>)");
-				int openBodyTag = regexEndOf(pattern, header.toLowerCase());
-
-				// TODO: can do more elegantly
-				String htmlFile = "";
-				htmlFile = HUD_HTML;
-
-				String hudScript = this.api.getFile(msg, htmlFile);
-
-				if (openBodyTag > -1  && hudScript != null) {
-					// These are the only files that use FILE_PREFIX
-					hudScript = hudScript.replace("<<FILE_PREFIX>>", api.getUrlPrefix(api.getSite(msg)));
-					
-					StringBuilder sb = new StringBuilder();
-					sb.append(header.substring(0, openBodyTag));
-					sb.append(hudScript);
-					sb.append(header.substring(openBodyTag));
-
-					String newBody = sb.toString();
-					msg.getResponseBody().setBody(newBody);
-					msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
-					
+				HtmlEditor htmlEd = new HtmlEditor(msg);
+				String hudScript = this.api.getFile(msg, HUD_HTML);
+				// These are the only files that use FILE_PREFIX
+				hudScript = hudScript.replace("<<FILE_PREFIX>>", api.getUrlPrefix(api.getSite(msg)));
+				htmlEd.injectAtStartOfBody(hudScript);
+				htmlEd.rewriteHttpMessage();
+				
+				if (htmlEd.isChanged()) {
 					URI uri = msg.getRequestHeader().getURI();
 					if (this.isUpgradedHttpsDomain(uri)) {
 						// Advise that we've upgraded this domain to https
@@ -397,10 +380,13 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 						msg.getResponseHeader().setHeader(HTTP_HEADER_XCSP, null);
 						msg.getResponseHeader().setHeader(HTTP_HEADER_WEBKIT_CSP, null);
 					}
-				}
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
+				} else {
+					log.debug("Failed to find body tag on " + msg.getRequestHeader().getURI());
+    			}
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+			
 		}
 		return true;
 	}
