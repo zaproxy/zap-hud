@@ -21,7 +21,8 @@ package org.zaproxy.zap.extension.hud;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,7 +39,6 @@ import org.zaproxy.zap.extension.selenium.ExtensionSelenium;
 public class HudBrowserTestThread extends Thread {
 
     private File file;
-    private String browser;
     private WebDriver wd;
     private boolean stop = false;
     private List<String> passes = new ArrayList<String>();
@@ -51,18 +51,18 @@ public class HudBrowserTestThread extends Thread {
     public HudBrowserTestThread(File file, String browser) throws IllegalArgumentException {
         this.setName("ZAP-HudBrowserTestThread");
         this.file = file;
-        this.browser = browser;
-        wd = getExtSelenium().getProxiedBrowser(this.browser);
+        wd = getExtSelenium().getProxiedBrowser(browser);
         if (wd == null) {
-            throw new IllegalArgumentException("No such browser " + this.browser);
+            throw new IllegalArgumentException("No such browser " + browser);
         }
     }
 
-    private ExtensionSelenium getExtSelenium() {
+    private static ExtensionSelenium getExtSelenium() {
         return Control.getSingleton().getExtensionLoader()
                 .getExtension(ExtensionSelenium.class);
     }
 
+    @Override
     public void run() {
         
         // Give it a bit of time to start up
@@ -73,7 +73,7 @@ public class HudBrowserTestThread extends Thread {
         }
         this.startTime = System.currentTimeMillis();
         
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (stop) {
@@ -89,10 +89,11 @@ public class HudBrowserTestThread extends Thread {
                     testUrl(wd, line);
                 }
             }
-            this.wd.close();
-            this.endTime = System.currentTimeMillis();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
+        } finally {
+            this.wd.close();
+            this.endTime = System.currentTimeMillis();
         }
     }
 

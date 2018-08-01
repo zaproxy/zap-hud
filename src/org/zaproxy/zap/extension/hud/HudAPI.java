@@ -214,7 +214,7 @@ public class HudAPI extends ApiImplementor {
                     requestMsg.setRequestBody(body);
                     requestMsg.getRequestHeader().setContentLength(requestMsg.getRequestBody().length());
                     return new ApiResponseElement("requestUrl", this.extension.setRecordedRequest(requestMsg));
-                } catch (HttpMalformedHeaderException e) {
+                } catch (HttpMalformedHeaderException | URIException e) {
                     throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_HEADER);
                 }
                 
@@ -224,7 +224,9 @@ public class HudAPI extends ApiImplementor {
                     throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_TEST_FILE);
                 }
                 try {
-                    this.extension.newTestThread(f, params.getString(PARAM_BROWSER));
+                    if (this.extension.newTestThread(f, params.getString(PARAM_BROWSER)) == null) {
+                        throw new ApiException(ApiException.Type.SCAN_IN_PROGRESS);
+                    }
                 } catch (IllegalArgumentException e) {
                     throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_BROWSER);
                 }
@@ -245,33 +247,39 @@ public class HudAPI extends ApiImplementor {
         return ApiResponseElement.OK;
     }
 
-   @Override
+    @Override
     public ApiResponse handleApiView(String name, JSONObject params) throws ApiException {
-       HudBrowserTestThread tt = this.extension.getTestThread();
-       if (tt == null) {
-           throw new ApiException(ApiException.Type.DOES_NOT_EXIST);
-       }
 
         switch (name) {
             case VIEW_TEST_PROGRESS:
-                return new ApiResponseElement(name, Integer.toString(tt.getProgress()));
+                return new ApiResponseElement(name, 
+                        Integer.toString(getTestThread().getProgress()));
             case VIEW_TEST_AVERAGE_LOAD_TIME:
-                return new ApiResponseElement(name, Long.toString(tt.getAverageLoadTimeInMSecs()));
+                return new ApiResponseElement(name, 
+                        Long.toString(getTestThread().getAverageLoadTimeInMSecs()));
             case VIEW_TEST_PASSES:
                 ApiResponseList passes = new ApiResponseList(name);
-                for (String pass : tt.getPasses()) {
+                for (String pass : getTestThread().getPasses()) {
                     passes.addItem(new ApiResponseElement("pass", pass));
                 }
                 return passes;
             case VIEW_TEST_FAILURES:
                 ApiResponseList failures = new ApiResponseList(name);
-                for (String fail : tt.getFails()) {
+                for (String fail : getTestThread().getFails()) {
                     failures.addItem(new ApiResponseElement("fail", fail));
                 }
                 return failures;
             default:
                 throw new ApiException(ApiException.Type.BAD_VIEW);
         }
+    }
+    
+    private HudBrowserTestThread getTestThread() throws ApiException {
+        HudBrowserTestThread tt = this.extension.getTestThread();
+        if (tt == null) {
+            throw new ApiException(ApiException.Type.DOES_NOT_EXIST);
+        }
+        return tt;
     }
 
     protected String getSite(HttpMessage msg) throws URIException {
