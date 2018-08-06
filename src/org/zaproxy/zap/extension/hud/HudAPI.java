@@ -44,6 +44,8 @@ import org.zaproxy.zap.extension.api.ApiException;
 import org.zaproxy.zap.extension.api.ApiImplementor;
 import org.zaproxy.zap.extension.api.ApiResponse;
 import org.zaproxy.zap.extension.api.ApiResponseElement;
+import org.zaproxy.zap.extension.api.ApiResponseList;
+import org.zaproxy.zap.extension.api.ApiView;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 
@@ -67,10 +69,19 @@ public class HudAPI extends ApiImplementor {
 
     private static final String ACTION_LOG = "log";
     private static final String ACTION_RECORD_REQUEST = "recordRequest";
+    private static final String ACTION_START_TEST = "startTest";
+    private static final String ACTION_STOP_TEST = "stopTest";
+
+    private static final String VIEW_TEST_PROGRESS = "testProgress";
+    private static final String VIEW_TEST_AVERAGE_LOAD_TIME = "testAverageLoadTime";
+    private static final String VIEW_TEST_PASSES = "testPasses";
+    private static final String VIEW_TEST_FAILURES = "testFailures";
 
     private static final String PARAM_RECORD = "record";
     private static final String PARAM_HEADER = "header";
     private static final String PARAM_BODY = "body";
+    private static final String PARAM_BROWSER = "browser";
+    private static final String PARAM_TEST_FILE = "testFile";
 	
 	/**
 	 * The only files that can be included on domain
@@ -97,7 +108,14 @@ public class HudAPI extends ApiImplementor {
 
         this.addApiAction(new ApiAction(ACTION_LOG, new String[] {PARAM_RECORD}));
         this.addApiAction(new ApiAction(ACTION_RECORD_REQUEST, new String[] {PARAM_HEADER, PARAM_BODY}));
-    	
+        this.addApiAction(new ApiAction(ACTION_START_TEST, new String[] {PARAM_TEST_FILE, PARAM_BROWSER}));
+        this.addApiAction(new ApiAction(ACTION_STOP_TEST));
+
+        this.addApiView(new ApiView(VIEW_TEST_PROGRESS));
+        this.addApiView(new ApiView(VIEW_TEST_AVERAGE_LOAD_TIME));
+        this.addApiView(new ApiView(VIEW_TEST_PASSES));
+        this.addApiView(new ApiView(VIEW_TEST_FAILURES));
+
     	hudFileProxy = new HudFileProxy(this);
     	hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S); 
         hudApiProxy = new HudApiProxy();
@@ -200,11 +218,68 @@ public class HudAPI extends ApiImplementor {
                     throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_HEADER);
                 }
                 
+            case ACTION_START_TEST:
+                File f = new File(params.getString(PARAM_TEST_FILE));
+                if (! f.isFile() && ! f.canRead()) {
+                    throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_TEST_FILE);
+                }
+                try {
+                    if (this.extension.newTestThread(f, params.getString(PARAM_BROWSER)) == null) {
+                        throw new ApiException(ApiException.Type.SCAN_IN_PROGRESS);
+                    }
+                } catch (IllegalArgumentException e) {
+                    throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_BROWSER);
+                }
+                break;
+            case ACTION_STOP_TEST:
+                HudBrowserTestThread tt = this.extension.getTestThread();
+                if (tt != null && tt.isAlive()) {
+                    tt.setStop(true);
+                } else {
+                    throw new ApiException(ApiException.Type.DOES_NOT_EXIST);
+                }
+                break;
+                
             default:
                 throw new ApiException(ApiException.Type.BAD_ACTION);
         }
 
         return ApiResponseElement.OK;
+    }
+
+    @Override
+    public ApiResponse handleApiView(String name, JSONObject params) throws ApiException {
+
+        switch (name) {
+            case VIEW_TEST_PROGRESS:
+                return new ApiResponseElement(name, 
+                        Integer.toString(getTestThread().getProgress()));
+            case VIEW_TEST_AVERAGE_LOAD_TIME:
+                return new ApiResponseElement(name, 
+                        Long.toString(getTestThread().getAverageLoadTimeInMSecs()));
+            case VIEW_TEST_PASSES:
+                ApiResponseList passes = new ApiResponseList(name);
+                for (String pass : getTestThread().getPasses()) {
+                    passes.addItem(new ApiResponseElement("pass", pass));
+                }
+                return passes;
+            case VIEW_TEST_FAILURES:
+                ApiResponseList failures = new ApiResponseList(name);
+                for (String fail : getTestThread().getFails()) {
+                    failures.addItem(new ApiResponseElement("fail", fail));
+                }
+                return failures;
+            default:
+                throw new ApiException(ApiException.Type.BAD_VIEW);
+        }
+    }
+    
+    private HudBrowserTestThread getTestThread() throws ApiException {
+        HudBrowserTestThread tt = this.extension.getTestThread();
+        if (tt == null) {
+            throw new ApiException(ApiException.Type.DOES_NOT_EXIST);
+        }
+        return tt;
     }
 
     protected String getSite(HttpMessage msg) throws URIException {
