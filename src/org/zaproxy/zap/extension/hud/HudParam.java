@@ -121,7 +121,7 @@ public class HudParam extends VersionedAbstractParam {
     
     public void setRemoveCSP(boolean removeCSP) {
         this.removeCSP = removeCSP;
-        getConfig().setProperty(PARAM_REMOVE_CSP, inScopeOnly);
+        getConfig().setProperty(PARAM_REMOVE_CSP, removeCSP);
     }
 
     @Override
