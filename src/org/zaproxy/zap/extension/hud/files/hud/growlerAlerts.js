@@ -8,7 +8,7 @@ var MAX_LINE_LENGTH = 45;
 
 var alertQueue = [];
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
 	if (typeof alertify != "undefined") {
 		alertify.maxLogItems(QUEUE_SIZE);
 		alertify.logPosition("bottom right");
@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	}
 });
 
-navigator.serviceWorker.addEventListener("message", function(event) {
+navigator.serviceWorker.addEventListener("message", event => {
 	var message = event.data;
 	
 	switch(message.action) {
@@ -48,7 +48,7 @@ function enqueueGrowlerAlert(alert, port) {
 		
 		alertQueue.push({'received': Date.now(), 'scheduled': schedule});
 
-		setTimeout(function() {
+		setTimeout(() => {
 			showGrowlerAlert(alert);
 		}, schedule);
 	}
@@ -67,13 +67,13 @@ function showGrowlerAlert(alert) {
 	alertify
 		.delay(DELAY_MS)
 		.closeLogOnClick(true)
-		.log(content, function(event) {
+		.log(content, event => {
 			var alertId = event.target.querySelector("#alertId").value;
 
 			navigator.serviceWorker.controller.postMessage({tool: "common-alerts", action: "showAlertDetails", "id": alertId});
 		});
 
-	setTimeout(function() {
+	setTimeout(() => {
 		shrinkFrame(lines);
 		alertQueue.shift();
 	}, DELAY_MS + 250);

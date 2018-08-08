@@ -8,12 +8,12 @@ var alertUtils = (function() {
 		config.risk = alertRisk;
 		
 		fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + domainWrapper(target) + "&recurse=true")
-		.then(function(response) {
+		.then(response => {
 			response.json().
-				then(function(json) {
+				then(json => {
 					config.alerts = flattenAllAlerts(json);
 					
-					messageFrame("display", {action: "showAllAlerts", config:config}).then(function(response) {
+					messageFrame("display", {action: "showAllAlerts", config:config}).then(response => {
 						// Handle button choice
 						if (response.alertId) {
 							let backFunction = function() {showSiteAlerts(title, target, alertRisk)};
@@ -66,12 +66,12 @@ var alertUtils = (function() {
 		}
 		
 		fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
-		.then(function(response) {
+		.then(response => {
 			response.json().
-				then(function(json) {
+				then(json => {
 					config.alerts = flattenAllAlerts(json);
 					
-					messageFrame("display", {action: "showAllAlerts", config:config}).then(function(response) {
+					messageFrame("display", {action: "showAllAlerts", config:config}).then(response => {
 						// Handle button choice
 						if (response.alertId) {
 							let backFunction = function() {showPageAlerts(title, target, alertRisk)};
@@ -90,17 +90,17 @@ var alertUtils = (function() {
 		log (LOG_DEBUG, 'showAlertDetails', '' + id);
 
 		fetch("<<ZAP_HUD_API>>/core/view/alert/?id=" + id)
-			.then(function(response) {
+			.then(response => {
 
 				response.json().
-					then(function(json) {
+					then(json => {
 
 						var config = {};
 						config.title = json.alert.alert;
 						config.details = json.alert;
 
 						messageFrame("display", {action: "showAlertDetails", config: config})
-							.then(function(response) {
+							.then(response => {
 								if (response.back) {
 									backFunction();
 								}
@@ -120,7 +120,7 @@ var alertUtils = (function() {
 		}
 		if (targetUrl === alertUrl && risk === alertEvent.riskString) {
 			loadTool(toolname)
-				.then(function(tool) {
+				.then(tool => {
 					let alertData = tool.alerts[alertEvent.name];
 					if (!alertData) {
 						// Don't need to add much, its the fact its here that matters
@@ -140,7 +140,7 @@ var alertUtils = (function() {
 
 	function setPageAlerts(toolname, alerts) {
 		loadTool(toolname)
-			.then(function(tool) {
+			.then(tool => {
 				tool.alerts = alerts;
 				tool.data = Object.keys(alerts).length;
 				return saveTool(tool);
@@ -150,7 +150,7 @@ var alertUtils = (function() {
 	
 	function updateAlertCount(toolname, count) {
 		loadTool(toolname)
-			.then(function(tool) {
+			.then(tool => {
 				tool.data = count;
 				return saveTool(tool);
 			})
@@ -169,7 +169,7 @@ var alertUtils = (function() {
 		config.options = {opt1: "Option 1", opt2: "Option 2", remove: "Remove"};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
-			.then(function(response) {
+			.then(response => {
 				// Handle button choice
 				if (response.id == "opt1") {
 					console.log("Option 1 chosen");

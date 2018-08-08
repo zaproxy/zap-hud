@@ -38,7 +38,7 @@ var Attack = (function() {
 	function showDialog(domain) {
 
 		checkIsRunning()
-			.then(function(isAttackMode) {
+			.then(isAttackMode => {
 				var config = {};
 
 				if(!isAttackMode) {
@@ -61,7 +61,7 @@ var Attack = (function() {
 				}
 
 				messageFrame("display", {action:"showDialog", config:config})
-					.then(function(response) {
+					.then(response => {
 						// Handle button choice
 						if (response.id === "turnon") {
 							turnOnAttackMode();
@@ -83,7 +83,7 @@ var Attack = (function() {
 			fetch("<<ZAP_HUD_API>>/core/action/setMode/?mode=attack");
 
 			loadTool(NAME)
-				.then(function(tool) {
+				.then(tool => {
 					tool.isRunning = true;
 					tool.icon = ICONS.ON;
 					tool.data = DATA.ON;
@@ -97,7 +97,7 @@ var Attack = (function() {
 		fetch("<<ZAP_HUD_API>>/core/action/setMode/?mode=standard");
 
 		loadTool(NAME)
-			.then(function(tool) {
+			.then(tool => {
 				tool.isRunning = false;
 				tool.icon = ICONS.OFF;
 				tool.data = DATA.OFF;
@@ -108,9 +108,9 @@ var Attack = (function() {
 	}
 
 	function checkIsRunning() {
-		return new Promise(function(resolve) {
+		return new Promise(resolve => {
 			loadTool(NAME)
-				.then(function(tool) {
+				.then(tool => {
 					resolve(tool.isRunning);
 				});
 		});
@@ -124,7 +124,7 @@ var Attack = (function() {
 		config.options = {remove: "Remove"};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
-			.then(function(response) {
+			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
 					removeToolFromPanel(NAME);
@@ -136,11 +136,11 @@ var Attack = (function() {
 			.catch(errorHandler);
 	}
 
-	self.addEventListener("activate", function(event) {
+	self.addEventListener("activate", event => {
 		initializeStorage();
 	});
 
-	self.addEventListener("message", function(event) {
+	self.addEventListener("message", event => {
 		var message = event.data;
 
 		// Broadcasts

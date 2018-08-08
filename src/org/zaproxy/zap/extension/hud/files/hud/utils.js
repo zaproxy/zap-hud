@@ -189,7 +189,7 @@ function configureStorage() {
 	promises.push(localforage.setItem(IS_HUD_CONFIGURED, true));
 	promises.push(localforage.setItem(IS_FIRST_TIME, true));
 		
-	promises.push(loadFrame("rightPanel").then(function(oldPanel) {
+	promises.push(loadFrame("rightPanel").then(oldPanel => {
 		var panel = {};
 
 		panel.key = "rightPanel";
@@ -202,7 +202,7 @@ function configureStorage() {
 		return saveFrame(panel);
 	}));
 
-	promises.push(loadFrame("leftPanel").then(function(oldPanel) {
+	promises.push(loadFrame("leftPanel").then(oldPanel => {
 		var panel = {};
 
 		panel.key = "leftPanel";
@@ -215,7 +215,7 @@ function configureStorage() {
 		return saveFrame(panel);
 	}));
 	
-	promises.push(loadFrame("display").then(function(oldFrame) {
+	promises.push(loadFrame("display").then(oldFrame => {
 		var frame = {};
 
 		frame.key = "display";
@@ -226,7 +226,7 @@ function configureStorage() {
 		return saveFrame(frame);
 	}));
 
-	promises.push(loadFrame("management").then(function(oldFrame) {
+	promises.push(loadFrame("management").then(oldFrame => {
 		var frame = {};
 
 		frame.key = "management";
@@ -237,7 +237,7 @@ function configureStorage() {
 		return saveFrame(frame);
 	}));
 
-	promises.push(loadFrame("growlerAlerts").then(function(oldFrame) {
+	promises.push(loadFrame("growlerAlerts").then(oldFrame => {
 		var frame = {};
 
 		frame.key = "growlerAlerts";
@@ -248,7 +248,7 @@ function configureStorage() {
 		return saveFrame(frame);
 	}));
 
-	promises.push(loadFrame('drawer').then(function(oldFrame) {
+	promises.push(loadFrame('drawer').then(oldFrame => {
 		var frame = {};
 
 		frame.key = "drawer";
@@ -268,20 +268,18 @@ function configureStorage() {
  */
 function setDefaultTools() {
 
-	return new Promise(function(resolve) {
+	return new Promise(resolve => {
 		var promises = [];
 
-		DEFAULT_TOOLS_LEFT.forEach(function(toolName) {
-			promises.push(function() { return addToolToPanel(toolName, "leftPanel");});
+		DEFAULT_TOOLS_LEFT.forEach(toolName => {
+			promises.push(() => addToolToPanel(toolName, "leftPanel"));
 		});
 
-		DEFAULT_TOOLS_RIGHT.forEach(function(toolName) {
-			promises.push(function() { return addToolToPanel(toolName, "rightPanel");});
+		DEFAULT_TOOLS_RIGHT.forEach(toolName => {
+			promises.push(() => addToolToPanel(toolName, "rightPanel"));
 		});
 
-		return promises.reduce(function(pacc, fn) {
-			return pacc.then(fn);
-		}, Promise.resolve());
+		return promises.reduce((pacc, fn) => pacc.then(fn), Promise.resolve());
 	});
 }
 
@@ -306,7 +304,7 @@ function saveFrame(frame) {
  */
 function registerTool(toolname) {
 	return localforage.getItem("tools")
-		.then(function(tools) {
+		.then(tools => {
 			tools.push(toolname);
 
 			return localforage.setItem("tools", tools);
@@ -319,7 +317,7 @@ function registerTool(toolname) {
  */
 function registerTools(toolnames) {
 	return localforage.getItem("tools")
-		.then(function(tools) {
+		.then(tools => {
 			tools = tools.concat(toolnames);
 
 			return localforage.setItem("tools", tools);
@@ -341,11 +339,11 @@ function loadTool(name) {
 function saveTool(tool) {
 	log(LOG_TRACE, 'utils.saveTool', tool.name);
 	return localforage.setItem(tool.name, tool)
-		.then(function(tool) {
+		.then(tool => {
 			// Notify Panel of Updated Data
 			if (tool.isSelected) {
 				messageFrame(tool.panel, {action:"updateData", tool:tool})
-					.catch(function(err) {
+					.catch(err => {
 						// this is only catching the NoClientIdError which occurs 
 						// when tools are added on startup and the panels haven't 
 						// been added yet
@@ -364,10 +362,10 @@ function saveTool(tool) {
 function loadPanelTools(panelKey) {
 	log(LOG_DEBUG, 'utils.loadPanelTools', 'Panel ' + panelKey);
 	return loadFrame(panelKey)
-		.then(function(panel) {
+		.then(panel => {
 			var toolPromises = [];
 
-			panel.tools.forEach(function(toolname) {
+			panel.tools.forEach(toolname => {
 				var p = loadTool(toolname);
 				log(LOG_DEBUG, 'utils.loadPanelTools', 'Tool ' + toolname, p);
 				toolPromises.push(p);
@@ -383,10 +381,10 @@ function loadPanelTools(panelKey) {
  */
 function loadAllTools() {
 	return localforage.getItem("tools")
-		.then(function(toolnames) {
+		.then(toolnames => {
 			var toolPromises = [];
 
-			toolnames.forEach(function(toolname) {
+			toolnames.forEach(toolname => {
 				var p = loadTool(toolname);
 				toolPromises.push(p);
 			})
@@ -406,7 +404,7 @@ function addToolToPanel(toolKey, panelKey) {
 	var promises = [loadTool(toolKey), loadFrame(panelKey)];
 	
 	return Promise.all(promises)
-		.then(function(results) {
+		.then(results => {
 			var tool = results[0];
 			var panel = results[1];
 			if (! tool) {
@@ -431,10 +429,8 @@ function addToolToPanel(toolKey, panelKey) {
 function removeToolFromPanel(toolKey) {
 
 	return loadTool(toolKey)
-		.then(function(tool) {
-			return Promise.all([tool, loadFrame(tool.panel), loadPanelTools(tool.panel)]);
-		})
-		.then(function(results) {
+		.then(tool => Promise.all([tool, loadFrame(tool.panel), loadPanelTools(tool.panel)]))
+		.then(results => {
 			var removedTool = results[0];
 			var panel = results[1];
 			var panelTools = results[2];
@@ -453,7 +449,7 @@ function removeToolFromPanel(toolKey) {
 			promises.push(saveFrame(panel));
 
 			// update all panel tool positions
-			panelTools.forEach(function(tool) {
+			panelTools.forEach(tool => {
 				if (tool.position > removedTool.position) {
 					tool.position = tool.position - 1;
 
@@ -463,7 +459,7 @@ function removeToolFromPanel(toolKey) {
 
 			return Promise.all(promises);
 		})
-		.then(function(results) {
+		.then(results => {
    			var tool = results[0];
 			var panel = results[1];
 
@@ -478,10 +474,8 @@ function removeToolFromPanel(toolKey) {
 function messageFrame(key, message) {
 	return loadFrame(key)
 			.then(getWindowFromFrame)
-			.then(function(window) {
-				return messageWindow(window, message);
-			})
-			.catch(function(err) {
+			.then(window => messageWindow(window, message))
+			.catch(err => {
 				// this catches all errors, unless it is a NoClientIdError
 				if (err instanceof NoClientIdError) {
 					throw err;
@@ -501,7 +495,7 @@ function getWindowFromFrame(frame) {
 		throw new Error("null frame passed to getWindowFromFrame");
 	}
 	return clients.get(frame.clientId)
-		.then(function(client) {
+		.then(client => {
 			if (client !== undefined) {
 				return client;
 			}
@@ -515,7 +509,7 @@ function getWindowFromFrame(frame) {
  * Send a postMessage to a window. 
  */
 function messageWindow(window, message, origin) {
-	return new Promise(function(resolve, reject) {
+	return new Promise((resolve, reject) => {
 		var channel = new MessageChannel();
 
 		channel.port1.onmessage = function(event) {
@@ -540,9 +534,7 @@ function messageWindow(window, message, origin) {
  * Sorts an array of tool objects by their position in descending order.
  */
 function sortToolsByPosition(tools) {
-	tools.sort(function (a, b) {
-		return b.position - a.position;
-	});
+	tools.sort((a, b) => b.position - a.position);
 }
 
 /*
@@ -592,7 +584,7 @@ function errorHandler(err) {
 	if (err.stack) {
 		// construct the stack trace
 		var lines = err.stack.split('\n').slice(0,-1);
-		lines.forEach(function(line) {
+		lines.forEach(line => {
 			var functionName = line.substring(0, line.indexOf('/'));
 			var urlAndLineNo = line.substring(line.indexOf('http'), line.length - 1);
 			var parts = urlAndLineNo.split(':');

@@ -41,11 +41,11 @@ var CommonAlerts = (function() {
 		return messageFrame("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
 	}
 
-	self.addEventListener("activate", function(event) {
+	self.addEventListener("activate", event => {
 		initializeStorage();
 	});
 
-	self.addEventListener("message", function(event) {
+	self.addEventListener("message", event => {
 		var message = event.data;
 
 		// Broadcasts
@@ -86,9 +86,9 @@ var CommonAlerts = (function() {
 		}
 	});
 
-	self.addEventListener("targetload", function(event) {
+	self.addEventListener("targetload", event => {
 		loadTool(NAME)
-			.then(function(tool) {
+			.then(tool => {
 				let origTarget = event.detail.url;
 				let target = origTarget;
 				let targetDomain = parseDomainFromUrl(target);
@@ -99,9 +99,9 @@ var CommonAlerts = (function() {
 
 				// Fetch all of the alerts on this page
 				fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
-				.then(function(response) {
+				.then(response => {
 					response.json().
-						then(function(json) {
+						then(json => {
 							let pageAlerts = alertUtils.flattenAllAlerts(json);
 							let raisedEventDetails = {target: origTarget, pageAlerts : pageAlerts};
 							var ev = new CustomEvent("commonAlerts.pageAlerts", {detail: raisedEventDetails});
@@ -132,7 +132,7 @@ var CommonAlerts = (function() {
 		.catch(errorHandler);
 	});
 
-	self.addEventListener("org.zaproxy.zap.extension.hud.HudEventPublisher", function(event) {
+	self.addEventListener("org.zaproxy.zap.extension.hud.HudEventPublisher", event => {
 		if (event.detail['event.type'] === 'domain.upgraded') {
 			sharedData.upgradedDomains.add(event.detail.domain);
 		} else if (event.detail['event.type'] === 'domain.redirected') {
@@ -140,7 +140,7 @@ var CommonAlerts = (function() {
 		} 
 	});
 
-	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", function(event) {
+	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", event => {
 		if (event.detail['event.type'] === 'alert.added') {
 			if (parseDomainFromUrl(event.detail.uri) === targetDomain) {
 				let save = false;
@@ -164,11 +164,11 @@ var CommonAlerts = (function() {
 				}
 				if (save) {
 					loadTool(NAME)
-						.then(function(tool) {
+						.then(tool => {
 							// backup to localstorage in case the serviceworker dies
 							tool.alerts = sharedData.alerts;
 							return saveTool(tool);
-						}).then(function() {
+						}).then(() => {
 							// Raise the event after the data is saved
 							let raisedEventName = 'commonAlerts.' + risk;
 							// This is the number of the relevant type of risk :)

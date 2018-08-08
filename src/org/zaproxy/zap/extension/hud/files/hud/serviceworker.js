@@ -29,19 +29,19 @@ var urlsToCache = [
 ];
 
 var toolScripts = [
-<<ZAP_HUD_TOOLS>>
+	<<ZAP_HUD_TOOLS>>
 ];
 
 self.tools = {};
 
 // Load Tool Scripts
 localforage.setItem("tools", [])
-	.then(function() {
-		toolScripts.forEach(function(script) {
+	.then(() => {
+		toolScripts.forEach(script => {
 			importScripts(script); 
 		});
 	})
-	.then(function(){
+	.then(() => {
 		var ts = [];
 		for (var tool in self.tools) {
 			ts.push(self.tools[tool].name);
@@ -52,13 +52,13 @@ localforage.setItem("tools", [])
 	.catch(errorHandler);
 
 /* Listeners */
-self.addEventListener("install", function(event) {
+self.addEventListener("install", event => {
 	log(LOG_INFO, 'serviceworker.install', 'Installing...');
 
 	// Cache Files
 	event.waitUntil(
 		caches.open(CACHE_NAME)
-			.then(function(cache) {
+			.then(cache => {
 				console.log("caching urls...");
 				return cache.addAll(urlsToCache);
 			})
@@ -66,17 +66,17 @@ self.addEventListener("install", function(event) {
 	);
 }); 
 
-self.addEventListener("activate", function(event) {
+self.addEventListener("activate", event => {
 	// Check Storage & Initiate
 	event.waitUntil(
 		isStorageConfigured()
-			.then(function(isConfigured) {
+			.then(isConfigured => {
 
 				if (!isConfigured || isDebugging) {
 					return configureStorage();
 				}
 			})
-			.then(function() {
+			.then(() => {
 				// set the default tools after configuring storage
 				setDefaultTools();
 			})
@@ -84,11 +84,11 @@ self.addEventListener("activate", function(event) {
 	);
 });
 
-self.addEventListener("fetch", function(event) {
+self.addEventListener("fetch", event => {
 	// Check Cache
 	event.respondWith(
 		caches.match(event.request)
-			.then(function(response) {  
+			.then(response => {  
 
 				if (response) {
 					// save the frame id as a destination for postmesssaging later
@@ -105,7 +105,7 @@ self.addEventListener("fetch", function(event) {
 	);
 });
 
-self.addEventListener("message", function(event) {
+self.addEventListener("message", event => {
 	if (!isFromTrustedOrigin(event)) {
 		return;
 	}
@@ -177,7 +177,7 @@ function saveFrameId(event) {
 	};
 
 	clients.get(event.clientId)
-		.then(function(client) {
+		.then(client => {
 			let params = new URL(client.url).searchParams;
 
 			let key = frameNames[params.get('name')];
@@ -187,7 +187,7 @@ function saveFrameId(event) {
 			}
 
 			loadFrame(key)
-				.then(function(frame) {
+				.then(frame => {
 					frame.clientId = client.id;
 
 					return saveFrame(frame);
@@ -201,7 +201,7 @@ function showAddToolDialog(panelKey) {
 	var config = {};
 
 	loadAllTools()
-		.then(function(tools) {
+		.then(tools => {
 
 			// filter out unselected tools
 			tools = tools.filter(tool => !tool.isSelected);
@@ -209,20 +209,22 @@ function showAddToolDialog(panelKey) {
 			tools = tools.filter(tool => !tool.isHidden);
 	
 			// reformat for displaying in list
-			tools = tools.map(function (tool) {
-				return {'label': tool.label, 'image': '<<ZAP_HUD_FILES>>?image=' + tool.icon, 'toolname': tool.name};
-			});
+			tools = tools.map(tool => ({
+                'label': tool.label,
+                'image': '<<ZAP_HUD_FILES>>?image=' + tool.icon,
+                'toolname': tool.name
+            }));
 
 			return tools;
 		})
-		.then(function(tools) {
+		.then(tools => {
 			// add tools to the config
 			config.tools = tools;
 
 			// display tools to select
 			return messageFrame("display", {action: "showAddToolList", config: config})
 		})
-		.then(function(response) {
+		.then(response => {
 			addToolToPanel(response.toolname, panelKey);
 		})
 		.catch(errorHandler);
@@ -235,7 +237,7 @@ function showHudSettings() {
 	};
 
 	messageFrame("display", {action: "showHudSettings", config: config})
-		.then(function(response) {
+		.then(response => {
 			if (response.id === "initialize") {
 				resetToDefault();
 			}
@@ -247,7 +249,7 @@ function resetToDefault() {
 	configureStorage()
 		.then(setDefaultTools)
 		.then(loadAllTools)
-		.then(function(tools) {
+		.then(tools => {
 			var promises = [];
 
 			for (var tool in tools) {
