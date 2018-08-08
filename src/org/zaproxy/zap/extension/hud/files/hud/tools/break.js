@@ -38,7 +38,7 @@ var Break = (function() {
 
 	function toggleBreak() {
 		loadTool(NAME)
-			.then(function(tool) {
+			.then(tool => {
 				if (tool.data === DATA.OFF) {
 					startBreaking();
 				}
@@ -52,7 +52,7 @@ var Break = (function() {
 	function showDialog(domain) {
 
 		checkIsRunning()
-			.then(function(isRunning) {
+			.then(isRunning => {
 				var config = {};
 
 				if(!isRunning) {
@@ -74,7 +74,7 @@ var Break = (function() {
 					];
 				}
 
-				messageFrame("display", {action:"showDialog", config:config}).then(function(response) {
+				messageFrame("display", {action:"showDialog", config:config}).then(response => {
 
 					// Handle button choice
 					if (response.id === "on") {
@@ -97,7 +97,7 @@ var Break = (function() {
 			.catch(errorHandler);
 
 		loadTool(NAME)
-			.then(function(tool) {
+			.then(tool => {
 				tool.isRunning = true;
 				tool.data = DATA.ON;
 				tool.icon = ICONS.ON;
@@ -113,7 +113,7 @@ var Break = (function() {
 			.catch(errorHandler);
 
 		loadTool(NAME)
-			.then(function(tool) {
+			.then(tool => {
 				tool.isRunning = false;
 				tool.data = DATA.OFF;
 				tool.icon = ICONS.OFF;
@@ -147,9 +147,9 @@ var Break = (function() {
 	}
 
 	function checkIsRunning() {
-		return new Promise(function(resolve) {
+		return new Promise(resolve => {
 			loadTool(NAME)
-				.then(function(tool) {
+				.then(tool => {
 					resolve(tool.isRunning);
 				});
 		});
@@ -181,18 +181,18 @@ var Break = (function() {
 		config.request.body = data.requestBody;
 
 		messageFrame("display", {action:"showBreakMessage", config:config})
-			.then(function(response) {
+			.then(response => {
 				// Handle button choice
 				if (response.buttonSelected === "step") {
 					setHttpMessage(response.header, response.body)
-						.then(function() {
+						.then(() => {
 							step();
 						})
 						.catch(errorHandler);
 				}
 				else if (response.buttonSelected === "continue") {
 					setHttpMessage(response.header, response.body)
-						.then(function() {
+						.then(() => {
 							stopBreaking();
 						})
 						.catch(errorHandler);
@@ -216,7 +216,7 @@ var Break = (function() {
 		config.options = {remove: "Remove", filter: "Add Filter"};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
-			.then(function(response) {
+			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
 					removeToolFromPanel(NAME);
@@ -225,11 +225,11 @@ var Break = (function() {
 			.catch(errorHandler);
 	}
 
-	self.addEventListener("activate", function(event) {
+	self.addEventListener("activate", event => {
 		initializeStorage();
 	});
 
-	self.addEventListener("message", function(event) {
+	self.addEventListener("message", event => {
 		var message = event.data;
 
 		// Broadcasts
@@ -259,7 +259,7 @@ var Break = (function() {
 		}
 	});
 
-	self.addEventListener("org.zaproxy.zap.extension.brk.BreakEventPublisher", function(event) {
+	self.addEventListener("org.zaproxy.zap.extension.brk.BreakEventPublisher", event => {
 		if (event.detail['event.type'] === 'break.active' && event.detail['messageType'] === 'HTTP') {
 			showBreakDisplay(event.detail);
 		}

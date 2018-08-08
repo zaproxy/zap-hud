@@ -22,13 +22,13 @@ webSocket.onmessage = function(event) {
 	document.getElementById("wsoutput").value += event.data + "\n";
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
 	// Very hacky, but its a start
-	document.getElementById('ex1').addEventListener('click', function(){copyToInput('ex1');});
-	document.getElementById('ex2').addEventListener('click', function(){copyToInput('ex2');});
-	document.getElementById('ex3').addEventListener('click', function(){copyToInput('ex3');});
-	document.getElementById('ex4').addEventListener('click', function(){copyToInput('ex4');});
+	document.getElementById('ex1').addEventListener('click', () => {copyToInput('ex1');});
+	document.getElementById('ex2').addEventListener('click', () => {copyToInput('ex2');});
+	document.getElementById('ex3').addEventListener('click', () => {copyToInput('ex3');});
+	document.getElementById('ex4').addEventListener('click', () => {copyToInput('ex4');});
 	
-	document.getElementById('wssend').addEventListener('click', function(){sendWebSocketMsg();});
-	document.getElementById('wsclear').addEventListener('click', function(){clearOutput();});
+	document.getElementById('wssend').addEventListener('click', () => {sendWebSocketMsg();});
+	document.getElementById('wsclear').addEventListener('click', () => {clearOutput();});
 });

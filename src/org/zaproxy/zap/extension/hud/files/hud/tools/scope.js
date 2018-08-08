@@ -39,7 +39,7 @@ var Scope = (function() {
 	function showDialog(domain) {
 
 		checkDomainInScope(domain)
-			.then(function(isInScope) {
+			.then(isInScope => {
 				var config = {};
 
 				if(!isInScope) {
@@ -63,7 +63,7 @@ var Scope = (function() {
 				}
 
 				messageFrame("display", {action:"showDialog", config:config})
-					.then(function(response) {
+					.then(response => {
 
 						// Handle button choice
 						if (response.id === "add") {
@@ -82,9 +82,9 @@ var Scope = (function() {
 	}
 
 	function checkDomainInScope(domain) {
-		return new Promise(function(resolve) {
+		return new Promise(resolve => {
 			loadTool(NAME)
-				.then(function(tool) {
+				.then(tool => {
 					var isInScope = tool.urls.includes(domain);
 					resolve(isInScope);
 				});
@@ -93,20 +93,16 @@ var Scope = (function() {
 
 	function addToScope(domain) {
 		return fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=Default%20Context&regex=" + domainWrapper(domain) + ".*")
-			.then(function() {
-				// add to list and save
-				return loadTool(NAME)
-					.then(function(tool) {
-						tool.urls.push(domain);
-						tool.data = DATA.IN;
-						tool.icon = ICONS.IN;
+			.then(() => // add to list and save
+        loadTool(NAME)
+            .then(tool => {
+                tool.urls.push(domain);
+                tool.data = DATA.IN;
+                tool.icon = ICONS.IN;
 
-						return saveTool(tool)
-							.then(function() {
-								return true;
-							});
-					});
-			})
+                return saveTool(tool)
+                    .then(() => true);
+            }))
 			.catch(errorHandler);
 	}
 
@@ -115,7 +111,7 @@ var Scope = (function() {
 
 		// remove from list and save
 		loadTool(NAME)
-			.then(function(tool) {
+			.then(tool => {
 				tool.urls.splice(tool.urls.indexOf(domain), 1);
 				tool.data = DATA.OUT;
 				tool.icon = ICONS.OUT;
@@ -127,16 +123,16 @@ var Scope = (function() {
 
 	function requireScope(targetDomain) {
 		
-		return new Promise(function(resolve, reject) {
+		return new Promise((resolve, reject) => {
 			checkDomainInScope(targetDomain)
-				.then(function(isInScope) {
+				.then(isInScope => {
 
 					if (!isInScope) {
 						return showScopeRequiredDialog(targetDomain);
 					}
 					return true;
 				})
-				.then(function(addedToScope) {
+				.then(addedToScope => {
 					if (addedToScope) {
 						resolve();
 					}
@@ -147,30 +143,28 @@ var Scope = (function() {
 		});
 	}
 
-	self.addEventListener('targetload', function(event){
-		return checkDomainInScope(event.detail.domain)
-			.then(function(isInScope) {
-				if (isInScope) {
-					loadTool(NAME)
-						.then(function(tool) {
-							tool.data = DATA.IN;
-							tool.icon = ICONS.IN;
+	self.addEventListener('targetload', event => checkDomainInScope(event.detail.domain)
+        .then(isInScope => {
+            if (isInScope) {
+                loadTool(NAME)
+                    .then(tool => {
+                        tool.data = DATA.IN;
+                        tool.icon = ICONS.IN;
 
-							saveTool(tool);
-						});
-				}
-				else {
-					loadTool(NAME)
-						.then(function(tool) {
-							tool.data = DATA.OUT;
-							tool.icon = ICONS.OUT;
+                        saveTool(tool);
+                    });
+            }
+            else {
+                loadTool(NAME)
+                    .then(tool => {
+                        tool.data = DATA.OUT;
+                        tool.icon = ICONS.OUT;
 
-							saveTool(tool);
-						});
-				}
-			})
-			.catch(errorHandler);
-	});
+                        saveTool(tool);
+                    });
+            }
+        })
+        .catch(errorHandler));
 
 	function showOptions() {
 		var config = {};
@@ -180,7 +174,7 @@ var Scope = (function() {
 		config.options = {remove: "Remove"};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
-			.then(function(response) {
+			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
 					removeToolFromPanel(NAME);
@@ -192,11 +186,11 @@ var Scope = (function() {
 			.catch(errorHandler);
 	}
 
-	self.addEventListener("activate", function(event) {
+	self.addEventListener("activate", event => {
 		initializeStorage();
 	});
 
-	self.addEventListener("message", function(event) {
+	self.addEventListener("message", event => {
 		var message = event.data;
 
 		// Broadcasts

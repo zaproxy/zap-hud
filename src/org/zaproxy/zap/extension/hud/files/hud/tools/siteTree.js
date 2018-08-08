@@ -46,7 +46,7 @@ var SiteTree = (function() {
 		config.options = {remove: "Remove"};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
-			.then(function(response) {
+			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
 					removeToolFromPanel(NAME);
@@ -58,11 +58,11 @@ var SiteTree = (function() {
 			.catch(errorHandler);
 	}
 
-	self.addEventListener("activate", function(event) {
+	self.addEventListener("activate", event => {
 		initializeStorage();
 	});
 
-	self.addEventListener("message", function(event) {
+	self.addEventListener("message", event => {
 		var message = event.data;
 
 		// Broadcasts
