@@ -47,20 +47,18 @@ var SiteAlertsInformational = (function() {
 		alertUtils.showOptions(NAME, LABEL)
 	}
 
-	self.addEventListener("activate", function(event) {
+	self.addEventListener("activate", event => {
 		initializeStorage();
 	});
 
-	self.addEventListener("commonAlerts.Informational", function(event) {
-		return loadTool(NAME)
-			.then(function(tool) {
-				tool.data = event.detail.count;
-				return saveTool(tool);
-			})
-			.catch(errorHandler);
-	});
+	self.addEventListener("commonAlerts.Informational", event => loadTool(NAME)
+        .then(tool => {
+            tool.data = event.detail.count;
+            return saveTool(tool);
+        })
+        .catch(errorHandler));
 
-	self.addEventListener("message", function(event) {
+	self.addEventListener("message", event => {
 		var message = event.data;
 
 		// Broadcasts

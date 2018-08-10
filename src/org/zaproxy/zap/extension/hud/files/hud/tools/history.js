@@ -39,7 +39,7 @@ var History = (function() {
 		config.options = {remove: "Remove"};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
-			.then(function(response) {
+			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
 					removeToolFromPanel(NAME);
@@ -50,15 +50,13 @@ var History = (function() {
 
 	function getMessageDetails(id) {
 		return fetch('<<ZAP_HUD_API>>/core/view/message/?id=' + id)
-			.then(function(response) {
+			.then(response => {
 				if (!response.ok) {
 					throw new Error('Could not find a message with id: ' + id);
 				}
 				return response.json();
 			})
-			.then(function(json) {
-				return json.message;
-			})
+			.then(json => json.message)
 			.catch(errorHandler);
 	}
 
@@ -86,14 +84,12 @@ var History = (function() {
 		}
 
 		return messageFrame("display", {action:"showHistoryMessage", config:config})
-			.then(function(data) {
+			.then(data => {
 				// Handle button choice
 				if (data.buttonSelected === "replay") {
 					sendRequest(data.header, data.body)
-					.then(function(response) {
-						return response.json();
-					})
-					.then(function(json) {
+					.then(response => response.json())
+					.then(json => {
 						let data = json.sendRequest[0];
 						data.activeTab = "Response"
 						return showHttpMessageDetails(data);
@@ -124,7 +120,7 @@ var History = (function() {
 			.catch(errorHandler);
 	}
     
-    self.addEventListener("org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher", function(event) {
+    self.addEventListener("org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher", event => {
 		var eventType = event.detail['event.type'];
         log (LOG_DEBUG, 'HistoryEventPublisher eventListener', 'Received ' + eventType + ' event');
 
@@ -147,18 +143,16 @@ var History = (function() {
         saveTool(tool);
 	});
 
-	self.addEventListener("activate", function(event) {
+	self.addEventListener("activate", event => {
 		initializeStorage();
 	});
 
 	function trimMessages(lastPageUnloadTime) {
-		tool.messages = tool.messages.filter(function(message) {
-			return message.timeInMs > lastPageUnloadTime;
-		})
+		tool.messages = tool.messages.filter(message => message.timeInMs > lastPageUnloadTime)
 		saveTool(tool);
 	}
 
-	self.addEventListener("message", function(event) {
+	self.addEventListener("message", event => {
 		var message = event.data;
 
 		// Broadcasts

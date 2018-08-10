@@ -46,23 +46,23 @@ var PageAlertsMedium = (function() {
 		alertUtils.showOptions(NAME, LABEL)
 	}
 
-	self.addEventListener("activate", function(event) {
+	self.addEventListener("activate", event => {
 		initializeStorage();
 	});
 
-	self.addEventListener("commonAlerts.pageAlerts", function(event) {
+	self.addEventListener("commonAlerts.pageAlerts", event => {
 		if (targetUrl === event.detail.target) {
 			return alertUtils.setPageAlerts(NAME, event.detail.pageAlerts[ALERT_RISK]);
 		}
 	});
 
-	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", function(event) {
+	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", event => {
 		if (event.detail['event.type'] === 'alert.added') {
 			return alertUtils.updatePageAlertCount(NAME, targetUrl, event.detail, ALERT_RISK);
 		}
 	});
 
-	self.addEventListener("message", function(event) {
+	self.addEventListener("message", event => {
 		var message = event.data;
 
 		// Broadcasts
