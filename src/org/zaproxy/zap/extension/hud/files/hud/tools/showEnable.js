@@ -33,9 +33,9 @@ var ShowEnable = (function() {
 
 
 	function checkIsRunning() {
-		return new Promise(function(resolve) {
+		return new Promise(resolve => {
 			loadTool(NAME)
-				.then(function(tool) {
+				.then(tool => {
 					resolve(tool.isRunning);
 				});
 		});
@@ -43,7 +43,7 @@ var ShowEnable = (function() {
 
 	function switchState() {
 		checkIsRunning()
-			.then(function(isRunning) {
+			.then(isRunning => {
 				if(!isRunning) {
 					switchOn();
 				}
@@ -58,7 +58,7 @@ var ShowEnable = (function() {
 		messageFrame("management", {action:"showEnable.on"});
 
 		loadTool(NAME)
-			.then(function(tool) {
+			.then(tool => {
 				tool.isRunning = true;
 				tool.icon = ICONS.ON;
 
@@ -71,7 +71,7 @@ var ShowEnable = (function() {
 		messageFrame("management", {action:"showEnable.off"});
 
 		loadTool(NAME)
-			.then(function(tool) {
+			.then(tool => {
 				tool.isRunning = false;
 				tool.icon = ICONS.OFF;
 
@@ -82,7 +82,7 @@ var ShowEnable = (function() {
 	
 	function setCount(count) {
 		loadTool(NAME)
-			.then(function(tool) {
+			.then(tool => {
 				tool.data = count;
 				saveTool(tool);
 			})
@@ -97,7 +97,7 @@ var ShowEnable = (function() {
 		config.options = {remove: "Remove"};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
-			.then(function(response) {
+			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
 					removeToolFromPanel(NAME);
@@ -109,13 +109,13 @@ var ShowEnable = (function() {
 			.catch(errorHandler);
 	}
 
-	self.addEventListener("activate", function(event) {
+	self.addEventListener("activate", event => {
 		initializeStorage();
 	});
 
-	self.addEventListener("targetload", function(event) {
+	self.addEventListener("targetload", event => {
 			checkIsRunning()
-				.then(function(isRunning) {
+				.then(isRunning => {
 					if (isRunning) {
 						switchOn();
 					}
@@ -128,7 +128,7 @@ var ShowEnable = (function() {
 				.catch(errorHandler);
 	});
 
-	self.addEventListener("message", function(event) {
+	self.addEventListener("message", event => {
 		var message = event.data;
 
 		// Broadcasts

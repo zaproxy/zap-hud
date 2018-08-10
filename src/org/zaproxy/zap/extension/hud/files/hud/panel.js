@@ -12,7 +12,7 @@ var panelKey = "";
 var app;
 
 // the Event wrapper class will act as an Event dispatcher for Vue
-window.Event = new class {
+window.Event = new (class {
 	constructor() {
 		this.vue = new Vue();
 	}
@@ -24,7 +24,7 @@ window.Event = new class {
 	listen(event, callback) {
 		this.vue.$on(event, callback);
 	}
-}
+})
 
 Vue.component('hud-button', {
 	template: '#hud-button-template',
@@ -82,7 +82,7 @@ Vue.component('hud-button', {
 			self.marginright = '.5rem'
 		}
 
-		Event.listen('updateButton', function(data) {
+		Event.listen('updateButton', data => {
 			if (self.name === data.name) {
 				self.currentIcon = '<<ZAP_HUD_FILES>>?image=' + data.icon;
 				self.currentData = data.data;
@@ -105,27 +105,27 @@ Vue.component('hud-buttons', {
 
 		// initialize panels with tools		
 		loadPanelTools(panel)
-			.then(function(tools) {
+			.then(tools => {
 				self.tools = tools;
 			})
 			.catch(console.error);
 
 		// listen for update events to add new button
-		Event.listen('updateButton', function(data) {
-			if (self.tools.filter(function(tool) {return tool.name === data.name}).length === 0) {
+		Event.listen('updateButton', data => {
+			if (self.tools.filter(tool => tool.name === data.name).length === 0) {
 				self.tools.push(data.tool)
 			}
 		})
 
 		// listen to remove buttons
-		Event.listen('removeButton', function(data) {
-			self.tools = self.tools.filter(function(tool) {return tool.name !== data.name});
+		Event.listen('removeButton', data => {
+			self.tools = self.tools.filter(tool => tool.name !== data.name);
 		})
 	}
 
 })
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
 	// set orientation
 	var params = document.location.search.substring(1).split("&");
 
@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	}); 
 });
 
-navigator.serviceWorker.addEventListener("message", function(event) {
+navigator.serviceWorker.addEventListener("message", event => {
 	var message = event.data;
 	
 	switch(message.action) {

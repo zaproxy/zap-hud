@@ -42,7 +42,7 @@ var ActiveScan = (function() {
 	function showDialog(domain) {
 
 		Promise.all([checkIsRunning(), self.tools.scope.isInScope(domain)])
-			.then(function(results) {
+			.then(results => {
 				var isRunning = results[0];
 				var isInScope = results[1];
 
@@ -66,10 +66,8 @@ var ActiveScan = (function() {
 
 				return config;
 			})
-			.then(function(config) {
-				return messageFrame("display", {action:"showDialog", config:config});
-			})
-			.then(function(response) {
+			.then(config => messageFrame("display", {action:"showDialog", config:config}))
+			.then(response => {
 				// Handle button choice
 				if (response.id === "start") {
 					startActiveScan(domain);
@@ -92,11 +90,11 @@ var ActiveScan = (function() {
 	}
 
 	function startActiveScan(domain) {
-		fetch("<<ZAP_HUD_API>>/ascan/action/scan/?url=" + domainWrapper(domain)).then(function(response) {
+		fetch("<<ZAP_HUD_API>>/ascan/action/scan/?url=" + domainWrapper(domain)).then(response => {
 			response.json()
-				.then(function(data) {
+				.then(data => {
 					loadTool(NAME)
-						.then(function(tool) {
+						.then(tool => {
 							tool.isRunning = true;
 							tool.icon = ICONS.ON;
 							tool.data = "0%";
@@ -111,7 +109,7 @@ var ActiveScan = (function() {
 
 	function stopActiveScan() {
 		loadTool(NAME)
-			.then(function(tool) {
+			.then(tool => {
 				fetch("<<ZAP_HUD_API>>/ascan/action/stop/?scanId=" + tool.scanId + "");
 			})
 			.catch(errorHandler);
@@ -120,7 +118,7 @@ var ActiveScan = (function() {
 
 	function activeScanStopped() {
 		loadTool(NAME)
-			.then(function(tool) {
+			.then(tool => {
 				tool.isRunning = false;
 				tool.icon = ICONS.OFF;
 				tool.data = DATA.START;
@@ -132,8 +130,8 @@ var ActiveScan = (function() {
 	}
 
 	function checkIsRunning() {
-		return new Promise(function(resolve) {
-			loadTool(NAME).then(function(tool) {
+		return new Promise(resolve => {
+			loadTool(NAME).then(tool => {
 				resolve(tool.isRunning);
 			});
 		});
@@ -142,7 +140,7 @@ var ActiveScan = (function() {
 	function updateProgress(progress) {
 		if (progress !== "-1") {
 			loadTool(NAME)
-				.then(function(tool) {
+				.then(tool => {
 					tool.data = progress;
 
 					saveTool(tool);
@@ -159,7 +157,7 @@ var ActiveScan = (function() {
 		config.options = {remove: "Remove"};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
-			.then(function(response) {
+			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
 					removeToolFromPanel(NAME);
@@ -171,11 +169,11 @@ var ActiveScan = (function() {
 			.catch(errorHandler);
 	}
 
-	self.addEventListener("activate", function(event) {
+	self.addEventListener("activate", event => {
 		initializeStorage();
 	});
 
-	self.addEventListener("message", function(event) {
+	self.addEventListener("message", event => {
 		var message = event.data;
 
 		// Broadcasts
@@ -205,11 +203,11 @@ var ActiveScan = (function() {
 		}
 	});
 
-	self.addEventListener("org.zaproxy.zap.extension.ascan.ActiveScanEventPublisher", function(event) {
+	self.addEventListener("org.zaproxy.zap.extension.ascan.ActiveScanEventPublisher", event => {
 		var eventType = event.detail['event.type'];
 		log (LOG_DEBUG, 'ActiveScanEventPublisher eventListener', 'Received ' + eventType + ' event');
 		checkIsRunning()
-			.then(function(isRunning) {
+			.then(isRunning => {
 				if (isRunning) {
 					if (eventType === 'scan.started') {
 						updateProgress("0%");

@@ -2,7 +2,7 @@
 var app;
 
 // the Event wrapper class will act as an Event dispatcher for Vue
-window.Event = new class {
+window.Event = new (class {
 	constructor() {
 		this.vue = new Vue();
 	}
@@ -14,7 +14,7 @@ window.Event = new class {
 	listen(event, callback) {
 		this.vue.$on(event, callback);
 	}
-}
+})
 
 Vue.component('history', {
     template: '#history-template',
@@ -37,16 +37,16 @@ Vue.component('history', {
         let self = this;
 
         loadTool('history')
-            .then(function(tool) {
+            .then(tool => {
                 self.messages = tool.messages
             })
             .catch(errorHandler)
 
-        Event.listen('setMessages', function(data) {
+        Event.listen('setMessages', data => {
             self.messages = data.messages;
         })
 
-		Event.listen('updateMessages', function(data) {
+		Event.listen('updateMessages', data => {
             self.messages = self.messages.concat(data.messages);
 
             let count = data.messages.length;
@@ -121,7 +121,7 @@ Vue.component('tabs', {
             localforage.getItem('drawer.activeTab')];
 
         Promise.all(promises)
-            .then(function(results) {
+            .then(results => {
                 let shouldOpenDrawer = results[0];
                 let activeTab = results[1];
 
@@ -163,7 +163,7 @@ Vue.component('tab', {
     created() {
         let self = this;
 
-        this.$on('badgeDataEvent', function(message) {
+        this.$on('badgeDataEvent', message => {
             if (!self.$parent.isOpen) {
                 self.badgeData += message.data;
             }
@@ -171,7 +171,7 @@ Vue.component('tab', {
     }
 });
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
 
 	/* Vue app */
 	app = new Vue({
@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-navigator.serviceWorker.addEventListener('message', function(event) {
+navigator.serviceWorker.addEventListener('message', event => {
 	var action = event.data.action;
 	var port = event.ports[0];
 	

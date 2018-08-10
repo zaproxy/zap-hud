@@ -34,7 +34,7 @@ Vue.component('loading-screen', {
 	props: []
 })
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
 	// initialize Vue app
 	app = new Vue({
 		el: '#app',
@@ -133,12 +133,12 @@ function startServiceWorker() {
 	if ('serviceWorker' in navigator) {
 
 		navigator.serviceWorker.register('<<ZAP_HUD_FILES>>?name=serviceworker.js')
-			.then(function(registration) {
+			.then(registration => {
 				console.log('Service worker registration was successful for the scope: ' + registration.scope);
 
 				// wait until serviceworker is installed and activated
 				navigator.serviceWorker.ready
-					.then(function(serviceWorkerRegistration) {
+					.then(serviceWorkerRegistration => {
 
 						// refresh the target page
 						parent.postMessage( {action: 'refresh'} , document.referrer);
@@ -156,7 +156,7 @@ function startServiceWorker() {
  * Starts sending heart beat messages to the ZAP API every 10 seconds
  */
 function startHeartBeat() {
-	setInterval(function() {
+	setInterval(() => {
 		log(LOG_INFO, 'heartbeat', 'heartbeat')
 	}, 10000)
 }

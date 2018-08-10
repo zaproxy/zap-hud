@@ -2,7 +2,7 @@
 var app;
 
 // the Event wrapper class will act as an Event dispatcher for Vue
-window.Event = new class {
+window.Event = new (class {
 	constructor() {
 		this.vue = new Vue();
 	}
@@ -14,7 +14,7 @@ window.Event = new class {
 	listen(event, callback) {
 		this.vue.$on(event, callback);
 	}
-}
+})
 
 /* Vue Components */
 Vue.component('modal', {
@@ -78,7 +78,7 @@ Vue.component('dialog-modal', {
 	created: function() {
 		let self = this;
 
-		Event.listen('showDialogModal', function(data) {
+		Event.listen('showDialogModal', data => {
 
 			app.isDialogModalShown = true;
 			app.dialogModalTitle = data.title;
@@ -107,7 +107,7 @@ Vue.component('select-tool-modal', {
 	created: function() {
 		let self = this;
 
-		Event.listen('showSelectToolModal', function(data) {
+		Event.listen('showSelectToolModal', data => {
 			app.isSelectToolModalShown = true;
 			
 			self.tools = data.tools;
@@ -148,7 +148,7 @@ Vue.component('all-alerts-modal', {
 	created: function() {
 		let self = this;
 		
-		Event.listen('showAllAlertsModal', function(data) {
+		Event.listen('showAllAlertsModal', data => {
 			app.isAllAlertsModalShown = true;
 			app.allAlertsModalTitle = data.title;
 
@@ -176,7 +176,7 @@ Vue.component('alert-list-modal', {
 	created() {
 		let self = this;
 
-		Event.listen('showAlertListModal', function(data) {
+		Event.listen('showAlertListModal', data => {
 			app.isAlertListModalShown = true;
 			app.alertListModalTitle = data.title;
 
@@ -233,7 +233,7 @@ Vue.component('alert-details-modal', {
 	created() {
 		let self = this;
 
-		Event.listen('showAlertDetailsModal', function(data) {
+		Event.listen('showAlertDetailsModal', data => {
 			app.isAlertDetailsModalShown = true;
 			app.alertDetailsModalTitle = data.title;
 			
@@ -264,7 +264,7 @@ Vue.component('simple-menu-modal', {
 	created() {
 		let self = this;
 
-		Event.listen('showSimpleMenuModal', function(data) {
+		Event.listen('showSimpleMenuModal', data => {
 			app.isSimpleMenuModalShown = true;
 			app.simpleMenuModalTitle = data.title;
 
@@ -341,7 +341,7 @@ Vue.component('break-message-modal', {
 	created() {
 		let self = this;
 
-		Event.listen('showBreakMessageModal', function(data) {
+		Event.listen('showBreakMessageModal', data => {
 			self.request = data.request;
 			self.response = data.response;
 			self.port = data.port;
@@ -374,10 +374,8 @@ Vue.component('history-message-modal', {
 			let self = this;
 			let message = this.request;
 			fetch("<<ZAP_HUD_API>>/hud/action/recordRequest/?header=" + encodeURIComponent(message.header) + "&body=" + encodeURIComponent(message.body))
-			.then(function(response) {
-				return response.json();
-			})
-			.then(function(json) {
+			.then(response => response.json())
+			.then(json => {
 				if (json.requestUrl) {
 					window.top.location.href = json.requestUrl;
 				} else {
@@ -400,7 +398,7 @@ Vue.component('history-message-modal', {
 	created() {
 		let self = this;
 
-		Event.listen('showHistoryMessageModal', function(data) {
+		Event.listen('showHistoryMessageModal', data => {
 			self.request = data.request;
 			self.response = data.response;
 			self.port = data.port;
@@ -436,10 +434,10 @@ Vue.component('site-tree-node', {
 	      this.addChild('..Loading..', false);
 			var treeNode = this;
 			fetch("<<ZAP_HUD_API>>/core/view/childNodes/?url=" + this.model.url)
-			.then(function(response) {
+			.then(response => {
 
 				response.json().
-					then(function(json) {
+					then(json => {
 						// Remove the ..loading.. child
 						Vue.set(treeNode.model, 'children', [])
 						for(var i = 0; i < json.childNodes.length; i++) {
@@ -507,7 +505,7 @@ Vue.component('site-tree-modal', {
 	created() {
 		let self = this;
 
-		Event.listen('showSiteTreeModal', function(data) {
+		Event.listen('showSiteTreeModal', data => {
 			self.port = data.port;
 
 			app.isSiteTreeModalShown = true;
@@ -573,7 +571,7 @@ Vue.component('tab', {
     },
 });
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
 
 	/* Vue app */
 	app = new Vue({
@@ -602,7 +600,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	});
 });
 
-navigator.serviceWorker.addEventListener("message", function(event) {
+navigator.serviceWorker.addEventListener("message", event => {
 	var action = event.data.action;
 	var config = event.data.config;
 	var port = event.ports[0];
