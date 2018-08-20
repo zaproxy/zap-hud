@@ -111,9 +111,11 @@ var CommonAlerts = (function() {
 							for (var risk in RISKS) {
 								var alertRisk = RISKS[risk];
 								for (var alertName in pageAlerts[alertRisk]) {
+									let reportedParams = new Set();
 									for (var i = 0; i < pageAlerts[alertRisk][alertName].length; i++) {
 										var alert = pageAlerts[alertRisk][alertName][i];
-										if (alert.param.length > 0) {
+										if (alert.param.length > 0 && ! reportedParams.has(alert.param)) {
+											reportedParams.add(alert.param);
 											messageFrame("management", {
 												action: "commonAlerts.alert",
 												name: alert.name,
