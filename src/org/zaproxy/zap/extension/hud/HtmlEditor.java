@@ -21,40 +21,39 @@ package org.zaproxy.zap.extension.hud;
 
 import java.util.List;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.parosproxy.paros.network.HttpMessage;
-
-import net.htmlparser.jericho.OutputDocument;
-import net.htmlparser.jericho.Source;
-import net.htmlparser.jericho.StartTag;
 /**
  * A class for injecting content into HTML responses
  */
 public class HtmlEditor {
     
     private HttpMessage msg;
-    private Source source;
-    private OutputDocument outputDocument;
+    private Document doc;
     private boolean changed = false;
 
     public HtmlEditor(HttpMessage msg) {
         this.msg = msg;
-        this.source = new Source(msg.getResponseBody().toString());
-        this.outputDocument = new OutputDocument(source);
+        doc = Jsoup.parse(msg.getResponseBody().toString(), msg.getRequestHeader().getURI().toString());
     }
 
     public void injectAtStartOfBody(String inject) {
-        List<StartTag> bodyTags = this.source.getAllStartTags("body");
-
-        if (bodyTags.size() > 0) {
-            this.outputDocument.insert(bodyTags.get(0).getEnd(), inject);
-            this.changed = true;
+        Element bodyElement = this.doc.body();
+        if (bodyElement != null) {
+            List<Node> childNodes = bodyElement.childNodes();
+            if (childNodes.size() > 0) {
+                childNodes.get(0).before(inject);
+                this.changed = true;
+            }
         }
-
     }
     
     public void rewriteHttpMessage() {
         if (this.changed) {
-            msg.setResponseBody(this.outputDocument.toString());
+            msg.setResponseBody(this.doc.toString());
             msg.getResponseHeader().setContentLength(this.msg.getResponseBody().length());
         }
     }
