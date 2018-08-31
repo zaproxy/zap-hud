@@ -97,6 +97,34 @@ var CommonAlerts = (function() {
 					target = target.replace("https://", "http://");
 				}
 
+				if (sharedData.alerts[targetDomain] === undefined) {
+					// This is the first time we have seen this domain so
+					// fetch all of the current alerts from ZAP
+					fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + domainWrapper(targetDomain) + "&recurse=true")
+					.then(response => {
+						response.json().
+							then(json => {
+								sharedData.alerts[targetDomain] = alertUtils.flattenAllAlerts(json);
+								tool.alerts = sharedData.alerts;
+								return saveTool(tool);
+							}).then(() => {
+								// Raise the events after the data is saved
+								const processRisk = (risk) => {
+									let raisedEventName = 'commonAlerts.' + risk;
+									let raisedEventDetails = {
+										count: Object.keys(sharedData.alerts[targetDomain][risk]).length,
+									};
+									log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
+									var event = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
+									self.dispatchEvent(event);
+								}
+								RISKS.forEach(processRisk);
+							})
+							.catch(errorHandler);
+						})
+						.catch(errorHandler);
+				}
+
 				// Fetch all of the alerts on this page
 				fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
 				.then(response => {
