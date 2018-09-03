@@ -160,9 +160,61 @@
                 <div slot="body">
                     <table class="table table-striped table-hover">
                         <tbody>
-                            <tr v-for="(detail, field) in details">
-                                <td> {{ field }}</td>
-                                <td> {{ detail }}</td>
+                            <tr>
+                                <td> Alert</td>
+                                <td> <b> {{ details['name'] }} <b></td>
+                            </tr>
+                            <tr>
+                                <td> URL </td>
+                                <td @click="messageSelected(details.messageId)"> <a href="#">{{ details['url'] }}</a></td>
+                            </tr>
+                            <tr>
+                                <td> Description </td>
+                                <td> {{ details['description'] }}</td>
+                            </tr>
+                            <tr>
+                                <td> Risk </td>
+                                <td> {{ details['risk'] }}</td>
+                            </tr>
+                            <tr>
+                                <td> Confidence </td>
+                                <td> {{ details['confidence'] }}</td>
+                            </tr>
+                            <tr>
+                                <td> Parameter </td>
+                                <td> {{ details['parameter'] }}</td>
+                            </tr>
+                            <tr>
+                                <td> Attack </td>
+                                <td> {{ details['attack'] }}</td>
+                            </tr>
+                            <tr>
+                                <td> Evidence </td>
+                                <td> {{ details['evidence'] }}</td>
+                            </tr>
+                            <tr>
+                                <td> CWE Id </td>
+                                <td> {{ details['cweid'] }}</td>
+                            </tr>
+                            <tr>
+                                <td> WASC Id </td>
+                                <td> {{ details['wascid'] }}</td>
+                            </tr>
+                            <tr>
+                                <td> Other Info </td>
+                                <td> {{ details['other'] }}</td>
+                            </tr>
+                            <tr>
+                                <td> Solution</td>
+                                <td> {{ details['solution'] }}</td>
+                            </tr>
+                            <tr>
+                                <td> Reference</td>
+                                <td>
+	                                <li v-for="link in details['reference'].split('\n')">
+	                                	<a :href="link" target="_top">{{ link }}</a>
+	                                </li>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -260,11 +312,9 @@
 
         <template id="site-tree-node-template">
 			  <li>
-			    <div
-			      :class="{bold: ! model.isLeaf}"
-			      @click="toggle">
-			      <span v-if="! model.isLeaf">[{{ open ? '-' : '+' }}]</span>
-			      {{ model.name }}
+			    <div :class="{bold: ! model.isLeaf}">
+			      <span v-if="! model.isLeaf" @click="toggle">[{{ open ? '-' : '+' }}]</span>
+			      <span @click="showHttpMessageDetails">{{ model.name }}</span>
 			    </div>
 			    <ul v-show="open" v-if="! model.isLeaf && open">
 			      <site-tree-node

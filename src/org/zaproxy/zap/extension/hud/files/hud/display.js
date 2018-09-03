@@ -218,6 +218,9 @@ Vue.component('alert-details-modal', {
 		close: function() {
 			this.$emit('close');
 		},
+		messageSelected: function(id) {
+			navigator.serviceWorker.controller.postMessage({action: "showHttpMessageDetails", tool: "history", id:id});
+		},
 		back: function() {
 			app.keepShowing = true;
 			app.isAlertDetailsModalShown = false;
