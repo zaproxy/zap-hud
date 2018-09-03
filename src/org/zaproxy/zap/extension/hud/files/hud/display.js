@@ -430,6 +430,11 @@ Vue.component('site-tree-node', {
 	        }
 	      }
 	    },
+	    showHttpMessageDetails: function () {
+		    app.keepShowing = true;
+		    app.isSiteTreeModalShown = false;
+		    navigator.serviceWorker.controller.postMessage({action: "showHttpMessageDetails", tool: "history", id:this.model.hrefId});
+	    },
 	    showChildren: function () {
 	      this.addChild('..Loading..', false);
 			var treeNode = this;
@@ -442,14 +447,14 @@ Vue.component('site-tree-node', {
 						Vue.set(treeNode.model, 'children', [])
 						for(var i = 0; i < json.childNodes.length; i++) {
 							var child = json.childNodes[i];
-							treeNode.addChild(child.name, child.method, child.isLeaf);
+							treeNode.addChild(child.name, child.method, child.isLeaf, child.hrefId);
 						} 
 					})
 					.catch(errorHandler);
 			})
 			.catch(errorHandler);
 	    },
-	    addChild: function (name, method, isLeaf) {
+	    addChild: function (name, method, isLeaf, hrefId) {
 	      if (name.slice(-1) == '/') {
 	      	name = name.slice(0, -1);
 	      }
@@ -464,6 +469,7 @@ Vue.component('site-tree-node', {
 	      this.model.children.push({
 	        name: name,
 	        isLeaf: isLeaf,
+	        hrefId: hrefId,
 	        method: method,
 	        children: [],
 	        url: this.model.url === '' ? name : this.model.url + '/' + name
@@ -496,6 +502,7 @@ Vue.component('site-tree-modal', {
 		  model: {
 		    name: 'Sites',
 		    isLeaf: false,
+		    hrefId: 0,
 		    url: '',
 		    method: '',
 		    children: []
