@@ -260,11 +260,10 @@
 
         <template id="site-tree-node-template">
 			  <li>
-			    <div
-			      :class="{bold: ! model.isLeaf}"
-			      @click="toggle">
-			      <span v-if="! model.isLeaf">[{{ open ? '-' : '+' }}]</span>
-			      {{ model.name }}
+			    <div :class="{bold: ! model.isLeaf}">
+			      <span v-if="! model.isLeaf" @click="toggle">[{{ open ? '-' : '+' }}]</span>
+			      <span v-if="model.hrefId > 0" @click="showHttpMessageDetails"><a href="#">{{ model.name }}</a></span>
+			      <span v-if="model.hrefId == 0" @click="toggle">{{ model.name }}</span>
 			    </div>
 			    <ul v-show="open" v-if="! model.isLeaf && open">
 			      <site-tree-node
