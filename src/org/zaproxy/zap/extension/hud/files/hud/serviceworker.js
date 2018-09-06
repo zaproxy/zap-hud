@@ -52,7 +52,7 @@ localforage.setItem("tools", [])
 	.catch(errorHandler);
 
 /* Listeners */
-self.addEventListener("install", event => {
+const onInstall = event => {
 	log(LOG_INFO, 'serviceworker.install', 'Installing...');
 
 	// Cache Files
@@ -64,9 +64,9 @@ self.addEventListener("install", event => {
 			})
 			.catch(errorHandler)
 	);
-}); 
+};
 
-self.addEventListener("activate", event => {
+const onActivate = event => {
 	// Check Storage & Initiate
 	event.waitUntil(
 		isStorageConfigured()
@@ -82,9 +82,9 @@ self.addEventListener("activate", event => {
 			})
 			.catch(errorHandler)
 	);
-});
+};
 
-self.addEventListener("fetch", event => {
+const onFetch = event => {
 	// Check Cache
 	event.respondWith(
 		caches.match(event.request)
@@ -103,9 +103,9 @@ self.addEventListener("fetch", event => {
 				}
 			}).catch(errorHandler)
 	);
-});
+}
 
-self.addEventListener("message", event => {
+const onMessage = event => {
 	if (!isFromTrustedOrigin(event)) {
 		return;
 	}
@@ -135,8 +135,12 @@ self.addEventListener("message", event => {
 		default:
 			break;
 	}
-});
+};
 
+self.addEventListener("install", onInstall); 
+self.addEventListener("activate", onActivate);
+self.addEventListener("fetch", onFetch);
+self.addEventListener("message", onMessage);
 self.addEventListener('error', errorHandler);
 
 /* Set up WebSockets */
