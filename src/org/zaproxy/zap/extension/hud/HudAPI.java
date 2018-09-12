@@ -34,6 +34,7 @@ import java.util.UUID;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.control.Control;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
@@ -48,6 +49,7 @@ import org.zaproxy.zap.extension.api.ApiResponseList;
 import org.zaproxy.zap.extension.api.ApiView;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
+import org.zaproxy.zap.utils.I18N;
 
 import net.sf.json.JSONObject;
 
@@ -63,6 +65,7 @@ public class HudAPI extends ApiImplementor {
             + "font-src 'self' data:; style-src 'self' 'unsafe-inline' ;";
 
     private static final String PREFIX = "hud";
+    private static final String I18N_PREFIX = "<<ZAP_I18N_";
     
     private Map<String, String> siteUrls = new HashMap<String, String>();
     private ExtensionHUD extension;
@@ -343,12 +346,43 @@ public class HudAPI extends ApiImplementor {
                 }
             }
             
+            // Replace all of the i18ned strings
+            contents = internationalize(contents);
+            
             return contents;
         } catch (Exception e) {
             // Something unexpected went wrong, write the error to the log
             logger.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    public static String internationalize (String str) {
+        return internationalize(str, Constant.messages);
+    }
+
+    public static String internationalize (String str, I18N i18n) {
+        int index = 0;
+        int offset = str.indexOf(I18N_PREFIX, index);
+        if (offset > 0) {
+            StringBuilder sb = new StringBuilder();
+            while (offset > 0) {
+                sb.append(str.substring(index, offset));
+                int end = str.indexOf(">>", offset);
+                String i18nStr = str.substring(offset + I18N_PREFIX.length(), end);
+                if (i18n.containsKey(i18nStr)) {
+                    sb.append(i18n.getString(i18nStr));
+                } else {
+                    sb.append(i18nStr);
+                    logger.error("No i18n message with key: " + i18nStr);
+                }
+                index = end + 2;
+                offset = str.indexOf(I18N_PREFIX, index);
+            }
+            sb.append(str.substring(index));
+            str = sb.toString();
+        }
+        return str;
     }
     
     private String getWebSocketUrl() {
