@@ -20,6 +20,7 @@ var Scope = (function() {
 		DIALOG.IN = "Remove current domain from scope?";
 		DIALOG.OUT = "Add current domain to scope?";
 		DIALOG.REQUIRED = "This tool requires the current site be added to the scope, via the Scope tool.";
+	var HUD_CONTEXT = "HUD%20Context";
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -29,6 +30,7 @@ var Scope = (function() {
 		tool.data = DATA.OUT;
 		tool.icon = ICONS.OUT;
 		tool.isSelected = false;
+		tool.hudContext = false;	// Set when we've added the HUD Context
 		tool.panel = "";
 		tool.position = 0;
 		tool.urls = [];
@@ -92,22 +94,35 @@ var Scope = (function() {
 	}
 
 	function addToScope(domain) {
-		return fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=Default%20Context&regex=" + domainWrapper(domain) + ".*")
-			.then(() => // add to list and save
         loadTool(NAME)
             .then(tool => {
+                if (! tool.hudContext) {
+                    fetch("<<ZAP_HUD_API>>/context/action/newContext/?contextName=" + HUD_CONTEXT)
+                }
                 tool.urls.push(domain);
                 tool.data = DATA.IN;
                 tool.icon = ICONS.IN;
+                tool.hudContext = true;
 
-                return saveTool(tool)
-                    .then(() => true);
-            }))
+                fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=" + HUD_CONTEXT + "&regex=" + domainWrapper(domain) + ".*")
+                .then(response => {
+                    if (!response.ok) {
+                        log (LOG_ERROR, 'scope.addToScope', 'Failed to add ' + domain + ' to scope');
+                    }
+                }).catch(errorHandler)
+
+                return saveTool(tool);
+            })
 			.catch(errorHandler);
 	}
 
 	function removeFromScope(domain) {
-		fetch("<<ZAP_HUD_API>>/context/action/excludeFromContext/?contextName=Default%20Context&regex=" + domainWrapper(domain) + ".*");
+		fetch("<<ZAP_HUD_API>>/context/action/excludeFromContext/?contextName=" + HUD_CONTEXT + "&regex=" + domainWrapper(domain) + ".*")
+        .then(response => {
+            if (!response.ok) {
+                log (LOG_ERROR, 'scope.removeFromScope', 'Failed to remove ' + domain + ' from scope');
+            }
+        }).catch(errorHandler)
 
 		// remove from list and save
 		loadTool(NAME)
