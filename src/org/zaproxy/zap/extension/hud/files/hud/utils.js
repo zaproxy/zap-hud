@@ -31,7 +31,7 @@ var BUTTON_LABEL = /BUTTON_LABEL/g;
 var IMAGE_NAME = /IMAGE_NAME/g;
 
 // default tools
-var DEFAULT_TOOLS_LEFT = ["scope", "break", "showEnable", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational"];
+var DEFAULT_TOOLS_LEFT = ["scope", "break", "showEnable", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational", "hudErrors"];
 var DEFAULT_TOOLS_RIGHT = ["site-tree", "spider", "active-scan", "attack", "site-alerts-high", "site-alerts-medium", "site-alerts-low", "site-alerts-informational"];
 
 
@@ -624,5 +624,8 @@ function log(level, method, message, object) {
 	}
 	if (LOG_TO_ZAP) {
 		fetch("<<ZAP_HUD_API>>/hud/action/log/?record=" + record);
+	}
+	if (level == LOG_ERROR) {
+		self.dispatchEvent(new CustomEvent("hud.error", {detail: {record: record}}));
 	}
 }
