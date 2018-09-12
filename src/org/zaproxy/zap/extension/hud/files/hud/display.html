@@ -206,10 +206,12 @@
                             </tr>
                             <tr>
                                 <td> Reference</td>
-                                <td>
+                                <td v-if="details['reference']" >
 	                                <li v-for="link in details['reference'].split('\n')">
 	                                	<a :href="link" target="_top">{{ link }}</a>
 	                                </li>
+                                </td>
+                                <td v-else >
                                 </td>
                             </tr>
                         </tbody>
