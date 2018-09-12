@@ -68,7 +68,7 @@
             <modal :title="title" :show="show" @close="close">
                 <div slot="body">
                     <div class="content">
-                        {{text}}
+                    	<span style="white-space: pre;">{{text}}</span>
                     </div>
                 </div>
                 <div slot="footer">
@@ -160,10 +160,6 @@
                 <div slot="body">
                     <table class="table table-striped table-hover">
                         <tbody>
-                            <tr>
-                                <td> Alert</td>
-                                <td> <b> {{ details['name'] }} <b></td>
-                            </tr>
                             <tr>
                                 <td> URL </td>
                                 <td @click="messageSelected(details.messageId)"> <a href="#">{{ details['url'] }}</a></td>
@@ -314,7 +310,8 @@
 			  <li>
 			    <div :class="{bold: ! model.isLeaf}">
 			      <span v-if="! model.isLeaf" @click="toggle">[{{ open ? '-' : '+' }}]</span>
-			      <span @click="showHttpMessageDetails">{{ model.name }}</span>
+			      <span v-if="model.hrefId > 0" @click="showHttpMessageDetails"><a href="#">{{ model.name }}</a></span>
+			      <span v-if="model.hrefId == 0" @click="toggle">{{ model.name }}</span>
 			    </div>
 			    <ul v-show="open" v-if="! model.isLeaf && open">
 			      <site-tree-node
