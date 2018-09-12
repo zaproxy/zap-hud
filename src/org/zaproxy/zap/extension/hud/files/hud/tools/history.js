@@ -105,7 +105,7 @@ var History = (function() {
 		let req = header;
 
 		if (body) {
-			req = req + "\n\n" + encodeURIComponent(body)
+			req = req + "\r\n\r\n" + body
 		}
 
 		let params = "request=" + encodeURIComponent(req)
