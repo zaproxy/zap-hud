@@ -9,7 +9,10 @@ var PageAlertsInformational = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "page-alerts-informational";
-	var LABEL = "Page Alerts";
+	var I18N = {
+		ALERTS_PAGE_INFO_LABEL: "<<ZAP_I18N_hud.ui.alerts.page.info.tool>>",
+	}
+	var LABEL = I18N.ALERTS_PAGE_INFO_LABEL;
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};

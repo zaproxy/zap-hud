@@ -9,7 +9,10 @@ var ShowEnable = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "showEnable";
-	var LABEL = "Show / Enable";
+	var I18N = {
+		SHOW_LABEL: "<<ZAP_I18N_hud.ui.show.tool>>",
+	}
+	var LABEL = I18N.SHOW_LABEL;
 	var DATA = {};
 	var ICONS = {};
 		ICONS.OFF = "show-off.png";

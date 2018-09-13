@@ -9,7 +9,10 @@ var SiteAlertsMedium = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "site-alerts-medium";
-	var LABEL = "Site Alerts";
+	var I18N = {
+		ALERTS_SITE_MEDIUM_LABEL: "<<ZAP_I18N_hud.ui.alerts.site.medium.tool>>",
+	}
+	var LABEL = I18N.ALERTS_SITE_MEDIUM_LABEL;
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
