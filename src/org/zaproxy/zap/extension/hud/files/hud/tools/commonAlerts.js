@@ -90,7 +90,14 @@ var CommonAlerts = (function() {
 		loadTool(NAME)
 			.then(tool => {
 				let origTarget = event.detail.url;
+				let zapReplaceOffset = origTarget.indexOf('zapHudReplaceReq=');
+				if (zapReplaceOffset > 0) {
+					// Strip off the string used for resending in the browser
+					// Will be preceded by ? or &
+					origTarget = origTarget.substring(0, zapReplaceOffset -1);
+				}
 				let target = origTarget;
+				
 				let targetDomain = parseDomainFromUrl(target);
 				if (sharedData.upgradedDomains.has(targetDomain)) {
 					// Its been upgraded to https by ZAP, but the alerts wont have been
