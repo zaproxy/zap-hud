@@ -171,6 +171,56 @@ Vue.component('tab', {
     }
 });
 
+Vue.component('hud-button-config', {
+	template: '#hud-button-config',
+	props: ['label', 'icon', 'data'],
+	data() {
+		return {
+			showData: false,
+			isActive: false
+		}
+	},
+	methods: {
+		click: function() {
+			navigator.serviceWorker.controller.postMessage({action:'showHudSettings'});
+		},
+		mouseOver() {
+			this.isActive = true;
+		},
+		mouseLeave() {
+			this.isActive = false;
+		}
+	}
+})
+
+Vue.component('hud-button-showhide', {
+	template: '#hud-button-showhide',
+	props: ['label', 'icon', 'data'],
+	data() {
+		return {
+			showData: false,
+			isActive: false,
+			hudVisible: true
+		}
+	},
+	methods: {
+		click: function() {
+			if (this.hudVisible) {
+				parent.postMessage({action:'hideSidePanels'}, document.referrer);
+			} else {
+				parent.postMessage({action:'showSidePanels'}, document.referrer);
+			}
+			this.hudVisible = ! this.hudVisible;
+		},
+		mouseOver() {
+			this.isActive = true;
+		},
+		mouseLeave() {
+			this.isActive = false;
+		}
+	}
+})
+
 document.addEventListener("DOMContentLoaded", () => {
 
 	/* Vue app */

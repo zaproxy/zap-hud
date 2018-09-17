@@ -6,28 +6,6 @@
 
 var app;
 
-Vue.component('hud-button', {
-	template: '#hud-button-template',
-	props: ['label', 'icon', 'data'],
-	data() {
-		return {
-			showData: false,
-			isActive: false
-		}
-	},
-	methods: {
-		click: function() {
-			navigator.serviceWorker.controller.postMessage({action:'showHudSettings'});
-		},
-		mouseOver() {
-			this.isActive = true;
-		},
-		mouseLeave() {
-			this.isActive = false;
-		}
-	}
-})
-
 // TODO: implement a super cool loading screen
 Vue.component('loading-screen', {
 	template: '#loading-screen-template',
