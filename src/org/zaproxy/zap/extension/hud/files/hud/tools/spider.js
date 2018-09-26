@@ -9,16 +9,26 @@ var Spider = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "spider";
-	var LABEL = "Spider";
+	var I18N = {
+		SPIDER_LABEL: "<<ZAP_I18N_hud.ui.spider.tool>>",
+		SPIDER_START: "<<ZAP_I18N_hud.ui.spider.start>>",
+		SPIDER_START_SCOPE: "<<ZAP_I18N_hud.ui.spider.start.scope>>",
+		SPIDER_STOP: "<<ZAP_I18N_hud.ui.spider.stop>>",
+		STD_CANCEL: "<<ZAP_I18N_hud.ui.common.cancel>>",
+		STD_REMOVE: "<<ZAP_I18N_hud.ui.common.remove>>",
+		STD_START: "<<ZAP_I18N_hud.ui.common.start>>",
+		STD_STOP: "<<ZAP_I18N_hud.ui.common.stop>>",
+	}
+	var LABEL = I18N.SPIDER_LABEL;
 	var DATA = {};
-		DATA.START = "Start";
-		DATA.STOP = "Stop";
+		DATA.START = I18N.STD_START;
+		DATA.STOP = I18N.STD_STOP;
 	var ICONS = {};
 		ICONS.SPIDER = "spider.png";
 	var DIALOG = {};
-		DIALOG.START = "Start spidering this site?";
-		DIALOG.START_ADD_SCOPE = "This site is not in scope.\nIn order to spider the site you must add it to the scope.\nAdd the site to the scope and start spidering it?";
-		DIALOG.STOP = "The spider is currently running. Would you like to stop it?";
+		DIALOG.START = I18N.SPIDER_START;
+		DIALOG.START_ADD_SCOPE = I18N.SPIDER_START_SCOPE;
+		DIALOG.STOP = I18N.SPIDER_STOP;
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -44,21 +54,21 @@ var Spider = (function() {
 				var isInScope = results[1];
 
 				var config = {};
-				config.buttons = [{text: "Cancel", id: "cancel"}];
+				config.buttons = [{text: I18N.STD_CANCEL, id: "cancel"}];
 
 				if(!isRunning) {
 					if (!isInScope) {
 						config.text = DIALOG.START_ADD_SCOPE;
-						config.buttons.unshift({text: "Start", id: "start-add-to-scope"});
+						config.buttons.unshift({text: I18N.STD_START, id: "start-add-to-scope"});
 					}
 					else {
 						config.text = DIALOG.START;
-						config.buttons.unshift({text: "Start", id: "start"});
+						config.buttons.unshift({text: I18N.STD_START, id: "start"});
 					}
 				}
 				else {
 					config.text = DIALOG.STOP;
-					config.buttons.unshift({text: "Stop", id: "stop"});
+					config.buttons.unshift({text: I18N.STD_STOP, id: "stop"});
 				}
 
 				return config;
@@ -143,7 +153,7 @@ var Spider = (function() {
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
-		config.options = {remove: "Remove"};
+		config.options = {remove: I18N.STD_REMOVE};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
 			.then(response => {

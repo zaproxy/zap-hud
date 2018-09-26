@@ -9,10 +9,15 @@ var Scope = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "scope";
-	var LABEL = "Scope";
+	var I18N = {
+		SCOPE_LABEL: "<<ZAP_I18N_hud.ui.scope.tool>>",
+		STD_IN: "<<ZAP_I18N_hud.ui.common.in>>",
+		STD_OUT: "<<ZAP_I18N_hud.ui.common.out>>",
+	}
+	var LABEL = I18N.SCOPE_LABEL;
 	var DATA = {};
-		DATA.IN = "In";
-		DATA.OUT = "Out";
+		DATA.IN = I18N.STD_IN;
+		DATA.OUT = I18N.STD_OUT;
 	var ICONS = {};
 		ICONS.IN = "target.png";
 		ICONS.OUT = "target-grey.png";

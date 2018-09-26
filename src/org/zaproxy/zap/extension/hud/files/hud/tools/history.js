@@ -9,7 +9,10 @@ var History = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "history";
-	var LABEL = "History";
+	var I18N = {
+		HISTORY_LABEL: "<<ZAP_I18N_hud.ui.history.tool>>",
+	}
+	var LABEL = I18N.HISTORY_LABEL;
 	var DATA = {};
 	var ICONS = {};
         ICONS.CLOCK = "clock.png";

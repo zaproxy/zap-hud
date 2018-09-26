@@ -9,10 +9,15 @@ var Break = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "break";
-	var LABEL = "Break";
+	var I18N = {
+		BREAK_LABEL: "<<ZAP_I18N_hud.ui.break.tool>>",
+		STD_ON: "<<ZAP_I18N_hud.ui.common.on>>",
+		STD_OFF: "<<ZAP_I18N_hud.ui.common.off>>",
+	}
+	var LABEL = I18N.BREAK_LABEL;
 	var DATA = {};
-		DATA.OFF = "Off";
-		DATA.ON = "On";
+		DATA.OFF = I18N.STD_OFF;
+		DATA.ON = I18N.STD_ON;
 	var ICONS = {};
 		ICONS.OFF = "break-off.png";
 		ICONS.ON = "break-on.png";

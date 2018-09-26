@@ -9,9 +9,13 @@ var SiteTree = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "site-tree";
-	var LABEL = "Sites Tree";
+	var I18N = {
+		SITES_LABEL: "<<ZAP_I18N_hud.ui.sites.tool>>",
+		SITES_STATUS: "<<ZAP_I18N_hud.ui.sites.status>>",
+	}
+	var LABEL = I18N.SITES_LABEL;
 	var DATA = {};
-		DATA.SITES = "Sites";
+		DATA.SITES = I18N.SITES_STATUS;
 	var ICONS = {};
 		ICONS.WORLD = "world.png";
 

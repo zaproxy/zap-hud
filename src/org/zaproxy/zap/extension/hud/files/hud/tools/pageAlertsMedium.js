@@ -9,7 +9,10 @@ var PageAlertsMedium = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "page-alerts-medium";
-	var LABEL = "Page Alerts";
+	var I18N = {
+		ALERTS_PAGE_MEDIUM_LABEL: "<<ZAP_I18N_hud.ui.alerts.page.medium.tool>>",
+	}
+	var LABEL = I18N.ALERTS_PAGE_MEDIUM_LABEL;
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};

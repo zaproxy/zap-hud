@@ -9,13 +9,16 @@ var PageAlertsHigh = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "page-alerts-high";
-	var LABEL = "Page Alerts";
+	var I18N = {
+		ALERTS_PAGE_HIGH_LABEL: "<<ZAP_I18N_hud.ui.alerts.page.high.tool>>",
+	}
+	var LABEL = I18N.ALERTS_PAGE_HIGH_LABEL;
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
         ICONS.PA = "page-alerts-high.png";
-    var ALERT_TYPE = "page-alerts"
-    var ALERT_RISK = "High"
+    var ALERT_TYPE = "page-alerts";
+    var ALERT_RISK = "High";
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
