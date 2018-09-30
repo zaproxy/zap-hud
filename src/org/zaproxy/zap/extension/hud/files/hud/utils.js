@@ -259,6 +259,13 @@ function configureStorage() {
 		return saveFrame(frame);
 	}));
 
+	// set other values to defaults on startup
+	promises.push( () => {
+		localforage.setItem('settings.isHudVisible', true);
+		localforage.setItem('drawer.isDrawerOpen', false);
+		localforage.setItem('drawer.activeTab', 'History');
+	})
+
 	return Promise.all(promises)
 		.catch(errorHandler);
 }
