@@ -171,54 +171,73 @@ Vue.component('tab', {
     }
 });
 
-Vue.component('hud-button-config', {
-	template: '#hud-button-config',
-	props: ['label', 'icon', 'data'],
-	data() {
-		return {
-			showData: false,
-			isActive: false
-		}
-	},
-	methods: {
-		click: function() {
-			navigator.serviceWorker.controller.postMessage({action:'showHudSettings'});
-		},
-		mouseOver() {
-			this.isActive = true;
-		},
-		mouseLeave() {
-			this.isActive = false;
-		}
-	}
-})
+Vue.component('drawer-button-template', {
+    template: '#drawer-button-template',
+    props: ['label', 'icon', 'data'],
+    data() {
+        return {
+            showData: false,
+            isActive: false,
+        }
+    },
+    methods: {
+        mouseOver() {
+            this.isActive = true;
+        },
+        mouseLeave() {
+            this.isActive = false;
+        }
+    }
+});
 
-Vue.component('hud-button-showhide', {
-	template: '#hud-button-showhide',
-	props: ['label', 'icon', 'data'],
-	data() {
-		return {
-			showData: false,
-			isActive: false,
-			hudVisible: true
-		}
-	},
-	methods: {
-		click: function() {
-			if (this.hudVisible) {
-				parent.postMessage({action:'hideSidePanels'}, document.referrer);
-			} else {
-				parent.postMessage({action:'showSidePanels'}, document.referrer);
-			}
-			this.hudVisible = ! this.hudVisible;
+Vue.component('drawer-button-settings', {
+    template: '#drawer-button-settings-template',
+    props: [],
+    methods: {
+        showHudSettings() {
+            navigator.serviceWorker.controller.postMessage({action:'showHudSettings'});
+        }
+    }
+});
+
+Vue.component('drawer-button-showhide', {
+    template: '#drawer-button-showhide-template',
+    props: [],
+    data() {
+        return {
+            icon: '<<ZAP_HUD_FILES>>?image=radar.png',
+            isHudVisible: true
+        }
+    },
+    methods: {
+        showHud() {
+            this.isHudVisible = true;
+            this.icon = '<<ZAP_HUD_FILES>>?image=radar.png';
+            localforage.setItem('settings.isHudVisible', true)
+                .catch(errorHandler);
+			parent.postMessage({action:'showSidePanels'}, document.referrer);
+        },
+        hideHud() {
+            this.isHudVisible = false;
+            this.icon = '<<ZAP_HUD_FILES>>?image=radar-grey.png';
+            localforage.setItem('settings.isHudVisible', false)
+                .catch(errorHandler);
+			parent.postMessage({action:'hideSidePanels'}, document.referrer);
+        },
+		toggleIsVisible() {
+            this.isHudVisible ? this.hideHud() : this.showHud();
 		},
-		mouseOver() {
-			this.isActive = true;
-		},
-		mouseLeave() {
-			this.isActive = false;
-		}
-	}
+    },
+    created() {
+        localforage.getItem('settings.isHudVisible')
+            .then(isHudVisible => {
+                this.isHudVisible = isHudVisible;
+                if (!this.isHudVisible) {
+                    this.icon = '<<ZAP_HUD_FILES>>?image=radar-grey.png';
+                }
+            })
+            .catch(errorHandler);
+    }
 })
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -252,3 +271,4 @@ navigator.serviceWorker.addEventListener('message', event => {
             break;
     }
 });
+

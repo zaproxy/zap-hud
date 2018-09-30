@@ -14,7 +14,7 @@
 	</div>
 
 	<template id="hud-buttons-template">
-		<div id="hud-buttons">
+		<div id="hud-buttons" :class="{'d-hide': !isVisible, 'd-visible': isVisible}">
 			<hud-button v-for="tool in tools" :key="tool.name" :label="tool.label" :icon="'<<ZAP_HUD_FILES>>?image=' + tool.icon" :data="tool.data" :name="tool.name"></hud-button>
 			<hud-button icon="<<ZAP_HUD_FILES>>?image=plus.png" name="add-tool"></hud-button>
 		</div>

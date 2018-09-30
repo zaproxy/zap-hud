@@ -46,16 +46,19 @@
                     <li v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true }">
                         <a :href="tab.href" @click="selectTab(tab)" :class="{ 'badge': tab.isBadgeData}" :data-badge="tab.badgeData">{{ tab.name }}</a>
                     </li>
+                    <!-- invisible tab-item to push tab-action buttons right -->
+                    <li class="tab-item tab-action-spacer">
+                    </li>
+                    <li class="tab-item tab-action">
+                        <drawer-button-showhide></drawer-button-showhide>
+                    </li>
+                    <li class="tab-item tab-action">
+                        <drawer-button-settings></drawer-button-settings>
+                    </li>
                     <li class="tab-item tab-action">
                         <button class="btn btn-action btn-sm"  @click="toggleOpenClose">
                             <i :class="{ 'icon': true, 'icon-arrow-up': isArrowUp, 'icon-arrow-down': !isArrowUp }"></i>
                         </button>
-                    </li>
-                    <li class="tab-item">
-						<hud-button-showhide icon="<<ZAP_HUD_FILES>>?image=radar.png"></hud-button-showhide>
-                    </li>
-                    <li class="tab-item">
-						<hud-button-config icon="<<ZAP_HUD_FILES>>?image=gear.png"></hud-button-config>
                     </li>
                 </ul>
             </div>
@@ -64,20 +67,22 @@
             </div>
         </div>
     </template>
+    
+    <!-- generic drawer button component -->
+    <template id="drawer-button-template">
+        <div :class="{'hud-button': true, 'small': true, 'active': isActive}" @click="$emit('click');" @mouseover="mouseOver" @mouseleave="mouseLeave">
+            <img :src="icon" />
+            <span>{{label}}</span>
+        </div>
+    </template>
 
-	<template id="hud-button-config">
-		<div :class="{'hud-button': true, 'small': true, 'active': isActive}" @click="click" />
-			<img :src="icon">
-			<span>{{label}}</span>
-		</div>
-	</template>
+    <template id="drawer-button-settings-template">
+        <drawer-button-template icon="<<ZAP_HUD_FILES>>?image=gear.png" @click="showHudSettings"></drawer-button-template>
+    </template>
 
-	<template id="hud-button-showhide">
-		<div :class="{'hud-button': true, 'small': true, 'active': isActive}" @click="click">
-			<img :src="icon">
-			<span>{{label}}</span>
-		</div>
-	</template>
+    <template id="drawer-button-showhide-template">
+        <drawer-button-template :icon="icon" @click="toggleIsVisible"></drawer-button-template>
+    </template>
 
     <!-- tab component -->
     <template id="tab-template">
