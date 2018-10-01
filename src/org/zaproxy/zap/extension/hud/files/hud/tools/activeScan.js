@@ -9,18 +9,18 @@ var ActiveScan = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "active-scan";
-	var LABEL = "Active Scan";
+	var LABEL = I18n.t("ascan_tool");
 	var DATA = {};
-		DATA.START = "Start";
-		DATA.STOP = "Stop";
+		DATA.START = I18n.t("common_start");
+		DATA.STOP = I18n.t("common_stop");
 	var ICONS = {};
 		ICONS.OFF = "flame-grey.png";
 		ICONS.ON = "flame.png";
 	var DIALOG = {};
-		DIALOG.START = "Start actively scanning this site?";
-		DIALOG.START_ADD_SCOPE = "This site is not in scope.\nIn order to Active Scan the site you must add it to the scope.\nAdd the site to the scope and start Active Scanning it?";
-		DIALOG.STOP = "The active scanner is currently running. Would you like to stop it?";
-	var ACTIVE_SCAN_EVENT = "org.zaproxy.zap.extension.ascan.ActiveScanEventPublisher" 
+		DIALOG.START = I18n.t("ascan_start");
+		DIALOG.START_ADD_SCOPE = I18n.t("ascan_start_scope");
+		DIALOG.STOP = I18n.t("ascan_stop");
+	var ACTIVE_SCAN_EVENT = "org.zaproxy.zap.extension.ascan.ActiveScanEventPublisher"; 
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -47,21 +47,21 @@ var ActiveScan = (function() {
 				var isInScope = results[1];
 
 				var config = {};
-				config.buttons = [{text: "Cancel", id: "cancel"}];
+				config.buttons = [{text: I18n.t("common_cancel"), id: "cancel"}];
 
 				if(!isRunning) {
 					if (!isInScope) {
 						config.text = DIALOG.START_ADD_SCOPE;
-						config.buttons.unshift({text: "Start", id: "start-add-to-scope"});
+						config.buttons.unshift({text: I18n.t("common_start"), id: "start-add-to-scope"});
 					}
 					else {
 						config.text = DIALOG.START;
-						config.buttons.unshift({text: "Start", id: "start"});
+						config.buttons.unshift({text: I18n.t("common_start"), id: "start"});
 					}
 				}
 				else {
 					config.text = DIALOG.STOP;
-					config.buttons.unshift({text: "Stop", id: "stop"});
+					config.buttons.unshift({text: I18n.t("common_stop"), id: "stop"});
 				}
 
 				return config;
@@ -154,7 +154,7 @@ var ActiveScan = (function() {
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
-		config.options = {remove: "Remove"};
+		config.options = {remove: I18n.t("common_remove")};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
 			.then(response => {

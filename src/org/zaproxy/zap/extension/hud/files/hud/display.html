@@ -5,6 +5,8 @@
         <link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=display.css"/>
 
         <script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue.js"></script>
+        <script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue-i18n.js"></script>
+        <script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=i18n.js"></script>
         <script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=utils.js"></script>
         <script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=display.js"></script>
     </head>
@@ -236,12 +238,12 @@
             <modal :title="title" :show="show" size="wide" @close="close">
                 <div slot="body">
                     <tabs :activetab="activeTab">
-                        <tab name="Request" selected="true">
+                        <tab :name="$t('message.common_request')" selected="true">
                             <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="request.header" :readonly="request.isReadonly"></textarea>
                             <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="request.body" :readonly="request.isReadonly"></textarea>
                         </tab>
             
-                        <tab name="Response" :disabled="isResponseDisabled">
+                        <tab :name="$t('message.common_response')" :disabled="isResponseDisabled">
                             <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="response.header" :readonly="response.isReadonly"></textarea>
                             <textarea class="form-input hud-http-message" rows="10" spellcheck="false" v-model="response.body" :readonly="response.isReadonly"></textarea>
                         </tab>

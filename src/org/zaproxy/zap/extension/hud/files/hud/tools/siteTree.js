@@ -9,9 +9,9 @@ var SiteTree = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "site-tree";
-	var LABEL = "Sites Tree";
+	var LABEL = I18n.t("sites_tool");
 	var DATA = {};
-		DATA.SITES = "Sites";
+		DATA.SITES = I18n.t("sites_status");
 	var ICONS = {};
 		ICONS.WORLD = "world.png";
 

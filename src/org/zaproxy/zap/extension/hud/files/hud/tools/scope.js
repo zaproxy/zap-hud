@@ -9,10 +9,10 @@ var Scope = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "scope";
-	var LABEL = "Scope";
+	var LABEL = I18n.t("scope_tool");
 	var DATA = {};
-		DATA.IN = "In";
-		DATA.OUT = "Out";
+		DATA.IN = I18n.t("common_in");
+		DATA.OUT = I18n.t("common_out");
 	var ICONS = {};
 		ICONS.IN = "target.png";
 		ICONS.OUT = "target-grey.png";
