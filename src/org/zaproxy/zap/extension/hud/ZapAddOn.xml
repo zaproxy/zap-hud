@@ -29,10 +29,12 @@
 		<file>hud/drawer.js</file>
 		<file>hud/growlerAlerts.html</file>
 		<file>hud/growlerAlerts.js</file>
+		<file>hud/i18n.js</file>
 		<file>hud/libraries/alertify.js</file>
 		<file>hud/libraries/localforage.min.js</file>
 		<file>hud/libraries/spectre-icons.css</file>
 		<file>hud/libraries/spectre.css</file>
+		<file>hud/libraries/vue-i18n.js</file>
 		<file>hud/libraries/vue.js</file>
 		<file>hud/management.css</file>
 		<file>hud/management.html</file>

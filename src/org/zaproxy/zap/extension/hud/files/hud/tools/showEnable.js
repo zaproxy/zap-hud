@@ -9,7 +9,7 @@ var ShowEnable = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "showEnable";
-	var LABEL = "Show / Enable";
+	var LABEL = I18n.t("show_tool");
 	var DATA = {};
 	var ICONS = {};
 		ICONS.OFF = "show-off.png";
