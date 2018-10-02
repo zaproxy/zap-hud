@@ -2886,6 +2886,12 @@ html {
   }
   
   .tab .tab-item.tab-action {
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    text-align: right;
+  }
+
+  .tab .tab-item.tab-action-spacer {
     -ms-flex: 1 0 auto;
     flex: 1 0 auto;
     text-align: right;

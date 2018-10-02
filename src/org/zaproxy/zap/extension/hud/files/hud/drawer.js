@@ -171,6 +171,75 @@ Vue.component('tab', {
     }
 });
 
+Vue.component('drawer-button-template', {
+    template: '#drawer-button-template',
+    props: ['label', 'icon', 'data'],
+    data() {
+        return {
+            showData: false,
+            isActive: false,
+        }
+    },
+    methods: {
+        mouseOver() {
+            this.isActive = true;
+        },
+        mouseLeave() {
+            this.isActive = false;
+        }
+    }
+});
+
+Vue.component('drawer-button-settings', {
+    template: '#drawer-button-settings-template',
+    props: [],
+    methods: {
+        showHudSettings() {
+            navigator.serviceWorker.controller.postMessage({action:'showHudSettings'});
+        }
+    }
+});
+
+Vue.component('drawer-button-showhide', {
+    template: '#drawer-button-showhide-template',
+    props: [],
+    data() {
+        return {
+            icon: '<<ZAP_HUD_FILES>>?image=radar.png',
+            isHudVisible: true
+        }
+    },
+    methods: {
+        showHud() {
+            this.isHudVisible = true;
+            this.icon = '<<ZAP_HUD_FILES>>?image=radar.png';
+            localforage.setItem('settings.isHudVisible', true)
+                .catch(errorHandler);
+			parent.postMessage({action:'showSidePanels'}, document.referrer);
+        },
+        hideHud() {
+            this.isHudVisible = false;
+            this.icon = '<<ZAP_HUD_FILES>>?image=radar-grey.png';
+            localforage.setItem('settings.isHudVisible', false)
+                .catch(errorHandler);
+			parent.postMessage({action:'hideSidePanels'}, document.referrer);
+        },
+		toggleIsVisible() {
+            this.isHudVisible ? this.hideHud() : this.showHud();
+		},
+    },
+    created() {
+        localforage.getItem('settings.isHudVisible')
+            .then(isHudVisible => {
+                this.isHudVisible = isHudVisible;
+                if (!this.isHudVisible) {
+                    this.icon = '<<ZAP_HUD_FILES>>?image=radar-grey.png';
+                }
+            })
+            .catch(errorHandler);
+    }
+})
+
 document.addEventListener("DOMContentLoaded", () => {
 
 	/* Vue app */
@@ -203,3 +272,4 @@ navigator.serviceWorker.addEventListener('message', event => {
             break;
     }
 });
+
