@@ -9,7 +9,7 @@ var PageAlertsMedium = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "page-alerts-medium";
-	var LABEL = "Page Alerts";
+	var LABEL = I18n.t("alerts_page_medium_tool");
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};

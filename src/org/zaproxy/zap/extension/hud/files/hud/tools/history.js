@@ -9,7 +9,7 @@ var History = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "history";
-	var LABEL = "History";
+	var LABEL = I18n.t("history_tool");
 	var DATA = {};
 	var ICONS = {};
         ICONS.CLOCK = "clock.png";

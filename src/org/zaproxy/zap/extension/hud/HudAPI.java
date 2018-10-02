@@ -34,6 +34,7 @@ import java.util.UUID;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.control.Control;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
@@ -321,6 +322,11 @@ public class HudAPI extends ApiImplementor {
                     .replace("<<URL>>", url)
                     .replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
 
+            if (file.equals("i18n.js")) {
+                contents = contents
+                        .replace("<<ZAP_LOCALE>>", Constant.messages.getLocal().toString());
+            }
+
             if (url.startsWith(API.API_URL_S)) {
                 // Only do this on the ZAP domain
                 contents = contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
@@ -350,7 +356,7 @@ public class HudAPI extends ApiImplementor {
             return null;
         }
     }
-    
+
     private String getWebSocketUrl() {
         if (websocketUrl == null) {
             websocketUrl = Control.getSingleton().getExtensionLoader().getExtension(ExtensionWebSocket.class).getCallbackUrl();

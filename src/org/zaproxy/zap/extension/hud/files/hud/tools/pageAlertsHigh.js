@@ -9,13 +9,13 @@ var PageAlertsHigh = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "page-alerts-high";
-	var LABEL = "Page Alerts";
+	var LABEL = I18n.t("alerts_page_high_tool");
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
         ICONS.PA = "page-alerts-high.png";
-    var ALERT_TYPE = "page-alerts"
-    var ALERT_RISK = "High"
+    var ALERT_TYPE = "page-alerts";
+    var ALERT_RISK = "High";
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {

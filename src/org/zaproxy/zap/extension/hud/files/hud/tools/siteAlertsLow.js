@@ -9,7 +9,7 @@ var SiteAlertsLow = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "site-alerts-low";
-	var LABEL = "Site Alerts";
+	var LABEL = I18n.t("alerts_site_low_tool");
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
