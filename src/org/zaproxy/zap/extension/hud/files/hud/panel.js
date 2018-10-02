@@ -96,19 +96,33 @@ Vue.component('hud-buttons', {
 	data() {
 		return {
 			tools: [],
-			orientation: orientation
+			orientation: orientation,
+			isVisible: false
 		}
 	},
 	created() {
 		let self = this;
 		var panel = orientation + 'Panel';
 
+		// check if currently hidden
+		localforage.getItem('settings.isHudVisible')
+			.then(isHudVisible => {
+				if (!isHudVisible) {
+					return parent.postMessage({action:'hideSidePanels'}, document.referrer);
+				}
+			})
+			.then( () => {
+				// hide the panels until we know whether to show them or not to prevent flashing
+				this.isVisible = true;
+			})
+			.catch(errorHandler)
+
 		// initialize panels with tools		
 		loadPanelTools(panel)
 			.then(tools => {
 				self.tools = tools;
 			})
-			.catch(console.error);
+			.catch(errorHandler);
 
 		// listen for update events to add new button
 		Event.listen('updateButton', data => {

@@ -259,8 +259,17 @@ function configureStorage() {
 		return saveFrame(frame);
 	}));
 
+	// set other values to defaults on startup
+	promises.push(initDefaults());
+
 	return Promise.all(promises)
 		.catch(errorHandler);
+}
+
+function initDefaults() {
+	localforage.setItem('settings.isHudVisible', true);
+	localforage.setItem('drawer.isDrawerOpen', false);
+	localforage.setItem('drawer.activeTab', 'History');
 }
 
 /*
