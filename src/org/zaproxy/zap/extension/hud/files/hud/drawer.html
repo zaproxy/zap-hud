@@ -5,13 +5,15 @@
 
 	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js"></script>
 	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue.js"></script>
+	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue-i18n.js"></script>
+	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=i18n.js"></script>
 	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=utils.js"></script>
 	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=drawer.js"></script>
 </head>
 <body>
     <div id="app">
         <tabs>
-            <tab name="History">
+            <tab :name="$t('message.history_tool')">
                 <history></history>
             </tab>
         </tabs>

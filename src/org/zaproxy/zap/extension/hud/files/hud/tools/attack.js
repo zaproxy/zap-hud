@@ -9,16 +9,16 @@ var Attack = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "attack";
-	var LABEL = "Attack Mode";
+	var LABEL = I18n.t("attack_tool");
 	var DATA = {};
-		DATA.ON = "On";
-		DATA.OFF = "Off";
+		DATA.ON = I18n.t("common_on");
+		DATA.OFF = I18n.t("common_off");
 	var ICONS = {};
 		ICONS.ON = "flame.png";
 		ICONS.OFF = "flame-grey.png";
 	var DIALOG = {};
-		DIALOG.ON = "Turn off Attack Mode?";
-		DIALOG.OFF = "Turn on Attack Mode?\nThis will cause ZAP to automatically attack all pages in scope.";
+		DIALOG.ON = I18n.t("attack_start");
+		DIALOG.OFF = I18n.t("attack_stop");
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {

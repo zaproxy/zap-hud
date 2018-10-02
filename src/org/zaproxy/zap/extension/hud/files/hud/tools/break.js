@@ -9,10 +9,10 @@ var Break = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "break";
-	var LABEL = "Break";
+	var LABEL = I18n.t("break_tool");
 	var DATA = {};
-		DATA.OFF = "Off";
-		DATA.ON = "On";
+		DATA.OFF = I18n.t("common_off");
+		DATA.ON = I18n.t("common_on");
 	var ICONS = {};
 		ICONS.OFF = "break-off.png";
 		ICONS.ON = "break-on.png";

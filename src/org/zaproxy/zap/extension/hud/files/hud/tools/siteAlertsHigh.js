@@ -9,7 +9,7 @@ var SiteAlertsHigh = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "site-alerts-high";
-	var LABEL = "Site Alerts";
+	var LABEL = I18n.t("alerts_site_high_tool");
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
