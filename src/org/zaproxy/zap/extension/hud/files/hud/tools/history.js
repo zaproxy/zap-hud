@@ -36,7 +36,7 @@ var History = (function() {
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
-		config.options = {remove: "Remove"};
+		config.options = {remove: I18n.t("common_remove")};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
 			.then(response => {

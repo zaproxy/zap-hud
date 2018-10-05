@@ -70,8 +70,8 @@ Vue.component('dialog-modal', {
 		return {
 			port: null,
 			buttons: [
-				{text: "Okay", id:"okay"},
-				{text: "Cancel", id:"cancel"}
+				{text: I18n.t("common_ok"), id:"okay"},
+				{text: I18n.t("common_cancel"), id:"cancel"}
 			]
 		}
 	},
@@ -142,7 +142,7 @@ Vue.component('all-alerts-modal', {
 		return {
 			port: null,
 			alerts: {},
-			activeTab: "High"
+			activeTab: I18n.t("alerts_risk_high")
 		}
 	},
 	created: function() {
@@ -338,7 +338,7 @@ Vue.component('break-message-modal', {
 			request: {},
 			response: {},
 			isResponseDisabled: false,
-			activeTab: "Request"
+			activeTab: I18n.t("common_request")
 		}
 	},
 	created() {
@@ -382,7 +382,7 @@ Vue.component('history-message-modal', {
 				if (json.requestUrl) {
 					window.top.location.href = json.requestUrl;
 				} else {
-					self.errors = "Invalid HTML header";
+					self.errors = I18n.t("error_invalid_html_header");
 				}
 			})
 			.catch(errorHandler)
@@ -439,7 +439,7 @@ Vue.component('site-tree-node', {
 		    navigator.serviceWorker.controller.postMessage({action: "showHttpMessageDetails", tool: "history", id:this.model.hrefId});
 	    },
 	    showChildren: function () {
-	      this.addChild('..Loading..', false);
+	      this.addChild(I18n.t("sites_children_loading"), false);
 			var treeNode = this;
 			fetch("<<ZAP_HUD_API>>/core/view/childNodes/?url=" + this.model.url)
 			.then(response => {
@@ -481,7 +481,7 @@ Vue.component('site-tree-node', {
 	},
 	data() {
 		return {
-		  name: 'Sites Tree',
+		  name: I18n.t("sites_tool"),
 		  open: false,
 		}
 	}
@@ -500,10 +500,10 @@ Vue.component('site-tree-modal', {
 	data() {
 		return {
 		  port: null,
-		  name: 'Sites Tree',
+		  name: I18n.t("sites_tool"),
 		  open: false,
 		  model: {
-		    name: 'Sites',
+		    name: I18n.t("sites_title"),
 		    isLeaf: false,
 		    hrefId: 0,
 		    url: '',
@@ -589,23 +589,23 @@ document.addEventListener("DOMContentLoaded", () => {
 		el: '#app',
 		data: {
 			isDialogModalShown: false,
-			dialogModalTitle: "HUD Modal",
+			dialogModalTitle: "",
 			dialogModalText: "text",
 			isSelectToolModalShown: false,
 			isAlertListModalShown: false,
-			alertListModalTitle: "Alerts",
+			alertListModalTitle: I18n.t("alerts_title"),
 			isAllAlertsModalShown: false,
-			allAlertsModalTitle: "All Alerts",
+			allAlertsModalTitle: I18n.t("alerts_all_title"),
 			isAlertDetailsModalShown: false,
-			alertDetailsModalTitle: "Alert Details",
+			alertDetailsModalTitle: I18n.t("alerts_details_title"),
 			isSimpleMenuModalShown: false,
-			simpleMenuModalTitle: "Menu",
+			simpleMenuModalTitle: I18n.t("common_menu_title"),
 			isBreakMessageModalShown: false,
-			breakMessageModalTitle: "HTTP Message",
+			breakMessageModalTitle: I18n.t("break_http_message_title"),
 			isHistoryMessageModalShown: false,
-			historyMessageModalTitle: "HTTP Message",
+			historyMessageModalTitle: I18n.t("history_http_message_title"),
 			isSiteTreeModalShown: false,
-			siteTreeModalTitle: "Sites Tree",
+			siteTreeModalTitle: I18n.t("sites_tool"),
 			keepShowing: false,
 		},
 	});
@@ -674,7 +674,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 
 		case "showHudSettings":
 			Event.fire('showSimpleMenuModal', {
-				title: 'HUD Settings',
+				title: I18n.t("settings_title"),
 				items: config.settings,
 				port: port
 			});
@@ -683,7 +683,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 
 		case "showBreakMessage":
 			Event.fire('showBreakMessageModal', {
-				title: 'Intercepted HTTP Message',
+				title: I18n.t("break_intercept_title"),
 				request: config.request,
 				response: config.response,
 				isResponseDisabled: config.isResponseDisabled,
@@ -694,7 +694,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 
 		case "showHistoryMessage":
 			Event.fire('showHistoryMessageModal', {
-				title: 'HTTP Message',
+				title: I18n.t("history_http_message_title"),
 				request: config.request,
 				response: config.response,
 				isResponseDisabled: config.isResponseDisabled,
@@ -705,7 +705,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 
 		case "showSiteTree":
 			Event.fire('showSiteTreeModal', {
-				title: "Sites Tree", 
+				title: I18n.t("sites_tool"), 
 				port: port
 			});
 			
