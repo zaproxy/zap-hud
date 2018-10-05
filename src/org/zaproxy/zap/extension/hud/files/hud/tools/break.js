@@ -213,7 +213,7 @@ var Break = (function() {
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
-		config.options = {remove: "Remove", filter: "Add Filter"};
+		config.options = {remove: I18n.t("common_remove"), filter: "Add Filter"};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
 			.then(response => {

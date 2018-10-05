@@ -166,7 +166,7 @@ var alertUtils = (function() {
 
 		config.tool = toolname;
 		config.toolLabel = toolLabel;
-		config.options = {opt1: "Option 1", opt2: "Option 2", remove: "Remove"};
+		config.options = {opt1: "Option 1", opt2: "Option 2", remove: I18n.t("common_remove")};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
 			.then(response => {

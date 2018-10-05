@@ -423,6 +423,34 @@
 		<build-deploy-addon name="hud" />
 	</target>
 
+	<target name="generate-i18n-hud" depends="clean,compile" description="regenerate the HUD i18n file">
+		<java  dir=".." fork="yes"
+			classname="org.zaproxy.zap.extension.hud.GenerateUiI18nFile">
+			<classpath>
+				<pathelement location="../bin" />
+				<fileset dir="${dist.lib.dir}">
+					<include name="**/*.jar" />
+					<include name="**/*.zap" />
+				</fileset>
+			</classpath>
+		</java>
+	</target>
+
+	<target name="generate-i18n-hud-test" depends="clean,compile" 
+			description="regenerate the HUD i18n file in test mode with the translated strings in uppercase">
+		<java  dir=".." fork="yes"
+			classname="org.zaproxy.zap.extension.hud.GenerateUiI18nFile">
+			<arg value="-test"/>
+			<classpath>
+				<pathelement location="../bin" />
+				<fileset dir="${dist.lib.dir}">
+					<include name="**/*.jar" />
+					<include name="**/*.zap" />
+				</fileset>
+			</classpath>
+		</java>
+	</target>
+
 	<target name="lint-staged-hud" description="run the XO linter on the staged hud extension">
 		<exec executable="npm">
 			<arg line="run lint-staged" />
