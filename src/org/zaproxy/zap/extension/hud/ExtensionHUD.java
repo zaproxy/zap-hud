@@ -51,6 +51,7 @@ import org.parosproxy.paros.extension.ExtensionHook;
 import org.parosproxy.paros.extension.OptionsChangedListener;
 import org.parosproxy.paros.extension.history.ProxyListenerLog;
 import org.parosproxy.paros.model.OptionsParam;
+import org.parosproxy.paros.network.HttpHeader;
 import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.view.View;
 import org.zaproxy.zap.ZAP;
@@ -91,6 +92,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	private static final String HTTP_HEADER_CSP = "Content-Security-Policy";
 	private static final String HTTP_HEADER_XCSP = "X-Content-Security-Policy";
 	private static final String HTTP_HEADER_WEBKIT_CSP = "X-WebKit-CSP";
+    private static final String HTTP_HEADER_REFERRER_POLICY = "Referrer-Policy";
 
 	// Change only after the message has been persisted, otherwise ZAP would see the HUD injections.
 	private static final int PROXY_LISTENER_ORDER = ProxyListenerLog.PROXY_LISTENER_ORDER + 1000;
@@ -388,6 +390,11 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 										HudEventPublisher.EVENT_DOMAIN_UPGRADED_TO_HTTPS,
 										null, map ));
 					}
+					
+					// The Referrer-Policy header break the HUD, always strip it out
+					msg.getResponseHeader().setHeader(HTTP_HEADER_REFERRER_POLICY, null);
+					// Browser caches will cause the browser to use old callback urls which will also fail
+					msg.getResponseHeader().setHeader(HttpHeader.CACHE_CONTROL, "no-cache, no-store");
 					
 					if (this.getHudParam().isRemoveCSP()) {
 						// Remove all of them, just in case
