@@ -67,6 +67,10 @@
 		<file>hud/utils.js</file>
 		<file>hud/websockettest.html</file>
 		<file>hud/websockettest.js</file>
+		<file>hudtutorial/en_GB/1-Intro.html</file>
+		<file>hudtutorial/en_GB/2-Warning.html</file>
+		<file>hudtutorial/en_GB/3-Frames.html</file>
+		<file>hudtutorial/en_GB/tutorial.css</file>
 	</files>
 	<not-before-version>2.7.0</not-before-version>
 	<not-from-version></not-from-version>
