@@ -545,4 +545,8 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
             this.addHudScripts();
         }
     }
+    
+    public HudAPI getAPI() {
+        return this.api;
+    }
 }
