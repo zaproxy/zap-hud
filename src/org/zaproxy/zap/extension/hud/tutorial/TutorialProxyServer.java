@@ -36,6 +36,7 @@ import org.parosproxy.paros.core.proxy.ProxyThread;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.network.HttpSender;
+import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.hud.ExtensionHUD;
 import org.zaproxy.zap.extension.selenium.ExtensionSelenium;
 import org.zaproxy.zap.view.ZapMenuItem;
@@ -123,22 +124,34 @@ public class TutorialProxyServer extends ProxyServer {
                 if (name.length() == 0) {
                     name = "1-Intro.html";
                 }
-                String localStr = Constant.getLocale().toString();
-                String body = getTextFile(localStr + "/" + name);
-                if (body == null) {
-                    body = getTextFile(DEFAULT_LOCALE + "/" + name);
-                }
-                if (body == null) {
-                    LOG.debug("Failed to find tutorial file " + name);
-                    msg.setResponseBody("<html><body><h1>404 Not found</h1><body></html>");
-                    msg.setResponseHeader(getDefaultResponseHeader(STATUS_NOT_FOUND, "text/html", 0));
-                } else {
-                    msg.setResponseBody(body);
-                    String contentType = "text/html";
-                    if (name.endsWith(".css")) {
-                        contentType = "text/css";
+                if (name.endsWith(".png")) {
+                    byte[] image = extension.getAPI().getImage(name);
+                    if (image == null) {
+                        msg.setResponseBody("<html><body><h1>404 Not found</h1><body></html>");
+                        msg.setResponseHeader(getDefaultResponseHeader(STATUS_NOT_FOUND, "text/html", 0));
+                    } else {
+                        msg.setResponseBody(image);
+                        msg.setResponseHeader(API.getDefaultResponseHeader(
+                                "image/png", msg.getResponseBody().length(), true));
                     }
-                    msg.setResponseHeader(getDefaultResponseHeader(contentType, msg.getResponseBody().length()));
+                } else {
+                    String localStr = Constant.getLocale().toString();
+                    String body = getTextFile(localStr + "/" + name);
+                    if (body == null) {
+                        body = getTextFile(DEFAULT_LOCALE + "/" + name);
+                    }
+                    if (body == null) {
+                        LOG.debug("Failed to find tutorial file " + name);
+                        msg.setResponseBody("<html><body><h1>404 Not found</h1><body></html>");
+                        msg.setResponseHeader(getDefaultResponseHeader(STATUS_NOT_FOUND, "text/html", 0));
+                    } else {
+                        msg.setResponseBody(body);
+                        String contentType = "text/html";
+                        if (name.endsWith(".css")) {
+                            contentType = "text/css";
+                        }
+                        msg.setResponseHeader(getDefaultResponseHeader(contentType, msg.getResponseBody().length()));
+                    }
                 }
             } catch (HttpMalformedHeaderException e) {
                 LOG.error(e.getMessage(), e);
