@@ -22,7 +22,7 @@ Vue.component('history', {
             navigator.serviceWorker.controller.postMessage({action: "showHttpMessageDetails", tool: "history", id:id});
         }
     },
-    created() {
+    mounted() {
         // let self = this;
 
         loadTool('history')
