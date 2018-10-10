@@ -40,23 +40,6 @@ var toolScripts = [
 
 self.tools = {};
 
-// Load Tool Scripts
-localforage.setItem("tools", [])
-	.then(() => {
-		toolScripts.forEach(script => {
-			importScripts(script); 
-		});
-	})
-	.then(() => {
-		var ts = [];
-		for (var tool in self.tools) {
-			ts.push(self.tools[tool].name);
-		}
-		return registerTools(ts); 
-
-	})
-	.catch(errorHandler);
-
 /* Listeners */
 const onInstall = event => {
 	log(LOG_INFO, 'serviceworker.install', 'Installing...');
@@ -66,10 +49,29 @@ const onInstall = event => {
 		caches.open(CACHE_NAME)
 			.then(cache => {
 				console.log("caching urls...");
+				cache.addAll(toolScripts);
 				return cache.addAll(urlsToCache);
 			})
 			.catch(errorHandler)
 	);
+
+	// Load Tool Scripts
+	localforage.setItem("tools", [])
+	.then(() => {
+		for (var toolScriptCounter = 0; toolScriptCounter < toolScripts.length; toolScriptCounter++){
+			var script = toolScripts[toolScriptCounter];
+			importScripts(script);
+		}
+	})
+	.then(() => {
+		var ts = [];
+		for (var tool in self.tools) {
+			ts.push(self.tools[tool].name);
+		}
+		return registerTools(ts);
+
+	})
+	.catch(errorHandler);
 };
 
 const onActivate = event => {
