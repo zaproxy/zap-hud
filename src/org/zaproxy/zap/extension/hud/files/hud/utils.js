@@ -269,7 +269,8 @@ function configureStorage() {
 function initDefaults() {
 	localforage.setItem('settings.isHudVisible', true);
 	localforage.setItem('drawer.isDrawerOpen', false);
-	localforage.setItem('drawer.activeTab', 'History');
+	// below point to href, not name
+	localforage.setItem('drawer.activeTab', '#history');
 }
 
 /*

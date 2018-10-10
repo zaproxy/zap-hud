@@ -103,7 +103,7 @@ Vue.component('tabs', {
             });
         }
     },
-    created() {
+    mounted() {
         this.tabs = this.$children;
 
         let promises = [
