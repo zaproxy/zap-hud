@@ -107,7 +107,7 @@ public class HudBrowserTestThread extends Thread {
             if (panel == null) {
                 this.fails.add(url + " : Failed to find left panel"); 
             } else {
-                wd.switchTo().frame(wd.findElement(By.id("left-panel")));
+                wd.switchTo().frame((WebElement)wd.findElement(By.id("left-panel")));
                 List<WebElement> buttons = null;
                 for (int i=0; i < 10; i++) {
                     buttons = wd.findElements(By.className("hud-button"));
