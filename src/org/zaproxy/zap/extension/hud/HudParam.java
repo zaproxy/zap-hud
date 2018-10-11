@@ -38,6 +38,8 @@ public class HudParam extends VersionedAbstractParam {
     private static final String PARAM_ALLOW_UNSAFE_EVAL = PARAM_BASE_KEY + ".unsafeEval";
     private static final String PARAM_IN_SCOPE_ONLY = PARAM_BASE_KEY + ".inScopeOnly";
     private static final String PARAM_REMOVE_CSP = PARAM_BASE_KEY + ".removeCsp";
+    private static final String PARAM_TUTORIAL_PORT = PARAM_BASE_KEY + ".tutorialPort";
+    private static final String PARAM_TUTORIAL_HOST = PARAM_BASE_KEY + ".tutorialHost";
 
     /**
      * The version of the configurations. Used to keep track of configurations changes between releases, if updates are needed.
@@ -58,6 +60,10 @@ public class HudParam extends VersionedAbstractParam {
     private boolean inScopeOnly;
     
     private boolean removeCSP;
+    
+    private int tutorialPort;
+    
+    private String tutorialHost;
 
     public String getBaseDirectory() {
         return baseDirectory;
@@ -143,6 +149,8 @@ public class HudParam extends VersionedAbstractParam {
         allowUnsafeEval = getConfig().getBoolean(PARAM_ALLOW_UNSAFE_EVAL, false);
         inScopeOnly = getConfig().getBoolean(PARAM_IN_SCOPE_ONLY, false);
         removeCSP = getConfig().getBoolean(PARAM_REMOVE_CSP, true);
+        tutorialPort = getConfig().getInt(PARAM_TUTORIAL_PORT, 0);
+        tutorialHost = getConfig().getString(PARAM_TUTORIAL_HOST, "127.0.0.1");
     }
 
     @Override
@@ -150,4 +158,27 @@ public class HudParam extends VersionedAbstractParam {
         // Currently nothing to do
 
     }
+
+    /**
+     * Returns the port the tutorial should run on.
+     * By default this will be 0, meaning that a random port will be used.
+     * This can be changed via a command line config value for unit tests
+     * where the port needs to be known in advance.
+     * @return
+     */
+    public int getTutorialPort() {
+        return tutorialPort;
+    }
+    
+    /**
+     * Returns the host address the tutorial should run on.
+     * By default this will be 127.0.0.1.
+     * This can be changed via a command line config value for unit tests
+     * where the host needs to be another value.
+     * @return
+     */
+    public String getTutorialHost() {
+        return tutorialHost;
+    }
+    
 }

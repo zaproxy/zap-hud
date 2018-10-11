@@ -217,6 +217,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
                     HudEventPublisher.getPublisher(),
                     new Event(HudEventPublisher.getPublisher(), HudEventPublisher.EVENT_DEV_MODE_ENABLED, null));
 	    }
+	    tutorialServer.start();
 	}
 	
     protected boolean isHudEnabled() {

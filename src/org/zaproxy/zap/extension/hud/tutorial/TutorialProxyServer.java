@@ -56,7 +56,17 @@ public class TutorialProxyServer extends ProxyServer {
     public TutorialProxyServer(ExtensionHUD extension) {
         this("ZAP-HUD-Tutorial");
         this.extension = extension;
-        int port = this.startServer("127.0.0.1", 0, true);
+    }
+    
+    /**
+     * The server is started after initialisation so that the parameters
+     * will have been loaded.
+     */
+    public void start() {
+        int port = this.startServer(
+                extension.getHudParam().getTutorialHost(),
+                extension.getHudParam().getTutorialPort(),
+                true);
         LOG.debug("HUD Tutorial port is " + port);
         this.hostPort = "127.0.0.1:" + port;
     }
