@@ -12,7 +12,6 @@
 	<property name="temp" location="temp" />
 	<property name="dist" location="zap-exts" />
 	<property name="dist.lib.dir" location="../lib" />
-	<property name="status" value="alpha" />
 	<property name="versions.file" location="${dist}/ZapVersions.xml" />
 	<property name="wiki.dir" location="../../zap-extensions-wiki" />
 	<!-- This assumes you also have the zaproxy project -->
@@ -180,8 +179,10 @@
 		<sequential>
 			<local name="zapaddon.version" />
 			<xmlproperty file="${src}/org/zaproxy/zap/extension/@{name}/ZapAddOn.xml"/>
+			<local name="zapaddon.status" />
+			<xmlproperty file="${src}/org/zaproxy/zap/extension/@{name}/ZapAddOn.xml"/>
 			<local name="file" />
-			<property name="file" value="@{addonid}-${status}-${zapaddon.version}.zap" />
+			<property name="file" value="@{addonid}-${zapaddon.status}-${zapaddon.version}.zap" />
 
 			<generatejavahelpsearchindexes jhalljar="${build.lib.dir}/jhall.jar"
 				helpcontentsdirname="contents" helpsetfilename="helpset*.hs">
@@ -248,7 +249,7 @@
 			</tstamp>
 
 			<appendzapaddonfile from="${src}/org/zaproxy/zap/extension/@{name}/ZapAddOn.xml" to="${versions.file}"
-				addonid="@{addonid}" filename="${file}" status="${status}" size="${length}" hash="${hash}" date="${yyyymmdd}"
+				addonid="@{addonid}" filename="${file}" status="${zapaddon.status}" size="${length}" hash="${hash}" date="${yyyymmdd}"
 				url="${zap.download.url}/${file}" />
 
 		</sequential>
@@ -261,8 +262,10 @@
 				<sequential>
 					<local name="zapaddon.version" />
 					<xmlproperty file="${src}/org/zaproxy/zap/extension/@{name}/ZapAddOn.xml"/>
+					<local name="zapaddon.status" />
+					<xmlproperty file="${src}/org/zaproxy/zap/extension/@{name}/ZapAddOn.xml"/>
 					<local name="file" />
-					<property name="file" value="@{addonid}-${status}-${zapaddon.version}.zap" />
+					<property name="file" value="@{addonid}-${zapaddon.status}-${zapaddon.version}.zap" />
 
 					<local name="addon.libs.zip" />
 					<property name="addon.libs.zip" value="${temp}/libs-@{name}.zip" />
@@ -313,59 +316,12 @@
 					</tstamp>
 
 					<appendzapaddonfile from="${src}/org/zaproxy/zap/extension/@{name}/ZapAddOn.xml" to="${versions.file}"
-						addonid="@{addonid}" filename="${file}" status="${status}" size="${length}" hash="${hash}" date="${yyyymmdd}"
+						addonid="@{addonid}" filename="${file}" status="${zapaddon.status}" size="${length}" hash="${hash}" date="${yyyymmdd}"
 						url="${zap.download.url}/${file}" />
 
 				</sequential>
 			</macrodef>
 	
-	<macrodef name="build-help-addon" description="build the specified addon">
-		<attribute name="name"/>
-		<element name="extra-actions" implicit="true" optional="true" />
-		<sequential>
-			<local name="zapaddon.version" />
-			<xmlproperty file="${src}/org/zaproxy/zap/extension/@{name}/ZapAddOn.xml" />
-			<local name="file" />
-			<property name="file" value="@{name}-${status}-${zapaddon.version}.zap" />
-
-			<local name="addon.libs.zip" />
-			<property name="addon.libs.zip" value="${temp}/libs-@{name}.zip" />
-
-			<delete file="${addon.libs.zip}" failonerror="true" />
-			<zip destfile="${addon.libs.zip}" whenempty="create">
-				<zipgroupfileset dir="${src}/org/zaproxy/zap/extension/@{name}/lib/" includes="*.jar" />
-			</zip>
-
-			 <jar jarfile="${dist}/${file}" update="true" compress="true">
-				<zipfileset src="${addon.libs.zip}" />
-				<zipfileset dir="${src}" includes="org/zaproxy/zap/extension/@{name}/ZapAddOn.xml" fullpath="ZapAddOn.xml"/>
-			</jar>
-			<delete file="${addon.libs.zip}" />
-
-			<!-- allow callers to do extra actions before generating the hash and determine the size of the file -->
-			<extra-actions />
-
-			<local name="length" />
-			<length file="${dist}/${file}" property="length" />
-
-			<local name="sha1hash" />
-			<checksum file="${dist}/${file}"  algorithm="SHA-1" property="sha1hash"/>
-
-			<local name="hash" />
-			<property name="hash" value="SHA1:${sha1hash}"/>
-
-			<local name="yyyymmdd" />
-			<tstamp>
-				<format property="yyyymmdd" pattern="yyyy-MM-dd"/>
-			</tstamp>
-
-			<appendzapaddonfile from="${src}/org/zaproxy/zap/extension/@{name}/ZapAddOn.xml" to="${versions.file}"
-				addonid="@{name}" filename="${file}" status="${status}" size="${length}" hash="${hash}" date="${yyyymmdd}"
-				url="${zap.download.url}/${file}" />
-
-		</sequential>
-	</macrodef>
-
 	<target name="build-all" depends="clean,compile" description="build all of the extensions">
 		<delete file="${versions.file}"/>
 		
@@ -406,16 +362,6 @@
 
 			<build-addon-without-help-indexes name="@{name}" addonid="@{addonid}" />
 			<deploy-addon name="@{addonid}" />
-		</sequential>
-	</macrodef>
-	
-	<macrodef name="build-deploy-help-addon" description="build and deploy the specified help addon">
-		<attribute name="name"/>
-		<sequential>
-			<antcall target="clean" />
-
-			<build-help-addon name="@{name}" />
-			<deploy-addon name="@{name}" />
 		</sequential>
 	</macrodef>
 	

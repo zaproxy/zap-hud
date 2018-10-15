@@ -1,6 +1,7 @@
 <zapaddon>
 	<name>HUD - Heads Up Display</name>
 	<version>1</version>
+	<status>alpha</status>
 	<description>Display information from ZAP in browser.</description>
 	<author>ZAP Dev Team</author>
 	<url></url>
