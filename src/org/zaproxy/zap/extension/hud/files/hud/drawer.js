@@ -1,7 +1,4 @@
 // app is the main Vue object controlling everything
-// DV: emit/handle via app
-// https://vuejs.org/v2/guide/migration.html#dispatch-and-broadcast-replaced
-
 var app;
 var eventBus = new Vue();
 
@@ -22,8 +19,7 @@ Vue.component('history', {
             navigator.serviceWorker.controller.postMessage({action: "showHttpMessageDetails", tool: "history", id:id});
         }
     },
-    mounted() {
-        // let self = this;
+    created() {
         loadTool('history')
             .then(tool => {
                 this.messages = tool.messages
@@ -47,7 +43,7 @@ Vue.component('history', {
             let lastid = 'message-tr-' + lastMessage.id
 
             document.getElementById(lastid).scrollIntoView({block:'end', behaviour:'smooth'});
-            //move horizontal scroll bar to the right
+            //move horizontal scroll bar to the left
             var tabsDetails = document.getElementsByClassName('tabs-details')[0];
             tabsDetails.scrollTo(0,tabsDetails.scrollHeight)
         }
