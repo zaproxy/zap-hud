@@ -11,20 +11,8 @@ var panelKey = "";
 // the Vue app
 var app;
 
-// the Event wrapper class will act as an Event dispatcher for Vue
-window.Event = new (class {
-	constructor() {
-		this.vue = new Vue();
-	}
-
-	fire(event, data = null) {
-		this.vue.$emit(event, data);
-	}
-
-	listen(event, callback) {
-		this.vue.$on(event, callback);
-	}
-})
+// Event dispatcher for Vue
+var eventBus = new Vue();
 
 Vue.component('hud-button', {
 	template: '#hud-button-template',
@@ -82,7 +70,7 @@ Vue.component('hud-button', {
 			self.marginright = '.5rem'
 		}
 
-		Event.listen('updateButton', data => {
+		eventBus.$on('updateButton', data => {
 			if (self.name === data.name) {
 				self.currentIcon = '<<ZAP_HUD_FILES>>?image=' + data.icon;
 				self.currentData = data.data;
@@ -125,14 +113,14 @@ Vue.component('hud-buttons', {
 			.catch(errorHandler);
 
 		// listen for update events to add new button
-		Event.listen('updateButton', data => {
+		eventBus.$on('updateButton', data => {
 			if (self.tools.filter(tool => tool.name === data.name).length === 0) {
 				self.tools.push(data.tool)
 			}
 		})
 
 		// listen to remove buttons
-		Event.listen('removeButton', data => {
+		eventBus.$on('removeButton', data => {
 			self.tools = self.tools.filter(tool => tool.name !== data.name);
 		})
 	}
@@ -169,7 +157,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 		case "updateData":
 			var tool = message.tool;
 
-			Event.fire('updateButton', {
+			eventBus.$emit('updateButton', {
 				name: tool.name,
 				data: tool.data,
 				icon: tool.icon,
@@ -180,7 +168,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 		case "removeTool":
 			var tool = message.tool;
 
-			Event.fire('removeButton', {
+			eventBus.$emit('removeButton', {
 				name: tool.name
 			})
 			break;
