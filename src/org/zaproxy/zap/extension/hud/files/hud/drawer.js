@@ -1,20 +1,6 @@
 // app is the main Vue object controlling everything
 var app;
-
-// the Event wrapper class will act as an Event dispatcher for Vue
-window.Event = new (class {
-	constructor() {
-		this.vue = new Vue();
-	}
-
-	fire(event, data = null) {
-		this.vue.$emit(event, data);
-	}
-
-	listen(event, callback) {
-		this.vue.$on(event, callback);
-	}
-})
+var eventBus = new Vue();
 
 Vue.component('history', {
     template: '#history-template',
@@ -26,7 +12,7 @@ Vue.component('history', {
     computed: {
         timeDescendingMessages() {
             return this.messages.slice().reverse();
-        }     
+        }
     },
     methods: {
         messageSelected(id) {
@@ -34,23 +20,21 @@ Vue.component('history', {
         }
     },
     created() {
-        let self = this;
-
         loadTool('history')
             .then(tool => {
-                self.messages = tool.messages
+                this.messages = tool.messages
             })
             .catch(errorHandler)
 
-        Event.listen('setMessages', data => {
-            self.messages = data.messages;
+        eventBus.$on('setMessages', data => {
+            this.messages = data.messages;
         })
 
-		Event.listen('updateMessages', data => {
-            self.messages = self.messages.concat(data.messages);
+		eventBus.$on('updateMessages', data => {
+            this.messages = this.messages.concat(data.messages);
 
             let count = data.messages.length;
-            self.$parent.$emit('badgeDataEvent', {data: count}) 
+            this.$parent.$emit('badgeDataEvent', {data: count})
         });
     },
     updated() {
@@ -59,6 +43,9 @@ Vue.component('history', {
             let lastid = 'message-tr-' + lastMessage.id
 
             document.getElementById(lastid).scrollIntoView({block:'end', behaviour:'smooth'});
+            //move horizontal scroll bar to the left
+            var tabsDetails = document.getElementsByClassName('tabs-details')[0];
+            tabsDetails.scrollTo(0,tabsDetails.scrollHeight)
         }
     }
 });
@@ -66,7 +53,7 @@ Vue.component('history', {
 Vue.component('tabs', {
 	template: '#tabs-template',
     data() {
-        return { 
+        return {
             tabs: [],
             isOpen: false,
             isArrowUp: true
@@ -113,8 +100,7 @@ Vue.component('tabs', {
         }
     },
     created() {
-        let self = this;
-        self.tabs = this.$children;
+        this.tabs = this.$children;
 
         let promises = [
             localforage.getItem('drawer.isDrawerOpen'),
@@ -125,12 +111,14 @@ Vue.component('tabs', {
                 let shouldOpenDrawer = results[0];
                 let activeTab = results[1];
 
-                if (shouldOpenDrawer) {
-                    self.openDrawer();
+                if (activeTab) {
+                    this.highlightTab(activeTab);
+                } else {
+                    this.highlightTab("#history");
+                }
 
-                    if (activeTab) {
-                        self.highlightTab(activeTab);
-                    }
+                if (shouldOpenDrawer) {
+                    this.openDrawer();
                 }
             })
             .catch(errorHandler);
@@ -247,10 +235,10 @@ document.addEventListener("DOMContentLoaded", () => {
 		i18n: I18n.i18n,
 		el: '#app',
 		data: {
-			
+
 		},
     });
-    
+
     // notify service worker drawer has been refreshed
     navigator.serviceWorker.controller.postMessage({
         action: 'frameload',
@@ -261,10 +249,10 @@ document.addEventListener("DOMContentLoaded", () => {
 navigator.serviceWorker.addEventListener('message', event => {
 	var action = event.data.action;
 	var port = event.ports[0];
-	
+
 	switch(action) {
         case 'updateMessages':
-			Event.fire('updateMessages', {
+            eventBus.$emit('updateMessages', {
                 messages: event.data.messages,
 				port: port
 			});
