@@ -17,10 +17,10 @@ var Scope = (function() {
 		ICONS.IN = "target.png";
 		ICONS.OUT = "target-grey.png";
 	var DIALOG = {};
-		DIALOG.IN = "Remove current domain from scope?";
-		DIALOG.OUT = "Add current domain to scope?";
-		DIALOG.REQUIRED = "This tool requires the current site be added to the scope, via the Scope tool.";
-	var HUD_CONTEXT = "HUD%20Context";
+		DIALOG.IN = I18n.t("scope_remove");
+		DIALOG.OUT = I18n.t("scope_add");
+		DIALOG.REQUIRED = I18n.t("scope_required");
+	var HUD_CONTEXT = encodeURI(I18n.t("scope_hud_context"));
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -48,18 +48,18 @@ var Scope = (function() {
 					config.title = LABEL;
 					config.text = DIALOG.OUT;
 					config.buttons = [
-						{text:"Add",
+						{text:I18n.t("common_add"),
 						id:"add"},
-						{text:"Cancel",
+						{text:I18n.t("common_cancel"),
 						id:"cancel"}
 					];
 				}
 				else {
 					config.text = DIALOG.IN;
 					config.buttons = [
-						{text:"Remove",
+						{text:I18n.t("common_remove"),
 						id:"remove"},
-						{text:"Cancel",
+						{text:I18n.t("common_cancel"),
 						id:"cancel"}
 					];
 				}
@@ -186,7 +186,7 @@ var Scope = (function() {
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
-		config.options = {remove: "Remove"};
+		config.options = {remove: I18n.t("common_remove")};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
 			.then(response => {

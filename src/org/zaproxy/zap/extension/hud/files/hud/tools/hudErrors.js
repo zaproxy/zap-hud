@@ -9,7 +9,7 @@ var HudErrors = (function() {
 	// Constants
 	// todo: could probably switch this to a config file?
 	var NAME = "hudErrors";
-	var LABEL = "HUD Errors";
+	var LABEL = I18n.t("hud_errors_tool");
 	var DATA = {};
 	var ICONS = {};
 		ICONS.NONE = "bug-grey.png";
@@ -36,9 +36,9 @@ var HudErrors = (function() {
 				var config = {};
 
 				config.title = LABEL;
-				config.text = tool.records.join('\n');
+				config.text = tool.records.join('<br>');
 				config.buttons = [
-					{text:"Clear", id:"clear"}
+					{text:I18n.t("common_clear"), id:"clear"}
 				];
 
 				messageFrame("display", {action:"showDialog", config:config})
@@ -65,7 +65,7 @@ var HudErrors = (function() {
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
-		config.options = {remove: "Remove"};
+		config.options = {remove: I18n.t("common_remove")};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
 			.then(response => {
