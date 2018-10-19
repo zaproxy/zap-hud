@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "ava",
-    "build": "webpack --config build/webpack.config.dev.js",
+    "build": "webpack --config src/webpack/config.dev.js",
     "lint": "xo",
     "lint-staged": "lint-staged"
   },
