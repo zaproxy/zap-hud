@@ -56,6 +56,7 @@ import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.view.View;
 import org.zaproxy.zap.ZAP;
 import org.zaproxy.zap.eventBus.Event;
+import org.zaproxy.zap.extension.hud.tutorial.TutorialProxyServer;
 import org.zaproxy.zap.extension.script.ExtensionScript;
 import org.zaproxy.zap.extension.script.ScriptEventListener;
 import org.zaproxy.zap.extension.script.ScriptType;
@@ -126,6 +127,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	private String baseDirectory;
 	private Set<String> upgradedHttpsDomains = new HashSet<String>();
 	private HudBrowserTestThread testThread;
+	private TutorialProxyServer tutorialServer;
 
 	/**
 	*
@@ -181,6 +183,12 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 	    this.getExtScript().registerScriptType(hudScriptType);
 	    
 	    this.getExtScript().addListener(this);
+	    
+	    tutorialServer = new TutorialProxyServer(this);
+        if (getView() != null) {
+            extensionHook.getHookMenu().addToolsMenuItem(tutorialServer.getFirefoxToolsMenuItem());
+            extensionHook.getHookMenu().addToolsMenuItem(tutorialServer.getChromeToolsMenuItem());
+        }
 	}
 	
 	@Override
@@ -209,6 +217,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
                     HudEventPublisher.getPublisher(),
                     new Event(HudEventPublisher.getPublisher(), HudEventPublisher.EVENT_DEV_MODE_ENABLED, null));
 	    }
+	    tutorialServer.start();
 	}
 	
     protected boolean isHudEnabled() {
@@ -242,7 +251,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
 		}
 	}
 	
-	protected HudParam getHudParam() {
+	public HudParam getHudParam() {
 		if (hudParam == null) {
 			hudParam = new HudParam();
 		}
@@ -536,5 +545,9 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
             this.removeHudScripts();
             this.addHudScripts();
         }
+    }
+    
+    public HudAPI getAPI() {
+        return this.api;
     }
 }

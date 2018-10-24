@@ -364,7 +364,7 @@ public class HudAPI extends ApiImplementor {
         return websocketUrl;
     }
 
-    protected byte[] getImage (String name) {
+    public byte[] getImage (String name) {
         // TODO cache? And support local files
         try {
             InputStream is = this.getClass().getResourceAsStream(ExtensionHUD.RESOURCE + "/" + name);
