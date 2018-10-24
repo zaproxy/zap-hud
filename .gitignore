@@ -8,3 +8,7 @@ build/zap-exts/
 *.iml
 node_modules/
 dist/
+/.gradle/
+/buildGradle/
+/.classpath
+/.project
