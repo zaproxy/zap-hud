@@ -44,9 +44,9 @@ var Attack = (function() {
 				if(!isAttackMode) {
 					config.text = DIALOG.OFF;
 					config.buttons = [
-						{text:"Turn on",
+						{text:I18n.t("common_turn_on"),
 						id:"turnon"},
-						{text:"Cancel",
+						{text:I18n.t("common_cancel"),
 						id:"cancel"}
 					];
 				}
@@ -121,7 +121,7 @@ var Attack = (function() {
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
-		config.options = {remove: "Remove"};
+		config.options = {remove: I18n.t("common_remove")};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
 			.then(response => {

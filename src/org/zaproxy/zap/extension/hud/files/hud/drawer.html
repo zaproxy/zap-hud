@@ -23,18 +23,18 @@
         <table class="table table-striped table-hover table-scroll table-history" style="min-width: fit-content;">
             <thead>
                 <tr>
-                    <th style="width: 125px">Time</th>
-                    <th style="width: 75px">Status</th>
-                    <th style="width: 75px">Method</th>
-                    <th style="width: 800px">URL</th>
+                    <th style="width: 125px"> {{ $t('message.history_http_message_field_time') }} </th>
+                    <th style="width: 75px"> {{ $t('message.history_http_message_field_code') }} </th>
+                    <th style="width: 75px"> {{ $t('message.history_http_message_field_method') }} </th>
+                    <th style="width: 800px"> {{ $t('message.history_http_message_field_url') }} </th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="message in messages" @click="messageSelected(message.id)" :id="'message-tr-'+message.id">
-                    <td> {{ message.time }}</td>
-                    <td> {{ message.code }}</td>
-                    <td> {{ message.method }}</td>
-                    <td> {{ message.url }}</td>
+                    <td> {{ message.time }} </td>
+                    <td> {{ message.code }} </td>
+                    <td> {{ message.method }} </td>
+                    <td> {{ message.url }} </td>
                 </tr>
             </tbody>
         </table>

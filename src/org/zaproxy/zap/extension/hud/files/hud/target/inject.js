@@ -119,6 +119,8 @@
 	var showEnableTypeHiddenFields = [];
 	var showEnableDisplayNoneFields = [];
 	var showEnableDisplayHiddenFields = [];
+	var showEnabledDisabled = [];
+	var showEnabledReadOnly = [];
 
 	function showEnableOn() {
 		var inputs, index;
@@ -148,6 +150,16 @@
 					counted = true;
 				}
 			}
+			if (inputs[index].disabled) {
+				inputs[index].disabled = false;
+				showEnabledDisabled.push(inputs[index]);
+				// We dont count disabled fields as they are still visible
+			}
+			if (inputs[index].readOnly) {
+				inputs[index].readOnly = false;
+				showEnabledReadOnly.push(inputs[index]);
+				// We dont count readonly fields as they are still visible
+			}
 		}
 		showEnabled = true;
 	}
@@ -157,17 +169,23 @@
 		for (index = 0; index < showEnableTypeHiddenFields.length; ++index) {
 			showEnableTypeHiddenFields[index].type = 'hidden';
 		}
-		showEnableTypeHiddenFields = [];
 		for (index = 0; index < showEnableDisplayNoneFields.length; ++index) {
 			showEnableDisplayNoneFields[index].style.display = 'none';
 		}
-		showEnableDisplayNoneFields = [];
 		for (index = 0; index < showEnableDisplayHiddenFields.length; ++index) {
 			showEnableDisplayHiddenFields[index].style.visibility = 'hidden';
+		}
+		for (index = 0; index < showEnabledDisabled.length; ++index) {
+			showEnabledDisabled[index].disabled = true;
+		}
+		for (index = 0; index < showEnabledReadOnly.length; ++index) {
+			showEnabledReadOnly[index].readOnly = true;
 		}
 		showEnableTypeHiddenFields = [];
 		showEnableDisplayNoneFields = [];
 		showEnableDisplayHiddenFields = [];
+		showEnabledDisabled = [];
+		showEnabledReadOnly = [];
 		showEnabled = false;
 		showEnabledCount = 0
 	}
