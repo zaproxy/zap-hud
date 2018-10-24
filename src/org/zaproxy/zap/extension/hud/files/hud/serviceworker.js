@@ -243,7 +243,7 @@ function showAddToolDialog(panelKey) {
 function showHudSettings() {
 	var config = {};
 	config.settings = {
-		initialize: "Reset Configurations to Default",
+		initialize: I18n.t("settings_resets"),
 	};
 
 	messageFrame("display", {action: "showHudSettings", config: config})

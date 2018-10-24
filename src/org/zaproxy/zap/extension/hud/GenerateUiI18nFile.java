@@ -21,7 +21,8 @@ package org.zaproxy.zap.extension.hud;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.net.MalformedURLException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -33,14 +34,20 @@ import java.util.ResourceBundle;
 /**
  * Generates the i18n.js file used by the HUD web UI.
  * The i18n messages are held in the UIMessages* files so that they can be translated
- * via crowdin but dont have to be loaded into the ZAP Desktop UI or daemon
+ * via crowdin but dont have to be loaded into the ZAP Desktop UI or daemon.
+ * Use '-test' to convert all translated strings into uppercase to make it easier
+ * to spot untranslated strings.
  */
 public class GenerateUiI18nFile {
+    
+    private static boolean test = false;
+    
+    private static final String HUD_PACKAGE = "src/org/zaproxy/zap/extension/hud/";
     
     private static String PREFIX = 
             "var I18n = (function() {\n" + 
             "\n" +
-            "	var messages = {";
+            "	var messages = {\n";
     private static String POSTFIX = 
             "	};\n" + 
             "\n" + 
@@ -71,51 +78,77 @@ public class GenerateUiI18nFile {
     }
     
     private static String cleanValue(String value) {
-        return value.replace("'", "\\'");
+        String v = value.replace("'", "\\'");
+        if (test) {
+            return v.toUpperCase();
+        }
+        return v;
     }
     
-    public static void main(String[] args) throws MalformedURLException {
-        File resourceDir = new File("src/org/zaproxy/zap/extension/hud/resources/");
+    public static void main(String[] args) throws IOException {
+        
+        if (args.length == 1) {
+            if (args[0].equals("-test")) {
+                test = true;
+            } else {
+                System.err.println("Usage: GenerateUiI18n [-test]");
+                System.exit(1);
+            }
+        }
+        
+        File resourceDir = new File(HUD_PACKAGE + "resources/");
         List<String> langs = new ArrayList<String>();
         langs.add("en_GB");
         String prefix = "UIMessages_";
-        FileFilter filter = new FileFilter() {
-            @Override
-            public boolean accept(File f) {
-                return f.getName().startsWith(prefix);
-            }
-            
-        };
-        for (final File file : resourceDir.listFiles(filter)) {
-            langs.add(file.getName().substring(
-                    prefix.length(), file.getName().indexOf(".properties")));
+        
+        File i18n = new File(HUD_PACKAGE + "files/hud/i18n.js");
+        if (i18n.exists()) {
+            System.out.println("Overwriting " + i18n.getAbsolutePath());
+        } else {
+            System.out.println("WARNING - creating new file: " + i18n.getAbsolutePath());
         }
-        URL[] urls = {resourceDir.toURI().toURL()};
-        ClassLoader loader = new URLClassLoader(urls);
-
-        System.out.println(PREFIX);
-
-        for (String lang : langs) {
-            Locale locale;
-            if (lang.indexOf("_") > 0) {
-                String[] parts = lang.split("_");
-                locale = new Locale(parts[0], parts[1]);
-            } else {
-                locale = new Locale(lang);
-            }
-            ResourceBundle rb = ResourceBundle.getBundle("UIMessages", locale, loader);
-            ArrayList<String> keys = Collections.list(rb.getKeys());
-            Collections.sort(keys);
-            System.out.println("\t\t" + lang + ": {");
-            System.out.println("\t\t\tmessage: {");
+        
+        try (FileWriter fout = new FileWriter(i18n, false)) {
             
-            for (String key : keys) {
-                System.out.println("\t\t\t\t" + key + ": '" + 
-                        cleanValue(rb.getString(key)) + "',");
+            FileFilter filter = new FileFilter() {
+                @Override
+                public boolean accept(File f) {
+                    return f.getName().startsWith(prefix);
+                }
+                
+            };
+            for (final File file : resourceDir.listFiles(filter)) {
+                langs.add(file.getName().substring(
+                        prefix.length(), file.getName().indexOf(".properties")));
             }
-            System.out.println("\t\t\t}");
-            System.out.println("\t\t},");
+            URL[] urls = {resourceDir.toURI().toURL()};
+            ClassLoader loader = new URLClassLoader(urls);
+
+            fout.write(PREFIX);
+
+            for (String lang : langs) {
+                Locale locale;
+                if (lang.indexOf("_") > 0) {
+                    String[] parts = lang.split("_");
+                    locale = new Locale(parts[0], parts[1]);
+                } else {
+                    locale = new Locale(lang);
+                }
+                ResourceBundle rb = ResourceBundle.getBundle("UIMessages", locale, loader);
+                ArrayList<String> keys = Collections.list(rb.getKeys());
+                Collections.sort(keys);
+                fout.write("\t\t" + lang + ": {\n");
+                fout.write("\t\t\tmessage: {\n");
+                
+                for (String key : keys) {
+                    fout.write("\t\t\t\t" + key + ": '" + 
+                            cleanValue(rb.getString(key)) + "',\n");
+                }
+                fout.write("\t\t\t}\n");
+                fout.write("\t\t},\n");
+            }
+            fout.write(POSTFIX);
         }
-        System.out.println(POSTFIX);
+        
     }
 }
