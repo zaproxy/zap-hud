@@ -1,20 +1,8 @@
 // app is the main Vue object controlling everything
 var app;
 
-// the Event wrapper class will act as an Event dispatcher for Vue
-window.Event = new (class {
-	constructor() {
-		this.vue = new Vue();
-	}
-
-	fire(event, data = null) {
-		this.vue.$emit(event, data);
-	}
-
-	listen(event, callback) {
-		this.vue.$on(event, callback);
-	}
-})
+// Event dispatcher for Vue
+var eventBus = new Vue();
 
 /* Vue Components */
 Vue.component('modal', {
@@ -78,7 +66,7 @@ Vue.component('dialog-modal', {
 	created: function() {
 		let self = this;
 
-		Event.listen('showDialogModal', data => {
+		eventBus.$on('showDialogModal', data => {
 
 			app.isDialogModalShown = true;
 			app.dialogModalTitle = data.title;
@@ -107,7 +95,7 @@ Vue.component('select-tool-modal', {
 	created: function() {
 		let self = this;
 
-		Event.listen('showSelectToolModal', data => {
+		eventBus.$on('showSelectToolModal', data => {
 			app.isSelectToolModalShown = true;
 			
 			self.tools = data.tools;
@@ -148,7 +136,7 @@ Vue.component('all-alerts-modal', {
 	created: function() {
 		let self = this;
 		
-		Event.listen('showAllAlertsModal', data => {
+		eventBus.$on('showAllAlertsModal', data => {
 			app.isAllAlertsModalShown = true;
 			app.allAlertsModalTitle = data.title;
 
@@ -176,7 +164,7 @@ Vue.component('alert-list-modal', {
 	created() {
 		let self = this;
 
-		Event.listen('showAlertListModal', data => {
+		eventBus.$on('showAlertListModal', data => {
 			app.isAlertListModalShown = true;
 			app.alertListModalTitle = data.title;
 
@@ -236,7 +224,7 @@ Vue.component('alert-details-modal', {
 	created() {
 		let self = this;
 
-		Event.listen('showAlertDetailsModal', data => {
+		eventBus.$on('showAlertDetailsModal', data => {
 			app.isAlertDetailsModalShown = true;
 			app.alertDetailsModalTitle = data.title;
 			
@@ -267,7 +255,7 @@ Vue.component('simple-menu-modal', {
 	created() {
 		let self = this;
 
-		Event.listen('showSimpleMenuModal', data => {
+		eventBus.$on('showSimpleMenuModal', data => {
 			app.isSimpleMenuModalShown = true;
 			app.simpleMenuModalTitle = data.title;
 
@@ -344,7 +332,7 @@ Vue.component('break-message-modal', {
 	created() {
 		let self = this;
 
-		Event.listen('showBreakMessageModal', data => {
+		eventBus.$on('showBreakMessageModal', data => {
 			self.request = data.request;
 			self.response = data.response;
 			self.port = data.port;
@@ -401,7 +389,7 @@ Vue.component('history-message-modal', {
 	created() {
 		let self = this;
 
-		Event.listen('showHistoryMessageModal', data => {
+		eventBus.$on('showHistoryMessageModal', data => {
 			self.request = data.request;
 			self.response = data.response;
 			self.port = data.port;
@@ -515,7 +503,7 @@ Vue.component('site-tree-modal', {
 	created() {
 		let self = this;
 
-		Event.listen('showSiteTreeModal', data => {
+		eventBus.$on('showSiteTreeModal', data => {
 			self.port = data.port;
 
 			app.isSiteTreeModalShown = true;
@@ -618,7 +606,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 	
 	switch(action) {
 		case "showDialog":
-			Event.fire('showDialogModal', {
+			eventBus.$emit('showDialogModal', {
 				title: config.title, 
 				text: config.text,
 				buttons: config.buttons,
@@ -628,7 +616,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 			break;
 
 		case "showAddToolList":
-			Event.fire('showSelectToolModal', {
+			eventBus.$emit('showSelectToolModal', {
 				tools: config.tools,
 				port: port
 			});
@@ -636,7 +624,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 			break;
 
 		case "showAlerts":
-			Event.fire('showAlertListModal', {
+			eventBus.$emit('showAlertListModal', {
 				title: config.title,
 				alerts: config.alerts,
 				port: port
@@ -645,7 +633,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 			break;
 
 		case "showAllAlerts":
-			Event.fire('showAllAlertsModal', {
+			eventBus.$emit('showAllAlertsModal', {
 				title: config.title,
 				alerts: config.alerts,
 				port: port,
@@ -655,7 +643,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 			break;
 
 		case "showAlertDetails":
-			Event.fire('showAlertDetailsModal', {
+			eventBus.$emit('showAlertDetailsModal', {
 				title: config.title,
 				details: config.details,
 				port: port
@@ -664,7 +652,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 			break;
 
 		case "showButtonOptions":
-			Event.fire('showSimpleMenuModal', {
+			eventBus.$emit('showSimpleMenuModal', {
 				title: config.toolLabel,
 				items: config.options,
 				port: port
@@ -673,7 +661,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 			break;
 
 		case "showHudSettings":
-			Event.fire('showSimpleMenuModal', {
+			eventBus.$emit('showSimpleMenuModal', {
 				title: I18n.t("settings_title"),
 				items: config.settings,
 				port: port
@@ -682,7 +670,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 			break;
 
 		case "showBreakMessage":
-			Event.fire('showBreakMessageModal', {
+			eventBus.$emit('showBreakMessageModal', {
 				title: I18n.t("break_intercept_title"),
 				request: config.request,
 				response: config.response,
@@ -693,7 +681,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 			break;
 
 		case "showHistoryMessage":
-			Event.fire('showHistoryMessageModal', {
+			eventBus.$emit('showHistoryMessageModal', {
 				title: I18n.t("history_http_message_title"),
 				request: config.request,
 				response: config.response,
@@ -704,7 +692,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 			break;
 
 		case "showSiteTree":
-			Event.fire('showSiteTreeModal', {
+			eventBus.$emit('showSiteTreeModal', {
 				title: I18n.t("sites_tool"), 
 				port: port
 			});
