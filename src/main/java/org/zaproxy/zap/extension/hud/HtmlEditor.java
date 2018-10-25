@@ -20,17 +20,14 @@
 package org.zaproxy.zap.extension.hud;
 
 import java.util.List;
-
-import org.parosproxy.paros.network.HttpMessage;
-
 import net.htmlparser.jericho.OutputDocument;
 import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.StartTag;
-/**
- * A class for injecting content into HTML responses
- */
+import org.parosproxy.paros.network.HttpMessage;
+
+/** A class for injecting content into HTML responses */
 public class HtmlEditor {
-    
+
     private HttpMessage msg;
     private Source source;
     private OutputDocument outputDocument;
@@ -49,17 +46,16 @@ public class HtmlEditor {
             this.outputDocument.insert(bodyTags.get(0).getEnd(), inject);
             this.changed = true;
         }
-
     }
-    
+
     public void rewriteHttpMessage() {
         if (this.changed) {
             msg.setResponseBody(this.outputDocument.toString());
             msg.getResponseHeader().setContentLength(this.msg.getResponseBody().length());
         }
     }
-    
-    public boolean isChanged () {
+
+    public boolean isChanged() {
         return this.changed;
     }
 }

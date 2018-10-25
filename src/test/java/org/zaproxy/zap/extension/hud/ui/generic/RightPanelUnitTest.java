@@ -23,15 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
-
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
 public class RightPanelUnitTest {
 
-    public RightPanelUnitTest() {
-    }
+    public RightPanelUnitTest() {}
 
     public static void runAllTests(WebDriver wd) {
         testRightPanelLoads(wd);
@@ -52,5 +50,4 @@ public class RightPanelUnitTest {
         assertEquals(9, buttons.size());
         wd.switchTo().parentFrame();
     }
-
 }
