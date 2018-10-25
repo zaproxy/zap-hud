@@ -36,9 +36,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.swing.ImageIcon;
-
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.log4j.Logger;
@@ -66,167 +64,167 @@ import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 import org.zaproxy.zap.view.ZapToggleButton;
 
 /*
- * An example ZAP extension which adds a top level menu item. 
- * 
+ * An example ZAP extension which adds a top level menu item.
+ *
  * This class is defines the extension.
  */
-public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, ScriptEventListener, OptionsChangedListener {
+public class ExtensionHUD extends ExtensionAdaptor
+        implements ProxyListener, ScriptEventListener, OptionsChangedListener {
 
-	// The name is public so that other extensions can access it
-	public static final String NAME = "ExtensionHUD";
-	
-	// The i18n prefix, by default the package name - defined in one place to make it easier
-	// to copy and change this example
-	protected static final String PREFIX = "hud";
+    // The name is public so that other extensions can access it
+    public static final String NAME = "ExtensionHUD";
 
-	protected static final String RESOURCE = "/org/zaproxy/zap/extension/hud/resources";
-	
-	private static final ImageIcon ICON = new ImageIcon(
-			ExtensionHUD.class.getResource( RESOURCE + "/radar.png"));
+    // The i18n prefix, by default the package name - defined in one place to make it easier
+    // to copy and change this example
+    protected static final String PREFIX = "hud";
 
-	public static final String SCRIPT_TYPE_HUD = "hud";
+    protected static final String RESOURCE = "/org/zaproxy/zap/extension/hud/resources";
 
-	protected static final String DIRECTORY_NAME = "hud";
-	protected static final String TARGET_DIRECTORY = "target";
-	protected static final String HUD_HTML = TARGET_DIRECTORY + "/injectionHtml.html";
+    private static final ImageIcon ICON =
+            new ImageIcon(ExtensionHUD.class.getResource(RESOURCE + "/radar.png"));
 
-	private static final String HTTP_HEADER_CSP = "Content-Security-Policy";
-	private static final String HTTP_HEADER_XCSP = "X-Content-Security-Policy";
-	private static final String HTTP_HEADER_WEBKIT_CSP = "X-WebKit-CSP";
+    public static final String SCRIPT_TYPE_HUD = "hud";
+
+    protected static final String DIRECTORY_NAME = "hud";
+    protected static final String TARGET_DIRECTORY = "target";
+    protected static final String HUD_HTML = TARGET_DIRECTORY + "/injectionHtml.html";
+
+    private static final String HTTP_HEADER_CSP = "Content-Security-Policy";
+    private static final String HTTP_HEADER_XCSP = "X-Content-Security-Policy";
+    private static final String HTTP_HEADER_WEBKIT_CSP = "X-WebKit-CSP";
     private static final String HTTP_HEADER_REFERRER_POLICY = "Referrer-Policy";
 
-	// Change only after the message has been persisted, otherwise ZAP would see the HUD injections.
-	private static final int PROXY_LISTENER_ORDER = ProxyListenerLog.PROXY_LISTENER_ORDER + 1000;
-	
-	private static final List<Class<? extends Extension>> DEPENDENCIES;
+    // Change only after the message has been persisted, otherwise ZAP would see the HUD injections.
+    private static final int PROXY_LISTENER_ORDER = ProxyListenerLog.PROXY_LISTENER_ORDER + 1000;
 
-	private static final String REPLACE_REQUEST_PARAM = "zapHudReplaceReq=";
-	private Map<String, HttpMessage> recordedRequests = new HashMap<String, HttpMessage>();
+    private static final List<Class<? extends Extension>> DEPENDENCIES;
 
-	static {
-	    List<Class<? extends Extension>> dependencies = new ArrayList<>(1);
-	    dependencies.add(ExtensionScript.class);
+    private static final String REPLACE_REQUEST_PARAM = "zapHudReplaceReq=";
+    private Map<String, HttpMessage> recordedRequests = new HashMap<String, HttpMessage>();
+
+    static {
+        List<Class<? extends Extension>> dependencies = new ArrayList<>(1);
+        dependencies.add(ExtensionScript.class);
         dependencies.add(ExtensionSelenium.class);
         dependencies.add(ExtensionWebSocket.class);
 
-	    DEPENDENCIES = Collections.unmodifiableList(dependencies);
-	}
+        DEPENDENCIES = Collections.unmodifiableList(dependencies);
+    }
 
-	private HudAPI api = new HudAPI(this);
+    private HudAPI api = new HudAPI(this);
 
-	private ScriptType hudScriptType = new ScriptType(SCRIPT_TYPE_HUD, "hud.script.type.hud", ICON, false);
+    private ScriptType hudScriptType =
+            new ScriptType(SCRIPT_TYPE_HUD, "hud.script.type.hud", ICON, false);
 
-	private Logger log = Logger.getLogger(this.getClass());
+    private Logger log = Logger.getLogger(this.getClass());
 
-	private ZapToggleButton hudButton = null;
-	private boolean hudEnabled = false;
-	private HudParam hudParam = null;
-	private OptionsHudPanel optionsPanel = null;
-	
-	private ExtensionScript extScript = null;
-	private String baseDirectory;
-	private Set<String> upgradedHttpsDomains = new HashSet<String>();
-	private HudBrowserTestThread testThread;
-	private TutorialProxyServer tutorialServer;
+    private ZapToggleButton hudButton = null;
+    private boolean hudEnabled = false;
+    private HudParam hudParam = null;
+    private OptionsHudPanel optionsPanel = null;
 
-	/**
-	*
-	*/
-	public ExtensionHUD() {
-		super();
-			initialize();
-	}
+    private ExtensionScript extScript = null;
+    private String baseDirectory;
+    private Set<String> upgradedHttpsDomains = new HashSet<String>();
+    private HudBrowserTestThread testThread;
+    private TutorialProxyServer tutorialServer;
 
-	/**
-	 * @param name
-	 */
-	public ExtensionHUD(String name) {
-		super(name);
-	}
+    /** */
+    public ExtensionHUD() {
+        super();
+        initialize();
+    }
 
-	/**
-	 * This method initializes this
-	 * 
-	 */
-	private void initialize() {
+    /** @param name */
+    public ExtensionHUD(String name) {
+        super(name);
+    }
+
+    /** This method initializes this */
+    private void initialize() {
         this.setName(NAME);
-	}
-	
+    }
+
     @Override
     public List<Class<? extends Extension>> getDependencies() {
         return DEPENDENCIES;
     }
 
-	@Override
-	public void hook(ExtensionHook extensionHook) {
-		super.hook(extensionHook);
-	    
-		this.api.addApiOptions(getHudParam());
-		extensionHook.addApiImplementor(this.api);
-		extensionHook.addApiImplementor(this.api.getHudApiProxy());
-		extensionHook.addApiImplementor(this.api.getHudFileProxy());
+    @Override
+    public void hook(ExtensionHook extensionHook) {
+        super.hook(extensionHook);
 
-		extensionHook.addOptionsParamSet(this.getHudParam());
-		extensionHook.addOptionsChangedListener(this);
+        this.api.addApiOptions(getHudParam());
+        extensionHook.addApiImplementor(this.api);
+        extensionHook.addApiImplementor(this.api.getHudApiProxy());
+        extensionHook.addApiImplementor(this.api.getHudFileProxy());
 
-	    extensionHook.addOverrideMessageProxyListener(new HttpUpgradeProxyListener(this));
+        extensionHook.addOptionsParamSet(this.getHudParam());
+        extensionHook.addOptionsChangedListener(this);
 
-	    if (getView() != null) {
-	        extensionHook.getHookView().addOptionPanel(getOptionsPanel());
-	        extensionHook.getHookView().addMainToolBarComponent(getHudButton());
-	    }
+        extensionHook.addOverrideMessageProxyListener(new HttpUpgradeProxyListener(this));
 
-	    // No reason this cant be used in daemon mode ;)
-	    extensionHook.addProxyListener(this);
-	    
-	    hudScriptType.addCapability("external");
-	    this.getExtScript().registerScriptType(hudScriptType);
-	    
-	    this.getExtScript().addListener(this);
-	    
-	    tutorialServer = new TutorialProxyServer(this);
+        if (getView() != null) {
+            extensionHook.getHookView().addOptionPanel(getOptionsPanel());
+            extensionHook.getHookView().addMainToolBarComponent(getHudButton());
+        }
+
+        // No reason this cant be used in daemon mode ;)
+        extensionHook.addProxyListener(this);
+
+        hudScriptType.addCapability("external");
+        this.getExtScript().registerScriptType(hudScriptType);
+
+        this.getExtScript().addListener(this);
+
+        tutorialServer = new TutorialProxyServer(this);
         if (getView() != null) {
             extensionHook.getHookMenu().addToolsMenuItem(tutorialServer.getFirefoxToolsMenuItem());
             extensionHook.getHookMenu().addToolsMenuItem(tutorialServer.getChromeToolsMenuItem());
         }
-	}
-	
-	@Override
-	public boolean canUnload() {
-		return true;
-	}
+    }
 
-	@Override
-	public void unload() {
-		getExtScript().removeScripType(hudScriptType);
-		getExtScript().removeListener(this);
+    @Override
+    public boolean canUnload() {
+        return true;
+    }
 
-		HudEventPublisher.unregister();
-	}
+    @Override
+    public void unload() {
+        getExtScript().removeScripType(hudScriptType);
+        getExtScript().removeListener(this);
 
-	@Override
-	public void optionsLoaded() {
-	    addHudScripts();
-	    this.hudEnabled = getHudParam().isEnabled();
-	    if (View.isInitialised()) {
-	        this.getHudButton().setSelected(hudEnabled);
-	        setZapCanGetFocus(! this.hudEnabled);
-	    }
-	    if (getHudParam().isDevelopmentMode()) {
-            ZAP.getEventBus().publishSyncEvent(
-                    HudEventPublisher.getPublisher(),
-                    new Event(HudEventPublisher.getPublisher(), HudEventPublisher.EVENT_DEV_MODE_ENABLED, null));
-	    }
-	    tutorialServer.start();
-	}
-	
+        HudEventPublisher.unregister();
+    }
+
+    @Override
+    public void optionsLoaded() {
+        addHudScripts();
+        this.hudEnabled = getHudParam().isEnabled();
+        if (View.isInitialised()) {
+            this.getHudButton().setSelected(hudEnabled);
+            setZapCanGetFocus(!this.hudEnabled);
+        }
+        if (getHudParam().isDevelopmentMode()) {
+            ZAP.getEventBus()
+                    .publishSyncEvent(
+                            HudEventPublisher.getPublisher(),
+                            new Event(
+                                    HudEventPublisher.getPublisher(),
+                                    HudEventPublisher.EVENT_DEV_MODE_ENABLED,
+                                    null));
+        }
+        tutorialServer.start();
+    }
+
     protected boolean isHudEnabled() {
         return hudEnabled;
     }
 
     /**
-     * Tell ZAP if it can grab the focus or not - should only be called if the 
-     * View has been initialised.
+     * Tell ZAP if it can grab the focus or not - should only be called if the View has been
+     * initialised.
+     *
      * @param canGetFocus
      */
     private void setZapCanGetFocus(boolean canGetFocus) {
@@ -237,42 +235,42 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
         } catch (Exception e) {
             log.debug(e.getMessage(), e);
         }
-   }
+    }
 
-	private void addHudScripts() {
-		this.baseDirectory = this.getHudParam().getBaseDirectory();
-	    File hudDir = new File(this.baseDirectory);
-	    this.addScripts(hudDir, "", hudScriptType);
-	}
-	
-	private void removeHudScripts() {
-		for (ScriptWrapper sw : this.getExtScript().getScripts(hudScriptType)) {
-			this.getExtScript().removeScript(sw);
-		}
-	}
-	
-	public HudParam getHudParam() {
-		if (hudParam == null) {
-			hudParam = new HudParam();
-		}
-		return hudParam;
-	}
+    private void addHudScripts() {
+        this.baseDirectory = this.getHudParam().getBaseDirectory();
+        File hudDir = new File(this.baseDirectory);
+        this.addScripts(hudDir, "", hudScriptType);
+    }
 
-	private OptionsHudPanel getOptionsPanel() {
-		if (optionsPanel == null) {
-			optionsPanel = new OptionsHudPanel();
-		}
-		return optionsPanel;
-	}
+    private void removeHudScripts() {
+        for (ScriptWrapper sw : this.getExtScript().getScripts(hudScriptType)) {
+            this.getExtScript().removeScript(sw);
+        }
+    }
+
+    public HudParam getHudParam() {
+        if (hudParam == null) {
+            hudParam = new HudParam();
+        }
+        return hudParam;
+    }
+
+    private OptionsHudPanel getOptionsPanel() {
+        if (optionsPanel == null) {
+            optionsPanel = new OptionsHudPanel();
+        }
+        return optionsPanel;
+    }
 
     public void addUpgradedHttpsDomain(URI uri) throws URIException {
         this.upgradedHttpsDomains.add(uri.getHost() + ":" + uri.getPort());
     }
-    
+
     public void removeUpgradedHttpsDomain(URI uri) throws URIException {
         this.upgradedHttpsDomains.remove(uri.getHost() + ":" + uri.getPort());
     }
-    
+
     public boolean isUpgradedHttpsDomain(URI uri) throws URIException {
         return this.upgradedHttpsDomains.contains(uri.getHost() + ":" + uri.getPort());
     }
@@ -281,7 +279,9 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
         if (file.isFile()) {
             try {
                 // Add to tree
-                ScriptWrapper sw = new ScriptWrapper(prefix + file.getName(), "", "Null", hudScriptType, false, file);
+                ScriptWrapper sw =
+                        new ScriptWrapper(
+                                prefix + file.getName(), "", "Null", hudScriptType, false, file);
                 this.getExtScript().loadScript(sw);
                 this.getExtScript().addScript(sw, false);
             } catch (IOException e) {
@@ -300,26 +300,30 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
     }
 
     private ZapToggleButton getHudButton() {
-    	if (hudButton == null) {
-    		hudButton = new ZapToggleButton(ICON);
-    		hudButton.setSelectedToolTipText(Constant.messages.getString("hud.toolbar.button.on.tooltip"));
-    		hudButton.setToolTipText(Constant.messages.getString("hud.toolbar.button.off.tooltip"));
-    		hudButton.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					hudEnabled = hudButton.isSelected();
-					getHudParam().setEnabled(hudEnabled);
-					setZapCanGetFocus(! hudEnabled);
-				}});
-    	}
-    	return hudButton;
+        if (hudButton == null) {
+            hudButton = new ZapToggleButton(ICON);
+            hudButton.setSelectedToolTipText(
+                    Constant.messages.getString("hud.toolbar.button.on.tooltip"));
+            hudButton.setToolTipText(Constant.messages.getString("hud.toolbar.button.off.tooltip"));
+            hudButton.addActionListener(
+                    new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            hudEnabled = hudButton.isSelected();
+                            getHudParam().setEnabled(hudEnabled);
+                            setZapCanGetFocus(!hudEnabled);
+                        }
+                    });
+        }
+        return hudButton;
     }
 
     public HudBrowserTestThread getTestThread() {
         return this.testThread;
     }
-    
-    public HudBrowserTestThread newTestThread(File file, String browser) throws IllegalArgumentException {
+
+    public HudBrowserTestThread newTestThread(File file, String browser)
+            throws IllegalArgumentException {
         if (this.testThread != null && this.testThread.isAlive()) {
             return null;
         }
@@ -328,33 +332,33 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
         return this.testThread;
     }
 
-	@Override
-	public String getAuthor() {
-		return Constant.ZAP_TEAM;
-	}
+    @Override
+    public String getAuthor() {
+        return Constant.ZAP_TEAM;
+    }
 
-	@Override
-	public String getDescription() {
-		return Constant.messages.getString(PREFIX + ".desc");
-	}
+    @Override
+    public String getDescription() {
+        return Constant.messages.getString(PREFIX + ".desc");
+    }
 
-	@Override
-	public URL getURL() {
-		try {
-			return new URL(Constant.ZAP_EXTENSIONS_PAGE);
-		} catch (MalformedURLException e) {
-			return null;
-		}
-	}
+    @Override
+    public URL getURL() {
+        try {
+            return new URL(Constant.ZAP_EXTENSIONS_PAGE);
+        } catch (MalformedURLException e) {
+            return null;
+        }
+    }
 
-	@Override
-	public int getArrangeableListenerOrder() {
-		return PROXY_LISTENER_ORDER;
-	}
+    @Override
+    public int getArrangeableListenerOrder() {
+        return PROXY_LISTENER_ORDER;
+    }
 
-	@Override
-	public boolean onHttpRequestSend(HttpMessage msg) {
-		// Check for a replaced request
+    @Override
+    public boolean onHttpRequestSend(HttpMessage msg) {
+        // Check for a replaced request
         try {
             String url = msg.getRequestHeader().getURI().toString();
             if (this.recordedRequests.size() > 0 && url.indexOf(REPLACE_REQUEST_PARAM) > 0) {
@@ -370,58 +374,65 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-		return true;
-	}
-	
-	@Override
-	public boolean onHttpResponseReceive(HttpMessage msg) {
-		if (hudEnabled && msg.getResponseHeader().isHtml()) {
-			if (getHudParam().isInScopeOnly() && ! msg.isInScope()) {
-				return true;
-			}
-			try {
-				HtmlEditor htmlEd = new HtmlEditor(msg);
-				String hudScript = this.api.getFile(msg, HUD_HTML);
-				// These are the only files that use FILE_PREFIX
-				hudScript = hudScript.replace("<<FILE_PREFIX>>", api.getUrlPrefix(api.getSite(msg)));
-				htmlEd.injectAtStartOfBody(hudScript);
-				htmlEd.rewriteHttpMessage();
-				
-				if (htmlEd.isChanged()) {
-					URI uri = msg.getRequestHeader().getURI();
-					if (this.isUpgradedHttpsDomain(uri)) {
-						// Advise that we've upgraded this domain to https
-						Map<String, String> map = new HashMap<String, String>();
-						map.put(HudEventPublisher.FIELD_DOMAIN, uri.getHost() + ":" + uri.getPort());
-						ZAP.getEventBus().publishSyncEvent(
-								HudEventPublisher.getPublisher(),
-								new Event(HudEventPublisher.getPublisher(), 
-										HudEventPublisher.EVENT_DOMAIN_UPGRADED_TO_HTTPS,
-										null, map ));
-					}
-					
-					// The Referrer-Policy header break the HUD, always strip it out
-					msg.getResponseHeader().setHeader(HTTP_HEADER_REFERRER_POLICY, null);
-					// Browser caches will cause the browser to use old callback urls which will also fail
-					msg.getResponseHeader().setHeader(HttpHeader.CACHE_CONTROL, "no-cache, no-store");
-					
-					if (this.getHudParam().isRemoveCSP()) {
-						// Remove all of them, just in case
-						msg.getResponseHeader().setHeader(HTTP_HEADER_CSP, null);
-						msg.getResponseHeader().setHeader(HTTP_HEADER_XCSP, null);
-						msg.getResponseHeader().setHeader(HTTP_HEADER_WEBKIT_CSP, null);
-					}
-				} else {
-					log.debug("Failed to find body tag on " + msg.getRequestHeader().getURI());
-    			}
+        return true;
+    }
+
+    @Override
+    public boolean onHttpResponseReceive(HttpMessage msg) {
+        if (hudEnabled && msg.getResponseHeader().isHtml()) {
+            if (getHudParam().isInScopeOnly() && !msg.isInScope()) {
+                return true;
+            }
+            try {
+                HtmlEditor htmlEd = new HtmlEditor(msg);
+                String hudScript = this.api.getFile(msg, HUD_HTML);
+                // These are the only files that use FILE_PREFIX
+                hudScript =
+                        hudScript.replace("<<FILE_PREFIX>>", api.getUrlPrefix(api.getSite(msg)));
+                htmlEd.injectAtStartOfBody(hudScript);
+                htmlEd.rewriteHttpMessage();
+
+                if (htmlEd.isChanged()) {
+                    URI uri = msg.getRequestHeader().getURI();
+                    if (this.isUpgradedHttpsDomain(uri)) {
+                        // Advise that we've upgraded this domain to https
+                        Map<String, String> map = new HashMap<String, String>();
+                        map.put(
+                                HudEventPublisher.FIELD_DOMAIN,
+                                uri.getHost() + ":" + uri.getPort());
+                        ZAP.getEventBus()
+                                .publishSyncEvent(
+                                        HudEventPublisher.getPublisher(),
+                                        new Event(
+                                                HudEventPublisher.getPublisher(),
+                                                HudEventPublisher.EVENT_DOMAIN_UPGRADED_TO_HTTPS,
+                                                null,
+                                                map));
+                    }
+
+                    // The Referrer-Policy header break the HUD, always strip it out
+                    msg.getResponseHeader().setHeader(HTTP_HEADER_REFERRER_POLICY, null);
+                    // Browser caches will cause the browser to use old callback urls which will
+                    // also fail
+                    msg.getResponseHeader()
+                            .setHeader(HttpHeader.CACHE_CONTROL, "no-cache, no-store");
+
+                    if (this.getHudParam().isRemoveCSP()) {
+                        // Remove all of them, just in case
+                        msg.getResponseHeader().setHeader(HTTP_HEADER_CSP, null);
+                        msg.getResponseHeader().setHeader(HTTP_HEADER_XCSP, null);
+                        msg.getResponseHeader().setHeader(HTTP_HEADER_WEBKIT_CSP, null);
+                    }
+                } else {
+                    log.debug("Failed to find body tag on " + msg.getRequestHeader().getURI());
+                }
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
-			
-		}
-		return true;
-	}
-	
+        }
+        return true;
+    }
+
     protected String setRecordedRequest(HttpMessage request) throws URIException {
         /*
          * The HUD UI calls the API endpoint that calls this function and then
@@ -436,7 +447,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
         int fragmentOffset = url.indexOf("%23");
         if (fragmentOffset > 0) {
             // %23 is the # character, so this is really a fragment
-            fragment = url.substring(fragmentOffset+3);
+            fragment = url.substring(fragmentOffset + 3);
             // Replace in the header
             request.getRequestHeader().setURI(new URI(url.replace("%23", "#"), true));
             // Remove from the local copy - it will be added again at the end
@@ -468,18 +479,18 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
     }
 
     /** @return index of pattern in s or -1, if not found */
-	public static int regexEndOf(Pattern pattern, String s) {
-	    Matcher matcher = pattern.matcher(s);
-	    return matcher.find() ? matcher.end() : -1;
-	}
+    public static int regexEndOf(Pattern pattern, String s) {
+        Matcher matcher = pattern.matcher(s);
+        return matcher.find() ? matcher.end() : -1;
+    }
 
-	public ExtensionScript getExtScript() {
-		if (extScript == null) {
-			extScript = Control.getSingleton()
-					.getExtensionLoader().getExtension(ExtensionScript.class);
-		}
-		return extScript;
-	}
+    public ExtensionScript getExtScript() {
+        if (extScript == null) {
+            extScript =
+                    Control.getSingleton().getExtensionLoader().getExtension(ExtensionScript.class);
+        }
+        return extScript;
+    }
 
     @Override
     public void preInvoke(ScriptWrapper arg0) {
@@ -546,7 +557,7 @@ public class ExtensionHUD extends ExtensionAdaptor implements ProxyListener, Scr
             this.addHudScripts();
         }
     }
-    
+
     public HudAPI getAPI() {
         return this.api;
     }

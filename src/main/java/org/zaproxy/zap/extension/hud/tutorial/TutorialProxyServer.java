@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.Files;
-
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.parosproxy.paros.Constant;
@@ -57,16 +56,14 @@ public class TutorialProxyServer extends ProxyServer {
         this("ZAP-HUD-Tutorial");
         this.extension = extension;
     }
-    
-    /**
-     * The server is started after initialisation so that the parameters
-     * will have been loaded.
-     */
+
+    /** The server is started after initialisation so that the parameters will have been loaded. */
     public void start() {
-        int port = this.startServer(
-                extension.getHudParam().getTutorialHost(),
-                extension.getHudParam().getTutorialPort(),
-                true);
+        int port =
+                this.startServer(
+                        extension.getHudParam().getTutorialHost(),
+                        extension.getHudParam().getTutorialPort(),
+                        true);
         LOG.debug("HUD Tutorial port is " + port);
         this.hostPort = "127.0.0.1:" + port;
     }
@@ -82,7 +79,8 @@ public class TutorialProxyServer extends ProxyServer {
     }
 
     private String getTextFile(String name) {
-        File f = new File(this.extension.getHudParam().getBaseDirectory() + "/../hudtutorial", name);
+        File f =
+                new File(this.extension.getHudParam().getBaseDirectory() + "/../hudtutorial", name);
         if (!f.exists()) {
             LOG.debug("No such tutorial file: " + f.getAbsolutePath());
             return null;
@@ -100,13 +98,15 @@ public class TutorialProxyServer extends ProxyServer {
         return getDefaultResponseHeader(STATUS_OK, contentType, contentLength);
     }
 
-    private static String getDefaultResponseHeader(String responseStatus, String contentType, int contentLength) {
+    private static String getDefaultResponseHeader(
+            String responseStatus, String contentType, int contentLength) {
         StringBuilder sb = new StringBuilder(250);
 
         sb.append("HTTP/1.1 ").append(responseStatus).append("\r\n");
         sb.append("Pragma: no-cache\r\n");
         sb.append("Cache-Control: no-cache, no-store, must-revalidate\r\n");
-        sb.append("Content-Security-Policy: default-src 'none'; script-src 'self'; connect-src 'self'; child-src 'self'; img-src 'self' data:; font-src 'self' data:; style-src 'self'\r\n");
+        sb.append(
+                "Content-Security-Policy: default-src 'none'; script-src 'self'; connect-src 'self'; child-src 'self'; img-src 'self' data:; font-src 'self' data:; style-src 'self'\r\n");
         sb.append("Access-Control-Allow-Methods: GET,POST,OPTIONS\r\n");
         sb.append("Access-Control-Allow-Headers: ZAP-Header\r\n");
         sb.append("X-Frame-Options: DENY\r\n");
@@ -138,11 +138,13 @@ public class TutorialProxyServer extends ProxyServer {
                     byte[] image = extension.getAPI().getImage(name);
                     if (image == null) {
                         msg.setResponseBody("<html><body><h1>404 Not found</h1><body></html>");
-                        msg.setResponseHeader(getDefaultResponseHeader(STATUS_NOT_FOUND, "text/html", 0));
+                        msg.setResponseHeader(
+                                getDefaultResponseHeader(STATUS_NOT_FOUND, "text/html", 0));
                     } else {
                         msg.setResponseBody(image);
-                        msg.setResponseHeader(API.getDefaultResponseHeader(
-                                "image/png", msg.getResponseBody().length(), true));
+                        msg.setResponseHeader(
+                                API.getDefaultResponseHeader(
+                                        "image/png", msg.getResponseBody().length(), true));
                     }
                 } else {
                     String localStr = Constant.getLocale().toString();
@@ -153,14 +155,17 @@ public class TutorialProxyServer extends ProxyServer {
                     if (body == null) {
                         LOG.debug("Failed to find tutorial file " + name);
                         msg.setResponseBody("<html><body><h1>404 Not found</h1><body></html>");
-                        msg.setResponseHeader(getDefaultResponseHeader(STATUS_NOT_FOUND, "text/html", 0));
+                        msg.setResponseHeader(
+                                getDefaultResponseHeader(STATUS_NOT_FOUND, "text/html", 0));
                     } else {
                         msg.setResponseBody(body);
                         String contentType = "text/html";
                         if (name.endsWith(".css")) {
                             contentType = "text/css";
                         }
-                        msg.setResponseHeader(getDefaultResponseHeader(contentType, msg.getResponseBody().length()));
+                        msg.setResponseHeader(
+                                getDefaultResponseHeader(
+                                        contentType, msg.getResponseBody().length()));
                     }
                 }
             } catch (HttpMalformedHeaderException e) {
@@ -174,16 +179,20 @@ public class TutorialProxyServer extends ProxyServer {
             LOG.debug("onHttpResponseReceived " + msg.getRequestHeader().getURI().toString());
             return false;
         }
-
     }
 
     private class TutorialProxyThread extends ProxyThread {
 
         TutorialProxyThread(ProxyServer server, Socket socket) {
             // TODO change initiator?
-            super(server, socket, new HttpSender(server.getConnectionParam(), true, HttpSender.MANUAL_REQUEST_INITIATOR));
+            super(
+                    server,
+                    socket,
+                    new HttpSender(
+                            server.getConnectionParam(),
+                            true,
+                            HttpSender.MANUAL_REQUEST_INITIATOR));
         }
-
     }
 
     public ZapMenuItem getFirefoxToolsMenuItem() {
@@ -193,16 +202,19 @@ public class TutorialProxyServer extends ProxyServer {
 
         if (firefoxToolsMenuItem == null) {
             firefoxToolsMenuItem = new ZapMenuItem("hud.menu.tutorial.firefox");
-            firefoxToolsMenuItem.addActionListener(new ActionListener() {
+            firefoxToolsMenuItem.addActionListener(
+                    new ActionListener() {
 
-                @Override
-                public void actionPerformed(ActionEvent arg0) {
-                    ExtensionSelenium extSel = Control.getSingleton().getExtensionLoader().getExtension(
-                            ExtensionSelenium.class);
-                    WebDriver wd = extSel.getProxiedBrowserByName("Firefox");
-                    wd.get("http://" + hostPort);
-                }
-            });
+                        @Override
+                        public void actionPerformed(ActionEvent arg0) {
+                            ExtensionSelenium extSel =
+                                    Control.getSingleton()
+                                            .getExtensionLoader()
+                                            .getExtension(ExtensionSelenium.class);
+                            WebDriver wd = extSel.getProxiedBrowserByName("Firefox");
+                            wd.get("http://" + hostPort);
+                        }
+                    });
         }
         return firefoxToolsMenuItem;
     }
@@ -214,18 +226,20 @@ public class TutorialProxyServer extends ProxyServer {
 
         if (chromeToolsMenuItem == null) {
             chromeToolsMenuItem = new ZapMenuItem("hud.menu.tutorial.chrome");
-            chromeToolsMenuItem.addActionListener(new ActionListener() {
+            chromeToolsMenuItem.addActionListener(
+                    new ActionListener() {
 
-                @Override
-                public void actionPerformed(ActionEvent arg0) {
-                    ExtensionSelenium extSel = Control.getSingleton().getExtensionLoader().getExtension(
-                            ExtensionSelenium.class);
-                    WebDriver wd = extSel.getProxiedBrowserByName("Chrome");
-                    wd.get("http://" + hostPort);
-                }
-            });
+                        @Override
+                        public void actionPerformed(ActionEvent arg0) {
+                            ExtensionSelenium extSel =
+                                    Control.getSingleton()
+                                            .getExtensionLoader()
+                                            .getExtension(ExtensionSelenium.class);
+                            WebDriver wd = extSel.getProxiedBrowserByName("Chrome");
+                            wd.get("http://" + hostPort);
+                        }
+                    });
         }
         return chromeToolsMenuItem;
     }
-
 }

@@ -19,6 +19,8 @@
  */
 package org.zaproxy.zap.extension.hud.ui.specific;
 
+import io.github.bonigarcia.Options;
+import io.github.bonigarcia.SeleniumExtension;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,9 +31,6 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.zaproxy.zap.extension.hud.ui.generic.LeftPanelUnitTest;
 import org.zaproxy.zap.extension.hud.ui.generic.RightPanelUnitTest;
 
-import io.github.bonigarcia.Options;
-import io.github.bonigarcia.SeleniumExtension;
-
 @Disabled
 @ExtendWith(SeleniumExtension.class)
 public class ExampleDotComFirefoxUnitTest {
@@ -39,14 +38,12 @@ public class ExampleDotComFirefoxUnitTest {
     static final String TARGET = "https://www.example.com";
     // TODO parameterise the host:port
     static final String PROXY = "localhost:8090";
-    
-    @Options
-    FirefoxOptions firefoxOptions = new FirefoxOptions();
+
+    @Options FirefoxOptions firefoxOptions = new FirefoxOptions();
+
     {
         Proxy proxy = new Proxy();
-        proxy.setHttpProxy(PROXY)
-            .setFtpProxy(PROXY)
-            .setSslProxy(PROXY);
+        proxy.setHttpProxy(PROXY).setFtpProxy(PROXY).setSslProxy(PROXY);
 
         firefoxOptions.addPreference("network.captive-portal-service.enabled", false);
         firefoxOptions.addPreference("network.proxy.type", 1);
@@ -70,5 +67,4 @@ public class ExampleDotComFirefoxUnitTest {
         RightPanelUnitTest.runAllTests(driver);
         // TODO add more tests
     }
-
 }
