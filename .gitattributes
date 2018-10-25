@@ -8,6 +8,7 @@
 *.js text
 *.css text
 *.gradle text
+*.gradle.kts text
 
 *.bat text eol=crlf
 *.sh text eol=lf

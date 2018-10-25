@@ -1,0 +1,30 @@
+<zapaddon>
+	<name>HUD - Heads Up Display</name>
+	<version>@version@</version>
+	<status>@status@</status>
+	<description>Display information from ZAP in browser.</description>
+	<author>ZAP Dev Team</author>
+	<url></url>
+	<changes>First version</changes>
+	<dependencies>
+		<addons>
+			<addon>
+				<id>selenium</id>
+			</addon>
+			<addon>
+				<id>websocket</id>
+			</addon>
+		</addons>
+	</dependencies>
+	<extensions>
+		<extension>org.zaproxy.zap.extension.hud.ExtensionHUD</extension>
+	</extensions>
+	<ascanrules/>
+	<pscanrules/>
+	<filters/>
+	<files>
+@files@
+	</files>
+	<not-before-version>@zapVersion@</not-before-version>
+	<not-from-version></not-from-version>
+</zapaddon>
