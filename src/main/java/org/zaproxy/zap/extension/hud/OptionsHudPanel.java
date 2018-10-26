@@ -25,7 +25,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -33,7 +32,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.model.OptionsParam;
 import org.parosproxy.paros.view.AbstractParamPanel;
@@ -41,16 +39,12 @@ import org.zaproxy.zap.ZAP;
 import org.zaproxy.zap.eventBus.Event;
 import org.zaproxy.zap.view.LayoutHelper;
 
-/**
- * The HUD options panel.
- */
+/** The HUD options panel. */
 public class OptionsHudPanel extends AbstractParamPanel {
 
     private static final long serialVersionUID = -1L;
 
-    /**
-     * The name of the options panel.
-     */
+    /** The name of the options panel. */
     private static final String NAME = Constant.messages.getString("hud.optionspanel.name");
 
     private JTextField baseDirectory;
@@ -68,9 +62,11 @@ public class OptionsHudPanel extends AbstractParamPanel {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(new EmptyBorder(2, 2, 2, 2));
 
-        JButton directoryButton = new JButton(Constant.messages.getString("hud.optionspanel.button.baseDirectory"));
+        JButton directoryButton =
+                new JButton(Constant.messages.getString("hud.optionspanel.button.baseDirectory"));
         directoryButton.addActionListener(new FileChooserAction(getBaseDirectory()));
-        JLabel directoryLabel = new JLabel(Constant.messages.getString("hud.optionspanel.label.baseDirectory"));
+        JLabel directoryLabel =
+                new JLabel(Constant.messages.getString("hud.optionspanel.label.baseDirectory"));
         directoryLabel.setLabelFor(directoryButton);
         JPanel overridesPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
         overridesPanel.add(getBaseDirectory());
@@ -95,36 +91,43 @@ public class OptionsHudPanel extends AbstractParamPanel {
 
     private JCheckBox getInScopeOnly() {
         if (inScopeOnly == null) {
-            inScopeOnly = new JCheckBox(Constant.messages.getString("hud.optionspanel.label.inScopeOnly"));
+            inScopeOnly =
+                    new JCheckBox(
+                            Constant.messages.getString("hud.optionspanel.label.inScopeOnly"));
         }
         return inScopeOnly;
     }
 
     private JCheckBox getRemoveCsp() {
         if (removeCsp == null) {
-            removeCsp = new JCheckBox(Constant.messages.getString("hud.optionspanel.label.removeCsp"));
+            removeCsp =
+                    new JCheckBox(Constant.messages.getString("hud.optionspanel.label.removeCsp"));
         }
         return removeCsp;
     }
 
-    
     private JCheckBox getDevelopmentMode() {
         if (developmentMode == null) {
-            developmentMode = new JCheckBox(Constant.messages.getString("hud.optionspanel.label.developmentMode"));
-            developmentMode.addActionListener(new ActionListener() {
+            developmentMode =
+                    new JCheckBox(
+                            Constant.messages.getString("hud.optionspanel.label.developmentMode"));
+            developmentMode.addActionListener(
+                    new ActionListener() {
 
-                @Override
-                public void actionPerformed(ActionEvent event) {
-                    getAllowUnsafeEval().setEnabled(developmentMode.isSelected());
-                }});
+                        @Override
+                        public void actionPerformed(ActionEvent event) {
+                            getAllowUnsafeEval().setEnabled(developmentMode.isSelected());
+                        }
+                    });
         }
         return developmentMode;
     }
 
-    
     private JCheckBox getAllowUnsafeEval() {
         if (allowUnsafeEval == null) {
-            allowUnsafeEval = new JCheckBox(Constant.messages.getString("hud.optionspanel.label.allowUnsafeEval"));
+            allowUnsafeEval =
+                    new JCheckBox(
+                            Constant.messages.getString("hud.optionspanel.label.allowUnsafeEval"));
         }
         return allowUnsafeEval;
     }
@@ -148,7 +151,8 @@ public class OptionsHudPanel extends AbstractParamPanel {
         if (filename != null && filename.length() > 0) {
             File file = new File(filename);
             if (!file.isDirectory() || !file.canRead()) {
-                throw new IllegalArgumentException(Constant.messages.getString("hud.optionspanel.warn.badBaseDir"));
+                throw new IllegalArgumentException(
+                        Constant.messages.getString("hud.optionspanel.warn.badBaseDir"));
             }
         }
     }
@@ -157,7 +161,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
     public void saveParam(Object obj) throws Exception {
         final OptionsParam options = (OptionsParam) obj;
         final HudParam param = options.getParamSet(HudParam.class);
-        
+
         // Raise any relevant events before saving
         if (param.isDevelopmentMode() != getDevelopmentMode().isSelected()) {
             String event;
@@ -166,9 +170,10 @@ public class OptionsHudPanel extends AbstractParamPanel {
             } else {
                 event = HudEventPublisher.EVENT_DEV_MODE_DISABLED;
             }
-            ZAP.getEventBus().publishSyncEvent(
-                    HudEventPublisher.getPublisher(),
-                    new Event(HudEventPublisher.getPublisher(), event, null));
+            ZAP.getEventBus()
+                    .publishSyncEvent(
+                            HudEventPublisher.getPublisher(),
+                            new Event(HudEventPublisher.getPublisher(), event, null));
         }
 
         param.setBaseDirectory(getBaseDirectory().getText());
@@ -181,7 +186,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
     @Override
     public String getHelpIndex() {
         // TODO  add help
-        //return "addon.hud.options";
+        // return "addon.hud.options";
         return null;
     }
 
@@ -200,7 +205,9 @@ public class OptionsHudPanel extends AbstractParamPanel {
             String path = textField.getText();
             if (path != null) {
                 File file = new File(path);
-                if (file.canRead() && file.isDirectory() && file.getName().equals(ExtensionHUD.DIRECTORY_NAME)) {
+                if (file.canRead()
+                        && file.isDirectory()
+                        && file.getName().equals(ExtensionHUD.DIRECTORY_NAME)) {
                     fileChooser.setSelectedFile(file);
                 }
             }

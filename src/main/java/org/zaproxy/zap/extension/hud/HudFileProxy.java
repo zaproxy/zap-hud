@@ -25,10 +25,7 @@ import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.api.ApiException;
 import org.zaproxy.zap.extension.api.ApiImplementor;
 
-/**
- * Used to serve HUD files via callbacks. These files can be on either the HUD or target domains
- *
- */
+/** Used to serve HUD files via callbacks. These files can be on either the HUD or target domains */
 public class HudFileProxy extends ApiImplementor {
 
     private static final String PREFIX = "hudfiles";
@@ -54,7 +51,9 @@ public class HudFileProxy extends ApiImplementor {
             if (query != null) {
                 if (query.contains("..")) {
                     // Looks like an injection attack
-                    throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, msg.getRequestHeader().getURI().toString());
+                    throw new ApiException(
+                            ApiException.Type.ILLEGAL_PARAMETER,
+                            msg.getRequestHeader().getURI().toString());
                 }
                 if (query.indexOf("name=") > 0) {
                     String file = query.substring(query.indexOf("name=") + 5);
@@ -62,42 +61,54 @@ public class HudFileProxy extends ApiImplementor {
                         file = file.substring(0, file.indexOf("&"));
                     }
                     if (file.endsWith(".js")) {
-                        msg.setResponseHeader(API.getDefaultResponseHeader("application/javascript; charset=UTF-8", 0, false));
+                        msg.setResponseHeader(
+                                API.getDefaultResponseHeader(
+                                        "application/javascript; charset=UTF-8", 0, false));
                     } else if (file.endsWith(".html")) {
                         // Must allow framing or it wont work
                         msg.setResponseHeader(
-                                HudAPI.getAllowFramingResponseHeader("200 OK", "text/html; charset=UTF-8", 0, false));
+                                HudAPI.getAllowFramingResponseHeader(
+                                        "200 OK", "text/html; charset=UTF-8", 0, false));
                     } else if (file.endsWith(".css")) {
-                        msg.setResponseHeader(API.getDefaultResponseHeader("text/css; charset=UTF-8", 0, false));
+                        msg.setResponseHeader(
+                                API.getDefaultResponseHeader("text/css; charset=UTF-8", 0, false));
                     }
                     msg.setResponseBody(api.getFile(msg, file));
                     msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
-                    
+
                     if (msg.getRequestHeader().getURI().toString().startsWith(API.API_URL_S)) {
                         if (api.allowUnsafeEval()) {
-                            msg.getResponseHeader().setHeader("Content-Security-Policy", HudAPI.CSP_POLICY_UNSAFE_EVAL);
+                            msg.getResponseHeader()
+                                    .setHeader(
+                                            "Content-Security-Policy",
+                                            HudAPI.CSP_POLICY_UNSAFE_EVAL);
                         } else {
-                            msg.getResponseHeader().setHeader("Content-Security-Policy", HudAPI.CSP_POLICY);
+                            msg.getResponseHeader()
+                                    .setHeader("Content-Security-Policy", HudAPI.CSP_POLICY);
                         }
                     }
 
-                    
                     return msg.getResponseBody().toString();
                 } else if (query.indexOf("image=") > 0) {
                     String file = query.substring(query.indexOf("image=") + 6);
 
                     msg.setResponseBody(api.getImage(file));
-                    msg.setResponseHeader(API.getDefaultResponseHeader(
-                            getImageContentType(file), msg.getResponseBody().length(), true));
+                    msg.setResponseHeader(
+                            API.getDefaultResponseHeader(
+                                    getImageContentType(file),
+                                    msg.getResponseBody().length(),
+                                    true));
                     return msg.getResponseBody().toString();
                 }
             }
         } catch (Exception e) {
-            throw new ApiException(ApiException.Type.URL_NOT_FOUND, msg.getRequestHeader().getURI().toString());
+            throw new ApiException(
+                    ApiException.Type.URL_NOT_FOUND, msg.getRequestHeader().getURI().toString());
         }
-        throw new ApiException(ApiException.Type.URL_NOT_FOUND, msg.getRequestHeader().getURI().toString());
+        throw new ApiException(
+                ApiException.Type.URL_NOT_FOUND, msg.getRequestHeader().getURI().toString());
     }
-    
+
     private String getImageContentType(String name) {
         if (name.endsWith(".png")) {
             return "image/png";
@@ -108,5 +119,4 @@ public class HudFileProxy extends ApiImplementor {
             return "image";
         }
     }
-
 }

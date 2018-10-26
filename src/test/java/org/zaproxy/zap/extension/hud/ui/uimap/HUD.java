@@ -20,7 +20,6 @@
 package org.zaproxy.zap.extension.hud.ui.uimap;
 
 import java.util.List;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -31,11 +30,11 @@ public class HUD {
 
     private WebDriver webdriver;
     private int timeoutInSecs = 10;
-    
+
     public HUD(WebDriver webdriver) {
         this.webdriver = webdriver;
     }
-    
+
     public static By LEFT_PANEL_BY_ID = By.id("left-panel");
     public static By RIGHT_PANEL_BY_ID = By.id("right-panel");
     public static By HUD_BUTTON_BY_CLASSNAME = By.className("hud-button");
@@ -61,5 +60,4 @@ public class HUD {
     public List<WebElement> getHudButtons() {
         return webdriver.findElements(HUD_BUTTON_BY_CLASSNAME);
     }
-
 }

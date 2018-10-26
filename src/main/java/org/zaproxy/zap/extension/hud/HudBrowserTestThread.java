@@ -26,7 +26,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -58,13 +57,12 @@ public class HudBrowserTestThread extends Thread {
     }
 
     private static ExtensionSelenium getExtSelenium() {
-        return Control.getSingleton().getExtensionLoader()
-                .getExtension(ExtensionSelenium.class);
+        return Control.getSingleton().getExtensionLoader().getExtension(ExtensionSelenium.class);
     }
 
     @Override
     public void run() {
-        
+
         // Give it a bit of time to start up
         try {
             Thread.sleep(3000);
@@ -72,7 +70,7 @@ public class HudBrowserTestThread extends Thread {
             // Ignore
         }
         this.startTime = System.currentTimeMillis();
-        
+
         try (BufferedReader br = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -80,9 +78,9 @@ public class HudBrowserTestThread extends Thread {
                     break;
                 }
                 // process the line.
-                if (! line.startsWith("#")) {
+                if (!line.startsWith("#")) {
                     // Not a comment
-                    if (! line.toLowerCase().startsWith("http")) {
+                    if (!line.toLowerCase().startsWith("http")) {
                         // The Alexa data typically doesnt include http(s)://
                         line = "http://" + line;
                     }
@@ -98,20 +96,23 @@ public class HudBrowserTestThread extends Thread {
     }
 
     @SuppressWarnings("cast")
-    private void testUrl(WebDriver wd, String url)  {
+    private void testUrl(WebDriver wd, String url) {
         try {
             wd.get(url);
 
-            WebElement panel = (new WebDriverWait(wd, 10))
-                    .until(ExpectedConditions.presenceOfElementLocated(By.id("left-panel")));
+            WebElement panel =
+                    (new WebDriverWait(wd, 10))
+                            .until(
+                                    ExpectedConditions.presenceOfElementLocated(
+                                            By.id("left-panel")));
 
             if (panel == null) {
-                this.fails.add(url + " : Failed to find left panel"); 
+                this.fails.add(url + " : Failed to find left panel");
             } else {
                 // Cast to make Eclipse compile without errors.
-                wd.switchTo().frame((WebElement)wd.findElement(By.id("left-panel")));
+                wd.switchTo().frame((WebElement) wd.findElement(By.id("left-panel")));
                 List<WebElement> buttons = null;
-                for (int i=0; i < 10; i++) {
+                for (int i = 0; i < 10; i++) {
                     buttons = wd.findElements(By.className("hud-button"));
                     if (buttons != null && buttons.size() == 8) {
                         this.passes.add(url);
@@ -120,29 +121,28 @@ public class HudBrowserTestThread extends Thread {
                     Thread.sleep(500);
                 }
                 if (buttons == null) {
-                    this.fails.add(url + " : Failed to find left panel buttons"); 
+                    this.fails.add(url + " : Failed to find left panel buttons");
                 } else {
-                    this.fails.add(url + " : Only found " + buttons.size() + " left panel buttons"); 
+                    this.fails.add(url + " : Only found " + buttons.size() + " left panel buttons");
                 }
             }
         } catch (Exception e) {
-            this.fails.add(url + " : Exception " + e.getMessage()); 
+            this.fails.add(url + " : Exception " + e.getMessage());
         }
-        
     }
 
     public List<String> getPasses() {
         return Collections.unmodifiableList(passes);
     }
-    
+
     public List<String> getFails() {
         return Collections.unmodifiableList(fails);
     }
-    
-    public int getProgress () {
+
+    public int getProgress() {
         return passes.size() + fails.size();
     }
-    
+
     public long getAverageLoadTimeInMSecs() {
         if (this.startTime == 0) {
             return 0;
@@ -152,7 +152,7 @@ public class HudBrowserTestThread extends Thread {
         }
         return (this.endTime - this.startTime) / this.getProgress();
     }
-    
+
     public void setStop(boolean stop) {
         this.stop = stop;
     }
