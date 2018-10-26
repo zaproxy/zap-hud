@@ -37,24 +37,28 @@ public class ExampleDotComChromeUnitTest {
 
     static final String TARGET = "https://www.example.com";
     // TODO parameterise the host:port
-    static final String PROXY = "localhost:8090";
+    static final String PROXY_HOST = "localhost";
+    static final int PROXY_PORT = 8999;
+    static final String PROXY_HOST_PORT = PROXY_HOST + ":" + PROXY_PORT;
 
     @Options ChromeOptions chromeOptions = new ChromeOptions();
 
     {
         Proxy proxy = new Proxy();
-        proxy.setHttpProxy(PROXY).setFtpProxy(PROXY).setSslProxy(PROXY);
+        proxy.setHttpProxy(PROXY_HOST_PORT)
+                .setFtpProxy(PROXY_HOST_PORT)
+                .setSslProxy(PROXY_HOST_PORT);
 
         chromeOptions.setCapability(CapabilityType.PROXY, proxy);
         chromeOptions.setCapability("acceptInsecureCerts", true);
+        chromeOptions.setHeadless(true);
     }
 
     @Test
     public void frameUnitTests(ChromeDriver driver) throws InterruptedException {
         driver.get(TARGET);
-        // TODO why doesnt this load the HUD straight away?
-        Thread.sleep(2000);
-        driver.get(TARGET);
+        // Give the HUD a chance to load
+        Thread.sleep(5000);
 
         LeftPanelUnitTest.runAllTests(driver);
         RightPanelUnitTest.runAllTests(driver);
