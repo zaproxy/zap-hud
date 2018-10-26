@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-
+import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -50,21 +50,19 @@ import org.zaproxy.zap.extension.api.ApiView;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 
-import net.sf.json.JSONObject;
-
 public class HudAPI extends ApiImplementor {
 
     // TODO shouldnt allow unsafe-inline styles - need to work out where they are being used
-	protected static final String CSP_POLICY =
-			"default-src 'none'; script-src 'self'; connect-src https://zap wss://zap; frame-src 'self'; img-src 'self' data:; "
-			+ "font-src 'self' data:; style-src 'self' 'unsafe-inline' ;";
+    protected static final String CSP_POLICY =
+            "default-src 'none'; script-src 'self'; connect-src https://zap wss://zap; frame-src 'self'; img-src 'self' data:; "
+                    + "font-src 'self' data:; style-src 'self' 'unsafe-inline' ;";
 
     protected static final String CSP_POLICY_UNSAFE_EVAL =
             "default-src 'none'; script-src 'self' 'unsafe-eval'; connect-src https://zap wss://zap; frame-src 'self'; img-src 'self' data:; "
-            + "font-src 'self' data:; style-src 'self' 'unsafe-inline' ;";
+                    + "font-src 'self' data:; style-src 'self' 'unsafe-inline' ;";
 
     private static final String PREFIX = "hud";
-    
+
     private Map<String, String> siteUrls = new HashMap<String, String>();
     private ExtensionHUD extension;
 
@@ -83,33 +81,35 @@ public class HudAPI extends ApiImplementor {
     private static final String PARAM_BODY = "body";
     private static final String PARAM_BROWSER = "browser";
     private static final String PARAM_TEST_FILE = "testFile";
-	
-	/**
-	 * The only files that can be included on domain
-	 */
-	private static final List<String> DOMAIN_FILE_WHITELIST = Arrays.asList(new String[] { "inject.js" });
+
+    /** The only files that can be included on domain */
+    private static final List<String> DOMAIN_FILE_WHITELIST =
+            Arrays.asList(new String[] {"inject.js"});
 
     private ApiImplementor hudFileProxy;
-	private ApiImplementor hudApiProxy;
-	
-	private String hudFileUrl;
+    private ApiImplementor hudApiProxy;
+
+    private String hudFileUrl;
     private String hudApiUrl;
 
     private String websocketUrl;
 
     /**
-     * Shared secret used to ensure that we only accept messages from the ZAP code running on the target domain
+     * Shared secret used to ensure that we only accept messages from the ZAP code running on the
+     * target domain
      */
     private final String sharedSecret = UUID.randomUUID().toString();
 
     private static Logger logger = Logger.getLogger(HudAPI.class);
-    
+
     public HudAPI(ExtensionHUD extension) {
-    	this.extension = extension;
+        this.extension = extension;
 
         this.addApiAction(new ApiAction(ACTION_LOG, new String[] {PARAM_RECORD}));
-        this.addApiAction(new ApiAction(ACTION_RECORD_REQUEST, new String[] {PARAM_HEADER, PARAM_BODY}));
-        this.addApiAction(new ApiAction(ACTION_START_TEST, new String[] {PARAM_TEST_FILE, PARAM_BROWSER}));
+        this.addApiAction(
+                new ApiAction(ACTION_RECORD_REQUEST, new String[] {PARAM_HEADER, PARAM_BODY}));
+        this.addApiAction(
+                new ApiAction(ACTION_START_TEST, new String[] {PARAM_TEST_FILE, PARAM_BROWSER}));
         this.addApiAction(new ApiAction(ACTION_STOP_TEST));
 
         this.addApiView(new ApiView(VIEW_TEST_PROGRESS));
@@ -117,8 +117,8 @@ public class HudAPI extends ApiImplementor {
         this.addApiView(new ApiView(VIEW_TEST_PASSES));
         this.addApiView(new ApiView(VIEW_TEST_FAILURES));
 
-    	hudFileProxy = new HudFileProxy(this);
-    	hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S); 
+        hudFileProxy = new HudFileProxy(this);
+        hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S);
         hudApiProxy = new HudApiProxy();
         hudApiUrl = API.getInstance().getCallBackUrl(hudApiProxy, API.API_URL_S);
 
@@ -134,19 +134,22 @@ public class HudAPI extends ApiImplementor {
                     // Ignore
                 }
                 if (View.isInitialised()) {
-                    View.getSingleton().getOutputPanel().append(
-                            "The websocket testing page is: " + hudFileUrl + "?name=websockettest.html\n");
+                    View.getSingleton()
+                            .getOutputPanel()
+                            .append(
+                                    "The websocket testing page is: "
+                                            + hudFileUrl
+                                            + "?name=websockettest.html\n");
                 }
             }
         }.start();
-
     }
 
-	@Override
-	public String getPrefix() {
-		return PREFIX;
-	}
-	
+    @Override
+    public String getPrefix() {
+        return PREFIX;
+    }
+
     protected ApiImplementor getHudApiProxy() {
         return hudApiProxy;
     }
@@ -156,49 +159,57 @@ public class HudAPI extends ApiImplementor {
     }
 
     public String getUrlPrefix(String site) {
-		String url = this.siteUrls.get(site);
-		if (url == null) {
-			url = API.getInstance().getCallBackUrl(this, site); 
-			this.siteUrls.put(site, url);
-		}
-		return url;
-	}
-	
-	public void reset() {
-		this.siteUrls.clear();
-	}
-	
-	public boolean allowUnsafeEval() {
-	    return this.extension.getHudParam().isDevelopmentMode() && this.extension.getHudParam().isAllowUnsafeEval();
-	}
-	
-	@Override
-	public String handleCallBack(HttpMessage msg)  throws ApiException {
-		// Just used to handle files which need to be on the target domain
-		try {
-			String query = msg.getRequestHeader().getURI().getPathQuery();
-			logger.debug("callback query = " + query);
-			if (query != null) {
-				if (query.indexOf("zapfile=") > 0) {
-					String fileName = query.substring(query.indexOf("zapfile=") + 8);
-					if (DOMAIN_FILE_WHITELIST.contains(fileName)) {
-						msg.setResponseBody(this.getFile(msg, ExtensionHUD.TARGET_DIRECTORY + "/" + fileName));
-						// Currently only javascript files are returned
-						msg.setResponseHeader(API.getDefaultResponseHeader("application/javascript; charset=UTF-8", msg.getResponseBody().length(), false));
-						return msg.getResponseBody().toString();
-					}
-				}
-			}
-		} catch (Exception e) {
-			throw new ApiException (ApiException.Type.URL_NOT_FOUND, msg.getRequestHeader().getURI().toString());
-		}
-		throw new ApiException (ApiException.Type.URL_NOT_FOUND, msg.getRequestHeader().getURI().toString());
-	}
+        String url = this.siteUrls.get(site);
+        if (url == null) {
+            url = API.getInstance().getCallBackUrl(this, site);
+            this.siteUrls.put(site, url);
+        }
+        return url;
+    }
 
-	@Override
-	public ApiResponse handleApiAction(String name, JSONObject params) throws ApiException {
+    public void reset() {
+        this.siteUrls.clear();
+    }
 
-		switch (name) {
+    public boolean allowUnsafeEval() {
+        return this.extension.getHudParam().isDevelopmentMode()
+                && this.extension.getHudParam().isAllowUnsafeEval();
+    }
+
+    @Override
+    public String handleCallBack(HttpMessage msg) throws ApiException {
+        // Just used to handle files which need to be on the target domain
+        try {
+            String query = msg.getRequestHeader().getURI().getPathQuery();
+            logger.debug("callback query = " + query);
+            if (query != null) {
+                if (query.indexOf("zapfile=") > 0) {
+                    String fileName = query.substring(query.indexOf("zapfile=") + 8);
+                    if (DOMAIN_FILE_WHITELIST.contains(fileName)) {
+                        msg.setResponseBody(
+                                this.getFile(msg, ExtensionHUD.TARGET_DIRECTORY + "/" + fileName));
+                        // Currently only javascript files are returned
+                        msg.setResponseHeader(
+                                API.getDefaultResponseHeader(
+                                        "application/javascript; charset=UTF-8",
+                                        msg.getResponseBody().length(),
+                                        false));
+                        return msg.getResponseBody().toString();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new ApiException(
+                    ApiException.Type.URL_NOT_FOUND, msg.getRequestHeader().getURI().toString());
+        }
+        throw new ApiException(
+                ApiException.Type.URL_NOT_FOUND, msg.getRequestHeader().getURI().toString());
+    }
+
+    @Override
+    public ApiResponse handleApiAction(String name, JSONObject params) throws ApiException {
+
+        switch (name) {
             case ACTION_LOG:
                 String record = params.getString(PARAM_RECORD);
                 if (View.isInitialised()) {
@@ -213,15 +224,18 @@ public class HudAPI extends ApiImplementor {
                     HttpMessage requestMsg = new HttpMessage();
                     requestMsg.setRequestHeader(header);
                     requestMsg.setRequestBody(body);
-                    requestMsg.getRequestHeader().setContentLength(requestMsg.getRequestBody().length());
-                    return new ApiResponseElement("requestUrl", this.extension.setRecordedRequest(requestMsg));
+                    requestMsg
+                            .getRequestHeader()
+                            .setContentLength(requestMsg.getRequestBody().length());
+                    return new ApiResponseElement(
+                            "requestUrl", this.extension.setRecordedRequest(requestMsg));
                 } catch (HttpMalformedHeaderException | URIException e) {
                     throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_HEADER);
                 }
-                
+
             case ACTION_START_TEST:
                 File f = new File(params.getString(PARAM_TEST_FILE));
-                if (! f.isFile() && ! f.canRead()) {
+                if (!f.isFile() && !f.canRead()) {
                     throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_TEST_FILE);
                 }
                 try {
@@ -240,7 +254,7 @@ public class HudAPI extends ApiImplementor {
                     throw new ApiException(ApiException.Type.DOES_NOT_EXIST);
                 }
                 break;
-                
+
             default:
                 throw new ApiException(ApiException.Type.BAD_ACTION);
         }
@@ -253,11 +267,11 @@ public class HudAPI extends ApiImplementor {
 
         switch (name) {
             case VIEW_TEST_PROGRESS:
-                return new ApiResponseElement(name, 
-                        Integer.toString(getTestThread().getProgress()));
+                return new ApiResponseElement(
+                        name, Integer.toString(getTestThread().getProgress()));
             case VIEW_TEST_AVERAGE_LOAD_TIME:
-                return new ApiResponseElement(name, 
-                        Long.toString(getTestThread().getAverageLoadTimeInMSecs()));
+                return new ApiResponseElement(
+                        name, Long.toString(getTestThread().getAverageLoadTimeInMSecs()));
             case VIEW_TEST_PASSES:
                 ApiResponseList passes = new ApiResponseList(name);
                 for (String pass : getTestThread().getPasses()) {
@@ -274,7 +288,7 @@ public class HudAPI extends ApiImplementor {
                 throw new ApiException(ApiException.Type.BAD_VIEW);
         }
     }
-    
+
     private HudBrowserTestThread getTestThread() throws ApiException {
         HudBrowserTestThread tt = this.extension.getTestThread();
         if (tt == null) {
@@ -295,7 +309,7 @@ public class HudAPI extends ApiImplementor {
         return site.toString();
     }
 
-    protected String getFile (HttpMessage msg, String file) {
+    protected String getFile(HttpMessage msg, String file) {
         try {
             String contents;
             ScriptWrapper sw = this.extension.getExtScript().getScript(file);
@@ -304,38 +318,41 @@ public class HudAPI extends ApiImplementor {
             } else {
                 logger.warn("Failed to access script " + file + " via the script extension");
                 File f = new File(this.extension.getHudParam().getBaseDirectory(), file);
-                if (! f.exists()) {
-                    logger.error("No such file " + f.getAbsolutePath(), new FileNotFoundException(file));
+                if (!f.exists()) {
+                    logger.error(
+                            "No such file " + f.getAbsolutePath(), new FileNotFoundException(file));
                     return null;
                 }
                 // Quick way to read a small text file
                 contents = new String(Files.readAllBytes(f.toPath()));
             }
-        
+
             String url = msg.getRequestHeader().getURI().toString();
             if (url.indexOf("/zapCallBackUrl") > 0) {
                 // Strip off the callback path
                 url = url.substring(0, url.indexOf("/zapCallBackUrl"));
             }
-            contents = contents
-                    .replace("<<ZAP_HUD_FILES>>", this.hudFileUrl)
-                    .replace("<<URL>>", url)
-                    .replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
+            contents =
+                    contents.replace("<<ZAP_HUD_FILES>>", this.hudFileUrl)
+                            .replace("<<URL>>", url)
+                            .replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
 
             if (file.equals("i18n.js")) {
-                contents = contents
-                        .replace("<<ZAP_LOCALE>>", Constant.messages.getLocal().toString());
+                contents =
+                        contents.replace("<<ZAP_LOCALE>>", Constant.messages.getLocal().toString());
             }
 
             if (url.startsWith(API.API_URL_S)) {
                 // Only do this on the ZAP domain
-                contents = contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
-                        .replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
+                contents =
+                        contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
+                                .replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
 
                 if (file.equals("serviceworker.js")) {
                     // Inject the tool filenames
                     StringBuilder sb = new StringBuilder();
-                    File toolsDir = new File(this.extension.getHudParam().getBaseDirectory(), "tools");
+                    File toolsDir =
+                            new File(this.extension.getHudParam().getBaseDirectory(), "tools");
                     for (String tool : toolsDir.list()) {
                         if (tool.toLowerCase(Locale.ROOT).endsWith(".js")) {
                             sb.append("\t\"");
@@ -348,7 +365,7 @@ public class HudAPI extends ApiImplementor {
                     contents = contents.replace("<<ZAP_HUD_TOOLS>>", sb.toString());
                 }
             }
-            
+
             return contents;
         } catch (Exception e) {
             // Something unexpected went wrong, write the error to the log
@@ -359,15 +376,20 @@ public class HudAPI extends ApiImplementor {
 
     private String getWebSocketUrl() {
         if (websocketUrl == null) {
-            websocketUrl = Control.getSingleton().getExtensionLoader().getExtension(ExtensionWebSocket.class).getCallbackUrl();
+            websocketUrl =
+                    Control.getSingleton()
+                            .getExtensionLoader()
+                            .getExtension(ExtensionWebSocket.class)
+                            .getCallbackUrl();
         }
         return websocketUrl;
     }
 
-    public byte[] getImage (String name) {
+    public byte[] getImage(String name) {
         // TODO cache? And support local files
         try {
-            InputStream is = this.getClass().getResourceAsStream(ExtensionHUD.RESOURCE + "/" + name);
+            InputStream is =
+                    this.getClass().getResourceAsStream(ExtensionHUD.RESOURCE + "/" + name);
             if (is == null) {
                 logger.error("No such resource: " + name);
                 return null;
@@ -382,28 +404,27 @@ public class HudAPI extends ApiImplementor {
         }
     }
 
-    
-	public static String getAllowFramingResponseHeader(String responseStatus, String contentType, int contentLength, boolean canCache) {
-		StringBuilder sb = new StringBuilder(250);
+    public static String getAllowFramingResponseHeader(
+            String responseStatus, String contentType, int contentLength, boolean canCache) {
+        StringBuilder sb = new StringBuilder(250);
 
-		sb.append("HTTP/1.1 ").append(responseStatus).append("\r\n");
-		if (! canCache) {
-			sb.append("Pragma: no-cache\r\n");
-			sb.append("Cache-Control: no-cache\r\n");
-		}
-		else {
-			//todo: found this necessary to cache, remove if not
-			sb.append("Cache-Control: public,max-age=3000000\r\n");
-		}
-		sb.append("Content-Security-Policy: ").append(HudAPI.CSP_POLICY).append("\r\n");
-		sb.append("Access-Control-Allow-Methods: GET,POST,OPTIONS\r\n");
-		sb.append("Access-Control-Allow-Headers: ZAP-Header\r\n");
-		sb.append("X-XSS-Protection: 1; mode=block\r\n");
-		sb.append("X-Content-Type-Options: nosniff\r\n");
-		sb.append("X-Clacks-Overhead: GNU Terry Pratchett\r\n");
-		sb.append("Content-Length: ").append(contentLength).append("\r\n");
-		sb.append("Content-Type: ").append(contentType).append("\r\n");
+        sb.append("HTTP/1.1 ").append(responseStatus).append("\r\n");
+        if (!canCache) {
+            sb.append("Pragma: no-cache\r\n");
+            sb.append("Cache-Control: no-cache\r\n");
+        } else {
+            // todo: found this necessary to cache, remove if not
+            sb.append("Cache-Control: public,max-age=3000000\r\n");
+        }
+        sb.append("Content-Security-Policy: ").append(HudAPI.CSP_POLICY).append("\r\n");
+        sb.append("Access-Control-Allow-Methods: GET,POST,OPTIONS\r\n");
+        sb.append("Access-Control-Allow-Headers: ZAP-Header\r\n");
+        sb.append("X-XSS-Protection: 1; mode=block\r\n");
+        sb.append("X-Content-Type-Options: nosniff\r\n");
+        sb.append("X-Clacks-Overhead: GNU Terry Pratchett\r\n");
+        sb.append("Content-Length: ").append(contentLength).append("\r\n");
+        sb.append("Content-Type: ").append(contentType).append("\r\n");
 
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 }

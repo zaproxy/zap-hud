@@ -25,55 +25,52 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.parosproxy.paros.network.HttpMessage;
 
-/**
- * Unit test for {@link HtmlEditor}.
- */
+/** Unit test for {@link HtmlEditor}. */
 public class HtmlEditorUnitTest {
 
     private static final String EOB_TOKEN = "EOB";
     private static final String INJECT_TOKEN = "INJECT";
-    
+
     @Test
     public void testNoBodyTag() {
         genericTestWithNoBodyTag("<head></head>");
     }
-    
+
     @Test
     public void testCommentedBody() {
         genericTestWithNoBodyTag("<head></head><!--<body></body>-->");
     }
-    
+
     @Test
     public void testSimpleHtml() {
-        genericTestWithBodyTag(
-                "<head></head><body>" + EOB_TOKEN + "</body>");
+        genericTestWithBodyTag("<head></head><body>" + EOB_TOKEN + "</body>");
     }
-    
+
     @Test
     public void testCommentedAndUncommentedBody() {
-        genericTestWithBodyTag(
-                "<head></head><!--<body></body>--><body>" + EOB_TOKEN + "</body>");
+        genericTestWithBodyTag("<head></head><!--<body></body>--><body>" + EOB_TOKEN + "</body>");
     }
-    
+
     @Test
     public void testTwitterStyleBody() {
         genericTestWithBodyTag(
                 "<head>"
-                + "</head>"
-                + " <body class=\"three-col logged-out static-logged-out-home-page\" \n" + 
-                "data-fouc-class-names=\"swift-loading\"\n" + 
-                " dir=\"ltr\">" + EOB_TOKEN + "\n" + 
-                "      <script id=\"swift_loading_indicator\" nonce=\"G5f1XC57dp7ig7dTGs9oxw==\">\n" + 
-                "        document.body.className=document.body.className+\" \"+document.body.getAttribute(\"data-fouc-class-names\");\n" + 
-                "      </script>\n");
+                        + "</head>"
+                        + " <body class=\"three-col logged-out static-logged-out-home-page\" \n"
+                        + "data-fouc-class-names=\"swift-loading\"\n"
+                        + " dir=\"ltr\">"
+                        + EOB_TOKEN
+                        + "\n"
+                        + "      <script id=\"swift_loading_indicator\" nonce=\"G5f1XC57dp7ig7dTGs9oxw==\">\n"
+                        + "        document.body.className=document.body.className+\" \"+document.body.getAttribute(\"data-fouc-class-names\");\n"
+                        + "      </script>\n");
     }
-    
+
     @Test
     public void testMultipleBodyTags() {
-        genericTestWithBodyTag(
-                "<head></head><body>" + EOB_TOKEN + "</body><body></body>");
+        genericTestWithBodyTag("<head></head><body>" + EOB_TOKEN + "</body><body></body>");
     }
-    
+
     private void genericTestWithBodyTag(String htmlBody) {
         // Given
         HttpMessage msg = new HttpMessage();

@@ -4,6 +4,7 @@ import org.zaproxy.gradle.tasks.UpdateManifestFile
 plugins {
     `java-library`
     id("zap-add-on")
+    id("com.diffplug.gradle.spotless") version "3.15.0"
 }
 
 apply(from = "$rootDir/gradle/compile.gradle.kts")
@@ -64,6 +65,13 @@ tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
+spotless {
+    java {
+        licenseHeaderFile("gradle/spotless/license.java")
+
+        googleJavaFormat().aosp()
+    }
+}
 
 tasks {
     register<Exec>("npmLintStagedHud") {
