@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en"><html>
+<head>
+	<title>Show / Enable</title>
+	<link href="tutorial.css" rel="stylesheet" type="text/css" />
+	<script type='text/javascript' src='Show.js'></script>
+</head>
+<body>
+<div class="roundContainer">
+	<h1>Show Fields</H1>
+	This page has 4 fields on it, but with the <img src="show-off.png"> 'Show / Enable' tool turned off you
+	can only see one of them:
+	<form action="Show.html" method="post">
+	<table border=0>
+		<tr>
+			<td>You can see this field:</td>
+			<td><input type="text" id="field1"></input></td>
+		<tr>
+		<tr>
+			<td>You can't see these fields:</td>
+			<td><input type="hidden" id="field2" name="field2" disabled value="Hidden by using the 'hidden' type" /></td>
+			<td><input type="text" id="field3" name="field3" value="Hidden by setting display to 'none' " /> </td>
+			<td><input type="text" id="field4" name="field4" value="Hidden by setting visibility to 'hidden' " /> </td>
+		<tr>
+		<tr>
+			<td></td>
+			<td><input type="submit" id="submit" value="Submit" /> </td>
+		<tr>
+	</table>
+	</form>
+	The 'Show / Enable' tool will make all of the hidden fields visible and allow you to change them.
+	As the fields are normally hidden the 'Show / Enable' tool shows a count of the number of hidden fields.
+	So if you see that this count is ever greater than zero then you will know that the page has that number
+	of hidden fields in it. 
+
+	<div class="buttonsDiv">
+		<a href="Enable.html"><button>Previous: Enable</button></a>
+		<a href="Break.html"><button>Next: Break</button></a>
+	</div>
+</div>
+
+</body>
+</html>
