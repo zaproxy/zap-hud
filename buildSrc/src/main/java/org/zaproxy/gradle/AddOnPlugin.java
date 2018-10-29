@@ -187,8 +187,9 @@ public class AddOnPlugin implements Plugin<Project> {
                 task -> {
                     task.setGroup("ZAP Add-On");
                     task.setDescription(
-                            "Deploys the ZAP add-on to zaproxy project (\"src/plugin\" dir) and deletes the hud dir (\".ZAP_D/hud\").");
+                            "Deploys the ZAP add-on to zaproxy project (\"src/plugin\" dir) and deletes the hud dirs (\".ZAP_D/hud\", \".ZAP_D/hudtutorial\").");
                     task.delete(System.getProperty("user.home") + "/.ZAP_D/hud");
+                    task.delete(System.getProperty("user.home") + "/.ZAP_D/hudtutorial");
                     task.dependsOn(deployZapAddOnProvider);
                 });
     }
