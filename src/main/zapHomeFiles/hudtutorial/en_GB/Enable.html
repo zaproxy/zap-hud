@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en"><html>
+<head>
+	<title>Enable Fields</title>
+	<link href="tutorial.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div class="roundContainer">
+	<h1>Enable Fields</H1>
+	This page has 3 fields on it. As you will see you can't type in the second or third fields:
+	<form action="Enable.html" method="post">
+	<table border=0>
+		<tr>
+			<td>You can type in this field:</td>
+			<td><input type="text" id="field1"></input></td>
+		<tr>
+		<tr>
+			<td>This field is disabled:</td>
+			<td><input type="text" id="field2" name="field2" disabled value="Disabled" /></td>
+		<tr>
+		<tr>
+			<td>This field is readonly:</td>
+			<td><input type="text" id="field3" name="field3" readonly value="Readonly" /> </td>
+		<tr>
+		<tr>
+			<td></td>
+			<td><input type="submit" id="submit" value="Submit" /> </td>
+		<tr>
+	</table>
+	</form>
+	However if you click on the <img src="show-off.png"> 'Show / Enable' tool then the icon will change to
+	<img src="show-on.png"> and you will now be able to type in all of the fields. You can then try changing
+	fields that the developers might have thought could not be changed. 
+	Clicking on the 'Show / Enable' tool again will return the field to their previous states, 
+	but the text you typed will still be in the fields.
+	<p>
+	It is worth noting that some fields may still be disabled if they use JavaScript to prevent them from being modified,
+	you will see how you can still change these values later in this tutorial.
+	<p>
+
+	<div class="buttonsDiv">
+		<a href="Scope.html"><button>Previous: Scope</button></a>
+		<a href="Show.html"><button>Next: Show Fields</button></a>
+	</div>
+</div>
+
+</body>
+</html>

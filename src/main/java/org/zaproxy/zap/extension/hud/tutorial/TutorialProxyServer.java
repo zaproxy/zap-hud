@@ -132,7 +132,7 @@ public class TutorialProxyServer extends ProxyServer {
             try {
                 String name = msg.getRequestHeader().getURI().getEscapedName();
                 if (name.length() == 0) {
-                    name = "1-Intro.html";
+                    name = "Intro.html";
                 }
                 if (name.endsWith(".png")) {
                     byte[] image = extension.getAPI().getImage(name);
@@ -147,21 +147,23 @@ public class TutorialProxyServer extends ProxyServer {
                                         "image/png", msg.getResponseBody().length(), true));
                     }
                 } else {
-                    String localStr = Constant.getLocale().toString();
-                    String body = getTextFile(localStr + "/" + name);
-                    if (body == null) {
-                        body = getTextFile(DEFAULT_LOCALE + "/" + name);
-                    }
+                    String body = getLocallizedTextFile(name);
                     if (body == null) {
                         LOG.debug("Failed to find tutorial file " + name);
-                        msg.setResponseBody("<html><body><h1>404 Not found</h1><body></html>");
+                        body = getLocallizedTextFile("404.html");
+                        msg.setResponseBody(body);
                         msg.setResponseHeader(
-                                getDefaultResponseHeader(STATUS_NOT_FOUND, "text/html", 0));
+                                getDefaultResponseHeader(
+                                        STATUS_NOT_FOUND,
+                                        "text/html",
+                                        msg.getResponseBody().length()));
                     } else {
                         msg.setResponseBody(body);
                         String contentType = "text/html";
                         if (name.endsWith(".css")) {
                             contentType = "text/css";
+                        } else if (name.endsWith(".js")) {
+                            contentType = "text/javascript";
                         }
                         msg.setResponseHeader(
                                 getDefaultResponseHeader(
@@ -172,6 +174,15 @@ public class TutorialProxyServer extends ProxyServer {
                 LOG.error(e.getMessage(), e);
             }
             return true;
+        }
+
+        private String getLocallizedTextFile(String name) {
+            String localStr = Constant.getLocale().toString();
+            String body = getTextFile(localStr + "/" + name);
+            if (body == null) {
+                body = getTextFile(DEFAULT_LOCALE + "/" + name);
+            }
+            return body;
         }
 
         @Override
