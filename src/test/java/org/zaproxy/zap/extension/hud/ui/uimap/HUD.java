@@ -19,17 +19,20 @@
  */
 package org.zaproxy.zap.extension.hud.ui.uimap;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.zaproxy.zap.extension.hud.ui.Constants;
 
 public class HUD {
 
     private WebDriver webdriver;
-    private int timeoutInSecs = 10;
 
     public HUD(WebDriver webdriver) {
         this.webdriver = webdriver;
@@ -37,6 +40,7 @@ public class HUD {
 
     public static By LEFT_PANEL_BY_ID = By.id("left-panel");
     public static By RIGHT_PANEL_BY_ID = By.id("right-panel");
+    public static By BOTTOM_PANEL_BY_ID = By.id("bottom-drawer");
     public static By HUD_BUTTON_BY_CLASSNAME = By.className("hud-button");
 
     public WebElement getLeftPanel() {
@@ -44,7 +48,7 @@ public class HUD {
     }
 
     public WebElement waitForLeftPanel() {
-        return (new WebDriverWait(webdriver, timeoutInSecs))
+        return (new WebDriverWait(webdriver, Constants.GENERIC_TESTS_TIMEOUT_SECS))
                 .until(ExpectedConditions.presenceOfElementLocated(LEFT_PANEL_BY_ID));
     }
 
@@ -53,11 +57,68 @@ public class HUD {
     }
 
     public WebElement waitForRightPanel() {
-        return (new WebDriverWait(webdriver, timeoutInSecs))
+        return (new WebDriverWait(webdriver, Constants.GENERIC_TESTS_TIMEOUT_SECS))
                 .until(ExpectedConditions.presenceOfElementLocated(RIGHT_PANEL_BY_ID));
     }
 
+    public WebElement getBottomPanel() {
+        return this.webdriver.findElement(BOTTOM_PANEL_BY_ID);
+    }
+
+    public WebElement waitForBottomPanel() {
+        return new WebDriverWait(this.webdriver, Constants.GENERIC_TESTS_TIMEOUT_SECS)
+                .until(ExpectedConditions.presenceOfElementLocated(BOTTOM_PANEL_BY_ID));
+    }
+
     public List<WebElement> getHudButtons() {
-        return webdriver.findElements(HUD_BUTTON_BY_CLASSNAME);
+        // return webdriver.findElements(HUD_BUTTON_BY_CLASSNAME);
+        /* This should work, but it looks like a Firefox bug is causing problems
+        return new WebDriverWait(this.webdriver, this.timeoutInSecs)
+                .until(ExpectedConditions.presenceOfAllElementsLocatedBy(HUD_BUTTON_BY_CLASSNAME));
+                */
+        for (int i = 0; i < Constants.GENERIC_TESTS_RETRY_COUNT; i++) {
+            try {
+                return webdriver.findElements(HUD_BUTTON_BY_CLASSNAME);
+            } catch (WebDriverException e1) {
+                try {
+                    Thread.sleep(Constants.GENERIC_TESTS_RETRY_SLEEP_MS);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<WebElement> waitForHudButtons(int expected) {
+        List<WebElement> buttons = null;
+        for (int i = 0; i < Constants.GENERIC_TESTS_RETRY_COUNT; i++) {
+            try {
+                buttons = webdriver.findElements(HUD_BUTTON_BY_CLASSNAME);
+                if (buttons.size() == expected) {
+                    break;
+                }
+            } catch (WebDriverException e1) {
+                // Not unexpected
+            }
+            try {
+                Thread.sleep(Constants.GENERIC_TESTS_RETRY_SLEEP_MS);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
+        }
+        return buttons;
+    }
+
+    public void openUrlWaitForHud(String url) {
+        this.webdriver.get(url);
+        new WebDriverWait(webdriver, Constants.GENERIC_TESTS_TIMEOUT_SECS)
+                .until(ExpectedConditions.presenceOfElementLocated(LEFT_PANEL_BY_ID));
+    }
+
+    public void openRelativePage(String page) throws URISyntaxException {
+        this.webdriver
+                .navigate()
+                .to(new URI(this.webdriver.getCurrentUrl()).resolve(page).toString());
     }
 }
