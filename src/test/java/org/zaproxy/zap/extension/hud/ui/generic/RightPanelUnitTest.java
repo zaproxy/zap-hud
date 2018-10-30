@@ -29,6 +29,8 @@ import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
 public class RightPanelUnitTest {
 
+    private static final int EXPECTED_BUTTONS = 9;
+
     public RightPanelUnitTest() {}
 
     public static void runAllTests(WebDriver wd) {
@@ -46,8 +48,9 @@ public class RightPanelUnitTest {
         WebElement panel = hud.waitForRightPanel();
         assertNotNull(panel);
         wd.switchTo().frame(panel);
-        List<WebElement> buttons = hud.getHudButtons();
-        assertEquals(9, buttons.size());
+        List<WebElement> buttons = hud.waitForHudButtons(EXPECTED_BUTTONS);
+        assertNotNull(buttons);
+        assertEquals(EXPECTED_BUTTONS, buttons.size());
         wd.switchTo().parentFrame();
     }
 }

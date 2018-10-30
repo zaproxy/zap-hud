@@ -23,30 +23,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
+import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
-public class LeftPanelUnitTest {
-
-    private static final int EXPECTED_BUTTONS = 9;
-
-    public LeftPanelUnitTest() {}
+public class BottomPanelUnitTest {
+    private static final int EXPECTED_BUTTONS = 2;
 
     public static void runAllTests(WebDriver wd) {
-        testLeftPanelLoads(wd);
-        testLeftContainsExpectedButtons(wd);
+        testBottomPanelLoads(wd);
+        testBottomContainsExpectedButtons(wd);
     }
 
-    public static void testLeftPanelLoads(WebDriver wd) {
+    public static void testBottomPanelLoads(WebDriver wd) {
         HUD hud = new HUD(wd);
-        assertNotNull(hud.waitForLeftPanel());
+        Assertions.assertNotNull(hud.waitForBottomPanel());
     }
 
-    public static void testLeftContainsExpectedButtons(WebDriver wd) {
+    public static void testBottomContainsExpectedButtons(WebDriver wd) {
         HUD hud = new HUD(wd);
-        WebElement panel = hud.waitForLeftPanel();
-        assertNotNull(panel);
+        WebElement panel = hud.waitForBottomPanel();
+        Assertions.assertNotNull(panel);
         wd.switchTo().frame(panel);
         List<WebElement> buttons = hud.waitForHudButtons(EXPECTED_BUTTONS);
         assertNotNull(buttons);
