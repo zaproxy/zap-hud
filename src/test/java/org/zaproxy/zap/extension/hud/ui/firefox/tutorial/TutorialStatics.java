@@ -31,6 +31,12 @@ public class TutorialStatics {
 
     private static String tutorialHostPort = null;
 
+    public static String NEXT_BUTTON_PREFIX = "Next:";
+    public static String PREVIOUS_BUTTON_PREFIX = "Previous:";
+    public static By NEXT_BUTTON_BY_ID = By.id("next-button");
+    public static By PREVIOUS_BUTTON_BY_ID = By.id("previous-button");
+    public static int ALERT_LOOP_COUNT = 10;
+
     private static String getTutorialHostPort() {
         if (tutorialHostPort == null) {
             tutorialHostPort = System.getenv().get("ZAP_HUD_TUTORIAL");
@@ -58,10 +64,10 @@ public class TutorialStatics {
     }
 
     public static WebElement getNextButton(WebDriver wd) {
-        return wd.findElement(By.id("next-button"));
+        return wd.findElement(NEXT_BUTTON_BY_ID);
     }
 
     public static WebElement getPreviousButton(WebDriver wd) {
-        return wd.findElement(By.id("previous-button"));
+        return wd.findElement(PREVIOUS_BUTTON_BY_ID);
     }
 }

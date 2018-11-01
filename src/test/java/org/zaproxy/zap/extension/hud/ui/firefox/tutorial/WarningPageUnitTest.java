@@ -26,6 +26,9 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.zaproxy.zap.extension.hud.tutorial.pages.FramesPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
 import org.zaproxy.zap.extension.hud.ui.Constants;
 import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
@@ -34,12 +37,10 @@ import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 @Tag("tutorial")
 public class WarningPageUnitTest extends FirefoxUnitTest {
 
-    public static final String PAGE = "Warning.html";
-
     @Test
     public void genericPageUnitTests(FirefoxDriver driver) throws InterruptedException {
         HUD hud = new HUD(driver);
-        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(PAGE));
+        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(WarningPage.NAME));
         Thread.sleep(Constants.POST_LOAD_DELAY_MS);
 
         GenericUnitTest.runAllTests(driver);
@@ -48,23 +49,20 @@ public class WarningPageUnitTest extends FirefoxUnitTest {
     @Test
     public void testPreviousButtonWorks(FirefoxDriver driver) {
         HUD hud = new HUD(driver);
-        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(PAGE));
+        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(WarningPage.NAME));
         WebElement previousButton = TutorialStatics.getPreviousButton(driver);
         assertNotNull(previousButton);
         previousButton.click();
-        assertEquals(
-                TutorialStatics.getTutorialHudUrl(WelcomePageUnitTest.PAGE),
-                driver.getCurrentUrl());
+        assertEquals(TutorialStatics.getTutorialHudUrl(IntroPage.NAME), driver.getCurrentUrl());
     }
 
     @Test
     public void testNextPageButtonWorks(FirefoxDriver driver) {
         HUD hud = new HUD(driver);
-        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(PAGE));
+        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(WarningPage.NAME));
         WebElement nextButton = TutorialStatics.getNextButton(driver);
         assertNotNull(nextButton);
         nextButton.click();
-        assertEquals(
-                TutorialStatics.getTutorialHudUrl(FramesPageUnitTest.PAGE), driver.getCurrentUrl());
+        assertEquals(TutorialStatics.getTutorialHudUrl(FramesPage.NAME), driver.getCurrentUrl());
     }
 }

@@ -52,6 +52,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
     private JCheckBox removeCsp = null;
     private JCheckBox developmentMode = null;
     private JCheckBox allowUnsafeEval = null;
+    private JCheckBox skipTutorialTasks = null;
 
     public OptionsHudPanel() {
         super();
@@ -72,12 +73,14 @@ public class OptionsHudPanel extends AbstractParamPanel {
         overridesPanel.add(getBaseDirectory());
         overridesPanel.add(directoryButton);
 
-        panel.add(directoryLabel, LayoutHelper.getGBC(0, 0, 1, 1.0, new Insets(2, 2, 2, 2)));
-        panel.add(overridesPanel, LayoutHelper.getGBC(1, 0, 1, 1.0, new Insets(2, 2, 2, 2)));
-        panel.add(getInScopeOnly(), LayoutHelper.getGBC(0, 1, 2, 1.0));
-        panel.add(getRemoveCsp(), LayoutHelper.getGBC(0, 2, 2, 1.0));
-        panel.add(getDevelopmentMode(), LayoutHelper.getGBC(0, 3, 2, 1.0));
-        panel.add(getAllowUnsafeEval(), LayoutHelper.getGBC(0, 4, 2, 1.0));
+        int i = 0;
+        panel.add(directoryLabel, LayoutHelper.getGBC(0, i, 1, 1.0, new Insets(2, 2, 2, 2)));
+        panel.add(overridesPanel, LayoutHelper.getGBC(1, i, 1, 1.0, new Insets(2, 2, 2, 2)));
+        panel.add(getInScopeOnly(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
+        panel.add(getRemoveCsp(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
+        panel.add(getSkipTutorialTasks(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
+        panel.add(getDevelopmentMode(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
+        panel.add(getAllowUnsafeEval(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
 
         add(panel);
     }
@@ -104,6 +107,16 @@ public class OptionsHudPanel extends AbstractParamPanel {
                     new JCheckBox(Constant.messages.getString("hud.optionspanel.label.removeCsp"));
         }
         return removeCsp;
+    }
+
+    private JCheckBox getSkipTutorialTasks() {
+        if (skipTutorialTasks == null) {
+            skipTutorialTasks =
+                    new JCheckBox(
+                            Constant.messages.getString(
+                                    "hud.optionspanel.label.skipTutorialTasks"));
+        }
+        return skipTutorialTasks;
     }
 
     private JCheckBox getDevelopmentMode() {
@@ -140,6 +153,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
         getBaseDirectory().setText(param.getBaseDirectory());
         getInScopeOnly().setSelected(param.isInScopeOnly());
         getRemoveCsp().setSelected(param.isRemoveCSP());
+        getSkipTutorialTasks().setSelected(param.isSkipTutorialTasks());
         getDevelopmentMode().setSelected(param.isDevelopmentMode());
         getAllowUnsafeEval().setSelected(param.isAllowUnsafeEval());
         getAllowUnsafeEval().setEnabled(developmentMode.isSelected());
@@ -179,6 +193,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
         param.setBaseDirectory(getBaseDirectory().getText());
         param.setInScopeOnly(getInScopeOnly().isSelected());
         param.setRemoveCSP(getRemoveCsp().isSelected());
+        param.setSkipTutorialTasks(getSkipTutorialTasks().isSelected());
         param.setDevelopmentMode(getDevelopmentMode().isSelected());
         param.setAllowUnsafeEval(getAllowUnsafeEval().isSelected());
     }

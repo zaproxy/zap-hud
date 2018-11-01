@@ -37,6 +37,8 @@ public class HudParam extends VersionedAbstractParam {
     private static final String PARAM_REMOVE_CSP = PARAM_BASE_KEY + ".removeCsp";
     private static final String PARAM_TUTORIAL_PORT = PARAM_BASE_KEY + ".tutorialPort";
     private static final String PARAM_TUTORIAL_HOST = PARAM_BASE_KEY + ".tutorialHost";
+    private static final String PARAM_TUTORIAL_SKIP_TASKS = PARAM_BASE_KEY + ".tutorialSkipTasks";
+    private static final String PARAM_TUTORIAL_TEST_MODE = PARAM_BASE_KEY + ".tutorialTestMode";
 
     /**
      * The version of the configurations. Used to keep track of configurations changes between
@@ -61,6 +63,10 @@ public class HudParam extends VersionedAbstractParam {
     private int tutorialPort;
 
     private String tutorialHost;
+
+    private boolean isSkipTutorialTasks;
+
+    private boolean isTutorialTestMode;
 
     public String getBaseDirectory() {
         return baseDirectory;
@@ -117,6 +123,24 @@ public class HudParam extends VersionedAbstractParam {
         getConfig().setProperty(PARAM_REMOVE_CSP, removeCSP);
     }
 
+    public boolean isSkipTutorialTasks() {
+        return isSkipTutorialTasks;
+    }
+
+    public void setSkipTutorialTasks(boolean isSkipTutorialTasks) {
+        this.isSkipTutorialTasks = isSkipTutorialTasks;
+        getConfig().setProperty(PARAM_TUTORIAL_SKIP_TASKS, isSkipTutorialTasks);
+    }
+
+    public boolean isTutorialTestMode() {
+        return isTutorialTestMode;
+    }
+
+    public void setTutorialTestMode(boolean isTutorialTestMode) {
+        this.isTutorialTestMode = isTutorialTestMode;
+        getConfig().setProperty(PARAM_TUTORIAL_TEST_MODE, isTutorialTestMode);
+    }
+
     @Override
     protected String getConfigVersionKey() {
         return PARAM_BASE_KEY + VERSION_ATTRIBUTE;
@@ -143,6 +167,8 @@ public class HudParam extends VersionedAbstractParam {
         removeCSP = getConfig().getBoolean(PARAM_REMOVE_CSP, true);
         tutorialPort = getConfig().getInt(PARAM_TUTORIAL_PORT, 0);
         tutorialHost = getConfig().getString(PARAM_TUTORIAL_HOST, "127.0.0.1");
+        isSkipTutorialTasks = getConfig().getBoolean(PARAM_TUTORIAL_SKIP_TASKS, false);
+        isTutorialTestMode = getConfig().getBoolean(PARAM_TUTORIAL_TEST_MODE, false);
     }
 
     @Override
