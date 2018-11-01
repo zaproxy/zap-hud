@@ -41,15 +41,29 @@ public class HUD {
     public static By LEFT_PANEL_BY_ID = By.id("left-panel");
     public static By RIGHT_PANEL_BY_ID = By.id("right-panel");
     public static By BOTTOM_PANEL_BY_ID = By.id("bottom-drawer");
+    public static By DISPLAY_PANEL_BY_ID = By.id("main-display");
     public static By HUD_BUTTON_BY_CLASSNAME = By.className("hud-button");
 
     public WebElement getLeftPanel() {
         return webdriver.findElement(LEFT_PANEL_BY_ID);
     }
 
-    public WebElement waitForLeftPanel() {
+    public WebElement waitForElement(By by) {
         return (new WebDriverWait(webdriver, Constants.GENERIC_TESTS_TIMEOUT_SECS))
-                .until(ExpectedConditions.presenceOfElementLocated(LEFT_PANEL_BY_ID));
+                .until(ExpectedConditions.presenceOfElementLocated(by));
+    }
+
+    public WebElement getFirstVisible(By by) {
+        for (WebElement elem : webdriver.findElements(by)) {
+            if (elem.isDisplayed()) {
+                return elem;
+            }
+        }
+        return null;
+    }
+
+    public WebElement waitForLeftPanel() {
+        return waitForElement(LEFT_PANEL_BY_ID);
     }
 
     public WebElement getRightPanel() {
@@ -57,8 +71,7 @@ public class HUD {
     }
 
     public WebElement waitForRightPanel() {
-        return (new WebDriverWait(webdriver, Constants.GENERIC_TESTS_TIMEOUT_SECS))
-                .until(ExpectedConditions.presenceOfElementLocated(RIGHT_PANEL_BY_ID));
+        return waitForElement(RIGHT_PANEL_BY_ID);
     }
 
     public WebElement getBottomPanel() {
@@ -66,8 +79,15 @@ public class HUD {
     }
 
     public WebElement waitForBottomPanel() {
-        return new WebDriverWait(this.webdriver, Constants.GENERIC_TESTS_TIMEOUT_SECS)
-                .until(ExpectedConditions.presenceOfElementLocated(BOTTOM_PANEL_BY_ID));
+        return waitForElement(BOTTOM_PANEL_BY_ID);
+    }
+
+    public WebElement getDisplayPanel() {
+        return this.webdriver.findElement(DISPLAY_PANEL_BY_ID);
+    }
+
+    public WebElement waitForDisplayPanel() {
+        return waitForElement(DISPLAY_PANEL_BY_ID);
     }
 
     public List<WebElement> getHudButtons() {
@@ -80,6 +100,11 @@ public class HUD {
             try {
                 return webdriver.findElements(HUD_BUTTON_BY_CLASSNAME);
             } catch (WebDriverException e1) {
+                if (e1.getMessage().indexOf("TypeError: can't access dead object") > -1) {
+                    // Retrying wont help
+                    throw e1;
+                }
+                System.out.println("Exception getting buttons, retrying: " + e1.getMessage());
                 try {
                     Thread.sleep(Constants.GENERIC_TESTS_RETRY_SLEEP_MS);
                 } catch (InterruptedException e) {

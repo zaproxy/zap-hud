@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.parosproxy.paros.Constant;
@@ -32,11 +34,32 @@ import org.parosproxy.paros.control.Control;
 import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
 import org.parosproxy.paros.core.proxy.ProxyServer;
 import org.parosproxy.paros.core.proxy.ProxyThread;
+import org.parosproxy.paros.network.HttpHeader;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.network.HttpSender;
 import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.hud.ExtensionHUD;
+import org.zaproxy.zap.extension.hud.tutorial.pages.ActiveScanPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.AlertNotificationsPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.AlertsPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.AttackModePage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.BreakPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.CompletePage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.EnablePage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.ErrorPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.FramesPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.HistoryPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.PageAlertsPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.ResendPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.ScopePage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.ShowPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.SiteAlertsJsPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.SiteAlertsPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.SitesPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.SpiderPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
 import org.zaproxy.zap.extension.selenium.ExtensionSelenium;
 import org.zaproxy.zap.view.ZapMenuItem;
 
@@ -45,16 +68,51 @@ public class TutorialProxyServer extends ProxyServer {
     private static final String DEFAULT_LOCALE = "en_GB";
     private static final String STATUS_OK = "200 OK";
     private static final String STATUS_NOT_FOUND = "404 Not Found";
+    private static final String STATUS_REDIRECT = "302 Found";
     private static final Logger LOG = Logger.getLogger(TutorialProxyServer.class);
 
     private ExtensionHUD extension;
     private ZapMenuItem firefoxToolsMenuItem;
     private ZapMenuItem chromeToolsMenuItem;
     private String hostPort;
+    private Map<String, TutorialPage> pages = new HashMap<String, TutorialPage>();
+
+    private Logger log = Logger.getLogger(this.getClass());
 
     public TutorialProxyServer(ExtensionHUD extension) {
         this("ZAP-HUD-Tutorial");
         this.extension = extension;
+
+        // New pages must be added here
+        TutorialPage prev = addPage(new IntroPage(this));
+        prev = addPage(new WarningPage(this, prev));
+        prev = addPage(new FramesPage(this, prev));
+        prev = addPage(new AlertsPage(this, prev));
+        prev = addPage(new AlertNotificationsPage(this, prev));
+        prev = addPage(new PageAlertsPage(this, prev));
+        prev = addPage(new SiteAlertsPage(this, prev));
+        prev = addPage(new HistoryPage(this, prev));
+        prev = addPage(new SitesPage(this, prev));
+        prev = addPage(new ScopePage(this, prev));
+        prev = addPage(new EnablePage(this, prev));
+        prev = addPage(new ShowPage(this, prev));
+        prev = addPage(new BreakPage(this, prev));
+        prev = addPage(new ResendPage(this, prev));
+        prev = addPage(new SpiderPage(this, prev));
+        prev = addPage(new ActiveScanPage(this, prev));
+        prev = addPage(new AttackModePage(this, prev));
+        prev = addPage(new CompletePage(this, prev));
+
+        // Tutorial pages that are not part of the standard flow
+        addPage(new ErrorPage(this));
+        addPage(new SiteAlertsJsPage(this));
+    }
+
+    private TutorialPage addPage(TutorialPage page) {
+        if (this.pages.put(page.getName(), page) != null) {
+            log.error("2 tutorial pages with the same name registered: " + page.getName());
+        }
+        return page;
     }
 
     /** The server is started after initialisation so that the parameters will have been loaded. */
@@ -65,7 +123,7 @@ public class TutorialProxyServer extends ProxyServer {
                         extension.getHudParam().getTutorialPort(),
                         true);
         LOG.debug("HUD Tutorial port is " + port);
-        this.hostPort = "127.0.0.1:" + port;
+        this.hostPort = extension.getHudParam().getTutorialHost() + ":" + port;
     }
 
     public TutorialProxyServer(String threadName) {
@@ -76,6 +134,32 @@ public class TutorialProxyServer extends ProxyServer {
     @Override
     protected ProxyThread createProxyProcess(Socket clientSocket) {
         return new TutorialProxyThread(this, clientSocket);
+    }
+
+    public String getTutorialUrl(String page) {
+        return this.getTutorialUrl(page, true);
+    }
+
+    public String getTutorialUrl(String page, boolean https) {
+        StringBuilder sb = new StringBuilder();
+        if (https) {
+            sb.append("https://");
+        } else {
+            sb.append("http://");
+        }
+        sb.append(this.hostPort);
+        sb.append("/");
+        sb.append(page);
+        return sb.toString();
+    }
+
+    public String getLocallizedTextFile(String name) {
+        String localStr = Constant.getLocale().toString();
+        String body = getTextFile(localStr + "/" + name);
+        if (body == null) {
+            body = getTextFile(DEFAULT_LOCALE + "/" + name);
+        }
+        return body;
     }
 
     private String getTextFile(String name) {
@@ -119,6 +203,14 @@ public class TutorialProxyServer extends ProxyServer {
         return sb.toString();
     }
 
+    protected boolean isSkipTutorialTasks() {
+        return extension.getHudParam().isSkipTutorialTasks();
+    }
+
+    protected boolean isTutorialTestMode() {
+        return extension.getHudParam().isTutorialTestMode();
+    }
+
     private class TutorialListener implements OverrideMessageProxyListener {
 
         @Override
@@ -132,9 +224,34 @@ public class TutorialProxyServer extends ProxyServer {
             try {
                 String name = msg.getRequestHeader().getURI().getEscapedName();
                 if (name.length() == 0) {
-                    name = "Intro.html";
+                    name = IntroPage.NAME;
                 }
-                if (name.endsWith(".png")) {
+                TutorialPage page = pages.get(name);
+                if (page != null) {
+                    TutorialPage uncompletedPage = page.getPreviousUncompletedPage();
+                    if (uncompletedPage != null) {
+                        // Tut tut, they are trying to cheat ;) Redirect to the first uncompleted
+                        // task
+                        msg.setResponseHeader(
+                                getDefaultResponseHeader(STATUS_REDIRECT, "text/html", 0));
+                        msg.getResponseHeader()
+                                .setHeader(HttpHeader.LOCATION, uncompletedPage.getName());
+                    } else {
+                        if (msg.getRequestHeader().getMethod().equals("POST")) {
+                            page.handlePostRequest(msg);
+                        } else if (msg.getRequestHeader().getMethod().equals("GET")) {
+                            page.handleGetRequest(msg);
+                        }
+
+                        String body = page.getHtml();
+                        msg.setResponseBody(body);
+                        msg.setResponseHeader(
+                                getDefaultResponseHeader(
+                                        STATUS_OK, "text/html", msg.getResponseBody().length()));
+                        // This allows the pages to tweak things like the response headers
+                        page.handleResponse(msg);
+                    }
+                } else if (name.endsWith(".png")) {
                     byte[] image = extension.getAPI().getImage(name);
                     if (image == null) {
                         msg.setResponseBody("<html><body><h1>404 Not found</h1><body></html>");
@@ -159,11 +276,13 @@ public class TutorialProxyServer extends ProxyServer {
                                         msg.getResponseBody().length()));
                     } else {
                         msg.setResponseBody(body);
-                        String contentType = "text/html";
+                        String contentType = "text/plain"; // Fallback
                         if (name.endsWith(".css")) {
                             contentType = "text/css";
                         } else if (name.endsWith(".js")) {
                             contentType = "text/javascript";
+                        } else {
+                            log.error("Unexpected tutorial file extension: " + name);
                         }
                         msg.setResponseHeader(
                                 getDefaultResponseHeader(
@@ -174,15 +293,6 @@ public class TutorialProxyServer extends ProxyServer {
                 LOG.error(e.getMessage(), e);
             }
             return true;
-        }
-
-        private String getLocallizedTextFile(String name) {
-            String localStr = Constant.getLocale().toString();
-            String body = getTextFile(localStr + "/" + name);
-            if (body == null) {
-                body = getTextFile(DEFAULT_LOCALE + "/" + name);
-            }
-            return body;
         }
 
         @Override
