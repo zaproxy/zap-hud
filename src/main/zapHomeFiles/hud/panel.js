@@ -7,6 +7,8 @@
 var IMAGE_URL = "<<ZAP_HUD_FILES>>?image=";
 var orientation = "";
 var panelKey = "";
+var frameId = '';
+var tabId = '';
 
 // the Vue app
 var app;
@@ -42,11 +44,13 @@ Vue.component('hud-button', {
 				tool: this.name,
 				domain: parseDomainFromUrl(document.referrer),
 				url: document.referrer,
-				panelKey: panelKey});
+				panelKey: panelKey,
+				frameId: frameId,
+				tabId: tabId});
 		},
 		showContextMenu(event) {
 			event.preventDefault();
-			navigator.serviceWorker.controller.postMessage({action: "buttonMenuClicked", tool: this.name});
+			navigator.serviceWorker.controller.postMessage({action: "buttonMenuClicked", tool: this.name, frameId: frameId, tabId: tabId});
 		},
 		mouseOver() {
 			this.showLabel = true;
@@ -128,18 +132,14 @@ Vue.component('hud-buttons', {
 })
 
 document.addEventListener("DOMContentLoaded", () => {
-	// set orientation
-	var params = document.location.search.substring(1).split("&");
+	let params = new URL(document.location).searchParams;
 
-	for (var i=0; i<params.length; i++) {
-		var param = params[i].split("=");
-		if (param[0] === "orientation") {
-			orientation = param[1];
-			panelKey = orientation + "Panel";
-		}
-	}
+	orientation = params.get('orientation');
+	panelKey = orientation + 'Panel';
+	frameId = params.get('frameId');
+	tabId = params.get('tabId');
 
-	window.name = orientation+"Panel";
+	window.name = panelKey;
 
 	// initialize vue app
 	app = new Vue({

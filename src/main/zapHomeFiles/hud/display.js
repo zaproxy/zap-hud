@@ -1,5 +1,7 @@
 // app is the main Vue object controlling everything
 var app;
+var tabId = '';
+var frameId = '';
 
 // Event dispatcher for Vue
 var eventBus = new Vue();
@@ -570,6 +572,10 @@ Vue.component('tab', {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+	let params = new URL(document.location).searchParams;
+
+	frameId = params.get('frameId');
+	tabId = params.get('tabId');
 
 	/* Vue app */
 	app = new Vue({

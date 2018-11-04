@@ -5,6 +5,8 @@
  */
 
 var app;
+var tabId = '';
+var frameId = '';
 
 // TODO: implement a super cool loading screen
 Vue.component('loading-screen', {
@@ -13,6 +15,11 @@ Vue.component('loading-screen', {
 })
 
 document.addEventListener('DOMContentLoaded', () => {
+	let params = new URL(document.location).searchParams;
+
+	frameId = params.get('frameId');
+	tabId = params.get('tabId');
+
 	// initialize Vue app
 	app = new Vue({
 		el: '#app',

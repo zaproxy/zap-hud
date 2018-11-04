@@ -1,6 +1,8 @@
 // app is the main Vue object controlling everything
 var app;
 var eventBus = new Vue();
+var frameId = '';
+var tabId = '';
 
 Vue.component('history', {
     template: '#history-template',
@@ -229,6 +231,10 @@ Vue.component('drawer-button-showhide', {
 })
 
 document.addEventListener("DOMContentLoaded", () => {
+    let params = new URL(document.location).searchParams;
+
+	frameId = params.get('frameId');
+	tabId = params.get('tabId');
 
 	/* Vue app */
 	app = new Vue({
