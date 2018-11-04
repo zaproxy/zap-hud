@@ -8,14 +8,21 @@ var MAX_LINE_LENGTH = 45;
 
 var alertQueue = [];
 
+var tabId = '';
+var frameId = '';
+
 document.addEventListener("DOMContentLoaded", () => {
-	if (typeof alertify != "undefined") {
-		alertify.maxLogItems(QUEUE_SIZE);
-		alertify.logPosition("bottom right");
-	} 
-	else {
+	if (typeof alertify == "undefined") {
 		errorHandler('Problem loading Alertify. Alertify is undefined.')
 	}
+
+	let params = new URL(document.location).searchParams;
+
+	frameId = params.get('frameId')
+	tabId = params.get('tabId')
+
+	alertify.maxLogItems(QUEUE_SIZE);
+	alertify.logPosition("bottom right");
 });
 
 navigator.serviceWorker.addEventListener("message", event => {
