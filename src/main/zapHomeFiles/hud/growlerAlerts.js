@@ -77,7 +77,7 @@ function showGrowlerAlert(alert) {
 		.log(content, event => {
 			var alertId = event.target.querySelector("#alertId").value;
 
-			navigator.serviceWorker.controller.postMessage({tool: "common-alerts", action: "showAlertDetails", "id": alertId});
+			navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, tool: "common-alerts", action: "showAlertDetails", "id": alertId});
 		});
 
 	setTimeout(() => {

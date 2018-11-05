@@ -408,27 +408,34 @@ function loadAllTools() {
 /* 
  * Add a tool to a specific panel using the tool and panel keys.
  */
-function addToolToPanel(toolKey, panelKey) {
+function addToolToPanel(toolKey, frameId) {
 	log(LOG_DEBUG, 'utils.addToolToPanel', toolKey);
 
-	var promises = [loadTool(toolKey), loadFrame(panelKey)];
+	var promises = [loadTool(toolKey), loadFrame(frameId)];
 	
 	return Promise.all(promises)
 		.then(results => {
 			var tool = results[0];
 			var panel = results[1];
+
 			if (! tool) {
-				log(LOG_WARN, 'utils.addToolToPanel', 'Failed to load tool?', toolKey);
+				log(LOG_ERROR, 'utils.addToolToPanel', 'Failed to load tool.', toolKey);
 				return;
 			}
 
 			tool.isSelected = true;
-			tool.panel = panelKey;
+			tool.panel = frameId;
 			tool.position = panel.tools.length;
 
 			panel.tools.push(tool.name);
 
 			return Promise.all([saveTool(tool), saveFrame(panel)]);
+		})
+		.then(results => {
+			let tool = results[0];
+			console.log(tool)
+
+			messageAllTabs(frameId, {action: 'updateData', tool: tool}); //todo: change to 'addButton', not 'updateData'
 		})
 		.catch(errorHandler);
 }
@@ -494,6 +501,87 @@ function messageFrame(key, message) {
 					errorHandler(err);
 				}
 			});
+}
+
+function messageFrame2(tabId, frameId, message) {
+	return clients.matchAll({includeUncontrolled: true})
+		.then(clients => {
+			for (let i = 0; i < clients.length; i++) {
+				let client = clients[i];
+				let params = new URL(client.url).searchParams;
+
+				let tid = params.get('tabId');
+				let fid = params.get('frameId');
+
+				if (tid === tabId && fid === frameId) {
+					return client;
+				}
+			};
+
+			throw new NoClientIdError('Could not find a ClientId for tabId: ' + tabId + ', frameId: ' + frameId);
+		})
+		.then(client => {
+			return new Promise(function(resolve, reject) {
+				let channel = new MessageChannel();
+
+				channel.port1.onmessage = function(event) {
+					if (event.data.error) {
+						reject(event.data.error);
+					}
+					else {
+						resolve(event.data);
+					}
+				};
+
+				client.postMessage(message, [channel.port2]);
+			})
+		})
+		.catch(errorHandler);
+}
+
+function messageAllTabs(frameId, message) {
+	return clients.matchAll({includeUncontrolled: true})
+		.then(clients => {
+			let frameClients = [];
+
+			for (let i = 0; i < clients.length; i++) {
+				let client = clients[i];
+				let params = new URL(client.url).searchParams;
+
+				let fid = params.get('frameId');
+
+				if (fid === frameId) {
+					frameClients.push(client);
+				}
+			};
+
+			if (frameClients.length === 0) {
+				throw new NoClientIdError('Could not find any Clients for frameId: ' + frameId);
+			}
+
+			return frameClients;
+		})
+		.then(clients => {
+			return new Promise(function(resolve, reject) {
+				for (var i = 0 ; i < clients.length ; i++) {
+					let client = clients[i];
+
+					let channel = new MessageChannel();
+
+					channel.port1.onmessage = function(event) {
+						if (event.data.error) {
+							reject(event.data.error);
+						}
+						else {
+							resolve(event.data);
+						}
+					};
+
+				client.postMessage(message, [channel.port2]);
+				}
+			});
+		})
+		.catch(errorHandler);
 }
 
 /*

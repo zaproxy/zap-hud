@@ -209,7 +209,7 @@ Vue.component('alert-details-modal', {
 			this.$emit('close');
 		},
 		messageSelected: function(id) {
-			navigator.serviceWorker.controller.postMessage({action: "showHttpMessageDetails", tool: "history", id:id});
+			navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "showHttpMessageDetails", tool: "history", id:id});
 		},
 		back: function() {
 			app.keepShowing = true;
@@ -426,7 +426,7 @@ Vue.component('site-tree-node', {
 	    showHttpMessageDetails: function () {
 		    app.keepShowing = true;
 		    app.isSiteTreeModalShown = false;
-		    navigator.serviceWorker.controller.postMessage({action: "showHttpMessageDetails", tool: "history", id:this.model.hrefId});
+		    navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "showHttpMessageDetails", tool: "history", id:this.model.hrefId});
 	    },
 	    showChildren: function () {
 	      this.addChild(I18n.t("sites_children_loading"), false);

@@ -18,7 +18,7 @@ Vue.component('history', {
     },
     methods: {
         messageSelected(id) {
-            navigator.serviceWorker.controller.postMessage({action: "showHttpMessageDetails", tool: "history", id:id});
+            navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "showHttpMessageDetails", tool: "history", id:id});
         }
     },
     created() {
@@ -67,14 +67,14 @@ Vue.component('tabs', {
             this.isArrowUp = true;
             localforage.setItem('drawer.isDrawerOpen', false)
                 .catch(errorHandler);
-            parent.postMessage({action:"hideBottomDrawer"}, document.referrer);
+            parent.postMessage({tabId: tabId, frameId: frameId, action:"hideBottomDrawer"}, document.referrer);
         },
         openDrawer() {
             this.isOpen = true;
             this.isArrowUp = false;
             localforage.setItem('drawer.isDrawerOpen', true)
                 .catch(errorHandler);
-            parent.postMessage({action:"showBottomDrawer"}, document.referrer);
+            parent.postMessage({tabId: tabId, frameId: frameId, action:"showBottomDrawer"}, document.referrer);
         },
         toggleOpenClose() {
             this.isOpen ? this.closeDrawer() : this.openDrawer();
@@ -185,7 +185,7 @@ Vue.component('drawer-button-settings', {
     props: [],
     methods: {
         showHudSettings() {
-            navigator.serviceWorker.controller.postMessage({action:'showHudSettings'});
+            navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action:'showHudSettings'});
         }
     }
 });
@@ -205,14 +205,14 @@ Vue.component('drawer-button-showhide', {
             this.icon = '<<ZAP_HUD_FILES>>?image=radar.png';
             localforage.setItem('settings.isHudVisible', true)
                 .catch(errorHandler);
-			parent.postMessage({action:'showSidePanels'}, document.referrer);
+			parent.postMessage({tabId: tabId, frameId: frameId, action:'showSidePanels'}, document.referrer);
         },
         hideHud() {
             this.isHudVisible = false;
             this.icon = '<<ZAP_HUD_FILES>>?image=radar-grey.png';
             localforage.setItem('settings.isHudVisible', false)
                 .catch(errorHandler);
-			parent.postMessage({action:'hideSidePanels'}, document.referrer);
+			parent.postMessage({tabId: tabId, frameId: frameId, action:'hideSidePanels'}, document.referrer);
         },
 		toggleIsVisible() {
             this.isHudVisible ? this.hideHud() : this.showHud();
@@ -248,7 +248,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // notify service worker drawer has been refreshed
     navigator.serviceWorker.controller.postMessage({
         action: 'frameload',
-        name: 'drawer'
+        name: 'drawer',
+        tabId: tabId,
+        frameId: frameId
     });
 });
 

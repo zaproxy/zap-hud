@@ -121,12 +121,12 @@ const onMessage = event => {
 	switch(message.action) {
 		case "buttonClicked":
 			if (message.buttonLabel === "add-tool") {
-				showAddToolDialog(message.panelKey);
+				showAddToolDialog(message.tabId, message.frameId);
 			}
 			break;
 
 		case "showHudSettings":
-			showHudSettings();
+			showHudSettings(message.tabId);
 			break;
 
 		case 'targetload':
@@ -134,7 +134,7 @@ const onMessage = event => {
 			targetDomain = parseDomainFromUrl(message.targetUrl);
 			targetUrl = message.targetUrl;
 
-			let e = new CustomEvent('targetload', {detail: {url: message.targetUrl, domain: targetDomain}});
+			let e = new CustomEvent('targetload', {detail: {tabId: message.tabId, url: message.targetUrl, domain: targetDomain}});
 			self.dispatchEvent(e);	
 			break;
 
@@ -207,7 +207,7 @@ function saveFrameId(event) {
 		.catch(errorHandler);
 }
 
-function showAddToolDialog(panelKey) {
+function showAddToolDialog(tabId, frameId) {
 	var config = {};
 
 	loadAllTools()
@@ -232,21 +232,21 @@ function showAddToolDialog(panelKey) {
 			config.tools = tools;
 
 			// display tools to select
-			return messageFrame("display", {action: "showAddToolList", config: config})
+			return messageFrame2(tabId, "display", {action: "showAddToolList", config: config})
 		})
 		.then(response => {
-			addToolToPanel(response.toolname, panelKey);
+			addToolToPanel(response.toolname, frameId);
 		})
 		.catch(errorHandler);
 }
 
-function showHudSettings() {
+function showHudSettings(tabId) {
 	var config = {};
 	config.settings = {
 		initialize: I18n.t("settings_resets"),
 	};
 
-	messageFrame("display", {action: "showHudSettings", config: config})
+	messageFrame2(tabId, "display", {action: "showHudSettings", config: config})
 		.then(response => {
 			if (response.id === "initialize") {
 				resetToDefault();
