@@ -60,14 +60,14 @@ var HudErrors = (function() {
 	}
 
 
-	function showOptions() {
+	function showOptions(tabId) {
 		var config = {};
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame("display", {action:"showButtonOptions", config:config})
+		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
@@ -105,7 +105,7 @@ var HudErrors = (function() {
 					break;
 
 				case "buttonMenuClicked":
-					showOptions();
+					showOptions(message.tabId);
 					break;
 
 				default:

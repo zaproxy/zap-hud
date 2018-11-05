@@ -43,8 +43,8 @@ var SiteAlertsMedium = (function() {
 		//return alertUtils.updateAlertCount(NAME, data.domain);
 	}
 
-	function showOptions() {
-		alertUtils.showOptions(NAME, LABEL)
+	function showOptions(tabId) {
+		alertUtils.showOptions(tabId, NAME, LABEL)
 	}
 
 	self.addEventListener("activate", event => {
@@ -79,7 +79,7 @@ var SiteAlertsMedium = (function() {
 					break;
 
 				case "buttonMenuClicked":
-					showOptions();
+					showOptions(message.tabId);
 					break;
 
 				default:

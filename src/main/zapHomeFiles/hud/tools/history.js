@@ -31,14 +31,14 @@ var History = (function() {
         registerForZapEvents("org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher");
 	}
 
-	function showOptions() {
+	function showOptions(tabId) {
 		var config = {};
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame("display", {action:"showButtonOptions", config:config})
+		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
@@ -173,7 +173,7 @@ var History = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonMenuCicked":
-					showOptions();
+					showOptions(message.tabId);
 					break;
 
 				case "showHttpMessageDetails":

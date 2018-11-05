@@ -42,8 +42,8 @@ var PageAlertsHigh = (function() {
 	function onPanelLoad(data) {
 	}
 
-	function showOptions() {
-		alertUtils.showOptions(NAME, LABEL)
+	function showOptions(tabId) {
+		alertUtils.showOptions(tabId, NAME, LABEL)
 	}
 
 	self.addEventListener("activate", event => {
@@ -83,7 +83,7 @@ var PageAlertsHigh = (function() {
 					break;
 
 				case "buttonMenuClicked":
-					showOptions();
+					showOptions(message.tabId);
 					break;
 
 				default:

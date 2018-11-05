@@ -72,10 +72,6 @@ var CommonAlerts = (function() {
 					showAlerts(message.domain);
 					break;
 
-				case "buttonMenuClicked":
-					showOptions();
-					break;
-
 				case "showAlertDetails":
 					alertUtils.showAlertDetails(message.id);
 					break;

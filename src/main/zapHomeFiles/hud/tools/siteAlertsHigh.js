@@ -39,8 +39,8 @@ var SiteAlertsHigh = (function() {
 		alertUtils.showSiteAlerts(LABEL, domain, ALERT_RISK);
 	}
 
-	function showOptions() {
-		alertUtils.showOptions(NAME, LABEL)
+	function showOptions(tabId) {
+		alertUtils.showOptions(tabId, NAME, LABEL)
 	}
 
 	self.addEventListener("activate", event => {
@@ -75,7 +75,7 @@ var SiteAlertsHigh = (function() {
 					break;
 
 				case "buttonMenuClicked":
-					showOptions();
+					showOptions(message.tabId);
 					break;
 
 				default:

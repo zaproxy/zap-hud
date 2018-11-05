@@ -161,14 +161,14 @@ var alertUtils = (function() {
 		return messageFrame("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
 	}
 
-	function showOptions(toolname, toolLabel) {
+	function showOptions(tabId, toolname, toolLabel) {
 		var config = {};
 
 		config.tool = toolname;
 		config.toolLabel = toolLabel;
 		config.options = {opt1: "Option 1", opt2: "Option 2", remove: I18n.t("common_remove")};
 
-		messageFrame("display", {action:"showButtonOptions", config:config})
+		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "opt1") {
