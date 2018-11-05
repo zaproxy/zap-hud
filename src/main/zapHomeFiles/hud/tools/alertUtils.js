@@ -178,7 +178,7 @@ var alertUtils = (function() {
 					console.log("Option 2 chosen");
 				}
 				else if (response.id == "remove") {
-					removeToolFromPanel(toolname);
+					removeToolFromPanel(tabId, toolname);
 				}
 				else {
 					//cancel

@@ -443,7 +443,7 @@ function addToolToPanel(toolKey, frameId) {
 /*
  * Remove a tool from a panel using the tool key.
  */
-function removeToolFromPanel(toolKey) {
+function removeToolFromPanel(tabId, toolKey) {
 
 	return loadTool(toolKey)
 		.then(tool => Promise.all([tool, loadFrame(tool.panel), loadPanelTools(tool.panel)]))
@@ -480,7 +480,7 @@ function removeToolFromPanel(toolKey) {
    			var tool = results[0];
 			var panel = results[1];
 
-			return messageFrame(panel.key, {action:"removeTool", tool:tool});
+			return messageAllTabs(panel.key, {action:"removeTool", tool:tool});
 		})
 		.catch(errorHandler);
 }
