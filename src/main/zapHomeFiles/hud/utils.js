@@ -435,7 +435,7 @@ function addToolToPanel(toolKey, frameId) {
 			let tool = results[0];
 			console.log(tool)
 
-			messageAllTabs(frameId, {action: 'updateData', tool: tool}); //todo: change to 'addButton', not 'updateData'
+			messageAllTabs(frameId, {action: 'addTool', tool: tool});
 		})
 		.catch(errorHandler);
 }

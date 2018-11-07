@@ -9,6 +9,10 @@ var orientation = "";
 var panelKey = "";
 var frameId = '';
 var tabId = '';
+var context = {
+	url: document.referrer,
+	domain: parseDomainFromUrl(document.referrer)
+};
 
 // the Vue app
 var app;
@@ -42,8 +46,8 @@ Vue.component('hud-button', {
 				action: 'buttonClicked',
 				buttonLabel: this.name,
 				tool: this.name,
-				domain: parseDomainFromUrl(document.referrer),
-				url: document.referrer,
+				domain: context.domain,
+				url: context.url,
 				panelKey: panelKey,
 				frameId: frameId,
 				tabId: tabId});
@@ -116,11 +120,8 @@ Vue.component('hud-buttons', {
 			})
 			.catch(errorHandler);
 
-		// listen for update events to add new button
-		eventBus.$on('updateButton', data => {
-			if (self.tools.filter(tool => tool.name === data.name).length === 0) {
-				self.tools.push(data.tool)
-			}
+		eventBus.$on('addButton', data => {
+			self.tools.push(data.tool)
 		})
 
 		// listen to remove buttons
@@ -152,10 +153,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 navigator.serviceWorker.addEventListener("message", event => {
 	var message = event.data;
+	let tool;
 	
 	switch(message.action) {
 		case "updateData":
-			var tool = message.tool;
+			tool = message.tool;
 
 			eventBus.$emit('updateButton', {
 				name: tool.name,
@@ -165,8 +167,19 @@ navigator.serviceWorker.addEventListener("message", event => {
 			});
 			break;
 
+		case "addTool":
+			tool = message.tool;
+			eventBus.$emit('addButton', {
+				name: tool.name,
+				data: tool.data,
+				icon: tool.icon,
+				tool: tool
+			});
+
+			break;
+
 		case "removeTool":
-			var tool = message.tool;
+			tool = message.tool;
 
 			eventBus.$emit('removeButton', {
 				name: tool.name
