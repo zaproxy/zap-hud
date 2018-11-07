@@ -433,7 +433,6 @@ function addToolToPanel(toolKey, frameId) {
 		})
 		.then(results => {
 			let tool = results[0];
-			console.log(tool)
 
 			messageAllTabs(frameId, {action: 'addTool', tool: tool});
 		})

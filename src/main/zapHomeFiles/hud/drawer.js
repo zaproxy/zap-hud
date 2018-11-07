@@ -3,6 +3,10 @@ var app;
 var eventBus = new Vue();
 var frameId = '';
 var tabId = '';
+var context = {
+    url: document.referrer,
+    domain: parseDomainFromUrl(document.referrer)
+};
 
 Vue.component('history', {
     template: '#history-template',

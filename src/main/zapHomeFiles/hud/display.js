@@ -2,6 +2,10 @@
 var app;
 var tabId = '';
 var frameId = '';
+var context = {
+	url: document.referrer,
+	domain: parseDomainFromUrl(document.referrer)
+};
 
 // Event dispatcher for Vue
 var eventBus = new Vue();

@@ -10,6 +10,10 @@ var alertQueue = [];
 
 var tabId = '';
 var frameId = '';
+var context = {
+	url: document.referrer,
+	domain: parseDomainFromUrl(document.referrer)
+};
 
 document.addEventListener("DOMContentLoaded", () => {
 	if (typeof alertify == "undefined") {

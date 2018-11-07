@@ -7,6 +7,10 @@
 var app;
 var tabId = '';
 var frameId = '';
+var context = {
+	url: document.referrer,
+	domain: parseDomainFromUrl(document.referrer)
+};
 
 // TODO: implement a super cool loading screen
 Vue.component('loading-screen', {
@@ -48,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		navigator.serviceWorker.addEventListener('message', serviceWorkerMessageListener)
 
 		// send targetload message 
-		navigator.serviceWorker.controller.postMessage({action:"targetload", targetUrl: document.referrer});
+		navigator.serviceWorker.controller.postMessage({action:"targetload", targetUrl: context.url});
 
 	}
 
