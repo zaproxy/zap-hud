@@ -70,6 +70,7 @@ public class HudAPI extends ApiImplementor {
     private static final String ACTION_RECORD_REQUEST = "recordRequest";
     private static final String ACTION_START_TEST = "startTest";
     private static final String ACTION_STOP_TEST = "stopTest";
+    private static final String ACTION_RESET_TUTORIAL_TASKS = "resetTutorialTasks";
 
     private static final String VIEW_TEST_PROGRESS = "testProgress";
     private static final String VIEW_TEST_AVERAGE_LOAD_TIME = "testAverageLoadTime";
@@ -111,6 +112,7 @@ public class HudAPI extends ApiImplementor {
         this.addApiAction(
                 new ApiAction(ACTION_START_TEST, new String[] {PARAM_TEST_FILE, PARAM_BROWSER}));
         this.addApiAction(new ApiAction(ACTION_STOP_TEST));
+        this.addApiAction(new ApiAction(ACTION_RESET_TUTORIAL_TASKS));
 
         this.addApiView(new ApiView(VIEW_TEST_PROGRESS));
         this.addApiView(new ApiView(VIEW_TEST_AVERAGE_LOAD_TIME));
@@ -253,6 +255,10 @@ public class HudAPI extends ApiImplementor {
                 } else {
                     throw new ApiException(ApiException.Type.DOES_NOT_EXIST);
                 }
+                break;
+
+            case ACTION_RESET_TUTORIAL_TASKS:
+                this.extension.resetTutorialTasks();
                 break;
 
             default:

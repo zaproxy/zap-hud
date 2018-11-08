@@ -21,12 +21,16 @@ package org.zaproxy.zap.extension.hud.ui.uimap;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.zaproxy.zap.extension.hud.ui.Constants;
 
@@ -43,6 +47,7 @@ public class HUD {
     public static By BOTTOM_PANEL_BY_ID = By.id("bottom-drawer");
     public static By DISPLAY_PANEL_BY_ID = By.id("main-display");
     public static By HUD_BUTTON_BY_CLASSNAME = By.className("hud-button");
+    public static int LEFT_PANEL_MIN_BUTTONS = 8;
 
     public WebElement getLeftPanel() {
         return webdriver.findElement(LEFT_PANEL_BY_ID);
@@ -100,11 +105,11 @@ public class HUD {
             try {
                 return webdriver.findElements(HUD_BUTTON_BY_CLASSNAME);
             } catch (WebDriverException e1) {
-                if (e1.getMessage().indexOf("TypeError: can't access dead object") > -1) {
-                    // Retrying wont help
-                    throw e1;
-                }
-                System.out.println("Exception getting buttons, retrying: " + e1.getMessage());
+                warning(
+                        "HUD.getHudButtons Exception getting buttons, retrying: "
+                                + e1.getMessage());
+                // Sometimes helps
+                webdriver.switchTo().defaultContent();
                 try {
                     Thread.sleep(Constants.GENERIC_TESTS_RETRY_SLEEP_MS);
                 } catch (InterruptedException e) {
@@ -120,11 +125,20 @@ public class HUD {
         for (int i = 0; i < Constants.GENERIC_TESTS_RETRY_COUNT; i++) {
             try {
                 buttons = webdriver.findElements(HUD_BUTTON_BY_CLASSNAME);
-                if (buttons.size() == expected) {
+                if (buttons.size() >= expected) {
                     break;
                 }
+                warning(
+                        "HUD.waitForHudButtons Only got "
+                                + buttons.size()
+                                + ", expected "
+                                + expected
+                                + " retrying");
             } catch (WebDriverException e1) {
                 // Not unexpected
+                warning("Exception getting buttons, retrying: " + e1.getMessage());
+                // Sometimes helps
+                webdriver.switchTo().defaultContent();
             }
             try {
                 Thread.sleep(Constants.GENERIC_TESTS_RETRY_SLEEP_MS);
@@ -137,13 +151,55 @@ public class HUD {
 
     public void openUrlWaitForHud(String url) {
         this.webdriver.get(url);
-        new WebDriverWait(webdriver, Constants.GENERIC_TESTS_TIMEOUT_SECS)
-                .until(ExpectedConditions.presenceOfElementLocated(LEFT_PANEL_BY_ID));
+        try {
+            Thread.sleep(Constants.POST_LOAD_DELAY_MS);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
+        for (int i = 0; i < Constants.GENERIC_TESTS_RETRY_COUNT; i++) {
+            WebElement leftPanel = this.waitForLeftPanel();
+            if (leftPanel != null) {
+                this.webdriver.switchTo().frame(leftPanel);
+                int numButtons = webdriver.findElements(HUD_BUTTON_BY_CLASSNAME).size();
+                this.webdriver.switchTo().parentFrame();
+                if (numButtons >= LEFT_PANEL_MIN_BUTTONS) {
+                    return;
+                }
+            }
+            try {
+                Thread.sleep(Constants.GENERIC_TESTS_RETRY_SLEEP_MS);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
+            // Sometimes helps
+            webdriver.switchTo().defaultContent();
+        }
     }
 
     public void openRelativePage(String page) throws URISyntaxException {
         this.webdriver
                 .navigate()
                 .to(new URI(this.webdriver.getCurrentUrl()).resolve(page).toString());
+    }
+
+    public void waitForPageLoad() {
+        Wait<WebDriver> wait = new WebDriverWait(webdriver, 30);
+        wait.until(
+                new Function<WebDriver, Boolean>() {
+                    public Boolean apply(WebDriver driver) {
+                        return String.valueOf(
+                                        ((JavascriptExecutor) driver)
+                                                .executeScript("return document.readyState"))
+                                .equals("complete");
+                    }
+                });
+    }
+
+    public void warning(String msg) {
+        System.err.println(new Date() + " " + this.getClass().getSimpleName() + " " + msg);
+    }
+
+    public void log(String msg) {
+        System.out.println(new Date() + " " + this.getClass().getSimpleName() + " " + msg);
     }
 }

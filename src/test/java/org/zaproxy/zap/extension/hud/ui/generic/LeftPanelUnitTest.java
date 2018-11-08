@@ -51,8 +51,8 @@ public class LeftPanelUnitTest {
         List<WebElement> buttons = hud.waitForHudButtons(EXPECTED_BUTTONS);
         assertNotNull(buttons);
         // An exact match would be better, but its proved to be too flaky :/
-        if (buttons.size() >= EXPECTED_BUTTONS) {
-            System.err.println("LeftPanelUnitTest only found " + buttons.size() + " buttons");
+        if (buttons.size() < EXPECTED_BUTTONS) {
+            hud.warning("LeftPanelUnitTest only found " + buttons.size() + " buttons");
         }
         assertTrue(buttons.size() >= EXPECTED_BUTTONS);
         wd.switchTo().parentFrame();

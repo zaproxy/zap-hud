@@ -19,31 +19,46 @@
  */
 package org.zaproxy.zap.extension.hud.tutorial.pages;
 
+import org.parosproxy.paros.network.HttpHeader;
 import org.parosproxy.paros.network.HttpMessage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialPage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialProxyServer;
 
-public class HistoryPage extends TutorialPage {
+public class HistoryJsPage extends TutorialPage {
 
-    public static final String NAME = "History";
+    public static final String NAME = "History.js";
 
-    public HistoryPage(TutorialProxyServer tutorialProxyServer) {
+    /* This is public so that it can be easily read by the HistoryPage */
+    public static String key;
+
+    private TutorialProxyServer tutorialProxyServer;
+
+    public HistoryJsPage(TutorialProxyServer tutorialProxyServer) {
         this(tutorialProxyServer, null);
     }
 
-    public HistoryPage(TutorialProxyServer tutorialProxyServer, TutorialPage prev) {
+    public HistoryJsPage(TutorialProxyServer tutorialProxyServer, TutorialPage prev) {
         super(tutorialProxyServer, prev);
-    }
-
-    @Override
-    public void handlePostRequest(HttpMessage msg) {
-        // The token for this task is set in another page
-        this.setTaskToken(HistoryJsPage.key);
-        super.handlePostRequest(msg);
+        this.tutorialProxyServer = tutorialProxyServer;
     }
 
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public String getHtml() {
+        // This is a special case
+        String html = tutorialProxyServer.getLocallizedTextFile(this.getName());
+        if (key == null) {
+            key = this.setTaskToken();
+        }
+        return html.replace("<!-- KEY -->", key);
+    }
+
+    public void handleResponse(HttpMessage msg) {
+        // Otherwise it would be html
+        msg.getResponseHeader().setHeader(HttpHeader.CONTENT_TYPE, "text/javascript");
     }
 }

@@ -35,7 +35,7 @@ val testResultsDir = layout.buildDirectory.dir("reports/tests/test").get()
 val zapPort = 8999
 // Use a key just to make sure the HUD works with one
 val zapApiKey = "password123"
-val zapCmdlineOpts = "-dir " + testZapHome + " -config hud.enabled=true -config hud.devMode=true -config hud.unsafeEval=true -config hud.tutorialPort=9998 -config hud.tutorialTestMode=true -config api.key=" + zapApiKey + " -daemon"
+val zapCmdlineOpts = "-dir " + testZapHome + " -config hud.enabled=true -config hud.devMode=true -config hud.unsafeEval=true -config hud.tutorialPort=9998 -config hud.tutorialTestMode=true -config api.key=" + zapApiKey + " -daemon -config start.addonDirs=$buildDir/zap/"
 val zapSleepAfterStart = 10L
 
 zapAddOn {
@@ -156,27 +156,13 @@ tasks {
             }        
         }
     }
-    
-    register<Copy>("deployAddOnTestZapBroken") {
-        // This should be the right way to deploy the HUD to the test dir, but on travis is wipes the plugins dir :/
-        from(tasks.named("assembleZapAddOn"))
-        into(file("$testZapInstall/zap/plugin/"))
-    }
 
-    register<Exec>("deployAddOnTestZap") {
-        group = LifecycleBasePlugin.VERIFICATION_GROUP
-        description = "Copy HUD plugin via the cmdline, as the proper task seems to clear the plugins dir on travis."
-
-        mustRunAfter("zapDownload")
-
-        commandLine("cp", "build/zap/hud-$status-$version.zap", "$testZapInstall/zap/plugin/")
-    }
-    
     register("zapStart") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Starts ZAP for the unit tests"
         
-        mustRunAfter("deployAddOnTestZap")
+        mustRunAfter("zapDownload")
+        dependsOn("assembleZapAddOn")
     
         doLast {
             delete(testZapHome)

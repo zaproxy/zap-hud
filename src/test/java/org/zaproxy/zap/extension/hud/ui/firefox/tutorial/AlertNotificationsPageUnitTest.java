@@ -33,21 +33,17 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertNotificationsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.PageAlertsPage;
-import org.zaproxy.zap.extension.hud.ui.Constants;
 import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
 @Tag("tutorial")
-@Disabled
 public class AlertNotificationsPageUnitTest extends FirefoxUnitTest {
 
     @Test
     public void genericPageUnitTests(FirefoxDriver driver) throws InterruptedException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(AlertNotificationsPage.NAME));
-        Thread.sleep(Constants.POST_LOAD_DELAY_MS);
-
         GenericUnitTest.runAllTests(driver);
     }
 
@@ -62,6 +58,7 @@ public class AlertNotificationsPageUnitTest extends FirefoxUnitTest {
     }
 
     @Test
+    @Disabled
     public void testTaskAndNextButton(FirefoxDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(AlertNotificationsPage.NAME));
@@ -74,8 +71,7 @@ public class AlertNotificationsPageUnitTest extends FirefoxUnitTest {
             // Expected
         }
 
-        WebElement submitButton = driver.findElement(By.id("submit"));
-        submitButton.submit();
+        driver.findElement(By.id("submit")).click();
         // That should have completed the task. Reload the page so we dont pick up a ref to the old
         // page
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(AlertNotificationsPage.NAME));
@@ -88,6 +84,7 @@ public class AlertNotificationsPageUnitTest extends FirefoxUnitTest {
         WebElement nextButton = hud.waitForElement(TutorialStatics.NEXT_BUTTON_BY_ID);
         assertNotNull(nextButton);
         nextButton.click();
+        hud.waitForPageLoad();
         assertEquals(
                 TutorialStatics.getTutorialHudUrl(PageAlertsPage.NAME), driver.getCurrentUrl());
     }

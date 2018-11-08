@@ -20,4 +20,4 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.m2/repository/webdriver/
 
-script: ./gradlew --continue check zapDownload deployAddOnTestZap zapRunTests
+script: ./gradlew --continue check zapDownload zapRunTests

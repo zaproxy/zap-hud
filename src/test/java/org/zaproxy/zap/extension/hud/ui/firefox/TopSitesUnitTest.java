@@ -22,7 +22,6 @@ package org.zaproxy.zap.extension.hud.ui.firefox;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.zaproxy.zap.extension.hud.ui.Constants;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
@@ -33,7 +32,6 @@ public class TopSitesUnitTest extends FirefoxUnitTest {
     private void testSite(FirefoxDriver driver, String site) throws InterruptedException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud("http://" + site);
-        Thread.sleep(Constants.POST_LOAD_DELAY_MS);
         GenericUnitTest.runAllTests(driver);
 
         hud.openUrlWaitForHud("https://" + site);

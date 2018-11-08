@@ -36,7 +36,6 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.FramesPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
-import org.zaproxy.zap.extension.hud.ui.Constants;
 import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
@@ -48,8 +47,6 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
     public void genericPageUnitTests(FirefoxDriver driver) throws InterruptedException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
-        Thread.sleep(Constants.POST_LOAD_DELAY_MS);
-
         GenericUnitTest.runAllTests(driver);
     }
 
@@ -79,20 +76,21 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
         WebElement keyElem = driver.findElement(By.className("frameskey"));
         assertNotNull(keyElem);
         String key = keyElem.getText();
+        hud.log("Got key " + key);
         assertEquals(8, key.length());
-        WebElement keyInput = driver.findElement(By.id("key"));
-        keyInput.sendKeys(key);
-        keyInput.submit();
+        driver.findElement(By.id("key")).sendKeys(key);
+        driver.findElement(By.id("submit")).click();
         // That should have completed the task. Reload the page so we dont pick up a ref to the old
         // page
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
 
-        // this should fail this time
+        // this should pass this time
         driver.findElement(By.partialLinkText(TutorialStatics.NEXT_BUTTON_PREFIX));
 
         WebElement nextButton = hud.waitForElement(TutorialStatics.NEXT_BUTTON_BY_ID);
         assertNotNull(nextButton);
         nextButton.click();
+        hud.waitForPageLoad();
         assertEquals(TutorialStatics.getTutorialHudUrl(AlertsPage.NAME), driver.getCurrentUrl());
     }
 
@@ -101,7 +99,6 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
             throws URISyntaxException, InterruptedException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
-        Thread.sleep(Constants.POST_LOAD_DELAY_MS);
 
         // check they visible to start with
         testSidePanesVisible(driver);

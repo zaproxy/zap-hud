@@ -40,6 +40,7 @@ import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.network.HttpSender;
 import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.hud.ExtensionHUD;
+import org.zaproxy.zap.extension.hud.HudParam;
 import org.zaproxy.zap.extension.hud.tutorial.pages.ActiveScanPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertNotificationsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertsPage;
@@ -49,6 +50,7 @@ import org.zaproxy.zap.extension.hud.tutorial.pages.CompletePage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.EnablePage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.ErrorPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.FramesPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.HistoryJsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.HistoryPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.PageAlertsPage;
@@ -59,6 +61,7 @@ import org.zaproxy.zap.extension.hud.tutorial.pages.SiteAlertsJsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.SiteAlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.SitesPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.SpiderPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.TutorialJsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
 import org.zaproxy.zap.extension.selenium.ExtensionSelenium;
 import org.zaproxy.zap.view.ZapMenuItem;
@@ -106,6 +109,8 @@ public class TutorialProxyServer extends ProxyServer {
         // Tutorial pages that are not part of the standard flow
         addPage(new ErrorPage(this));
         addPage(new SiteAlertsJsPage(this));
+        addPage(new HistoryJsPage(this));
+        addPage(new TutorialJsPage(this));
     }
 
     private TutorialPage addPage(TutorialPage page) {
@@ -203,6 +208,10 @@ public class TutorialProxyServer extends ProxyServer {
         return sb.toString();
     }
 
+    protected HudParam getHudParam() {
+        return extension.getHudParam();
+    }
+
     protected boolean isSkipTutorialTasks() {
         return extension.getHudParam().isSkipTutorialTasks();
     }
@@ -220,7 +229,20 @@ public class TutorialProxyServer extends ProxyServer {
 
         @Override
         public boolean onHttpRequestSend(HttpMessage msg) {
-            LOG.debug("onHttpRequestSend " + msg.getRequestHeader().getURI().toString());
+            if (isTutorialTestMode()) {
+                LOG.info(
+                        "onHttpRequestSend "
+                                + msg.getRequestHeader().getMethod()
+                                + " "
+                                + msg.getRequestHeader().getURI().toString());
+            } else {
+                LOG.debug(
+                        "onHttpRequestSend "
+                                + msg.getRequestHeader().getMethod()
+                                + " "
+                                + msg.getRequestHeader().getURI().toString());
+            }
+
             try {
                 String name = msg.getRequestHeader().getURI().getEscapedName();
                 if (name.length() == 0) {
@@ -297,7 +319,9 @@ public class TutorialProxyServer extends ProxyServer {
 
         @Override
         public boolean onHttpResponseReceived(HttpMessage msg) {
-            LOG.debug("onHttpResponseReceived " + msg.getRequestHeader().getURI().toString());
+            if (isTutorialTestMode()) {
+                LOG.info("onHttpResponseReceived " + msg.getRequestHeader().getURI().toString());
+            }
             return false;
         }
     }
@@ -362,5 +386,11 @@ public class TutorialProxyServer extends ProxyServer {
                     });
         }
         return chromeToolsMenuItem;
+    }
+
+    public void resetTasks() {
+        for (TutorialPage page : pages.values()) {
+            page.resetTask();
+        }
     }
 }

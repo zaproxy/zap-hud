@@ -19,34 +19,76 @@
  */
 package org.zaproxy.zap.extension.hud.tutorial.pages;
 
-import org.parosproxy.paros.network.HttpMessage;
+import org.parosproxy.paros.Constant;
+import org.parosproxy.paros.core.scanner.Alert;
+import org.zaproxy.zap.eventBus.Event;
+import org.zaproxy.zap.extension.hud.tutorial.TutorialAlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialPage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialProxyServer;
 
-public class AlertNotificationsPage extends TutorialPage {
+public class AlertNotificationsPage extends TutorialAlertsPage {
 
     public static final String NAME = "AlertNotifications";
 
     public AlertNotificationsPage(TutorialProxyServer tutorialProxyServer) {
         super(tutorialProxyServer);
-        this.setTaskCompleted(false);
     }
 
     public AlertNotificationsPage(TutorialProxyServer tutorialProxyServer, TutorialPage prev) {
         super(tutorialProxyServer, prev);
-    }
-
-    public void handlePostRequest(HttpMessage msg) {
-        // Any request will do
-        this.setTaskCompleted(true);
+        this.setTaskCompleted(false);
     }
 
     @Override
-    public void handleResponse(HttpMessage msg) {
-        if (this.isTaskCompleted()) {
-            // This should cause an alert to be shown once the task has been completed
-            msg.getResponseHeader().setHeader("X-Frame-Options", null);
+    public String getHtml() {
+        String html = super.getHtml();
+        if (!this.isTaskCompleted()) {
+            html = html.replace("<!-- KEY -->", this.setTaskToken());
         }
+        return html;
+    }
+
+    @Override
+    public void setTaskCompleted(boolean taskCompleted) {
+        super.setTaskCompleted(taskCompleted);
+        if (taskCompleted) {
+            Thread thread =
+                    new Thread() {
+
+                        public void run() {
+                            int alertRisk = Alert.RISK_INFO;
+                            while (alertRisk <= Alert.RISK_HIGH) {
+                                try {
+                                    sleep(500);
+                                } catch (InterruptedException e) {
+                                    // Ignore
+                                }
+                                if (getHref() != null) {
+                                    Alert alert =
+                                            new Alert(
+                                                    TUTORIAL_ALERTS_PLUGIN_ID,
+                                                    alertRisk,
+                                                    Alert.CONFIDENCE_LOW,
+                                                    Constant.messages.getString(
+                                                            "hud.tutorial.page.alertsnotifications.alert.title."
+                                                                    + alertRisk));
+                                    alert.setDescription(
+                                            Constant.messages.getString(
+                                                    "hud.tutorial.page.alertsnotifications.alert.description"));
+                                    alertRisk += 1;
+                                    raiseAlert(alert);
+                                }
+                            }
+                        }
+                    };
+
+            thread.start();
+        }
+    }
+
+    @Override
+    public void hrefAddedEventReceived(Event event) {
+        // Do nothing
     }
 
     @Override
