@@ -32,7 +32,6 @@ public class FramesPage extends TutorialPage {
 
     public FramesPage(TutorialProxyServer tutorialProxyServer, TutorialPage prev) {
         super(tutorialProxyServer, prev);
-        this.setTaskCompleted(false);
     }
 
     @Override
@@ -47,15 +46,5 @@ public class FramesPage extends TutorialPage {
             html = html.replace("<!-- KEY -->", this.setTaskToken());
         }
         return html;
-    }
-
-    // @Override
-    public String getPreviousPageName() {
-        return WarningPage.NAME;
-    }
-
-    // @Override
-    public String getNextPageNAme() {
-        return AlertsPage.NAME;
     }
 }

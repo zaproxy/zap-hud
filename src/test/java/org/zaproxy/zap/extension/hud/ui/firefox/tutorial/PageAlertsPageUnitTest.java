@@ -28,13 +28,11 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertNotificationsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.PageAlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.SiteAlertsPage;
-import org.zaproxy.zap.extension.hud.ui.Constants;
 import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
@@ -46,8 +44,6 @@ public class PageAlertsPageUnitTest extends FirefoxUnitTest {
     public void genericPageUnitTests(FirefoxDriver driver) throws InterruptedException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(PageAlertsPage.NAME));
-        Thread.sleep(Constants.POST_LOAD_DELAY_MS);
-
         GenericUnitTest.runAllTests(driver);
     }
 
@@ -67,7 +63,6 @@ public class PageAlertsPageUnitTest extends FirefoxUnitTest {
     public void testTaskAndNextButton(FirefoxDriver driver) throws InterruptedException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(PageAlertsPage.NAME));
-        Thread.sleep(Constants.POST_LOAD_DELAY_MS);
 
         // Check the Next button is not a link
         try {
@@ -88,13 +83,12 @@ public class PageAlertsPageUnitTest extends FirefoxUnitTest {
                 List<WebElement> buttons = hud.getHudButtons();
                 if (buttons != null && buttons.size() >= 7) {
                     infoPageButton = buttons.get(6);
-                    System.out.println("SBSB infopage button = " + infoPageButton.toString());
                     if (!infoPageButton.getText().equals("0")) {
                         break;
                     }
                 }
-            } catch (StaleElementReferenceException e1) {
-                System.out.println("SBSB infopage exception " + e1.getMessage());
+            } catch (Exception e1) {
+                System.out.println("PageAlertsPage exception " + e1.getMessage());
             }
             try {
                 Thread.sleep(1000);
@@ -128,6 +122,7 @@ public class PageAlertsPageUnitTest extends FirefoxUnitTest {
         assertNotNull(desc);
         String description = desc.getText();
         String key = description.substring(description.length() - 8);
+        hud.log("Got key " + key);
         assertEquals(8, key.length());
 
         // Close alerts window
@@ -139,20 +134,20 @@ public class PageAlertsPageUnitTest extends FirefoxUnitTest {
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(PageAlertsPage.NAME));
 
         // Submit the key
-        WebElement keyField = driver.findElement(By.id("key"));
-        keyField.sendKeys(key);
-        keyField.submit();
+        driver.findElement(By.id("key")).sendKeys(key);
+        driver.findElement(By.id("submit")).click();
 
         // That should have completed the task. Reload the page so we dont pick up a ref to the old
         // page
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(PageAlertsPage.NAME));
 
-        // this shouldnt fail this time
+        // this should pass this time
         driver.findElement(By.partialLinkText(TutorialStatics.NEXT_BUTTON_PREFIX));
 
         WebElement nextButton = hud.waitForElement(TutorialStatics.NEXT_BUTTON_BY_ID);
         assertNotNull(nextButton);
         nextButton.click();
+        hud.waitForPageLoad();
         assertEquals(
                 TutorialStatics.getTutorialHudUrl(SiteAlertsPage.NAME), driver.getCurrentUrl());
     }

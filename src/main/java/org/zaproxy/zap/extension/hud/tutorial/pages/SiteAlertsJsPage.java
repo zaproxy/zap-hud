@@ -19,17 +19,22 @@
  */
 package org.zaproxy.zap.extension.hud.tutorial.pages;
 
+import org.parosproxy.paros.Constant;
+import org.parosproxy.paros.core.scanner.Alert;
 import org.parosproxy.paros.network.HttpHeader;
 import org.parosproxy.paros.network.HttpMessage;
+import org.zaproxy.zap.eventBus.Event;
+import org.zaproxy.zap.extension.hud.tutorial.TutorialAlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialPage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialProxyServer;
 
-public class SiteAlertsJsPage extends TutorialPage {
+public class SiteAlertsJsPage extends TutorialAlertsPage {
 
     public static final String NAME = "SiteAlerts.js";
 
     /* This is public so that it can be easily read by the SiteAlertsPage */
     public static String key;
+    private boolean alertRaised = false;
 
     private TutorialProxyServer tutorialProxyServer;
 
@@ -51,8 +56,27 @@ public class SiteAlertsJsPage extends TutorialPage {
     public String getHtml() {
         // This is a special case
         String html = tutorialProxyServer.getLocallizedTextFile(this.getName());
-        key = this.setTaskToken();
+        if (key == null) {
+            key = this.setTaskToken();
+        }
         return html.replace("<!-- KEY -->", key);
+    }
+
+    @Override
+    public void hrefAddedEventReceived(Event event) {
+        if (!alertRaised) {
+            Alert alert =
+                    new Alert(
+                            TUTORIAL_ALERTS_PLUGIN_ID,
+                            Alert.RISK_LOW,
+                            Alert.CONFIDENCE_MEDIUM,
+                            Constant.messages.getString(
+                                    "hud.tutorial.page.sitealerts.alert.title"));
+            alert.setDescription(
+                    Constant.messages.getString("hud.tutorial.page.sitealerts.alert.description"));
+            this.raiseAlert(alert);
+            this.alertRaised = true;
+        }
     }
 
     public void handleResponse(HttpMessage msg) {

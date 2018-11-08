@@ -258,7 +258,7 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     private OptionsHudPanel getOptionsPanel() {
         if (optionsPanel == null) {
-            optionsPanel = new OptionsHudPanel();
+            optionsPanel = new OptionsHudPanel(this);
         }
         return optionsPanel;
     }
@@ -490,6 +490,11 @@ public class ExtensionHUD extends ExtensionAdaptor
                     Control.getSingleton().getExtensionLoader().getExtension(ExtensionScript.class);
         }
         return extScript;
+    }
+
+    public void resetTutorialTasks() {
+        this.getHudParam().resetTutorialTasks();
+        this.tutorialServer.resetTasks();
     }
 
     @Override

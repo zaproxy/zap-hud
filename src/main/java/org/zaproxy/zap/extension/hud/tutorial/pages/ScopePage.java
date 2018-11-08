@@ -19,6 +19,7 @@
  */
 package org.zaproxy.zap.extension.hud.tutorial.pages;
 
+import org.parosproxy.paros.network.HttpMessage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialPage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialProxyServer;
 
@@ -32,6 +33,13 @@ public class ScopePage extends TutorialPage {
 
     public ScopePage(TutorialProxyServer tutorialProxyServer, TutorialPage prev) {
         super(tutorialProxyServer, prev);
+    }
+
+    public void handlePostRequest(HttpMessage msg) {
+        if (msg.isInScope()) {
+            this.setTaskCompleted(true);
+        }
+        super.handlePostRequest(msg);
     }
 
     @Override

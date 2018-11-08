@@ -53,3 +53,10 @@ button-disabled {
     font-size: small;
     top: 50%;
 }
+
+.notifcationtext {
+    color: red;
+    position: absolute;
+    bottom : 50px;
+    right : 5px;
+}

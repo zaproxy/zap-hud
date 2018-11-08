@@ -29,7 +29,6 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.zaproxy.zap.extension.hud.tutorial.pages.FramesPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
-import org.zaproxy.zap.extension.hud.ui.Constants;
 import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
@@ -41,8 +40,6 @@ public class WarningPageUnitTest extends FirefoxUnitTest {
     public void genericPageUnitTests(FirefoxDriver driver) throws InterruptedException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(WarningPage.NAME));
-        Thread.sleep(Constants.POST_LOAD_DELAY_MS);
-
         GenericUnitTest.runAllTests(driver);
     }
 
@@ -63,6 +60,7 @@ public class WarningPageUnitTest extends FirefoxUnitTest {
         WebElement nextButton = TutorialStatics.getNextButton(driver);
         assertNotNull(nextButton);
         nextButton.click();
+        hud.waitForPageLoad();
         assertEquals(TutorialStatics.getTutorialHudUrl(FramesPage.NAME), driver.getCurrentUrl());
     }
 }

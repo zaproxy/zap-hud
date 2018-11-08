@@ -22,6 +22,7 @@ package org.zaproxy.zap.extension.hud.tutorial;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.security.SecureRandom;
+import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.network.HttpMessage;
@@ -35,11 +36,14 @@ public abstract class TutorialPage {
     private TutorialPage previousPage = null;
     private TutorialPage nextPage = null;
     private SecureRandom rnd = new SecureRandom();
+    private Boolean hasTask;
+    private String taskHtml;
     private boolean taskCompleted = true;
     private boolean taskJustCompleted = false;
     private String key;
+    private String antiCsrfToken = UUID.randomUUID().toString();
 
-    protected Logger log = Logger.getLogger(this.getClass());
+    public Logger log = Logger.getLogger(this.getClass());
 
     public TutorialPage(TutorialProxyServer tutorialProxyServer) {
         this.tutorialProxyServer = tutorialProxyServer;
@@ -70,26 +74,49 @@ public abstract class TutorialPage {
     }
 
     public boolean isTaskCompleted() {
+        if (this.getTutorialProxyServer().getHudParam().isTutorialTaskDone(this.getName())) {
+            return true;
+        }
         return taskCompleted;
     }
 
     public void setTaskCompleted(boolean taskCompleted) {
         this.taskCompleted = taskCompleted;
+        if (taskCompleted) {
+            this.tutorialProxyServer.getHudParam().setTutorialTaskDone(this.getName());
+        }
     }
 
     public String getI18nName() {
         return Constant.messages.getString("hud.tutorial.page." + this.getName().toLowerCase());
     }
 
+    private String getTaskHtml() {
+        if (this.hasTask == null && this.taskHtml == null) {
+            taskHtml = tutorialProxyServer.getLocallizedTextFile(this.getName() + ".task.html");
+        }
+        return taskHtml;
+    }
+
+    private boolean hasTask() {
+        if (this.hasTask == null) {
+            this.hasTask = Boolean.valueOf(getTaskHtml() != null);
+            this.taskCompleted = !this.hasTask;
+        }
+        return hasTask;
+    }
+
+    public void resetTask() {
+        this.taskCompleted = !this.hasTask();
+    }
+
     public String getHtml() {
         String html = tutorialProxyServer.getLocallizedTextFile(this.getName() + ".html");
         if (html != null) {
-            if (!this.tutorialProxyServer.isSkipTutorialTasks() && !this.isTaskCompleted()) {
-                String taskHtml =
-                        tutorialProxyServer.getLocallizedTextFile(this.getName() + ".task.html");
-                if (taskHtml != null) {
-                    html = html.replace(TASK_TOKEN, taskHtml);
-                }
+            if (!this.tutorialProxyServer.isSkipTutorialTasks()
+                    && this.hasTask()
+                    && !this.isTaskCompleted()) {
+                html = html.replace(TASK_TOKEN, getTaskHtml());
             } else if (this.taskJustCompleted) {
                 this.taskJustCompleted = false;
                 html =
@@ -98,6 +125,7 @@ public abstract class TutorialPage {
                                 Constant.messages.getString("hud.tutorial.task.complete"));
             }
             html = html.replace("<!-- BUTTONS -->", this.getButtonsHtml());
+            html = html.replace("<!-- CSRF -->", this.antiCsrfToken);
         } else {
             log.error("Failed to find tutorial text page: " + this.getName() + ".html");
         }
@@ -115,6 +143,9 @@ public abstract class TutorialPage {
      */
     public String setTaskToken() {
         this.key = Integer.toString(10000000 + rnd.nextInt(90000000));
+        if (this.tutorialProxyServer.isTutorialTestMode()) {
+            log.info("Generated key " + key);
+        }
         return this.key;
     }
 
@@ -141,18 +172,47 @@ public abstract class TutorialPage {
         }
         try {
             String supplied = URLDecoder.decode(body, "UTF-8");
+
+            if (this.tutorialProxyServer.isTutorialTestMode()) {
+                log.info("Supplied data: " + supplied);
+            }
+
+            boolean csrfOk = false;
+            boolean taskOk = false;
+
             for (String keyValue : supplied.split("\\&")) {
                 log.debug("Expecting key=" + key + " got " + keyValue);
                 if (keyValue.trim().equals("key=" + key)) {
-                    log.debug("Passed the task");
-                    this.setTaskCompleted(true);
-                    this.taskJustCompleted = true;
+                    if (this.tutorialProxyServer.isTutorialTestMode()) {
+                        log.info("Passed the task with key " + key);
+                    }
+                    taskOk = true;
                     taskPassed();
-                    break;
+                } else if (keyValue.startsWith("key")) {
+                    if (this.tutorialProxyServer.isTutorialTestMode()) {
+                        log.info("Unexpected keyValue pair: " + keyValue);
+                    }
+                } else if (keyValue.trim().equals("anticsrf=" + this.antiCsrfToken)) {
+                    if (this.tutorialProxyServer.isTutorialTestMode()) {
+                        log.info("Anticsrf token ok");
+                    }
+                    csrfOk = true;
+                } else if (keyValue.trim().startsWith("anticsrf=")) {
+                    if (this.tutorialProxyServer.isTutorialTestMode()) {
+                        log.info("Anticsrf token bad " + keyValue);
+                    }
                 }
             }
+            if (csrfOk && taskOk) {
+                this.setTaskCompleted(true);
+                this.taskJustCompleted = true;
+            }
+
         } catch (UnsupportedEncodingException e) {
             log.error(e.getMessage(), e);
+        }
+        if (this.tutorialProxyServer.isTutorialTestMode() && !this.taskJustCompleted) {
+            log.info("Did not pass the task for key " + key);
         }
     }
 

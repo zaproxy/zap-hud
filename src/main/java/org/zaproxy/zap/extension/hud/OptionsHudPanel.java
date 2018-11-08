@@ -47,16 +47,19 @@ public class OptionsHudPanel extends AbstractParamPanel {
     /** The name of the options panel. */
     private static final String NAME = Constant.messages.getString("hud.optionspanel.name");
 
+    private ExtensionHUD extension;
     private JTextField baseDirectory;
     private JCheckBox inScopeOnly = null;
     private JCheckBox removeCsp = null;
     private JCheckBox developmentMode = null;
     private JCheckBox allowUnsafeEval = null;
     private JCheckBox skipTutorialTasks = null;
+    private JButton resetTutorialTasks = null;
 
-    public OptionsHudPanel() {
+    public OptionsHudPanel(ExtensionHUD extension) {
         super();
         setName(NAME);
+        this.extension = extension;
 
         setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
 
@@ -78,9 +81,10 @@ public class OptionsHudPanel extends AbstractParamPanel {
         panel.add(overridesPanel, LayoutHelper.getGBC(1, i, 1, 1.0, new Insets(2, 2, 2, 2)));
         panel.add(getInScopeOnly(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getRemoveCsp(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
-        panel.add(getSkipTutorialTasks(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getDevelopmentMode(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getAllowUnsafeEval(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
+        panel.add(getSkipTutorialTasks(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
+        panel.add(getResetTutorialTasks(), LayoutHelper.getGBC(0, ++i, 1, 1.0));
 
         add(panel);
     }
@@ -157,6 +161,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
         getDevelopmentMode().setSelected(param.isDevelopmentMode());
         getAllowUnsafeEval().setSelected(param.isAllowUnsafeEval());
         getAllowUnsafeEval().setEnabled(developmentMode.isSelected());
+        getResetTutorialTasks().setEnabled(param.getTutorialTasksDone().size() > 0);
     }
 
     @Override
@@ -196,6 +201,26 @@ public class OptionsHudPanel extends AbstractParamPanel {
         param.setSkipTutorialTasks(getSkipTutorialTasks().isSelected());
         param.setDevelopmentMode(getDevelopmentMode().isSelected());
         param.setAllowUnsafeEval(getAllowUnsafeEval().isSelected());
+    }
+
+    private JButton getResetTutorialTasks() {
+        if (resetTutorialTasks == null) {
+            resetTutorialTasks =
+                    new JButton(
+                            Constant.messages.getString(
+                                    "hud.optionspanel.label.resetTutorialTasks"));
+            resetTutorialTasks.addActionListener(
+                    new ActionListener() {
+
+                        @Override
+                        public void actionPerformed(ActionEvent arg0) {
+                            extension.resetTutorialTasks();
+                            // Disable button to indicate its been done
+                            resetTutorialTasks.setEnabled(false);
+                        }
+                    });
+        }
+        return resetTutorialTasks;
     }
 
     @Override
