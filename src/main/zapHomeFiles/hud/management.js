@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		// send targetload message 
 		navigator.serviceWorker.controller.postMessage({action:"targetload", targetUrl: context.url});
 
+		localforage.setItem(IS_SERVICEWORKER_REFRESHED, true);
 	}
 
 	startHeartBeat();

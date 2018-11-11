@@ -7,6 +7,7 @@
 var IS_HUD_CONFIGURED = "isHudConfigured";
 var IS_DEBUG_ENABLED = false;
 var IS_FIRST_TIME = "isFirstTime";
+var IS_SERVICEWORKER_REFRESHED = 'isServiceWorkerRefreshed';
 
 var LOG_OFF = 0;	// Just use for setting the level, nothing will be logged
 var LOG_ERROR = 1;	// Errors that should be addressed
@@ -188,6 +189,7 @@ function configureStorage() {
 
 	promises.push(localforage.setItem(IS_HUD_CONFIGURED, true));
 	promises.push(localforage.setItem(IS_FIRST_TIME, true));
+	promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false))
 		
 	promises.push(loadFrame("rightPanel").then(oldPanel => {
 		var panel = {};

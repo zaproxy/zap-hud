@@ -136,6 +136,7 @@ const onMessage = event => {
 
 			let e = new CustomEvent('targetload', {detail: {tabId: message.tabId, url: message.targetUrl, domain: targetDomain}});
 			self.dispatchEvent(e);	
+
 			break;
 
 		default:
