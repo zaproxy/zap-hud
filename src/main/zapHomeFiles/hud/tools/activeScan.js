@@ -189,6 +189,9 @@ var ActiveScan = (function() {
 				if (tabId === tool.runningTabId) {
 					port.postMessage({label: LABEL, data: tool.data, icon: ICONS.ON});
 				}
+				else if (tool.isRunning) {
+					port.postMessage({label: LABEL, data: DATA.START, icon: ICONS.OFF, isDisabled: true});
+				}
 				else {
 					port.postMessage({label: LABEL, data: DATA.START, icon: ICONS.OFF});
 				}

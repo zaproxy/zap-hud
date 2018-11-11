@@ -132,7 +132,8 @@ Vue.component('hud-buttons', {
 						eventBus.$emit('updateButton', {
 							name: tool.name,
 							data: event.data.data,
-							icon: event.data.icon
+							icon: event.data.icon,
+							isDisabled: event.data.isDisabled
 						});
 					};
 
@@ -187,7 +188,8 @@ function doesContextApply(toolContext) {
 	return toolContext.domain === context.domain ||
 		toolContext.url === context.url ||
 		toolContext.tabId === tabId ||
-		('notTabId' in toolContext && toolContext.notTabId != tabId);
+		('notTabId' in toolContext && toolContext.notTabId != tabId) ||
+		('notDomain' in toolContext && toolContext.notDomain != context.domain);
 }
 
 navigator.serviceWorker.addEventListener("message", event => {

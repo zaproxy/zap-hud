@@ -30,18 +30,19 @@ var Attack = (function() {
 		tool.isSelected = false;
 		tool.panel = "";
 		tool.position = 0;
-		tool.isAttackMode = false;
+		tool.isRunning = false;
+		tool.attackingDomain = '';
 
 		saveTool(tool);
 	}
 
-	function showDialog(domain) {
+	function showDialog(tabId, domain) {
 
-		checkIsRunning()
-			.then(isAttackMode => {
+		checkIsRunning(domain)
+			.then(isRunning => {
 				var config = {};
 
-				if(!isAttackMode) {
+				if(!isRunning) {
 					config.text = DIALOG.OFF;
 					config.buttons = [
 						{text:I18n.t("common_turn_on"),
@@ -60,17 +61,14 @@ var Attack = (function() {
 					];
 				}
 
-				messageFrame("display", {action:"showDialog", config:config})
+				messageFrame2(tabId, "display", {action:"showDialog", config:config})
 					.then(response => {
 						// Handle button choice
 						if (response.id === "turnon") {
-							turnOnAttackMode();
+							turnOnAttackMode(domain);
 						}
 						else if (response.id === "turnoff") {
-							turnOffAttackMode();
-						}
-						else {
-							//cancel
+							turnOffAttackMode(domain);
 						}
 					})
 					.catch(errorHandler);
@@ -85,10 +83,13 @@ var Attack = (function() {
 			loadTool(NAME)
 				.then(tool => {
 					tool.isRunning = true;
+					tool.attackingDomain = domain;
 					tool.icon = ICONS.ON;
 					tool.data = DATA.ON;
 
-					saveTool(tool);
+					writeTool(tool);
+					messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notDomain: domain}, tool: {name: NAME, label: LABEL, data: DATA.OFF, icon: ICONS.OFF}, isToolDisabled: true})
+					messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain}, tool: {name: NAME, label: LABEL, data: DATA.ON, icon: ICONS.ON}});
 				})
 				.catch(errorHandler);
 	}
@@ -99,21 +100,38 @@ var Attack = (function() {
 		loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = false;
+				tool.attackingDomain = '';
 				tool.icon = ICONS.OFF;
 				tool.data = DATA.OFF;
 
-				saveTool(tool);
+				writeTool(tool);
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: DATA.OFF, icon: ICONS.OFF}, isToolDisabled: false})
 			})
 			.catch(errorHandler);
 	}
 
-	function checkIsRunning() {
+	function checkIsRunning(domain) {
 		return new Promise(resolve => {
 			loadTool(NAME)
 				.then(tool => {
-					resolve(tool.isRunning);
+					resolve(tool.attackingDomain === domain);
 				});
 		});
+	}
+
+	function getTool(tabId, context, port) {
+		loadTool(NAME)
+			.then(tool => {
+				if (context.domain === tool.attackingDomain) {
+					port.postMessage({label: LABEL, data: DATA.ON, icon: ICONS.ON});
+				}
+				else if (tool.isRunning) {
+					port.postMessage({label: LABEL, data: DATA.OFF, icon: ICONS.OFF, isDisabled: true});
+				} else {
+					port.postMessage({label: LABEL, data: DATA.OFF, icon: ICONS.OFF});
+				}
+			})
+			.catch(errorHandler)
 	}
 
 	function showOptions(tabId) {
@@ -157,11 +175,15 @@ var Attack = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showDialog(message.domain);
+					showDialog(message.tabId, message.domain);
 					break;
 
 				case "buttonMenuClicked":
 					showOptions(message.tabId);
+					break;
+
+				case "getTool":
+					getTool(message.tabId, message.context, event.ports[0]);
 					break;
 
 				default:

@@ -150,6 +150,9 @@ var Spider = (function() {
 				if (tabId === tool.runningTabId) {
 					port.postMessage({label: LABEL, data: tool.data, icon: ICONS.SPIDER});
 				}
+				else if (tool.isRunning) {
+					port.postMessage({label: LABEL, data: DATA.START, icon: ICONS.SPIDER, isDisabled: true});
+				}
 				else {
 					port.postMessage({label: LABEL, data: DATA.START, icon: ICONS.SPIDER});
 				}
