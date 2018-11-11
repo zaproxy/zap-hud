@@ -33,6 +33,7 @@ Vue.component('hud-button', {
 			marginleft: '0rem',
 			marginright: '0rem',
 			isActive: false,
+			isDisabled: false
 		}
 	},
 	computed: {
@@ -84,6 +85,10 @@ Vue.component('hud-button', {
 			if (self.name === data.name) {
 				self.currentIcon = '<<ZAP_HUD_FILES>>?image=' + data.icon;
 				self.currentData = data.data;
+
+				if (data.isDisabled !== undefined) {
+					self.isDisabled = data.isDisabled;
+				}
 			}
 		})
 	}
@@ -180,7 +185,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function doesContextApply(toolContext) {
 	return toolContext.domain === context.domain ||
-		toolContext.url === context.url;
+		toolContext.url === context.url ||
+		toolContext.tabId === tabId ||
+		('notTabId' in toolContext && toolContext.notTabId != tabId);
 }
 
 navigator.serviceWorker.addEventListener("message", event => {
@@ -193,6 +200,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 
 			if (!message.context || doesContextApply(message.context)) {
 				eventBus.$emit('updateButton', {
+					isDisabled: message.isToolDisabled,
 					name: tool.name,
 					data: tool.data,
 					icon: tool.icon,

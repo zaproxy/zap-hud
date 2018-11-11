@@ -2313,6 +2313,12 @@ html {
     color: #667189;
   }
 
+  .hud-button.disabled {
+    cursor: default;
+    opacity: .75;
+    pointer-events: none;
+  }
+
   .hud-button.small {
     min-width: 26px;
     max-width: 26px;

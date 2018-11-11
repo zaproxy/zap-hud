@@ -82,14 +82,14 @@ var Scope = (function() {
 		return new Promise(resolve => {
 			loadTool(NAME)
 				.then(tool => {
-					var isInScope = tool.urls.includes(domain);
+					let isInScope = tool.urls.includes(domain);
 					resolve(isInScope);
 				});
 		});
 	}
 
 	function addToScope(domain) {
-		loadTool(NAME)
+		return loadTool(NAME)
 			.then(tool => {
 				if (! tool.hudContext) {
 					fetch("<<ZAP_HUD_API>>/context/action/newContext/?contextName=" + HUD_CONTEXT)
@@ -106,10 +106,9 @@ var Scope = (function() {
 					})
 					.catch(errorHandler)
 
-
 				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain, url: ''}, tool: {name: NAME, data: DATA.IN, icon: ICONS.IN, label: LABEL}})
 
-                writeTool(tool);
+                return writeTool(tool);
             })
 			.catch(errorHandler);
 	}
