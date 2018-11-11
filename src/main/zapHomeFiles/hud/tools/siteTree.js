@@ -30,12 +30,9 @@ var SiteTree = (function() {
 		saveTool(tool);
 	}
 
-	function showSiteTree() {
-		messageFrame("display", {action:"showSiteTree"})
+	function showSiteTree(tabId) {
+		messageFrame2(tabId, "display", {action:"showSiteTree"})
 			.catch(errorHandler);
-	}
-
-	function onPanelLoad(data) {
 	}
 
 	function showOptions(tabId) {
@@ -54,6 +51,14 @@ var SiteTree = (function() {
 				else {
 					//cancel
 				}
+			})
+			.catch(errorHandler);
+	}
+
+	function getTool(port) {
+		loadTool(NAME)
+			.then(tool => {
+				port.postMessage({label: LABEL, data: DATA.SITES, icon: ICONS.WORLD});
 			})
 			.catch(errorHandler);
 	}
@@ -79,11 +84,15 @@ var SiteTree = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showSiteTree();
+					showSiteTree(message.tabId);
 					break;
 
 				case "buttonMenuClicked":
 					showOptions(message.tabId);
+					break;
+
+				case "getTool":
+					getTool(event.ports[0]);
 					break;
 
 				default:
@@ -94,7 +103,6 @@ var SiteTree = (function() {
 
 	return {
 		name: NAME,
-		onPanelLoad: onPanelLoad,
 		initialize: initializeStorage
 	};
 })();

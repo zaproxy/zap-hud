@@ -100,6 +100,46 @@ var History = (function() {
 			.catch(errorHandler);
 	}
 
+	function showHttpMessageDetails2(tabId, data) {
+		if (!data) {
+			throw new Error('Coud not load HTTP message details')
+		}
+
+		var config = {
+			request: {
+				method: parseRequestHeader(data.requestHeader).method,
+				header: data.requestHeader.trim(),
+				body: data.requestBody
+			},
+			response: {
+				header: data.responseHeader.trim(),
+				body: data.responseBody
+			},
+			isResponseDisabled: false,
+			activeTab: "Request"
+		};
+
+		if ('activeTab' in data) {
+			config.activeTab = data.activeTab;
+		}
+
+		return messageFrame2(tabId, "display", {action:"showHistoryMessage", config:config})
+			.then(data => {
+				// Handle button choice
+				if (data.buttonSelected === "replay") {
+					sendRequest(data.header, data.body)
+					.then(response => response.json())
+					.then(json => {
+						let data = json.sendRequest[0];
+						data.activeTab = "Response"
+						return showHttpMessageDetails2(tabId, data);
+					})
+					.catch(errorHandler)
+				}
+			})
+			.catch(errorHandler);
+	}
+
 	function sendRequest(header, body) {
 		let url = "<<ZAP_HUD_API>>/core/action/sendRequest/";
 		let req = header;
@@ -179,6 +219,14 @@ var History = (function() {
 				case "showHttpMessageDetails":
 					getMessageDetails(message.id)
 						.then(showHttpMessageDetails)
+						.catch(errorHandler)
+					break;
+
+				case "showHttpMessageDetails2":
+					getMessageDetails(message.id)
+						.then(data => {
+							return showHttpMessageDetails2(message.tabId, data)
+						})
 						.catch(errorHandler)
 					break;
 
