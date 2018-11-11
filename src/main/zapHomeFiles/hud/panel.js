@@ -79,6 +79,8 @@ Vue.component('hud-button', {
 		}
 
 		eventBus.$on('updateButton', data => {
+			log(LOG_TRACE, 'panel.updateButton', 'updating button: ' + data.name, data)
+
 			if (self.name === data.name) {
 				self.currentIcon = '<<ZAP_HUD_FILES>>?image=' + data.icon;
 				self.currentData = data.data;
@@ -113,10 +115,30 @@ Vue.component('hud-buttons', {
 			})
 			.catch(errorHandler)
 
-		// initialize panels with tools		
+		// initialize panels with tools
 		loadPanelTools(panel)
 			.then(tools => {
 				self.tools = tools;
+
+				tools.forEach(tool => {
+					let channel = new MessageChannel();
+
+					channel.port1.onmessage = function(event) {
+						eventBus.$emit('updateButton', {
+							name: tool.name,
+							data: event.data.data,
+							icon: event.data.icon
+						});
+					};
+
+					navigator.serviceWorker.controller.postMessage({
+						action: 'getTool',
+						tool: tool.name,
+						context: context,
+						frameId: frameId,
+						tabId: tabId
+					}, [channel.port2]);
+				})
 			})
 			.catch(errorHandler);
 
@@ -156,11 +178,30 @@ document.addEventListener("DOMContentLoaded", () => {
 	}); 
 });
 
+function doesContextApply(toolContext) {
+	return toolContext.domain === context.domain ||
+		toolContext.url === context.url;
+}
+
 navigator.serviceWorker.addEventListener("message", event => {
 	var message = event.data;
 	let tool;
 	
 	switch(message.action) {
+		case "broadcastUpdate":
+			tool = message.tool;
+
+			if (doesContextApply(message.context)) {
+				eventBus.$emit('updateButton', {
+					name: tool.name,
+					data: tool.data,
+					icon: tool.icon,
+					tool: tool
+				});
+			}
+
+			break;
+
 		case "updateData":
 			tool = message.tool;
 

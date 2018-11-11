@@ -343,6 +343,11 @@ function loadTool(name) {
 	return localforage.getItem(name);
 }
 
+function writeTool(tool) {
+	log(LOG_TRACE, 'utils.writeTool', tool.name);
+	return localforage.setItem(tool.name, tool);
+}
+
 /* 
  * saves the tool blob to indexeddb
  */
