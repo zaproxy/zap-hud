@@ -107,8 +107,7 @@ var Scope = (function() {
 					.catch(errorHandler)
 
 
-				messageAllTabs('leftPanel', {action: 'broadcastUpdate', context: {domain: domain, url: ''}, tool: {name: NAME, data: DATA.IN, icon: ICONS.IN, label: LABEL}})
-				messageAllTabs('rightPanel', {action: 'broadcastUpdate', context: {domain: domain, url: ''}, tool: {name: NAME, data: DATA.IN, icon: ICONS.IN, label: LABEL}})
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain, url: ''}, tool: {name: NAME, data: DATA.IN, icon: ICONS.IN, label: LABEL}})
 
                 writeTool(tool);
             })
@@ -129,8 +128,7 @@ var Scope = (function() {
 			.then(tool => {
 				tool.urls.splice(tool.urls.indexOf(domain), 1);
 
-				messageAllTabs('leftPanel', {action: 'broadcastUpdate', context: {domain: domain, url: ''}, tool: {name: NAME, data: DATA.OUT, icon: ICONS.OUT, label: LABEL}})
-				messageAllTabs('rightPanel', {action: 'broadcastUpdate', context: {domain: domain, url: ''}, tool: {name: NAME, data: DATA.OUT, icon: ICONS.OUT, label: LABEL}})
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain, url: ''}, tool: {name: NAME, data: DATA.OUT, icon: ICONS.OUT, label: LABEL}})
 
 				writeTool(tool);
 			})
