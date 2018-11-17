@@ -83,8 +83,13 @@ Vue.component('hud-button', {
 			log(LOG_TRACE, 'panel.updateButton', 'updating button: ' + data.name, data)
 
 			if (self.name === data.name) {
-				self.currentIcon = '<<ZAP_HUD_FILES>>?image=' + data.icon;
-				self.currentData = data.data;
+				if (data.icon !== undefined) {
+					self.currentIcon = '<<ZAP_HUD_FILES>>?image=' + data.icon;
+				}
+
+				if (data.data !== undefined) {
+					self.currentData = data.data;
+				}
 
 				if (data.isDisabled !== undefined) {
 					self.isDisabled = data.isDisabled;

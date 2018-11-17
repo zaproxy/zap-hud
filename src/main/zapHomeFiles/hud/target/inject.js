@@ -5,6 +5,8 @@
  */
 
  var injection  = (function () {
+	 let tabId = '';
+
 	/* HELPERS */
 	function isFromTrustedOrigin (message) {
 		return (
@@ -210,7 +212,7 @@
 		}
 		// Send to the management frame with the shared secret
 		var iframe = document.getElementById("management");
-		iframe.contentWindow.postMessage({action: 'showEnable.count', count: count, sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
+		iframe.contentWindow.postMessage({action: 'showEnable.count', tabId: tabId, count: count, sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
 	}
 	
 	function highlightAlert(alert) {
@@ -350,7 +352,7 @@
 	if (window.top == window.self) {
 		window.addEventListener("message", receiveMessages);
 
-		let tabId = Math.round(Math.random()*5000) //todo: nonsense random number generator;
+		tabId = Math.round(Math.random()*5000) //todo: nonsense random number generator;
 
 		var template = document.createElement("template");
 		template.innerHTML = '<iframe id="management" src="<<ZAP_HUD_FILES>>?name=management.html&amp;frameId=management&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +

@@ -519,7 +519,7 @@ function messageFrame2(tabId, frameId, message) {
 				let tid = params.get('tabId');
 				let fid = params.get('frameId');
 
-				if (tid === tabId && fid === frameId) {
+				if (tid == tabId && fid == frameId) {
 					return client;
 				}
 			};
