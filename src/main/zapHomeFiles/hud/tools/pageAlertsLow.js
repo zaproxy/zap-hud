@@ -35,8 +35,8 @@ var PageAlertsLow = (function() {
 		saveTool(tool);
 	}
 
-	function showAlerts(url) {
-		alertUtils.showPageAlerts(LABEL, url, ALERT_RISK);
+	function showAlerts(tabId, url) {
+		alertUtils.showPageAlerts(tabId, LABEL, url, ALERT_RISK);
 	}
 
 	function showOptions(tabId) {
@@ -76,7 +76,7 @@ var PageAlertsLow = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showAlerts(message.url);
+					showAlerts(message.tabId, message.url);
 					break;
 
 				case "buttonMenuClicked":

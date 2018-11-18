@@ -1,6 +1,6 @@
 var alertUtils = (function() {
 	
-	function showSiteAlerts(title, target, alertRisk) {
+	function showSiteAlerts(tabId, title, target, alertRisk) {
 		// Note that theres no need to load any tool data here
 		var config = {};
 
@@ -13,11 +13,11 @@ var alertUtils = (function() {
 				then(json => {
 					config.alerts = flattenAllAlerts(json);
 					
-					messageFrame("display", {action: "showAllAlerts", config:config}).then(response => {
+					messageFrame2(tabId, "display", {action: "showAllAlerts", config:config}).then(response => {
 						// Handle button choice
 						if (response.alertId) {
-							let backFunction = function() {showSiteAlerts(title, target, alertRisk)};
-							showAlertDetails(response.alertId, backFunction);
+							let backFunction = function() {showSiteAlerts(tabId, title, target, alertRisk)};
+							showAlertDetails(tabId, response.alertId, backFunction);
 						}
 					})
 					.catch(errorHandler);
@@ -48,7 +48,7 @@ var alertUtils = (function() {
 		return json;
 	}
 
-	function showPageAlerts(title, target, alertRisk) {
+	function showPageAlerts(tabId, title, target, alertRisk) {
 		// Note that theres no need to load any tool data here
 		var config = {};
 
@@ -71,11 +71,11 @@ var alertUtils = (function() {
 				then(json => {
 					config.alerts = flattenAllAlerts(json);
 					
-					messageFrame("display", {action: "showAllAlerts", config:config}).then(response => {
+					messageFrame2(tabId, "display", {action: "showAllAlerts", config:config}).then(response => {
 						// Handle button choice
 						if (response.alertId) {
-							let backFunction = function() {showPageAlerts(title, target, alertRisk)};
-							showAlertDetails(response.alertId, backFunction);
+							let backFunction = function() {showPageAlerts(tabId, title, target, alertRisk)};
+							showAlertDetails(tabId, response.alertId, backFunction);
 						}
 					})
 					.catch(errorHandler);
@@ -86,7 +86,7 @@ var alertUtils = (function() {
 			.catch(errorHandler);
 	}
 
-	function showAlertDetails(id, backFunction) { 
+	function showAlertDetails(tabId, id, backFunction) {
 		log (LOG_DEBUG, 'showAlertDetails', '' + id);
 
 		fetch("<<ZAP_HUD_API>>/core/view/alert/?id=" + id)
@@ -99,7 +99,7 @@ var alertUtils = (function() {
 						config.title = json.alert.alert;
 						config.details = json.alert;
 
-						messageFrame("display", {action: "showAlertDetails", config: config})
+						messageFrame2(tabId, "display", {action: "showAlertDetails", config: config})
 							.then(response => {
 								if (response.back) {
 									backFunction();
@@ -158,7 +158,7 @@ var alertUtils = (function() {
 	}
 
 	function showGrowlerAlert(alert) {
-		return messageFrame("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
+		return messageAllTabs("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
 	}
 
 	function showOptions(tabId, toolname, toolLabel) {

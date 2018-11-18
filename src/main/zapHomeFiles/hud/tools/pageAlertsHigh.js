@@ -35,11 +35,8 @@ var PageAlertsHigh = (function() {
 		saveTool(tool);
 	}
 
-	function showAlerts(url) {
-		alertUtils.showPageAlerts(LABEL, url, ALERT_RISK);
-	}
-
-	function onPanelLoad(data) {
+	function showAlerts(tabId, url) {
+		alertUtils.showPageAlerts(tabId, LABEL, url, ALERT_RISK);
 	}
 
 	function showOptions(tabId) {
@@ -79,7 +76,7 @@ var PageAlertsHigh = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showAlerts(message.url);
+					showAlerts(message.tabId, message.url);
 					break;
 
 				case "buttonMenuClicked":
@@ -94,7 +91,6 @@ var PageAlertsHigh = (function() {
 
 	return {
 		name: NAME,
-		onPanelLoad: onPanelLoad,
 		initialize: initializeStorage
 	};
 })();

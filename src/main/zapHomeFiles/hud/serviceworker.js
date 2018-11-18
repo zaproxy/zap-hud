@@ -170,6 +170,10 @@ webSocket.onmessage = function (event) {
 	}
 }
 
+webSocket.onerror = function (event) {
+	log(LOG_ERROR, 'websocket', '', event)
+}
+
 function registerForZapEvents(publisher) {
 	webSocket.send('{"component" : "event", "type" : "register", "name" : "' + publisher + '"}');
 }

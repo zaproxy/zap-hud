@@ -35,8 +35,8 @@ var SiteAlertsLow = (function() {
 		saveTool(tool);
 	}
 
-	function showAlerts(domain) {
-		alertUtils.showSiteAlerts(LABEL, domain, ALERT_RISK);
+	function showAlerts(tabId, domain) {
+		alertUtils.showSiteAlerts(tabId, LABEL, domain, ALERT_RISK);
 	}
 
 	function showOptions(tabId) {
@@ -71,7 +71,7 @@ var SiteAlertsLow = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showAlerts(message.domain);
+					showAlerts(message.tabId, message.domain);
 					break;
 
 				case "buttonMenuClicked":

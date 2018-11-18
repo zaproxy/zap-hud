@@ -35,12 +35,8 @@ var SiteAlertsMedium = (function() {
 		saveTool(tool);
 	}
 
-	function showAlerts(domain) {
-		alertUtils.showSiteAlerts(LABEL, domain, ALERT_RISK);
-	}
-
-	function onPanelLoad(data) {
-		//return alertUtils.updateAlertCount(NAME, data.domain);
+	function showAlerts(tabId, domain) {
+		alertUtils.showSiteAlerts(tabId, LABEL, domain, ALERT_RISK);
 	}
 
 	function showOptions(tabId) {
@@ -75,7 +71,7 @@ var SiteAlertsMedium = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showAlerts(message.domain);
+					showAlerts(message.tabId, message.domain);
 					break;
 
 				case "buttonMenuClicked":
@@ -90,7 +86,6 @@ var SiteAlertsMedium = (function() {
 
 	return {
 		name: NAME,
-		onPanelLoad: onPanelLoad,
 		initialize: initializeStorage
 	};
 })();
