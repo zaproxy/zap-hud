@@ -12,7 +12,6 @@ var CommonAlerts = (function() {
 	var LABEL = "Common Alerts";
 	var DATA = {};
 		DATA.NONE = "0";
-	var ICONS = {};
 	var alertCache = {};
 	var RISKS = ["Informational", "Low", "Medium", "High"];
 
@@ -27,10 +26,6 @@ var CommonAlerts = (function() {
 		tool.panel = "";
 		tool.position = 0;
 		tool.alerts = {};
-		tool.cache = {};
-		sharedData.alerts = {};
-		// upgradedDomains is used to keep a set of domains that ZAP has upgraded from http to https
-		//sharedData.upgradedDomains = new Set();
 
 		saveTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.alert.AlertEventPublisher");
@@ -105,7 +100,7 @@ var CommonAlerts = (function() {
 					target = target.replace("https://", "http://");
 				}
 
-				if (sharedData.alerts[targetDomain] === undefined) {
+				if (alertCache[targetDomain] === undefined) { 
 					// This is the first time we have seen this domain so
 					// fetch all of the current alerts from ZAP
 					getUpgradedDomain(targetDomain)
@@ -116,8 +111,8 @@ var CommonAlerts = (function() {
 							return response.json()
 						})
 						.then(json => {
-							sharedData.alerts[targetDomain] = alertUtils.flattenAllAlerts(json);
-							tool.alerts = sharedData.alerts;
+							alertCache[targetDomain] = alertUtils.flattenAllAlerts(json);
+							tool.alerts = alertCache;
 							return saveTool(tool);
 						})
 						.then(() => {
@@ -125,8 +120,9 @@ var CommonAlerts = (function() {
 							const processRisk = (risk) => {
 								let raisedEventName = 'commonAlerts.' + risk;
 								let raisedEventDetails = {
-									count: Object.keys(sharedData.alerts[targetDomain][risk]).length,
+									count: Object.keys(alertCache[targetDomain][risk]).length,
 								};
+
 								log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
 								var event = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
 								self.dispatchEvent(event);
@@ -145,7 +141,7 @@ var CommonAlerts = (function() {
 							let raisedEventDetails = {target: origTarget, pageAlerts : pageAlerts};
 							var ev = new CustomEvent("commonAlerts.pageAlerts", {detail: raisedEventDetails});
 							self.dispatchEvent(ev);
-							
+
 							// Highlight any alerts related to form params
 							for (var risk in RISKS) {
 								var alertRisk = RISKS[risk];
@@ -193,18 +189,21 @@ var CommonAlerts = (function() {
 		if (event.detail['event.type'] === 'alert.added') {
 			if (parseDomainFromUrl(event.detail.uri) === targetDomain) {
 				let save = false;
-				if (sharedData.alerts[targetDomain] === undefined) {
-					sharedData.alerts[targetDomain] = {};
-					sharedData.alerts[targetDomain].Low = {};
-					sharedData.alerts[targetDomain].Medium = {};
-					sharedData.alerts[targetDomain].High = {};
-					sharedData.alerts[targetDomain].Informational = {};
+
+				if (alertCache[targetDomain] === undefined) {
+					alertCache[targetDomain] = {};
+					alertCache[targetDomain].Low = {};
+					alertCache[targetDomain].Medium = {};
+					alertCache[targetDomain].High = {};
+					alertCache[targetDomain].Informational = {};
 					save = true;
 				}
+
 				risk = event.detail['riskString'];
 				name = event.detail['name'];
-				if (sharedData.alerts[targetDomain][risk][name] === undefined) {
-					sharedData.alerts[targetDomain][risk][name] = {};
+
+				if (alertCache[targetDomain][risk][name] === undefined) {
+					alertCache[targetDomain][risk][name] = {};
 					// send growler alert (fine with it being async, can change later if its an issue)
 					log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'Show growler alert', risk + ' ' + name);
 					showGrowlerAlert(event.detail)
@@ -215,13 +214,13 @@ var CommonAlerts = (function() {
 					loadTool(NAME)
 						.then(tool => {
 							// backup to localstorage in case the serviceworker dies
-							tool.alerts = sharedData.alerts;
+							tool.alerts = alertCache;
 							return saveTool(tool);
 						}).then(() => {
 							// Raise the event after the data is saved
 							let raisedEventName = 'commonAlerts.' + risk;
 							// This is the number of the relevant type of risk :)
-							let raisedEventDetails = {count : Object.keys(sharedData.alerts[targetDomain][risk]).length};
+							let raisedEventDetails = {count : Object.keys(alertCache[targetDomain][risk]).length};
 							log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
 							var ev = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
 							self.dispatchEvent(ev);

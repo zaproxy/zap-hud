@@ -11,7 +11,6 @@ var targetDomain = "";
 var targetUrl = "";
 
 var isDebugging = true;
-var sharedData = {};
 
 var webSocket;
 
