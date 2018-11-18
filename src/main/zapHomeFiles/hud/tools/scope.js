@@ -98,7 +98,10 @@ var Scope = (function() {
 
 				tool.urls.push(domain);
 
-				fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=" + HUD_CONTEXT + "&regex=" + domainWrapper(domain) + ".*")
+				getUpgradedDomain(domain)
+					.then(upgradedDomain => {
+						return fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
+					})
 					.then(response => {
 						if (!response.ok) {
 							log (LOG_ERROR, 'scope.addToScope', 'Failed to add ' + domain + ' to scope');
@@ -114,7 +117,10 @@ var Scope = (function() {
 	}
 
 	function removeFromScope(domain) {
-		fetch("<<ZAP_HUD_API>>/context/action/excludeFromContext/?contextName=" + HUD_CONTEXT + "&regex=" + domainWrapper(domain) + ".*")
+		getUpgradedDomain(domain)
+			.then(upgradedDomain => {
+				return fetch("<<ZAP_HUD_API>>/context/action/excludeFromContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
+			})
 			.then(response => {
 				if (!response.ok) {
 					log(LOG_ERROR, 'scope.removeFromScope', 'Failed to remove ' + domain + ' from scope');

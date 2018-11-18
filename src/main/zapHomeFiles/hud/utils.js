@@ -190,7 +190,9 @@ function configureStorage() {
 	promises.push(localforage.setItem(IS_HUD_CONFIGURED, true));
 	promises.push(localforage.setItem(IS_FIRST_TIME, true));
 	promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false))
-		
+	promises.push(localforage.setItem('alerts', []))
+	promises.push(localforage.setItem('upgradedDomains', {}))
+
 	promises.push(loadFrame("rightPanel").then(oldPanel => {
 		var panel = {};
 
@@ -664,15 +666,20 @@ function configureButtonHtml(tool) {
  * Adds the correct scheme to a domain, handling the fact the ZAP could be upgrading an http domain to https
  * Is only available in the serviceworker and Should always be used when supplying a domain to the ZAP API.
  */
-function domainWrapper(domain) {
-	var scheme = "https";
-	if (sharedData.upgradedDomains && sharedData.upgradedDomains.has(domain)) {
-		scheme = "http";
-	}
-	return scheme + "://" + domain + (domain.endsWith("/") ? "" : "/");
+
+function getUpgradedDomain(domain) {
+	return localforage.getItem('upgradedDomains')
+		.then(upgradedDomains => {
+			let scheme = 'https';
+
+			if (upgradedDomains && domain in upgradedDomains) {
+				scheme = "http";
+			}
+
+			return scheme + "://" + domain + (domain.endsWith("/") ? "" : "/");
+		})
+		.catch(errorHandler)
 }
-
-
 
 // todo: maybe needed instead of passing info through postmessage
 function getTargetDomain() {

@@ -88,25 +88,29 @@ var ActiveScan = (function() {
 	}
 
 	function startActiveScan(tabId, domain) {
-		fetch("<<ZAP_HUD_API>>/ascan/action/scan/?url=" + domainWrapper(domain)).then(response => {
-			response.json()
-				.then(data => {
-					loadTool(NAME)
-						.then(tool => {
-							tool.isRunning = true;
-							tool.runningTabId = tabId;
-							tool.icon = ICONS.ON;
-							tool.data = "0%";
-							tool.scanid = data.scan;
+		getUpgradedDomain(domain)
+			.then(upgradedDomain => {
+				return fetch("<<ZAP_HUD_API>>/ascan/action/scan/?url=" + upgradedDomain)
+			}).
+			then(response => {
+				return response.json()
+			})
+			.then(data => {
+				loadTool(NAME)
+					.then(tool => {
+						tool.isRunning = true;
+						tool.runningTabId = tabId;
+						tool.icon = ICONS.ON;
+						tool.data = "0%";
+						tool.scanid = data.scan;
 
-							writeTool(tool);
-							messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notTabId: tabId}, tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.OFF}, isToolDisabled: true})
-							messageFrame2(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.ON}});
-						})
-						.catch(errorHandler);
-				})
-				.catch(errorHandler);
-		});
+						writeTool(tool);
+						messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notTabId: tabId}, tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.OFF}, isToolDisabled: true})
+						messageFrame2(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.ON}});
+					})
+					.catch(errorHandler)
+			})
+			.catch(errorHandler);
 	}
 
 	function stopActiveScan() {

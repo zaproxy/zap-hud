@@ -7,23 +7,24 @@ var alertUtils = (function() {
 		config.title = title;
 		config.risk = alertRisk;
 		
-		fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + domainWrapper(target) + "&recurse=true")
-		.then(response => {
-			response.json().
-				then(json => {
-					config.alerts = flattenAllAlerts(json);
-					
-					messageFrame2(tabId, "display", {action: "showAllAlerts", config:config}).then(response => {
-						// Handle button choice
-						if (response.alertId) {
-							let backFunction = function() {showSiteAlerts(tabId, title, target, alertRisk)};
-							showAlertDetails(tabId, response.alertId, backFunction);
-						}
-					})
-					.catch(errorHandler);
-					
+		getUpgradedDomain(target)
+			.then(upgradedDomain => {
+				return fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
+			})
+			.then(response => {
+				return response.json()
+			})
+			.then(json => {
+				config.alerts = flattenAllAlerts(json);
+				
+				messageFrame2(tabId, "display", {action: "showAllAlerts", config:config}).then(response => {
+					// Handle button choice
+					if (response.alertId) {
+						let backFunction = function() {showSiteAlerts(tabId, title, target, alertRisk)};
+						showAlertDetails(tabId, response.alertId, backFunction);
+					}
 				})
-				.catch(errorHandler);
+				.catch(errorHandler)
 			})
 			.catch(errorHandler);
 	}
@@ -56,35 +57,38 @@ var alertUtils = (function() {
 		config.risk = alertRisk;
 
 		let targetDomain = parseDomainFromUrl(target);
-		if (sharedData.upgradedDomains.has(targetDomain)) {
-			// Its been upgraded to https by ZAP, but the alerts wont have been
-			target = target.replace("https://", "http://");
-		}
-		if (target.indexOf("?") > 0) {
-			// Remove any url params
-			target = target.substring(0, target.indexOf("?"));
-		}
-		
-		fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
-		.then(response => {
-			response.json().
-				then(json => {
-					config.alerts = flattenAllAlerts(json);
-					
-					messageFrame2(tabId, "display", {action: "showAllAlerts", config:config}).then(response => {
-						// Handle button choice
-						if (response.alertId) {
-							let backFunction = function() {showPageAlerts(tabId, title, target, alertRisk)};
-							showAlertDetails(tabId, response.alertId, backFunction);
-						}
-					})
-					.catch(errorHandler);
-					
-				})
-				.catch(errorHandler);
+
+		localforage.getItem('upgradedDomains')
+			.then(upgradedDomains => {
+				if (targetDomain in upgradedDomains) {
+					// Its been upgraded to https by ZAP, but the alerts wont have been
+					target = target.replace("https://", "http://");
+				}
+
+				if (target.indexOf("?") > 0) {
+					// Remove any url params
+					target = target.substring(0, target.indexOf("?"));
+				}
+				
+				return fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
+			})
+			.then(response => {
+				return response.json()
+			})
+			.then(json => {
+				config.alerts = flattenAllAlerts(json);
+				
+				return messageFrame2(tabId, "display", {action: "showAllAlerts", config:config})
+			})
+			.then(response => {
+				// Handle button choice
+				if (response.alertId) {
+					let backFunction = function() {showPageAlerts(tabId, title, target, alertRisk)};
+					return showAlertDetails(tabId, response.alertId, backFunction);
+				}
 			})
 			.catch(errorHandler);
-	}
+		}
 
 	function showAlertDetails(tabId, id, backFunction) {
 		log (LOG_DEBUG, 'showAlertDetails', '' + id);

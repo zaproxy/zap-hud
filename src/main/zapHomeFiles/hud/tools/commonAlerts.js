@@ -30,7 +30,7 @@ var CommonAlerts = (function() {
 		tool.cache = {};
 		sharedData.alerts = {};
 		// upgradedDomains is used to keep a set of domains that ZAP has upgraded from http to https
-		sharedData.upgradedDomains = new Set();
+		//sharedData.upgradedDomains = new Set();
 
 		saveTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.alert.AlertEventPublisher");
@@ -83,8 +83,13 @@ var CommonAlerts = (function() {
 	});
 
 	self.addEventListener("targetload", event => {
-		loadTool(NAME)
-			.then(tool => {
+		let promises = [loadTool(NAME), localforage.getItem('upgradedDomains')];
+
+		Promise.all(promises)
+			.then(results => {
+				let tool = results[0];
+				let upgradedDomains = results[1];
+
 				let origTarget = event.detail.url;
 				let zapReplaceOffset = origTarget.indexOf('zapHudReplaceReq=');
 				if (zapReplaceOffset > 0) {
@@ -95,7 +100,7 @@ var CommonAlerts = (function() {
 				let target = origTarget;
 				
 				let targetDomain = parseDomainFromUrl(target);
-				if (sharedData.upgradedDomains.has(targetDomain)) {
+				if (targetDomain in upgradedDomains) {
 					// Its been upgraded to https by ZAP, but the alerts wont have been
 					target = target.replace("https://", "http://");
 				}
@@ -103,27 +108,30 @@ var CommonAlerts = (function() {
 				if (sharedData.alerts[targetDomain] === undefined) {
 					// This is the first time we have seen this domain so
 					// fetch all of the current alerts from ZAP
-					fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + domainWrapper(targetDomain) + "&recurse=true")
-					.then(response => {
-						response.json().
-							then(json => {
-								sharedData.alerts[targetDomain] = alertUtils.flattenAllAlerts(json);
-								tool.alerts = sharedData.alerts;
-								return saveTool(tool);
-							}).then(() => {
-								// Raise the events after the data is saved
-								const processRisk = (risk) => {
-									let raisedEventName = 'commonAlerts.' + risk;
-									let raisedEventDetails = {
-										count: Object.keys(sharedData.alerts[targetDomain][risk]).length,
-									};
-									log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
-									var event = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
-									self.dispatchEvent(event);
-								}
-								RISKS.forEach(processRisk);
-							})
-							.catch(errorHandler);
+					getUpgradedDomain(targetDomain)
+						.then(upgradedDomain => {
+							return fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
+						})
+						.then(response => {
+							return response.json()
+						})
+						.then(json => {
+							sharedData.alerts[targetDomain] = alertUtils.flattenAllAlerts(json);
+							tool.alerts = sharedData.alerts;
+							return saveTool(tool);
+						})
+						.then(() => {
+							// Raise the events after the data is saved
+							const processRisk = (risk) => {
+								let raisedEventName = 'commonAlerts.' + risk;
+								let raisedEventDetails = {
+									count: Object.keys(sharedData.alerts[targetDomain][risk]).length,
+								};
+								log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
+								var event = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
+								self.dispatchEvent(event);
+							}
+							RISKS.forEach(processRisk);
 						})
 						.catch(errorHandler);
 				}
@@ -166,11 +174,19 @@ var CommonAlerts = (function() {
 	});
 
 	self.addEventListener("org.zaproxy.zap.extension.hud.HudEventPublisher", event => {
-		if (event.detail['event.type'] === 'domain.upgraded') {
-			sharedData.upgradedDomains.add(event.detail.domain);
-		} else if (event.detail['event.type'] === 'domain.redirected') {
-			sharedData.upgradedDomains.remove(event.detail.domain);
-		} 
+		localforage.getItem('upgradedDomains')
+			.then(upgradedDomains => {
+				if (event.detail['event.type'] === 'domain.upgraded') {
+					upgradedDomains[event.detail.domain] = true;
+				}
+				else if (event.detail['event.type'] === 'domain.redirected') {
+					//upgradedDomains.remove(event.detail.domain);
+					delete upgradedDomains[event.detail.domain];
+				} 
+
+				return localforage.setItem('upgradedDomains', upgradedDomains)
+			})
+			.catch(errorHandler)
 	});
 
 	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", event => {
