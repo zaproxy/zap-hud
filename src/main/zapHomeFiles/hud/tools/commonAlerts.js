@@ -187,48 +187,47 @@ var CommonAlerts = (function() {
 
 	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", event => {
 		if (event.detail['event.type'] === 'alert.added') {
-			if (parseDomainFromUrl(event.detail.uri) === targetDomain) {
-				let save = false;
+			let save = false;
 
-				if (alertCache[targetDomain] === undefined) {
-					alertCache[targetDomain] = {};
-					alertCache[targetDomain].Low = {};
-					alertCache[targetDomain].Medium = {};
-					alertCache[targetDomain].High = {};
-					alertCache[targetDomain].Informational = {};
-					save = true;
-				}
+			if (alertCache[targetDomain] === undefined) {
+				alertCache[targetDomain] = {};
+				alertCache[targetDomain].Low = {};
+				alertCache[targetDomain].Medium = {};
+				alertCache[targetDomain].High = {};
+				alertCache[targetDomain].Informational = {};
+				save = true;
+			}
 
-				risk = event.detail['riskString'];
-				name = event.detail['name'];
+			let risk = event.detail['riskString'];
+			let name = event.detail['name'];
 
-				if (alertCache[targetDomain][risk][name] === undefined) {
-					alertCache[targetDomain][risk][name] = {};
-					// send growler alert (fine with it being async, can change later if its an issue)
-					log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'Show growler alert', risk + ' ' + name);
-					showGrowlerAlert(event.detail)
-						.catch(errorHandler);
-					save = true;
-				}
-				if (save) {
-					loadTool(NAME)
-						.then(tool => {
-							// backup to localstorage in case the serviceworker dies
-							tool.alerts = alertCache;
-							return saveTool(tool);
-						}).then(() => {
-							// Raise the event after the data is saved
-							let raisedEventName = 'commonAlerts.' + risk;
-							// This is the number of the relevant type of risk :)
-							let raisedEventDetails = {count : Object.keys(alertCache[targetDomain][risk]).length};
-							log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
-							var ev = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
-							self.dispatchEvent(ev);
-						})
-						.catch(errorHandler);
-				}
-			} else {
-				log (LOG_TRACE, 'AlertEventPublisher eventListener', 'Ignoring alert.added event', event.detail['alertId']);
+			if (alertCache[targetDomain][risk][name] === undefined) {
+				alertCache[targetDomain][risk][name] = {};
+				// send growler alert (fine with it being async, can change later if its an issue)
+				log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'Show growler alert', risk + ' ' + name);
+				showGrowlerAlert(event.detail)
+					.catch(errorHandler);
+				save = true;
+			}
+
+			if (save) {
+				loadTool(NAME)
+					.then(tool => {
+						// backup to localstorage in case the serviceworker dies
+						tool.alerts = alertCache;
+						return writeTool(tool);
+						//return saveTool(tool);
+					})
+					.then(() => {
+						// Raise the event after the data is saved
+						let raisedEventName = 'commonAlerts.' + risk;
+						// This is the number of the relevant type of risk :)
+						let raisedEventDetails = {risk: risk, domain: parseDomainFromUrl(event.detail.uri), url: event.detail.uri, count : Object.keys(alertCache[targetDomain][risk]).length};
+						log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
+						var ev = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
+						self.dispatchEvent(ev);
+					})
+					.catch(errorHandler);
 			}
 		} else {
 			log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'Ignoring event', event.detail['event.type'])

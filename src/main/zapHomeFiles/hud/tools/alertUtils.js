@@ -116,38 +116,42 @@ var alertUtils = (function() {
 			.catch(errorHandler);
 	}
 
-	function updatePageAlertCount(toolname, target, alertEvent, risk) {
+	function updatePageAlertCount(toolname, alertEvent) {
 		let alertUrl = alertEvent.uri;
 		if (alertUrl.startsWith("http://")) {
 			// It will have been upgraded to https in the HUD
 			alertUrl = alertUrl.replace("http://", "https://");
 		}
-		if (targetUrl === alertUrl && risk === alertEvent.riskString) {
-			loadTool(toolname)
-				.then(tool => {
-					let alertData = tool.alerts[alertEvent.name];
-					if (!alertData) {
-						// Don't need to add much, its the fact its here that matters
-						tool.alerts[alertEvent.name] = [{
-								"confidence": alertEvent["confidence"],
-								"name": alertEvent["name"],
-								"id": alertEvent["alertId"],
-								"url": alertEvent["uri"]
-							}];
-						tool.data = Object.keys(tool.alerts).length;
-						return saveTool(tool);	
-					}
-				})
-			.catch(errorHandler);
-		}
+
+		loadTool(toolname)
+			.then(tool => {
+				let alertData = tool.alerts[alertEvent.name];
+
+				if (!alertData) {
+					// Don't need to add much, its the fact its here that matters
+					tool.alerts[alertEvent.name] = [{
+							"confidence": alertEvent["confidence"],
+							"name": alertEvent["name"],
+							"id": alertEvent["alertId"],
+							"url": alertEvent["uri"]
+						}];
+					tool.data = Object.keys(tool.alerts).length;
+
+					messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {url: alertUrl}, tool: {name: toolname, data: tool.data}})
+					return writeTool(tool);	
+				}
+			})
+		.catch(errorHandler);
 	}
 
-	function setPageAlerts(toolname, alerts) {
+	function setPageAlerts(toolname, url, alerts) {
 		loadTool(toolname)
 			.then(tool => {
 				tool.alerts = alerts;
 				tool.data = Object.keys(alerts).length;
-				return saveTool(tool);
+				
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {url: url}, tool: {name: toolname, data: tool.data}})
+				return writeTool(tool);
 			})
 			.catch(errorHandler);
 	}

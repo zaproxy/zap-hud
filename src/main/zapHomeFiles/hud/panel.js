@@ -205,7 +205,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 		case "broadcastUpdate":
 			tool = message.tool;
 
-			if (!message.context || doesContextApply(message.context)) {
+			if (message.context === undefined || doesContextApply(message.context)) {
 				eventBus.$emit('updateButton', {
 					isDisabled: message.isToolDisabled,
 					name: tool.name,

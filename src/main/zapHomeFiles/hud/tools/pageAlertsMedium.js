@@ -48,14 +48,18 @@ var PageAlertsMedium = (function() {
 	});
 
 	self.addEventListener("commonAlerts.pageAlerts", event => {
-		if (targetUrl === event.detail.target) {
-			return alertUtils.setPageAlerts(NAME, event.detail.pageAlerts[ALERT_RISK]);
-		}
+		return alertUtils.setPageAlerts(NAME, event.detail.target, event.detail.pageAlerts[ALERT_RISK]);
 	});
 
 	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", event => {
-		if (event.detail['event.type'] === 'alert.added') {
-			return alertUtils.updatePageAlertCount(NAME, targetUrl, event.detail, ALERT_RISK);
+		if (event.detail['event.type'] === 'alert.added' && event.detail.riskString === ALERT_RISK) {
+			loadTool(NAME)
+				.then(tool => {
+					if (tool.isSelected) {
+						return alertUtils.updatePageAlertCount(NAME, event.detail)
+					}
+				})
+				.catch(errorHandler)
 		}
 	});
 
