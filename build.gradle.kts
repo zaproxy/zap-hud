@@ -35,7 +35,7 @@ val testResultsDir = layout.buildDirectory.dir("reports/tests/test").get()
 val zapPort = 8999
 // Use a key just to make sure the HUD works with one
 val zapApiKey = "password123"
-val zapCmdlineOpts = "-dir " + testZapHome + " -config hud.enabled=true -config hud.devMode=true -config hud.unsafeEval=true -config hud.tutorialPort=9998 -config api.key=" + zapApiKey + " -daemon -config start.addonDirs=$buildDir/zap/"
+val zapCmdlineOpts = "-dir " + testZapHome + " -config hud.enabled=true -config hud.devMode=true -config hud.unsafeEval=true -config hud.tutorialPort=9998 -config hud.tutorialTestMode=true -config api.key=" + zapApiKey + " -daemon -config start.addonDirs=$buildDir/zap/"
 val zapSleepAfterStart = 10L
 
 zapAddOn {
@@ -112,6 +112,22 @@ tasks {
         commandLine("npm", "test")
     }
 
+    register<Test>("testTutorial") { 
+        group = "Verification"
+        description = "Runs the tutorial tests (ZAP must be running)."
+        useJUnitPlatform { 
+            includeTags("tutorial") 
+        } 
+    }
+
+    register<Test>("testRemote") { 
+        group = "Verification"
+        description = "Runs the remote tests (ZAP must be running)."
+        useJUnitPlatform { 
+            includeTags("remote") 
+        } 
+    }
+
     register("zapDownload") {
         group = "Verification"
         description = "Downloads the latest ZAP weekly release for the unit tests"
@@ -176,6 +192,9 @@ tasks {
         
         dependsOn("zapStart")
         dependsOn("test")
+        dependsOn("testTutorial")
+        // These are failing too often on travis, presumably due to timeouts?
+        // dependsOn("testRemote")
         dependsOn("zapStop")
     }
 
@@ -194,4 +213,10 @@ tasks {
     }
 }
 
-tasks.named<Test>("test") { shouldRunAfter("zapStart") }
+tasks.named<Test>("test") { 
+    shouldRunAfter("zapStart")
+    useJUnitPlatform { 
+        excludeTags("remote", "tutorial") 
+    }  
+}
+

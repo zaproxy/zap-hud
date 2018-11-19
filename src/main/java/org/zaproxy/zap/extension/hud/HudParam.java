@@ -20,6 +20,10 @@
 package org.zaproxy.zap.extension.hud;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.log4j.Logger;
 import org.parosproxy.paros.Constant;
 import org.zaproxy.zap.common.VersionedAbstractParam;
 import org.zaproxy.zap.extension.api.ZapApiIgnore;
@@ -37,6 +41,9 @@ public class HudParam extends VersionedAbstractParam {
     private static final String PARAM_REMOVE_CSP = PARAM_BASE_KEY + ".removeCsp";
     private static final String PARAM_TUTORIAL_PORT = PARAM_BASE_KEY + ".tutorialPort";
     private static final String PARAM_TUTORIAL_HOST = PARAM_BASE_KEY + ".tutorialHost";
+    private static final String PARAM_TUTORIAL_SKIP_TASKS = PARAM_BASE_KEY + ".tutorialSkipTasks";
+    private static final String PARAM_TUTORIAL_TEST_MODE = PARAM_BASE_KEY + ".tutorialTestMode";
+    private static final String PARAM_TUTORIAL_TASKS = PARAM_BASE_KEY + ".tutorialTasks";
 
     /**
      * The version of the configurations. Used to keep track of configurations changes between
@@ -61,6 +68,14 @@ public class HudParam extends VersionedAbstractParam {
     private int tutorialPort;
 
     private String tutorialHost;
+
+    private boolean isSkipTutorialTasks;
+
+    private boolean isTutorialTestMode;
+
+    private List<String> tutorialTasks;
+
+    private Logger log = Logger.getLogger(this.getClass());
 
     public String getBaseDirectory() {
         return baseDirectory;
@@ -117,6 +132,24 @@ public class HudParam extends VersionedAbstractParam {
         getConfig().setProperty(PARAM_REMOVE_CSP, removeCSP);
     }
 
+    public boolean isSkipTutorialTasks() {
+        return isSkipTutorialTasks;
+    }
+
+    public void setSkipTutorialTasks(boolean isSkipTutorialTasks) {
+        this.isSkipTutorialTasks = isSkipTutorialTasks;
+        getConfig().setProperty(PARAM_TUTORIAL_SKIP_TASKS, isSkipTutorialTasks);
+    }
+
+    public boolean isTutorialTestMode() {
+        return isTutorialTestMode;
+    }
+
+    public void setTutorialTestMode(boolean isTutorialTestMode) {
+        this.isTutorialTestMode = isTutorialTestMode;
+        getConfig().setProperty(PARAM_TUTORIAL_TEST_MODE, isTutorialTestMode);
+    }
+
     @Override
     protected String getConfigVersionKey() {
         return PARAM_BASE_KEY + VERSION_ATTRIBUTE;
@@ -143,6 +176,17 @@ public class HudParam extends VersionedAbstractParam {
         removeCSP = getConfig().getBoolean(PARAM_REMOVE_CSP, true);
         tutorialPort = getConfig().getInt(PARAM_TUTORIAL_PORT, 0);
         tutorialHost = getConfig().getString(PARAM_TUTORIAL_HOST, "127.0.0.1");
+        isSkipTutorialTasks = getConfig().getBoolean(PARAM_TUTORIAL_SKIP_TASKS, false);
+        isTutorialTestMode = getConfig().getBoolean(PARAM_TUTORIAL_TEST_MODE, false);
+        tutorialTasks = convert(getConfig().getList(PARAM_TUTORIAL_TASKS));
+    }
+
+    private List<String> convert(List<Object> objs) {
+        List<String> strs = new ArrayList<String>(objs.size());
+        for (Object obj : objs) {
+            strs.add(obj.toString());
+        }
+        return strs;
     }
 
     @Override
@@ -171,5 +215,33 @@ public class HudParam extends VersionedAbstractParam {
      */
     public String getTutorialHost() {
         return tutorialHost;
+    }
+
+    public void setTutorialTaskDone(String task) {
+        this.tutorialTasks.add(task);
+        getConfig().setProperty(PARAM_TUTORIAL_TASKS, tutorialTasks);
+        try {
+            this.getConfig().save();
+        } catch (ConfigurationException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public boolean isTutorialTaskDone(String task) {
+        return this.tutorialTasks.contains(task);
+    }
+
+    public List<String> getTutorialTasksDone() {
+        return this.tutorialTasks;
+    }
+
+    public void resetTutorialTasks() {
+        tutorialTasks.clear();
+        getConfig().setProperty(PARAM_TUTORIAL_TASKS, tutorialTasks);
+        try {
+            this.getConfig().save();
+        } catch (ConfigurationException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }
