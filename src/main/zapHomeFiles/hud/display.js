@@ -325,6 +325,7 @@ Vue.component('break-message-modal', {
 			port: null,
 			request: {},
 			response: {},
+			isDropDisabled: false,
 			isResponseDisabled: false,
 			activeTab: I18n.t("common_request")
 		}
@@ -341,6 +342,21 @@ Vue.component('break-message-modal', {
 			
 			self.request.isReadonly = !data.isResponseDisabled;
 			self.response.isReadonly = data.isResponseDisabled;
+
+			// Only show the Drop option for things that dont look like a requests for a web page as this can break the HUD UI
+			if (data.isResponseDisabled) {
+				// Its a request
+				let headerLc = data.request.header.toLowerCase();
+				self.isDropDisabled = headerLc.match('accept:.*text\/html');
+				// Explicitly XHRs should be fine
+				if (headerLc.match('x-requested-with.*xmlhttprequest')) {
+					self.isDropDisabled = false;
+				}
+			} else {
+				// Its a response
+				let headerLc = data.response.header.toLowerCase();
+				self.isDropDisabled = headerLc.match('content-type:.*text\/html');
+			}
 
 			app.isBreakMessageModalShown = true;
 			app.BreakMessageModalTitle = data.title;
