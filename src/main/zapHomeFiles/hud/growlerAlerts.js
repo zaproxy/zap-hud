@@ -34,7 +34,9 @@ navigator.serviceWorker.addEventListener("message", event => {
 	
 	switch(message.action) {
 		case "showGrowlerAlert":
-			enqueueGrowlerAlert(message.alert, event.ports[0]);
+			if (parseDomainFromUrl(message.alert.uri) === context.domain) {
+				enqueueGrowlerAlert(message.alert, event.ports[0]);
+			}
 			break;
 
 		default:

@@ -109,7 +109,7 @@ var Scope = (function() {
 					})
 					.catch(errorHandler)
 
-				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain, url: ''}, tool: {name: NAME, data: DATA.IN, icon: ICONS.IN, label: LABEL}})
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain}, tool: {name: NAME, data: DATA.IN, icon: ICONS.IN, label: LABEL}})
 
                 return writeTool(tool);
             })

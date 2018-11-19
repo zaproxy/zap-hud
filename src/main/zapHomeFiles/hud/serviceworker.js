@@ -7,7 +7,6 @@ importScripts("<<ZAP_HUD_FILES>>?name=tools/alertUtils.js");
 
 var CACHE_NAME = "hud-cache-1.0";
 
-var targetDomain = "";
 var targetUrl = "";
 
 var isDebugging = true;
@@ -130,8 +129,7 @@ const onMessage = event => {
 
 		case 'targetload':
 
-			targetDomain = parseDomainFromUrl(message.targetUrl);
-			targetUrl = message.targetUrl;
+			let targetDomain = parseDomainFromUrl(message.targetUrl);
 
 			let e = new CustomEvent('targetload', {detail: {tabId: message.tabId, url: message.targetUrl, domain: targetDomain}});
 			self.dispatchEvent(e);	

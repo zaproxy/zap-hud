@@ -49,8 +49,10 @@ var SiteAlertsLow = (function() {
 
 	self.addEventListener("commonAlerts.Low", event => loadTool(NAME)
         .then(tool => {
-            tool.data = event.detail.count;
-            return saveTool(tool);
+			tool.data = event.detail.count;
+
+			messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: event.detail.domain}, tool: {name: NAME, data: event.detail.count}})
+			return writeTool(tool);
         })
         .catch(errorHandler));
 

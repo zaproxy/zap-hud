@@ -33,7 +33,7 @@ var CommonAlerts = (function() {
 	}
 
 	function showGrowlerAlert(alert) {
-		return messageFrame("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
+		return messageAllTabs("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
 	}
 
 	self.addEventListener("activate", event => {
@@ -100,37 +100,41 @@ var CommonAlerts = (function() {
 					target = target.replace("https://", "http://");
 				}
 
-				if (alertCache[targetDomain] === undefined) { 
-					// This is the first time we have seen this domain so
-					// fetch all of the current alerts from ZAP
-					getUpgradedDomain(targetDomain)
-						.then(upgradedDomain => {
-							return fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
-						})
-						.then(response => {
-							return response.json()
-						})
-						.then(json => {
-							alertCache[targetDomain] = alertUtils.flattenAllAlerts(json);
-							tool.alerts = alertCache;
-							return saveTool(tool);
-						})
-						.then(() => {
-							// Raise the events after the data is saved
-							const processRisk = (risk) => {
-								let raisedEventName = 'commonAlerts.' + risk;
-								let raisedEventDetails = {
-									count: Object.keys(alertCache[targetDomain][risk]).length,
-								};
+				// ruins all optimizations. will fix in a refactor. only keeping round for explanation.
+				//if (alertCache[targetDomain] === undefined) { 
 
-								log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
-								var event = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
-								self.dispatchEvent(event);
-							}
-							RISKS.forEach(processRisk);
-						})
-						.catch(errorHandler);
-				}
+				// This is the first time we have seen this domain so
+				// fetch all of the current alerts from ZAP
+				getUpgradedDomain(targetDomain)
+					.then(upgradedDomain => {
+						return fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
+					})
+					.then(response => {
+						return response.json()
+					})
+					.then(json => {
+						alertCache[targetDomain] = alertUtils.flattenAllAlerts(json);
+						tool.alerts = alertCache;
+						return saveTool(tool);
+					})
+					.then(() => {
+						// Raise the events after the data is saved
+						const processRisk = (risk) => {
+							let raisedEventName = 'commonAlerts.' + risk;
+							let raisedEventDetails = {
+								count: Object.keys(alertCache[targetDomain][risk]).length,
+								url: target,
+								risk: risk,
+								domain: targetDomain
+							};
+
+							log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
+							var event = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
+							self.dispatchEvent(event);
+						}
+						RISKS.forEach(processRisk);
+					})
+					.catch(errorHandler);
 
 				// Fetch all of the alerts on this page
 				fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
@@ -138,7 +142,7 @@ var CommonAlerts = (function() {
 					response.json().
 						then(json => {
 							let pageAlerts = alertUtils.flattenAllAlerts(json);
-							let raisedEventDetails = {target: origTarget, pageAlerts : pageAlerts};
+							let raisedEventDetails = {domain: targetDomain, url: event.detail.uri, target: origTarget, pageAlerts : pageAlerts};
 							var ev = new CustomEvent("commonAlerts.pageAlerts", {detail: raisedEventDetails});
 							self.dispatchEvent(ev);
 
@@ -176,7 +180,6 @@ var CommonAlerts = (function() {
 					upgradedDomains[event.detail.domain] = true;
 				}
 				else if (event.detail['event.type'] === 'domain.redirected') {
-					//upgradedDomains.remove(event.detail.domain);
 					delete upgradedDomains[event.detail.domain];
 				} 
 
@@ -187,6 +190,7 @@ var CommonAlerts = (function() {
 
 	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", event => {
 		if (event.detail['event.type'] === 'alert.added') {
+			let targetDomain = parseDomainFromUrl(event.detail.uri)
 			let save = false;
 
 			if (alertCache[targetDomain] === undefined) {
@@ -222,7 +226,7 @@ var CommonAlerts = (function() {
 						// Raise the event after the data is saved
 						let raisedEventName = 'commonAlerts.' + risk;
 						// This is the number of the relevant type of risk :)
-						let raisedEventDetails = {risk: risk, domain: parseDomainFromUrl(event.detail.uri), url: event.detail.uri, count : Object.keys(alertCache[targetDomain][risk]).length};
+						let raisedEventDetails = {risk: risk, domain: targetDomain, url: event.detail.uri, count : Object.keys(alertCache[targetDomain][risk]).length};
 						log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
 						var ev = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
 						self.dispatchEvent(ev);
