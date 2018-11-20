@@ -33,7 +33,8 @@ public class HudParam extends VersionedAbstractParam {
     /** The base configuration key for all HUD configurations. */
     private static final String PARAM_BASE_KEY = "hud";
 
-    private static final String PARAM_ENABLED = PARAM_BASE_KEY + ".enabled";
+    private static final String PARAM_ENABLED_DESKTOP = PARAM_BASE_KEY + ".enabledForDesktop";
+    private static final String PARAM_ENABLED_DAEMON = PARAM_BASE_KEY + ".enabledForDaemon";
     private static final String PARAM_BASE_DIRECTORY = PARAM_BASE_KEY + ".dir";
     private static final String PARAM_DEV_MODE = PARAM_BASE_KEY + ".devMode";
     private static final String PARAM_ALLOW_UNSAFE_EVAL = PARAM_BASE_KEY + ".unsafeEval";
@@ -59,7 +60,8 @@ public class HudParam extends VersionedAbstractParam {
 
     private boolean allowUnsafeEval;
 
-    private boolean enabled;
+    private boolean enabledForDesktop;
+    private boolean enabledForDaemon;
 
     private boolean inScopeOnly;
 
@@ -105,13 +107,22 @@ public class HudParam extends VersionedAbstractParam {
         getConfig().setProperty(PARAM_ALLOW_UNSAFE_EVAL, allowUnsafeEval);
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public boolean isEnabledForDesktop() {
+        return enabledForDesktop;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        getConfig().setProperty(PARAM_ENABLED, enabled);
+    public void setEnabledForDesktop(boolean enabledForDesktop) {
+        this.enabledForDesktop = enabledForDesktop;
+        getConfig().setProperty(PARAM_ENABLED_DESKTOP, enabledForDesktop);
+    }
+
+    public boolean isEnabledForDaemon() {
+        return enabledForDaemon;
+    }
+
+    public void setEnabledForDaemon(boolean enabledForDaemon) {
+        this.enabledForDaemon = enabledForDaemon;
+        getConfig().setProperty(PARAM_ENABLED_DAEMON, enabledForDaemon);
     }
 
     public boolean isInScopeOnly() {
@@ -169,9 +180,10 @@ public class HudParam extends VersionedAbstractParam {
                                 Constant.getZapHome()
                                         + File.separator
                                         + ExtensionHUD.DIRECTORY_NAME);
-        enabled = getConfig().getBoolean(PARAM_ENABLED, false);
-        developmentMode = getConfig().getBoolean(PARAM_DEV_MODE, false);
-        allowUnsafeEval = getConfig().getBoolean(PARAM_ALLOW_UNSAFE_EVAL, false);
+        enabledForDesktop = getConfig().getBoolean(PARAM_ENABLED_DESKTOP, true);
+        enabledForDaemon = getConfig().getBoolean(PARAM_ENABLED_DAEMON, false);
+        developmentMode = getConfig().getBoolean(PARAM_DEV_MODE, true);
+        allowUnsafeEval = getConfig().getBoolean(PARAM_ALLOW_UNSAFE_EVAL, true);
         inScopeOnly = getConfig().getBoolean(PARAM_IN_SCOPE_ONLY, false);
         removeCSP = getConfig().getBoolean(PARAM_REMOVE_CSP, true);
         tutorialPort = getConfig().getInt(PARAM_TUTORIAL_PORT, 0);

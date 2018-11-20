@@ -119,7 +119,8 @@ public class ExtensionHUD extends ExtensionAdaptor
     private Logger log = Logger.getLogger(this.getClass());
 
     private ZapToggleButton hudButton = null;
-    private boolean hudEnabled = false;
+    private boolean hudEnabledForDesktop = false;
+    private boolean hudEnabledForDaemon = false;
     private HudParam hudParam = null;
     private OptionsHudPanel optionsPanel = null;
 
@@ -200,11 +201,12 @@ public class ExtensionHUD extends ExtensionAdaptor
     @Override
     public void optionsLoaded() {
         addHudScripts();
-        this.hudEnabled = getHudParam().isEnabled();
+        this.hudEnabledForDesktop = getHudParam().isEnabledForDesktop();
         if (View.isInitialised()) {
-            this.getHudButton().setSelected(hudEnabled);
-            setZapCanGetFocus(!this.hudEnabled);
+            this.getHudButton().setSelected(hudEnabledForDesktop);
+            setZapCanGetFocus(!this.hudEnabledForDesktop);
         }
+        this.hudEnabledForDaemon = getHudParam().isEnabledForDaemon();
         if (getHudParam().isDevelopmentMode()) {
             ZAP.getEventBus()
                     .publishSyncEvent(
@@ -218,7 +220,11 @@ public class ExtensionHUD extends ExtensionAdaptor
     }
 
     protected boolean isHudEnabled() {
-        return hudEnabled;
+        if (View.isInitialised()) {
+            return hudEnabledForDesktop;
+        } else {
+            return hudEnabledForDaemon;
+        }
     }
 
     /**
@@ -309,9 +315,9 @@ public class ExtensionHUD extends ExtensionAdaptor
                     new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            hudEnabled = hudButton.isSelected();
-                            getHudParam().setEnabled(hudEnabled);
-                            setZapCanGetFocus(!hudEnabled);
+                            hudEnabledForDesktop = hudButton.isSelected();
+                            getHudParam().setEnabledForDesktop(hudEnabledForDesktop);
+                            setZapCanGetFocus(!hudEnabledForDesktop);
                         }
                     });
         }
@@ -379,7 +385,7 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     @Override
     public boolean onHttpResponseReceive(HttpMessage msg) {
-        if (hudEnabled && msg.getResponseHeader().isHtml()) {
+        if (this.isHudEnabled() && msg.getResponseHeader().isHtml()) {
             if (getHudParam().isInScopeOnly() && !msg.isInScope()) {
                 return true;
             }
@@ -561,6 +567,12 @@ public class ExtensionHUD extends ExtensionAdaptor
             this.removeHudScripts();
             this.addHudScripts();
         }
+        this.hudEnabledForDesktop = getHudParam().isEnabledForDesktop();
+        if (View.isInitialised()) {
+            this.getHudButton().setSelected(hudEnabledForDesktop);
+            setZapCanGetFocus(!this.hudEnabledForDesktop);
+        }
+        this.hudEnabledForDaemon = getHudParam().isEnabledForDaemon();
     }
 
     public HudAPI getAPI() {
