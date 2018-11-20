@@ -59,7 +59,7 @@ public class GenerateI18nJsFile extends DefaultTask {
                     + "\tVue.use(VueI18n);\n"
                     + "\tvar i18n = new VueI18n({\n"
                     + "\t\tlocale: '<<ZAP_LOCALE>>',\n"
-                    + "\t\tfallbackLocalelocale: 'en_GB',\n"
+                    + "\t\tfallbackLocale: 'en_GB',\n"
                     + "\t\tmessages: messages\n"
                     + "\t});\n"
                     + "\tnew Vue({ i18n: i18n });\n"
