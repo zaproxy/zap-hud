@@ -37,7 +37,7 @@ val zapPort = 8999
 // Use a key just to make sure the HUD works with one
 val zapApiKey = "password123"
 val hudDevArgs = "-config hud.enabledForDesktop=true -config hud.enabledForDaemon=true -config hud.devMode=true -config hud.unsafeEval=true"
-val zapCmdlineOpts = "-dir $testZapHome $hudDevArgs -config hud.tutorialPort=9998 -config hud.tutorialTestMode=true -config api.key=$zapApiKey -daemon -config start.addonDirs=$buildDir/zap/"
+val zapCmdlineOpts = "-dir $testZapHome $hudDevArgs -config hud.tutorialPort=9998 -config hud.tutorialTestMode=true -config hud.showWelcomeScreen=false -config api.key=$zapApiKey -daemon -config start.addonDirs=$buildDir/zap/"
 val zapSleepAfterStart = 10L
 
 zapAddOn {

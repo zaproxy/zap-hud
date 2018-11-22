@@ -6,29 +6,60 @@
 
 var app;
 
-// TODO: implement a super cool loading screen
 Vue.component('loading-screen', {
 	template: '#loading-screen-template',
+	methods: {
+		target: function() {
+			if (dontShowAgain.checked) {
+				dontShowWelcomeAgain().then(() => {
+					// Refresh the target so the HUD buttons appear
+					parent.postMessage( {action: 'refresh'} , document.referrer);
+				});
+			} else {
+				// Refresh the target so the HUD buttons appear
+				parent.postMessage( {action: 'refresh'} , document.referrer);
+			}
+		},
+		tutorial: function() {
+			if (dontShowAgain.checked) {
+				dontShowWelcomeAgain().then(() => {
+					// Open the tutorial in a new window / tab
+					window.open("<<TUTORIAL_URL>>");
+					// Refresh the target so the HUD buttons appear
+					parent.postMessage( {action: 'refresh'} , document.referrer);
+				});
+			} else {
+				// Open the tutorial in a new window / tab
+				window.open("<<TUTORIAL_URL>>");
+				// Refresh the target so the HUD buttons appear
+				parent.postMessage( {action: 'refresh'} , document.referrer);
+			}
+		}
+	},
+	data() {
+		return {
+			dontShowAgain: false
+		}
+	},
 	props: []
 })
+
+function dontShowWelcomeAgain() {
+	return fetch("<<ZAP_HUD_API>>/hud/action/setOptionShowWelcomeScreen/?Boolean=false");
+}
 
 document.addEventListener('DOMContentLoaded', () => {
 	// initialize Vue app
 	app = new Vue({
 		el: '#app',
 		data: {
-			isSettingsButtonShown: false,
-			isLoadingScreenShown: false
+			isSettingsButtonShown: false
 		}
 	});
 
 	// if first time starting HUD boot up the service worker
 	if (navigator.serviceWorker.controller === null) {
-		/*
-		// TODO: turn this on for a cool loading screen
 		parent.postMessage( {action: 'expandManagement'} , document.referrer);
-		app.isLoadingScreenShown = true;
-		*/
 		startServiceWorker();
 	}
 	else {
@@ -109,6 +140,9 @@ function serviceWorkerMessageListener(event) {
  */ 
 function startServiceWorker() {
 	if ('serviceWorker' in navigator) {
+		if ( <<SHOW_WELCOME_SCREEN>> ) {
+			parent.postMessage({action: 'showWelcomeScreen'}, document.referrer);
+		}
 
 		navigator.serviceWorker.register('<<ZAP_HUD_FILES>>?name=serviceworker.js')
 			.then(registration => {
@@ -117,9 +151,10 @@ function startServiceWorker() {
 				// wait until serviceworker is installed and activated
 				navigator.serviceWorker.ready
 					.then(serviceWorkerRegistration => {
-
-						// refresh the target page
-						parent.postMessage( {action: 'refresh'} , document.referrer);
+						if (! <<SHOW_WELCOME_SCREEN>> ) {
+							// refresh the target page
+							parent.postMessage( {action: 'refresh'} , document.referrer);
+						}
 					})
 					.catch(errorHandler);
 			})

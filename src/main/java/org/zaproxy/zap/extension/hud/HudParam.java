@@ -45,6 +45,7 @@ public class HudParam extends VersionedAbstractParam {
     private static final String PARAM_TUTORIAL_SKIP_TASKS = PARAM_BASE_KEY + ".tutorialSkipTasks";
     private static final String PARAM_TUTORIAL_TEST_MODE = PARAM_BASE_KEY + ".tutorialTestMode";
     private static final String PARAM_TUTORIAL_TASKS = PARAM_BASE_KEY + ".tutorialTasks";
+    private static final String PARAM_SHOW_WELCOME_SCREEN = PARAM_BASE_KEY + ".showWelcomeScreen";
 
     /**
      * The version of the configurations. Used to keep track of configurations changes between
@@ -74,6 +75,8 @@ public class HudParam extends VersionedAbstractParam {
     private boolean isSkipTutorialTasks;
 
     private boolean isTutorialTestMode;
+
+    private boolean showWelcomeScreen;
 
     private List<String> tutorialTasks;
 
@@ -161,6 +164,15 @@ public class HudParam extends VersionedAbstractParam {
         getConfig().setProperty(PARAM_TUTORIAL_TEST_MODE, isTutorialTestMode);
     }
 
+    public boolean isShowWelcomeScreen() {
+        return showWelcomeScreen;
+    }
+
+    public void setShowWelcomeScreen(boolean showWelcomeScreen) {
+        this.showWelcomeScreen = showWelcomeScreen;
+        getConfig().setProperty(PARAM_SHOW_WELCOME_SCREEN, showWelcomeScreen);
+    }
+
     @Override
     protected String getConfigVersionKey() {
         return PARAM_BASE_KEY + VERSION_ATTRIBUTE;
@@ -191,6 +203,7 @@ public class HudParam extends VersionedAbstractParam {
         isSkipTutorialTasks = getConfig().getBoolean(PARAM_TUTORIAL_SKIP_TASKS, false);
         isTutorialTestMode = getConfig().getBoolean(PARAM_TUTORIAL_TEST_MODE, false);
         tutorialTasks = convert(getConfig().getList(PARAM_TUTORIAL_TASKS));
+        showWelcomeScreen = getConfig().getBoolean(PARAM_SHOW_WELCOME_SCREEN, true);
     }
 
     private List<String> convert(List<Object> objs) {
