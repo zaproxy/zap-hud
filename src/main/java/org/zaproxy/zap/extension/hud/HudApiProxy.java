@@ -95,10 +95,16 @@ public class HudApiProxy extends ApiImplementor {
             }
             switch (reqType) {
                 case action:
-                    response = impl.handleApiAction(elements[8], params);
+                    response = impl.handleApiOptionAction(elements[8], params);
+                    if (response == null) {
+                        response = impl.handleApiAction(elements[8], params);
+                    }
                     break;
                 case view:
-                    response = impl.handleApiView(elements[8], params);
+                    response = impl.handleApiOptionView(elements[8], params);
+                    if (response == null) {
+                        response = impl.handleApiView(elements[8], params);
+                    }
                     break;
                 case other:
                     // Not currently needed
