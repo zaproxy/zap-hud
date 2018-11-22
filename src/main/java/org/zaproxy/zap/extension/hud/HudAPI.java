@@ -341,6 +341,11 @@ public class HudAPI extends ApiImplementor {
             contents =
                     contents.replace("<<ZAP_HUD_FILES>>", this.hudFileUrl)
                             .replace("<<URL>>", url)
+                            .replace("<<TUTORIAL_URL>>", this.extension.getTutorialUrl("", false))
+                            .replace(
+                                    "<<SHOW_WELCOME_SCREEN>>",
+                                    Boolean.toString(
+                                            this.extension.getHudParam().isShowWelcomeScreen()))
                             .replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
 
             if (file.equals("i18n.js")) {

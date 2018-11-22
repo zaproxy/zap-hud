@@ -52,6 +52,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
     private JCheckBox enabledForDesktop = null;
     private JCheckBox enabledForDaemon = null;
     private JCheckBox inScopeOnly = null;
+    private JCheckBox showWelcomeScreen = null;
     private JCheckBox removeCsp = null;
     private JCheckBox developmentMode = null;
     private JCheckBox allowUnsafeEval = null;
@@ -81,11 +82,12 @@ public class OptionsHudPanel extends AbstractParamPanel {
         int i = 0;
         panel.add(getEnabledForDesktop(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getEnabledForDaemon(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
+        panel.add(getShowWelcomeScreen(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getInScopeOnly(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getRemoveCsp(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getDevelopmentMode(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(directoryLabel, LayoutHelper.getGBC(0, ++i, 1, 1.0, new Insets(2, 2, 2, 2)));
-        panel.add(overridesPanel, LayoutHelper.getGBC(1, ++i, 1, 1.0, new Insets(2, 2, 2, 2)));
+        panel.add(overridesPanel, LayoutHelper.getGBC(1, i, 1, 1.0, new Insets(2, 2, 2, 2)));
         panel.add(getAllowUnsafeEval(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getSkipTutorialTasks(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getResetTutorialTasks(), LayoutHelper.getGBC(0, ++i, 1, 1.0));
@@ -126,6 +128,16 @@ public class OptionsHudPanel extends AbstractParamPanel {
                             Constant.messages.getString("hud.optionspanel.label.inScopeOnly"));
         }
         return inScopeOnly;
+    }
+
+    private JCheckBox getShowWelcomeScreen() {
+        if (showWelcomeScreen == null) {
+            showWelcomeScreen =
+                    new JCheckBox(
+                            Constant.messages.getString(
+                                    "hud.optionspanel.label.showWelcomeScreen"));
+        }
+        return showWelcomeScreen;
     }
 
     private JCheckBox getRemoveCsp() {
@@ -181,6 +193,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
         getEnabledForDaemon().setSelected(param.isEnabledForDaemon());
         getBaseDirectory().setText(param.getBaseDirectory());
         getInScopeOnly().setSelected(param.isInScopeOnly());
+        getShowWelcomeScreen().setSelected(param.isShowWelcomeScreen());
         getRemoveCsp().setSelected(param.isRemoveCSP());
         getSkipTutorialTasks().setSelected(param.isSkipTutorialTasks());
         getDevelopmentMode().setSelected(param.isDevelopmentMode());
@@ -224,6 +237,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
         param.setEnabledForDaemon(getEnabledForDaemon().isSelected());
         param.setBaseDirectory(getBaseDirectory().getText());
         param.setInScopeOnly(getInScopeOnly().isSelected());
+        param.setShowWelcomeScreen(getShowWelcomeScreen().isSelected());
         param.setRemoveCSP(getRemoveCsp().isSelected());
         param.setSkipTutorialTasks(getSkipTutorialTasks().isSelected());
         param.setDevelopmentMode(getDevelopmentMode().isSelected());
