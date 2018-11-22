@@ -178,10 +178,6 @@ public class ExtensionHUD extends ExtensionAdaptor
         this.getExtScript().addListener(this);
 
         tutorialServer = new TutorialProxyServer(this);
-        if (getView() != null) {
-            extensionHook.getHookMenu().addToolsMenuItem(tutorialServer.getFirefoxToolsMenuItem());
-            extensionHook.getHookMenu().addToolsMenuItem(tutorialServer.getChromeToolsMenuItem());
-        }
     }
 
     @Override
@@ -495,6 +491,10 @@ public class ExtensionHUD extends ExtensionAdaptor
     public void resetTutorialTasks() {
         this.getHudParam().resetTutorialTasks();
         this.tutorialServer.resetTasks();
+    }
+
+    public String getTutorialUrl(String page, boolean https) {
+        return this.tutorialServer.getTutorialUrl(page, https);
     }
 
     @Override

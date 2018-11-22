@@ -19,8 +19,6 @@
  */
 package org.zaproxy.zap.extension.hud.tutorial;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
@@ -28,9 +26,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import org.openqa.selenium.WebDriver;
 import org.parosproxy.paros.Constant;
-import org.parosproxy.paros.control.Control;
 import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
 import org.parosproxy.paros.core.proxy.ProxyServer;
 import org.parosproxy.paros.core.proxy.ProxyThread;
@@ -63,8 +59,6 @@ import org.zaproxy.zap.extension.hud.tutorial.pages.SitesPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.SpiderPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.TutorialJsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
-import org.zaproxy.zap.extension.selenium.ExtensionSelenium;
-import org.zaproxy.zap.view.ZapMenuItem;
 
 public class TutorialProxyServer extends ProxyServer {
 
@@ -75,8 +69,6 @@ public class TutorialProxyServer extends ProxyServer {
     private static final Logger LOG = Logger.getLogger(TutorialProxyServer.class);
 
     private ExtensionHUD extension;
-    private ZapMenuItem firefoxToolsMenuItem;
-    private ZapMenuItem chromeToolsMenuItem;
     private String hostPort;
     private Map<String, TutorialPage> pages = new HashMap<String, TutorialPage>();
 
@@ -338,54 +330,6 @@ public class TutorialProxyServer extends ProxyServer {
                             true,
                             HttpSender.MANUAL_REQUEST_INITIATOR));
         }
-    }
-
-    public ZapMenuItem getFirefoxToolsMenuItem() {
-        // TODO This is a temporary solution, and should be removed
-        // when the tutorial can be accessed via a HUD 'loading' page.
-        // And maybe from the Quick Start tab as well :)
-
-        if (firefoxToolsMenuItem == null) {
-            firefoxToolsMenuItem = new ZapMenuItem("hud.menu.tutorial.firefox");
-            firefoxToolsMenuItem.addActionListener(
-                    new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(ActionEvent arg0) {
-                            ExtensionSelenium extSel =
-                                    Control.getSingleton()
-                                            .getExtensionLoader()
-                                            .getExtension(ExtensionSelenium.class);
-                            WebDriver wd = extSel.getProxiedBrowserByName("Firefox");
-                            wd.get("http://" + hostPort);
-                        }
-                    });
-        }
-        return firefoxToolsMenuItem;
-    }
-
-    public ZapMenuItem getChromeToolsMenuItem() {
-        // TODO This is a temporary solution, and should be removed
-        // when the tutorial can be accessed via a HUD 'loading' page.
-        // And maybe from the Quick Start tab as well :)
-
-        if (chromeToolsMenuItem == null) {
-            chromeToolsMenuItem = new ZapMenuItem("hud.menu.tutorial.chrome");
-            chromeToolsMenuItem.addActionListener(
-                    new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(ActionEvent arg0) {
-                            ExtensionSelenium extSel =
-                                    Control.getSingleton()
-                                            .getExtensionLoader()
-                                            .getExtension(ExtensionSelenium.class);
-                            WebDriver wd = extSel.getProxiedBrowserByName("Chrome");
-                            wd.get("http://" + hostPort);
-                        }
-                    });
-        }
-        return chromeToolsMenuItem;
     }
 
     public void resetTasks() {
