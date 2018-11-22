@@ -29,13 +29,15 @@ version = "1"
 
 val genHudFilesDir = layout.buildDirectory.dir("genHudFiles").get()
 val generatedI18nJsFileDir = genHudFilesDir.dir("i18nJs")
+val zapHome = layout.buildDirectory.dir("zapHome").get()
 val testZapHome = layout.buildDirectory.dir("testZapHome").get()
 val testZapInstall = layout.buildDirectory.dir("testZapInstall").get()
 val testResultsDir = layout.buildDirectory.dir("reports/tests/test").get()
 val zapPort = 8999
 // Use a key just to make sure the HUD works with one
 val zapApiKey = "password123"
-val zapCmdlineOpts = "-dir " + testZapHome + " -config hud.enabledForDaemon=true -config hud.devMode=true -config hud.unsafeEval=true -config hud.tutorialPort=9998 -config hud.tutorialTestMode=true -config api.key=" + zapApiKey + " -daemon -config start.addonDirs=$buildDir/zap/"
+val hudDevArgs = "-config hud.enabledForDesktop=true -config hud.enabledForDaemon=true -config hud.devMode=true -config hud.unsafeEval=true"
+val zapCmdlineOpts = "-dir $testZapHome $hudDevArgs -config hud.tutorialPort=9998 -config hud.tutorialTestMode=true -config api.key=$zapApiKey -daemon -config start.addonDirs=$buildDir/zap/"
 val zapSleepAfterStart = 10L
 
 zapAddOn {
@@ -154,6 +156,28 @@ tasks {
                   "move"("file" to "$testZapInstall/ZAP_D-" + day, "tofile" to "$testZapInstall/zap")
                   Runtime.getRuntime().exec("chmod +x " + "$testZapInstall/zap/zap.sh")
             }        
+        }
+    }
+
+    register<Copy>("copyHudClientFiles") {
+        description = "Copies the HUD files to the (local) home directory for use with continuous mode."
+
+        from(file("src/main/zapHomeFiles"))
+        from(sourceSets["main"].output.dirs)
+        into(zapHome)
+    }
+
+    register("runZap") {
+        description = "Runs ZAP (weekly) with the HUD in dev mode."
+
+        if (!file("$testZapInstall/zap").exists()) {
+            dependsOn("zapDownload")
+        }
+        dependsOn("assembleZapAddOn", "copyHudClientFiles")
+
+        doLast {
+            val args = "-dir $zapHome -dev -config start.checkForUpdates=false -config start.addonDirs=$buildDir/zap/ $hudDevArgs -config hud.dir=$zapHome/hud"
+            Runtime.getRuntime().exec("$testZapInstall/zap/zap.sh $args")
         }
     }
 
