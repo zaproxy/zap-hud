@@ -134,14 +134,28 @@
 		inputs = document.getElementsByTagName('input');
 		for (index = 0; index < inputs.length; ++index) {
 			var counted = false;
+			if (inputs[index].disabled) {
+				inputs[index].disabled = false;
+				inputs[index].style.borderColor = 'blue';
+				showEnabledDisabled.push(inputs[index]);
+				// We dont count disabled fields as they are still visible
+			}
+			if (inputs[index].readOnly) {
+				inputs[index].readOnly = false;
+				inputs[index].style.borderColor = 'blue';
+				showEnabledReadOnly.push(inputs[index]);
+				// We dont count readonly fields as they are still visible
+			}
 			if (inputs[index].type == "hidden") {
 				inputs[index].type = "";
+				inputs[index].style.borderColor = 'purple';
 				showEnableTypeHiddenFields.push(inputs[index]);
 				showEnabledCount++;
 				counted = true;
 			}
 			if (inputs[index].style.display == "none") {
 				inputs[index].style.display = "";
+				inputs[index].style.borderColor = 'purple';
 				showEnableDisplayNoneFields.push(inputs[index]);
 				if (! counted) {
 					showEnabledCount++;
@@ -150,21 +164,12 @@
 			}
 			if (inputs[index].style.visibility == "hidden") {
 				inputs[index].style.visibility = "";
+				inputs[index].style.borderColor = 'purple';
 				showEnableTypeHiddenFields.push(inputs[index]);
 				if (! counted) {
 					showEnabledCount++;
 					counted = true;
 				}
-			}
-			if (inputs[index].disabled) {
-				inputs[index].disabled = false;
-				showEnabledDisabled.push(inputs[index]);
-				// We dont count disabled fields as they are still visible
-			}
-			if (inputs[index].readOnly) {
-				inputs[index].readOnly = false;
-				showEnabledReadOnly.push(inputs[index]);
-				// We dont count readonly fields as they are still visible
 			}
 		}
 		showEnabled = true;
@@ -174,18 +179,23 @@
 		var index;
 		for (index = 0; index < showEnableTypeHiddenFields.length; ++index) {
 			showEnableTypeHiddenFields[index].type = 'hidden';
+			showEnableTypeHiddenFields[index].style.borderColor = '';
 		}
 		for (index = 0; index < showEnableDisplayNoneFields.length; ++index) {
 			showEnableDisplayNoneFields[index].style.display = 'none';
+			showEnableDisplayNoneFields[index].style.borderColor = '';
 		}
 		for (index = 0; index < showEnableDisplayHiddenFields.length; ++index) {
 			showEnableDisplayHiddenFields[index].style.visibility = 'hidden';
+			showEnableDisplayHiddenFields[index].style.borderColor = '';
 		}
 		for (index = 0; index < showEnabledDisabled.length; ++index) {
 			showEnabledDisabled[index].disabled = true;
+			showEnabledDisabled[index].style.borderColor = '';
 		}
 		for (index = 0; index < showEnabledReadOnly.length; ++index) {
 			showEnabledReadOnly[index].readOnly = true;
+			showEnabledReadOnly[index].style.borderColor = '';
 		}
 		showEnableTypeHiddenFields = [];
 		showEnableDisplayNoneFields = [];
