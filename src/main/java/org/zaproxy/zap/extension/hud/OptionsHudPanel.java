@@ -49,6 +49,8 @@ public class OptionsHudPanel extends AbstractParamPanel {
 
     private ExtensionHUD extension;
     private JTextField baseDirectory;
+    private JCheckBox enabledForDesktop = null;
+    private JCheckBox enabledForDaemon = null;
     private JCheckBox inScopeOnly = null;
     private JCheckBox showWelcomeScreen = null;
     private JCheckBox removeCsp = null;
@@ -78,12 +80,14 @@ public class OptionsHudPanel extends AbstractParamPanel {
         overridesPanel.add(directoryButton);
 
         int i = 0;
-        panel.add(directoryLabel, LayoutHelper.getGBC(0, i, 1, 1.0, new Insets(2, 2, 2, 2)));
-        panel.add(overridesPanel, LayoutHelper.getGBC(1, i, 1, 1.0, new Insets(2, 2, 2, 2)));
+        panel.add(getEnabledForDesktop(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
+        panel.add(getEnabledForDaemon(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getShowWelcomeScreen(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getInScopeOnly(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getRemoveCsp(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getDevelopmentMode(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
+        panel.add(directoryLabel, LayoutHelper.getGBC(0, ++i, 1, 1.0, new Insets(2, 2, 2, 2)));
+        panel.add(overridesPanel, LayoutHelper.getGBC(1, i, 1, 1.0, new Insets(2, 2, 2, 2)));
         panel.add(getAllowUnsafeEval(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getSkipTutorialTasks(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getResetTutorialTasks(), LayoutHelper.getGBC(0, ++i, 1, 1.0));
@@ -96,6 +100,25 @@ public class OptionsHudPanel extends AbstractParamPanel {
             baseDirectory = new JTextField(20);
         }
         return baseDirectory;
+    }
+
+    private JCheckBox getEnabledForDesktop() {
+        if (enabledForDesktop == null) {
+            enabledForDesktop =
+                    new JCheckBox(
+                            Constant.messages.getString(
+                                    "hud.optionspanel.label.enabledForDesktop"));
+        }
+        return enabledForDesktop;
+    }
+
+    private JCheckBox getEnabledForDaemon() {
+        if (enabledForDaemon == null) {
+            enabledForDaemon =
+                    new JCheckBox(
+                            Constant.messages.getString("hud.optionspanel.label.enabledForDaemon"));
+        }
+        return enabledForDaemon;
     }
 
     private JCheckBox getInScopeOnly() {
@@ -166,6 +189,8 @@ public class OptionsHudPanel extends AbstractParamPanel {
         final OptionsParam options = (OptionsParam) obj;
         final HudParam param = options.getParamSet(HudParam.class);
 
+        getEnabledForDesktop().setSelected(param.isEnabledForDesktop());
+        getEnabledForDaemon().setSelected(param.isEnabledForDaemon());
         getBaseDirectory().setText(param.getBaseDirectory());
         getInScopeOnly().setSelected(param.isInScopeOnly());
         getShowWelcomeScreen().setSelected(param.isShowWelcomeScreen());
@@ -208,6 +233,8 @@ public class OptionsHudPanel extends AbstractParamPanel {
                             new Event(HudEventPublisher.getPublisher(), event, null));
         }
 
+        param.setEnabledForDesktop(getEnabledForDesktop().isSelected());
+        param.setEnabledForDaemon(getEnabledForDaemon().isSelected());
         param.setBaseDirectory(getBaseDirectory().getText());
         param.setInScopeOnly(getInScopeOnly().isSelected());
         param.setShowWelcomeScreen(getShowWelcomeScreen().isSelected());
