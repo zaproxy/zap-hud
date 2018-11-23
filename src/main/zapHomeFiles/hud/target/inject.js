@@ -113,12 +113,6 @@
 		document.getElementById("management").style.height = "0px";
 	}
 	
-	
-	function showWelcomeScreen() {
-		var iframe = document.getElementById("management");
-		iframe.contentWindow.postMessage({action: 'showHudSettings', sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
-	}
-	
 	// TODO put this code in a separate file and inject ?
 	var showEnabled = false;
 	var showEnabledCount = 0;
@@ -309,10 +303,6 @@
 
 			case "contractManagement":
 				contractManagement();
-				break;
-
-			case "showWelcomeScreen":
-				showWelcomeScreen();
 				break;
 
 			case "refresh":
