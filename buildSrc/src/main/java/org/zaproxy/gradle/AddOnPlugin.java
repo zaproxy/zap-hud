@@ -29,12 +29,11 @@ import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Copy;
-import org.gradle.api.tasks.Delete;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
+import org.zaproxy.gradle.tasks.CopyZapHome;
 import org.zaproxy.gradle.tasks.UpdateManifestFile;
 
 public class AddOnPlugin implements Plugin<Project> {
@@ -170,27 +169,19 @@ public class AddOnPlugin implements Plugin<Project> {
                 .named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME)
                 .configure(t -> t.dependsOn(generateAddOnProvider));
 
-        TaskProvider<Copy> deployZapAddOnProvider =
-                project.getTasks().register("deployZapAddOn", Copy.class);
-        deployZapAddOnProvider.configure(
+        TaskProvider<CopyZapHome> deployProvider =
+                project.getTasks().register("deploy", CopyZapHome.class);
+        deployProvider.configure(
                 task -> {
                     task.setGroup("ZAP Add-On");
                     task.setDescription(
-                            "Deploys the ZAP add-on to zaproxy project (\"src/plugin\" dir).");
-                    task.from(generateAddOnProvider);
-                    task.setDestinationDir(project.file("../zaproxy/src/plugin"));
-                });
+                            "Deploys the add-on and its home files to ZAP home dir.\n\n"
+                                    + "Defaults to dev home dir if not specified through the command line nor\n"
+                                    + "through the system property \"zap.home.dir\". The command line argument\n"
+                                    + "takes precedence over the system property.");
 
-        TaskProvider<Delete> deployZapAddOnAndResetHudProvider =
-                project.getTasks().register("deployAndResetHud", Delete.class);
-        deployZapAddOnAndResetHudProvider.configure(
-                task -> {
-                    task.setGroup("ZAP Add-On");
-                    task.setDescription(
-                            "Deploys the ZAP add-on to zaproxy project (\"src/plugin\" dir) and deletes the hud dirs (\".ZAP_D/hud\", \".ZAP_D/hudtutorial\").");
-                    task.delete(System.getProperty("user.home") + "/.ZAP_D/hud");
-                    task.delete(System.getProperty("user.home") + "/.ZAP_D/hudtutorial");
-                    task.dependsOn(deployZapAddOnProvider);
+                    task.from(generateAddOnProvider, spec -> spec.into("plugin"));
+                    task.from(extension.getZapHomeFiles());
                 });
     }
 }
