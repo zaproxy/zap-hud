@@ -19,7 +19,6 @@
  */
 package org.zaproxy.zap.extension.hud;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.configuration.ConfigurationException;
@@ -189,9 +188,7 @@ public class HudParam extends VersionedAbstractParam {
                 getConfig()
                         .getString(
                                 PARAM_BASE_DIRECTORY,
-                                Constant.getZapHome()
-                                        + File.separator
-                                        + ExtensionHUD.DIRECTORY_NAME);
+                                Constant.getZapHome() + ExtensionHUD.DIRECTORY_NAME);
         enabledForDesktop = getConfig().getBoolean(PARAM_ENABLED_DESKTOP, true);
         enabledForDaemon = getConfig().getBoolean(PARAM_ENABLED_DAEMON, false);
         developmentMode = getConfig().getBoolean(PARAM_DEV_MODE, true);
