@@ -347,12 +347,12 @@
 				break;
 		}
 	}
-	
+
 	/* initializes the HUD Frames */
 	if (window.top == window.self) {
-		window.addEventListener("message", receiveMessages);
-
 		tabId = Math.round(Math.random()*5000) //todo: nonsense random number generator;
+
+		window.addEventListener("message", receiveMessages);
 
 		var template = document.createElement("template");
 		template.innerHTML = '<iframe id="management" src="<<ZAP_HUD_FILES>>?name=management.html&amp;frameId=management&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +

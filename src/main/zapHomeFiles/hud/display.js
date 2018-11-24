@@ -434,7 +434,7 @@ Vue.component('site-tree-node', {
 	    showHttpMessageDetails: function () {
 		    app.keepShowing = true;
 		    app.isSiteTreeModalShown = false;
-		    navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "showHttpMessageDetails2", tool: "history", id:this.model.hrefId});
+		    navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "showHttpMessageDetails", tool: "history", id:this.model.hrefId});
 	    },
 	    showChildren: function () {
 	      this.addChild(I18n.t("sites_children_loading"), false);

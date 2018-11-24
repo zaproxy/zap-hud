@@ -27,7 +27,7 @@ var History = (function() {
         tool.position = 0;
         tool.messages = [];
 
-        saveTool(tool);
+        writeTool(tool);
         registerForZapEvents("org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher");
 	}
 
@@ -60,47 +60,7 @@ var History = (function() {
 			.catch(errorHandler);
 	}
 
-	function showHttpMessageDetails(data) {
-		if (!data) {
-			throw new Error('Coud not load HTTP message details')
-		}
-
-		var config = {
-			request: {
-				method: parseRequestHeader(data.requestHeader).method,
-				header: data.requestHeader.trim(),
-				body: data.requestBody
-			},
-			response: {
-				header: data.responseHeader.trim(),
-				body: data.responseBody
-			},
-			isResponseDisabled: false,
-			activeTab: "Request"
-		};
-
-		if ('activeTab' in data) {
-			config.activeTab = data.activeTab;
-		}
-
-		return messageFrame("display", {action:"showHistoryMessage", config:config})
-			.then(data => {
-				// Handle button choice
-				if (data.buttonSelected === "replay") {
-					sendRequest(data.header, data.body)
-					.then(response => response.json())
-					.then(json => {
-						let data = json.sendRequest[0];
-						data.activeTab = "Response"
-						return showHttpMessageDetails(data);
-					})
-					.catch(errorHandler)
-				}
-			})
-			.catch(errorHandler);
-	}
-
-	function showHttpMessageDetails2(tabId, data) {
+	function showHttpMessageDetails(tabId, data) {
 		if (!data) {
 			throw new Error('Coud not load HTTP message details')
 		}
@@ -132,7 +92,7 @@ var History = (function() {
 					.then(json => {
 						let data = json.sendRequest[0];
 						data.activeTab = "Response"
-						return showHttpMessageDetails2(tabId, data);
+						return showHttpMessageDetails(tabId, data);
 					})
 					.catch(errorHandler)
 				}
@@ -176,11 +136,11 @@ var History = (function() {
         message.code = event.detail.statusCode;
 		message.id = event.detail.historyReferenceId;
 
-        messageFrame('drawer', {action: 'updateMessages', messages: [message]})
+        messageAllTabs('drawer', {action: 'updateMessages', messages: [message]})
             .catch(errorHandler);
 
-        tool.messages.push(message);
-        saveTool(tool);
+		tool.messages.push(message);
+		writeTool(tool)
 	});
 
 	self.addEventListener("activate", event => {
@@ -188,8 +148,12 @@ var History = (function() {
 	});
 
 	function trimMessages(lastPageUnloadTime) {
-		tool.messages = tool.messages.filter(message => message.timeInMs > lastPageUnloadTime)
-		saveTool(tool);
+		loadTool(NAME)
+			.then(tool => {
+				tool.messages = tool.messages.filter(message => message.timeInMs > lastPageUnloadTime)
+				writeTool(tool)
+			})
+			.catch(errorHandler);
 	}
 
 	self.addEventListener("message", event => {
@@ -218,14 +182,8 @@ var History = (function() {
 
 				case "showHttpMessageDetails":
 					getMessageDetails(message.id)
-						.then(showHttpMessageDetails)
-						.catch(errorHandler)
-					break;
-
-				case "showHttpMessageDetails2":
-					getMessageDetails(message.id)
 						.then(data => {
-							return showHttpMessageDetails2(message.tabId, data)
+							return showHttpMessageDetails(message.tabId, data)
 						})
 						.catch(errorHandler)
 					break;
