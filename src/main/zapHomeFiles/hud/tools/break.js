@@ -32,7 +32,7 @@ var Break = (function() {
 		tool.panel = "";
 		tool.position = 0;
 
-		saveTool(tool);
+		writeTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.brk.BreakEventPublisher");
 	}
 
@@ -102,7 +102,8 @@ var Break = (function() {
 				tool.data = DATA.ON;
 				tool.icon = ICONS.ON;
 
-				saveTool(tool);
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: DATA.ON, icon: ICONS.ON}})
+				writeTool(tool);
 			})
 			.catch(errorHandler);
 	}
@@ -118,7 +119,8 @@ var Break = (function() {
 				tool.data = DATA.OFF;
 				tool.icon = ICONS.OFF;
 
-				saveTool(tool);
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: DATA.OFF, icon: ICONS.OFF}})
+				writeTool(tool)
 			})
 			.catch(errorHandler);
 	}
@@ -129,7 +131,8 @@ var Break = (function() {
 	}
 
 	function drop() {
-		return fetch("<<ZAP_HUD_API>>/break/action/drop/");
+		return fetch("<<ZAP_HUD_API>>/break/action/drop/")
+			.catch(errorHandler);
 	}
 
 	function setHttpMessage(header, body) {
@@ -180,13 +183,14 @@ var Break = (function() {
 		config.request.header = data.requestHeader.trim();
 		config.request.body = data.requestBody;
 
-		messageFrame("display", {action:"showBreakMessage", config:config})
+		messageAllTabs("display", {action:"showBreakMessage", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.buttonSelected === "step") {
 					setHttpMessage(response.header, response.body)
 						.then(() => {
 							step();
+							messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
 						})
 						.catch(errorHandler);
 				}
@@ -194,12 +198,13 @@ var Break = (function() {
 					setHttpMessage(response.header, response.body)
 						.then(() => {
 							stopBreaking();
+							messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
 						})
 						.catch(errorHandler);
 				}
 				else if (response.buttonSelected === "drop") {
-					drop()
-						.catch(errorHandler);
+					drop();
+					messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
 				}
 				else {
 					//cancel

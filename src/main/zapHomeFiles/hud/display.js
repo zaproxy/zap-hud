@@ -312,17 +312,17 @@ Vue.component('break-message-modal', {
 		step: function() {
 			let message = this.$refs.messageModal.currentMessage;
 
-			this.port.postMessage({'buttonSelected': 'step', 'method': message.method, 'header': message.header, 'body': message.body});
 			this.$emit('close');
+			this.port.postMessage({buttonSelected: 'step', tabId: tabId, method: message.method, header: message.header, body: message.body});
 		},
 		continueOn: function() {
 			let message = this.$refs.messageModal.currentMessage;
 
-			this.port.postMessage({'buttonSelected': 'continue', 'method': message.method, 'header': message.header, 'body': message.body});
+			this.port.postMessage({buttonSelected: 'continue', tabId: tabId, method: message.method, header: message.header, body: message.body});
 			this.$emit('close');
 		},
 		drop: function() {
-			this.port.postMessage({'buttonSelected': 'drop'});
+			this.port.postMessage({buttonSelected: 'drop', frameId: frameId});
 			this.$emit('close');
 		}
 	},
@@ -350,6 +350,10 @@ Vue.component('break-message-modal', {
 
 			app.isBreakMessageModalShown = true;
 			app.BreakMessageModalTitle = data.title;
+		})
+
+		eventBus.$on('closeAllModals', () => {
+			this.$emit('close');
 		})
 	}
 })
@@ -622,7 +626,8 @@ navigator.serviceWorker.addEventListener("message", event => {
 				buttons: config.buttons,
 				port: port
 			});
-			
+
+			showDisplayFrame();
 			break;
 
 		case "showAddToolList":
@@ -630,7 +635,8 @@ navigator.serviceWorker.addEventListener("message", event => {
 				tools: config.tools,
 				port: port
 			});
-		
+
+			showDisplayFrame();
 			break;
 
 		case "showAlerts":
@@ -639,7 +645,8 @@ navigator.serviceWorker.addEventListener("message", event => {
 				alerts: config.alerts,
 				port: port
 			});
-		
+
+			showDisplayFrame();
 			break;
 
 		case "showAllAlerts":
@@ -649,7 +656,8 @@ navigator.serviceWorker.addEventListener("message", event => {
 				port: port,
 				risk: config.risk
 			});
-		
+
+			showDisplayFrame();
 			break;
 
 		case "showAlertDetails":
@@ -658,7 +666,8 @@ navigator.serviceWorker.addEventListener("message", event => {
 				details: config.details,
 				port: port
 			});
-		
+
+			showDisplayFrame();
 			break;
 
 		case "showButtonOptions":
@@ -667,7 +676,8 @@ navigator.serviceWorker.addEventListener("message", event => {
 				items: config.options,
 				port: port
 			});
-		
+
+			showDisplayFrame();
 			break;
 
 		case "showHudSettings":
@@ -676,7 +686,8 @@ navigator.serviceWorker.addEventListener("message", event => {
 				items: config.settings,
 				port: port
 			});
-		
+
+			showDisplayFrame();
 			break;
 
 		case "showBreakMessage":
@@ -688,6 +699,8 @@ navigator.serviceWorker.addEventListener("message", event => {
 				activeTab: config.activeTab,
 				port: port
 			})
+
+			showDisplayFrame();
 			break;
 
 		case "showHistoryMessage":
@@ -699,6 +712,8 @@ navigator.serviceWorker.addEventListener("message", event => {
 				activeTab: config.activeTab,
 				port: port
 			})
+
+			showDisplayFrame();
 			break;
 
 		case "showSiteTree":
@@ -706,15 +721,21 @@ navigator.serviceWorker.addEventListener("message", event => {
 				title: I18n.t("sites_tool"), 
 				port: port
 			});
-			
+
+			showDisplayFrame();
+			break;
+
+		case "closeModals":
+			if (config.notTabId != tabId) {
+				eventBus.$emit('closeAllModals', {
+					port: port
+				});
+			}
 			break;
 
 		default:
 			break;
 	}
-
-	// show the display frame
-	showDisplayFrame();
 });
 
 /* the injected script makes the main frame visible */
