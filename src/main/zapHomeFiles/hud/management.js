@@ -14,7 +14,8 @@ Vue.component('loading-screen', {
 				dontShowWelcomeAgain().then(() => {
 					// Refresh the target so the HUD buttons appear
 					parent.postMessage( {action: 'refresh'} , document.referrer);
-				});
+				})
+				.catch(errorHandler);
 			} else {
 				// Refresh the target so the HUD buttons appear
 				parent.postMessage( {action: 'refresh'} , document.referrer);
@@ -27,7 +28,8 @@ Vue.component('loading-screen', {
 					window.open("<<TUTORIAL_URL>>");
 					// Refresh the target so the HUD buttons appear
 					parent.postMessage( {action: 'refresh'} , document.referrer);
-				});
+				})
+				.catch(errorHandler);
 			} else {
 				// Open the tutorial in a new window / tab
 				window.open("<<TUTORIAL_URL>>");
@@ -140,10 +142,6 @@ function serviceWorkerMessageListener(event) {
  */ 
 function startServiceWorker() {
 	if ('serviceWorker' in navigator) {
-		if ( <<SHOW_WELCOME_SCREEN>> ) {
-			parent.postMessage({action: 'showWelcomeScreen'}, document.referrer);
-		}
-
 		navigator.serviceWorker.register('<<ZAP_HUD_FILES>>?name=serviceworker.js')
 			.then(registration => {
 				console.log('Service worker registration was successful for the scope: ' + registration.scope);
