@@ -6,12 +6,23 @@ Vue.component('history', {
     template: '#history-template',
     data() {
         return {
+            filter: '',
             messages: []
         }
     },
     computed: {
         timeDescendingMessages() {
             return this.messages.slice().reverse();
+        },
+        filteredMessages() {
+            const self=this;
+
+            return this.messages.filter( message => {
+                if (self.filter.trim().length === 0) {
+                    return message;
+                }
+                return message.url.indexOf(self.filter)>=0; 
+            });
         }
     },
     methods: {
