@@ -30,7 +30,12 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="message in messages" @click="messageSelected(message.id)" :id="'message-tr-'+message.id">
+                <tr>
+                    <td colspan="4">
+                        <input v-model="filter" type="text" placeholder="Filter" />
+                    </td>
+                </tr>
+                <tr v-for="message in filteredMessages" @click="messageSelected(message.id)" :id="'message-tr-'+message.id">
                     <td> {{ message.time }} </td>
                     <td> {{ message.code }} </td>
                     <td> {{ message.method }} </td>
