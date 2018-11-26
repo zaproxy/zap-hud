@@ -364,7 +364,7 @@ Vue.component('history-message-modal', {
 		replayInBrowser: function() {
 			let self = this;
 			let message = this.request;
-			fetch("<<ZAP_HUD_API>>/hud/action/recordRequest/?header=" + encodeURIComponent(message.header) + "&body=" + encodeURIComponent(message.body))
+			zapApiCall("/hud/action/recordRequest/?header=" + encodeURIComponent(message.header) + "&body=" + encodeURIComponent(message.body))
 			.then(response => response.json())
 			.then(json => {
 				if (json.requestUrl) {
@@ -429,7 +429,7 @@ Vue.component('site-tree-node', {
 	    showChildren: function () {
 	      this.addChild(I18n.t("sites_children_loading"), false);
 			var treeNode = this;
-			fetch("<<ZAP_HUD_API>>/core/view/childNodes/?url=" + this.model.url)
+			zapApiCall("/core/view/childNodes/?url=" + this.model.url)
 			.then(response => {
 
 				response.json().

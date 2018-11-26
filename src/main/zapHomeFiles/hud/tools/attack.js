@@ -80,7 +80,7 @@ var Attack = (function() {
 	}
 
 	function turnOnAttackMode(domain) {
-			fetch("<<ZAP_HUD_API>>/core/action/setMode/?mode=attack");
+			zapApiCall("/core/action/setMode/?mode=attack");
 
 			loadTool(NAME)
 				.then(tool => {
@@ -94,7 +94,7 @@ var Attack = (function() {
 	}
 
 	function turnOffAttackMode() {
-		fetch("<<ZAP_HUD_API>>/core/action/setMode/?mode=standard");
+		zapApiCall("/core/action/setMode/?mode=standard");
 
 		loadTool(NAME)
 			.then(tool => {

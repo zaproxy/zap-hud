@@ -338,23 +338,16 @@ public class HudAPI extends ApiImplementor {
                 // Strip off the callback path
                 url = url.substring(0, url.indexOf("/zapCallBackUrl"));
             }
-            contents =
-                    contents.replace("<<ZAP_HUD_FILES>>", this.hudFileUrl)
-                            .replace("<<URL>>", url)
-                            .replace("<<TUTORIAL_URL>>", this.extension.getTutorialUrl("", false))
-                            .replace(
-                                    "<<SHOW_WELCOME_SCREEN>>",
-                                    Boolean.toString(
-                                            this.extension.getHudParam().isShowWelcomeScreen()))
-                            .replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
-
-            if (file.equals("i18n.js")) {
+            // Inject content into specific files
+            if (file.equals("target/inject.js")) {
                 contents =
-                        contents.replace("<<ZAP_LOCALE>>", Constant.messages.getLocal().toString());
+                        contents.replace("<<URL>>", url)
+                                .replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
             }
+            contents = contents.replace("<<ZAP_HUD_FILES>>", this.hudFileUrl);
 
             if (url.startsWith(API.API_URL_S)) {
-                // Only do this on the ZAP domain
+                // Only do these on the ZAP domain
                 contents =
                         contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
                                 .replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
@@ -373,7 +366,38 @@ public class HudAPI extends ApiImplementor {
                             sb.append("\",\n");
                         }
                     }
-                    contents = contents.replace("<<ZAP_HUD_TOOLS>>", sb.toString());
+                    // The single quotes are to keep the JS linter happy
+                    contents = contents.replace("'<<ZAP_HUD_TOOLS>>'", sb.toString());
+                } else if (file.equals("i18n.js")) {
+                    contents =
+                            contents.replace(
+                                    "<<ZAP_LOCALE>>", Constant.messages.getLocal().toString());
+
+                } else if (file.equals("utils.js")) {
+                    contents = contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl);
+                } else if (file.equals("serviceworker.js")) {
+                    contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
+                } else if (file.equals("websockettest.js")) {
+                    contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
+                } else if (file.equals("management.html")) {
+                    // TODO move into js
+                    contents =
+                            contents.replace(
+                                    "<<SHOW_WELCOME_SCREEN>>",
+                                    Boolean.toString(
+                                            this.extension.getHudParam().isShowWelcomeScreen()));
+                } else if (file.equals("management.js")) {
+                    contents =
+                            contents.replace(
+                                            "<<SHOW_WELCOME_SCREEN>>",
+                                            Boolean.toString(
+                                                    this.extension
+                                                            .getHudParam()
+                                                            .isShowWelcomeScreen()))
+                                    .replace(
+                                            "<<TUTORIAL_URL>>",
+                                            this.extension.getTutorialUrl("", false))
+                                    .replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
                 }
             }
 

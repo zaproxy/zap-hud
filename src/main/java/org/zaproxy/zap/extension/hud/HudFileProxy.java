@@ -19,8 +19,13 @@
  */
 package org.zaproxy.zap.extension.hud;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.log4j.Logger;
+import org.parosproxy.paros.network.HttpHeader;
+import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
+import org.parosproxy.paros.network.HttpResponseHeader;
 import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.api.ApiException;
 import org.zaproxy.zap.extension.api.ApiImplementor;
@@ -34,6 +39,14 @@ public class HudFileProxy extends ApiImplementor {
 
     private HudAPI api;
 
+    private static final Set<String> DYNAMIC_FILES;
+
+    static {
+        DYNAMIC_FILES = new HashSet<String>();
+        DYNAMIC_FILES.add("inject.js");
+        DYNAMIC_FILES.add("management.js");
+    }
+
     public HudFileProxy(HudAPI api) {
         this.api = api;
     }
@@ -41,6 +54,41 @@ public class HudFileProxy extends ApiImplementor {
     @Override
     public String getPrefix() {
         return PREFIX;
+    }
+
+    private HttpResponseHeader getResponseHeader(String fileName, int contentLength)
+            throws HttpMalformedHeaderException {
+        if (DYNAMIC_FILES.contains(fileName)) {
+            return new HttpResponseHeader(
+                    API.getDefaultResponseHeader(
+                            "application/javascript; charset=UTF-8", contentLength, false));
+        } else {
+            HttpResponseHeader header;
+            if (fileName.endsWith(".html")) {
+                // Must allow framing
+                header =
+                        new HttpResponseHeader(
+                                HudAPI.getAllowFramingResponseHeader(
+                                        "200 OK",
+                                        "text/html; charset=UTF-8",
+                                        contentLength,
+                                        false));
+            } else {
+                String contentType;
+                if (fileName.endsWith(".js")) {
+                    contentType = "application/javascript; charset=UTF-8";
+                } else if (fileName.endsWith(".css")) {
+                    contentType = "text/css; charset=UTF-8";
+                } else {
+                    contentType = getImageContentType(fileName);
+                }
+                header =
+                        new HttpResponseHeader(
+                                API.getDefaultResponseHeader(contentType, contentLength, true));
+            }
+            header.setHeader(HttpHeader.CACHE_CONTROL, "public, max-age=31536000");
+            return header;
+        }
     }
 
     @Override
@@ -60,21 +108,8 @@ public class HudFileProxy extends ApiImplementor {
                     if (file.indexOf("&") > 0) {
                         file = file.substring(0, file.indexOf("&"));
                     }
-                    if (file.endsWith(".js")) {
-                        msg.setResponseHeader(
-                                API.getDefaultResponseHeader(
-                                        "application/javascript; charset=UTF-8", 0, false));
-                    } else if (file.endsWith(".html")) {
-                        // Must allow framing or it wont work
-                        msg.setResponseHeader(
-                                HudAPI.getAllowFramingResponseHeader(
-                                        "200 OK", "text/html; charset=UTF-8", 0, false));
-                    } else if (file.endsWith(".css")) {
-                        msg.setResponseHeader(
-                                API.getDefaultResponseHeader("text/css; charset=UTF-8", 0, false));
-                    }
                     msg.setResponseBody(api.getFile(msg, file));
-                    msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
+                    msg.setResponseHeader(getResponseHeader(file, msg.getResponseBody().length()));
 
                     if (msg.getRequestHeader().getURI().toString().startsWith(API.API_URL_S)) {
                         if (api.allowUnsafeEval()) {
@@ -93,11 +128,7 @@ public class HudFileProxy extends ApiImplementor {
                     String file = query.substring(query.indexOf("image=") + 6);
 
                     msg.setResponseBody(api.getImage(file));
-                    msg.setResponseHeader(
-                            API.getDefaultResponseHeader(
-                                    getImageContentType(file),
-                                    msg.getResponseBody().length(),
-                                    true));
+                    msg.setResponseHeader(getResponseHeader(file, msg.getResponseBody().length()));
                     return msg.getResponseBody().toString();
                 }
             }
