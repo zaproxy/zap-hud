@@ -4,6 +4,10 @@
  * Description goes here...
  */
 
+// Injected strings
+var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
+var ZAP_HUD_API = '<<ZAP_HUD_API>>';
+
 var IS_HUD_CONFIGURED = "isHudConfigured";
 var IS_DEBUG_ENABLED = false;
 var IS_FIRST_TIME = "isFirstTime";
@@ -23,7 +27,7 @@ var LOG_TO_ZAP = true;
 var CLIENT_LEFT = "left";
 var CLIENT_RIGHT = "right";
 
-var BUTTON_HTML = '<div class="button" id="BUTTON_NAME-button">\n<div class="button-icon" id="BUTTON_NAME-button-icon"><img src="<<ZAP_HUD_FILES>>?image=IMAGE_NAME" alt="IMAGE_NAME" height="16" width="16"></div>\n<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA</div>\n<div class="button-label" id="BUTTON_NAME-button-label">BUTTON_LABEL</div>\n</div>\n';
+var BUTTON_HTML = '<div class="button" id="BUTTON_NAME-button">\n<div class="button-icon" id="BUTTON_NAME-button-icon"><img src="' + ZAP_HUD_FILES + '?image=IMAGE_NAME" alt="IMAGE_NAME" height="16" width="16"></div>\n<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA</div>\n<div class="button-label" id="BUTTON_NAME-button-label">BUTTON_LABEL</div>\n</div>\n';
 var BUTTON_NAME = /BUTTON_NAME/g;
 var BUTTON_DATA_DIV  = /<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA<\/div>/g;
 var BUTTON_DATA = /BUTTON_DATA/g;
@@ -614,6 +618,15 @@ function errorHandler(err) {
 	log(LOG_ERROR, 'errorHandler', message, err);
 }
 
+
+function getZapFilePath(file) {
+	return ZAP_HUD_FILES + '?name=' + file;
+}
+
+function zapApiCall(apiCall) {
+	return fetch(ZAP_HUD_API + apiCall);
+}
+
 function log(level, method, message, object) {
 	if (level > LOG_LEVEL || (! LOG_TO_CONSOLE && ! LOG_TO_ZAP)) {
 		return;
@@ -633,7 +646,7 @@ function log(level, method, message, object) {
 		console[logLevel.toLowerCase()](record);
 	}
 	if (LOG_TO_ZAP) {
-		fetch("<<ZAP_HUD_API>>/hud/action/log/?record=" + record);
+		zapApiCall("/hud/action/log/?record=" + record);
 	}
 	if (level == LOG_ERROR) {
 		self.dispatchEvent(new CustomEvent("hud.error", {detail: {record: record}}));

@@ -93,7 +93,7 @@ var Break = (function() {
 	}
 
 	function startBreaking() {
-		fetch("<<ZAP_HUD_API>>/break/action/break/?type=http-all&state=true")
+		zapApiCall("/break/action/break/?type=http-all&state=true")
 			.catch(errorHandler);
 
 		loadTool(NAME)
@@ -109,7 +109,7 @@ var Break = (function() {
 
 	// todo: change this to 'continue' and figure out / fix stopBreaking
 	function stopBreaking() {
-		fetch("<<ZAP_HUD_API>>/break/action/continue")
+		zapApiCall("/break/action/continue")
 			.catch(errorHandler);
 
 		loadTool(NAME)
@@ -124,16 +124,16 @@ var Break = (function() {
 	}
 
 	function step() {
-		return fetch("<<ZAP_HUD_API>>/break/action/step/")
+		return zapApiCall("/break/action/step/")
 			.catch(errorHandler);
 	}
 
 	function drop() {
-		return fetch("<<ZAP_HUD_API>>/break/action/drop/");
+		return zapApiCall("/break/action/drop/");
 	}
 
 	function setHttpMessage(header, body) {
-		let url = "<<ZAP_HUD_API>>/break/action/setHttpMessage/";
+		let url = "/break/action/setHttpMessage/";
 		let params = "httpHeader=" + encodeURIComponent(header) + "&httpBody=" + encodeURIComponent(body)
 
 		let init = {
@@ -142,7 +142,7 @@ var Break = (function() {
 			headers: {'content-type': 'application/x-www-form-urlencoded'} 
 		};
 
-		return fetch(url, init)
+		return zapApiCall(url, init)
 			.catch(errorHandler);
 	}
 

@@ -107,7 +107,7 @@ var CommonAlerts = (function() {
 				if (sharedData.alerts[targetDomain] === undefined) {
 					// This is the first time we have seen this domain so
 					// fetch all of the current alerts from ZAP
-					fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + domainWrapper(targetDomain) + "&recurse=true")
+					zapApiCall("/alert/view/alertsByRisk/?url=" + domainWrapper(targetDomain) + "&recurse=true")
 					.then(response => {
 						response.json().
 							then(json => {
@@ -133,7 +133,7 @@ var CommonAlerts = (function() {
 				}
 
 				// Fetch all of the alerts on this page
-				fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
+				zapApiCall("/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
 				.then(response => {
 					response.json().
 						then(json => {
