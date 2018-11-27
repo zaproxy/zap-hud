@@ -20,6 +20,11 @@
       "git add"
     ]
   },
+  "xo": {
+    "ignores": [
+      "src/**/hud/libraries/**"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/psiinon/zap-hud.git"

@@ -623,8 +623,16 @@ function getZapFilePath(file) {
 	return ZAP_HUD_FILES + '?name=' + file;
 }
 
+function getZapImagePath(file) {
+	return ZAP_HUD_FILES + '?image=' + file;
+}
+
 function zapApiCall(apiCall) {
 	return fetch(ZAP_HUD_API + apiCall);
+}
+
+function zapApiCall(apiCall, init) {
+	return fetch(ZAP_HUD_API + apiCall, init);
 }
 
 function log(level, method, message, object) {

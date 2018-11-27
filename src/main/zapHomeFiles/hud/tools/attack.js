@@ -53,9 +53,9 @@ var Attack = (function() {
 				else {
 					config.text = DIALOG.ON;
 					config.buttons = [
-						{text:"Turn off",
+						{text:I18n.t("common_turn_off"),
 						id:"turnoff"},
-						{text:"Cancel",
+						{text:I18n.t("common_cancel"),
 						id:"cancel"}
 					];
 				}
