@@ -4,7 +4,7 @@
  * Description goes here...
  */
 
-var IMAGE_URL = "<<ZAP_HUD_FILES>>?image=";
+var IMAGE_URL = '<<ZAP_HUD_FILES>>?image=';
 var orientation = "";
 var panelKey = "";
 
@@ -72,7 +72,7 @@ Vue.component('hud-button', {
 
 		eventBus.$on('updateButton', data => {
 			if (self.name === data.name) {
-				self.currentIcon = '<<ZAP_HUD_FILES>>?image=' + data.icon;
+				self.currentIcon = IMAGE_URL + data.icon;
 				self.currentData = data.data;
 			}
 		})

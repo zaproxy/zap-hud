@@ -97,14 +97,14 @@ var Scope = (function() {
         loadTool(NAME)
             .then(tool => {
                 if (! tool.hudContext) {
-                    fetch("<<ZAP_HUD_API>>/context/action/newContext/?contextName=" + HUD_CONTEXT)
+                    zapApiCall("/context/action/newContext/?contextName=" + HUD_CONTEXT)
                 }
                 tool.urls.push(domain);
                 tool.data = DATA.IN;
                 tool.icon = ICONS.IN;
                 tool.hudContext = true;
 
-                fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=" + HUD_CONTEXT + "&regex=" + domainWrapper(domain) + ".*")
+                zapApiCall("/context/action/includeInContext/?contextName=" + HUD_CONTEXT + "&regex=" + domainWrapper(domain) + ".*")
                 .then(response => {
                     if (!response.ok) {
                         log (LOG_ERROR, 'scope.addToScope', 'Failed to add ' + domain + ' to scope');
@@ -117,7 +117,7 @@ var Scope = (function() {
 	}
 
 	function removeFromScope(domain) {
-		fetch("<<ZAP_HUD_API>>/context/action/excludeFromContext/?contextName=" + HUD_CONTEXT + "&regex=" + domainWrapper(domain) + ".*")
+		zapApiCall("/context/action/excludeFromContext/?contextName=" + HUD_CONTEXT + "&regex=" + domainWrapper(domain) + ".*")
         .then(response => {
             if (!response.ok) {
                 log (LOG_ERROR, 'scope.removeFromScope', 'Failed to remove ' + domain + ' from scope');
