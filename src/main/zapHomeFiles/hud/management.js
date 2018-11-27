@@ -6,9 +6,9 @@
 
 var app;
 // Injected strings
-var showWelcomeScreen = '<<SHOW_WELCOME_SCREEN>>' === 'true' ? true : false ;
-var tutorialUrl = '<<TUTORIAL_URL>>';
-var zapSharedSecret = '<<ZAP_SHARED_SECRET>>';
+var SHOW_WELCOME_SCREEN = '<<SHOW_WELCOME_SCREEN>>' === 'true' ? true : false ;
+var TUTORIAL_URL = '<<TUTORIAL_URL>>';
+var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
 
 Vue.component('loading-screen', {
 	template: '#loading-screen-template',
@@ -29,14 +29,14 @@ Vue.component('loading-screen', {
 			if (dontShowAgain.checked) {
 				dontShowWelcomeAgain().then(() => {
 					// Open the tutorial in a new window / tab
-					window.open(tutorialUrl);
+					window.open(TUTORIAL_URL);
 					// Refresh the target so the HUD buttons appear
 					parent.postMessage( {action: 'refresh'} , document.referrer);
 				})
 				.catch(errorHandler);
 			} else {
 				// Open the tutorial in a new window / tab
-				window.open(tutorialUrl);
+				window.open(TUTORIAL_URL);
 				// Refresh the target so the HUD buttons appear
 				parent.postMessage( {action: 'refresh'} , document.referrer);
 			}
@@ -44,7 +44,7 @@ Vue.component('loading-screen', {
 	},
 	data() {
 		return {
-			isShowWelcomeScreen: showWelcomeScreen,
+			isShowWelcomeScreen: SHOW_WELCOME_SCREEN,
 			dontShowAgain: false
 		}
 	},
@@ -97,7 +97,7 @@ function windowMessageListener(event) {
 		log(LOG_WARN, 'management.receiveMessage', 'Message without sharedSecret rejected');
 		return;
 	}
-	if (event.data.sharedSecret === zapSharedSecret) {
+	if (event.data.sharedSecret === ZAP_SHARED_SECRET) {
 		navigator.serviceWorker.controller.postMessage(event.data);
 	} else {
 		log(LOG_WARN, 'management.receiveMessage', 'Message with incorrect sharedSecret rejected ' + event.data.sharedSecret);
@@ -154,7 +154,7 @@ function startServiceWorker() {
 				// wait until serviceworker is installed and activated
 				navigator.serviceWorker.ready
 					.then(serviceWorkerRegistration => {
-						if (! showWelcomeScreen ) {
+						if (! SHOW_WELCOME_SCREEN ) {
 							// refresh the target page
 							parent.postMessage( {action: 'refresh'} , document.referrer);
 						}
