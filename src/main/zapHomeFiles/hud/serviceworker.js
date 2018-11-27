@@ -3,7 +3,7 @@ importScripts("<<ZAP_HUD_FILES>>?name=libraries/vue.js");
 importScripts("<<ZAP_HUD_FILES>>?name=libraries/vue-i18n.js"); 
 importScripts("<<ZAP_HUD_FILES>>?name=i18n.js");
 importScripts("<<ZAP_HUD_FILES>>?name=utils.js");
-importScripts("<<ZAP_HUD_FILES>>?name=tools/alertUtils.js");
+importScripts("<<ZAP_HUD_FILES>>?name=tools/utils/alertUtils.js");
 
 var CACHE_NAME = "hud-cache-1.0";
 
