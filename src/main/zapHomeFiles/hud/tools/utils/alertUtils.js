@@ -7,7 +7,7 @@ var alertUtils = (function() {
 		config.title = title;
 		config.risk = alertRisk;
 		
-		fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + domainWrapper(target) + "&recurse=true")
+		zapApiCall("/alert/view/alertsByRisk/?url=" + domainWrapper(target) + "&recurse=true")
 		.then(response => {
 			response.json().
 				then(json => {
@@ -65,7 +65,7 @@ var alertUtils = (function() {
 			target = target.substring(0, target.indexOf("?"));
 		}
 		
-		fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
+		zapApiCall("/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
 		.then(response => {
 			response.json().
 				then(json => {
@@ -89,7 +89,7 @@ var alertUtils = (function() {
 	function showAlertDetails(id, backFunction) { 
 		log (LOG_DEBUG, 'showAlertDetails', '' + id);
 
-		fetch("<<ZAP_HUD_API>>/core/view/alert/?id=" + id)
+		zapApiCall("/core/view/alert/?id=" + id)
 			.then(response => {
 
 				response.json().

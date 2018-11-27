@@ -90,7 +90,7 @@ var ActiveScan = (function() {
 	}
 
 	function startActiveScan(domain) {
-		fetch("<<ZAP_HUD_API>>/ascan/action/scan/?url=" + domainWrapper(domain)).then(response => {
+		zapApiCall("/ascan/action/scan/?url=" + domainWrapper(domain)).then(response => {
 			response.json()
 				.then(data => {
 					loadTool(NAME)
@@ -110,7 +110,7 @@ var ActiveScan = (function() {
 	function stopActiveScan() {
 		loadTool(NAME)
 			.then(tool => {
-				fetch("<<ZAP_HUD_API>>/ascan/action/stop/?scanId=" + tool.scanId + "");
+				zapApiCall("/ascan/action/stop/?scanId=" + tool.scanId + "");
 			})
 			.catch(errorHandler);
 		activeScanStopped();

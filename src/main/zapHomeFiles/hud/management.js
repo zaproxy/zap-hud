@@ -5,6 +5,10 @@
  */
 
 var app;
+// Injected strings
+var SHOW_WELCOME_SCREEN = '<<SHOW_WELCOME_SCREEN>>' === 'true' ? true : false ;
+var TUTORIAL_URL = '<<TUTORIAL_URL>>';
+var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
 
 Vue.component('loading-screen', {
 	template: '#loading-screen-template',
@@ -25,14 +29,14 @@ Vue.component('loading-screen', {
 			if (dontShowAgain.checked) {
 				dontShowWelcomeAgain().then(() => {
 					// Open the tutorial in a new window / tab
-					window.open("<<TUTORIAL_URL>>");
+					window.open(TUTORIAL_URL);
 					// Refresh the target so the HUD buttons appear
 					parent.postMessage( {action: 'refresh'} , document.referrer);
 				})
 				.catch(errorHandler);
 			} else {
 				// Open the tutorial in a new window / tab
-				window.open("<<TUTORIAL_URL>>");
+				window.open(TUTORIAL_URL);
 				// Refresh the target so the HUD buttons appear
 				parent.postMessage( {action: 'refresh'} , document.referrer);
 			}
@@ -40,6 +44,7 @@ Vue.component('loading-screen', {
 	},
 	data() {
 		return {
+			isShowWelcomeScreen: SHOW_WELCOME_SCREEN,
 			dontShowAgain: false
 		}
 	},
@@ -47,7 +52,7 @@ Vue.component('loading-screen', {
 })
 
 function dontShowWelcomeAgain() {
-	return fetch("<<ZAP_HUD_API>>/hud/action/setOptionShowWelcomeScreen/?Boolean=false");
+	return zapApiCall("/hud/action/setOptionShowWelcomeScreen/?Boolean=false");
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -92,7 +97,7 @@ function windowMessageListener(event) {
 		log(LOG_WARN, 'management.receiveMessage', 'Message without sharedSecret rejected');
 		return;
 	}
-	if (event.data.sharedSecret === "<<ZAP_SHARED_SECRET>>") {
+	if (event.data.sharedSecret === ZAP_SHARED_SECRET) {
 		navigator.serviceWorker.controller.postMessage(event.data);
 	} else {
 		log(LOG_WARN, 'management.receiveMessage', 'Message with incorrect sharedSecret rejected ' + event.data.sharedSecret);
@@ -142,14 +147,14 @@ function serviceWorkerMessageListener(event) {
  */ 
 function startServiceWorker() {
 	if ('serviceWorker' in navigator) {
-		navigator.serviceWorker.register('<<ZAP_HUD_FILES>>?name=serviceworker.js')
+		navigator.serviceWorker.register(getZapFilePath('serviceworker.js'))
 			.then(registration => {
 				console.log('Service worker registration was successful for the scope: ' + registration.scope);
 
 				// wait until serviceworker is installed and activated
 				navigator.serviceWorker.ready
 					.then(serviceWorkerRegistration => {
-						if (! <<SHOW_WELCOME_SCREEN>> ) {
+						if (! SHOW_WELCOME_SCREEN ) {
 							// refresh the target page
 							parent.postMessage( {action: 'refresh'} , document.referrer);
 						}
