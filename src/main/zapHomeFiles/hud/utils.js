@@ -497,6 +497,17 @@ function messageFrame(key, message) {
 }
 
 /*
+ * Returns the visibilityState of the specified iframe window
+ */
+function getWindowVisibilityState(key) {
+	return loadFrame(key)
+		.then(getWindowFromFrame)
+		.then(window => {
+			return window.visibilityState;
+		});
+}
+
+/*
  * Get the window object from a stored frame blob. Throws NoClientIdError if
  * the clientId doesn't exist.
  */
