@@ -21,6 +21,10 @@
     ]
   },
   "xo": {
+    "envs": [
+      "browser",
+      "serviceworker"
+    ],
     "ignores": [
       "src/**/hud/libraries/**"
     ]
