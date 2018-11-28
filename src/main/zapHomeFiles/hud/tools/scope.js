@@ -94,7 +94,7 @@ var Scope = (function() {
 	}
 
 	function addToScope(domain) {
-        loadTool(NAME)
+        return loadTool(NAME)
             .then(tool => {
                 if (! tool.hudContext) {
                     zapApiCall("/context/action/newContext/?contextName=" + HUD_CONTEXT)
