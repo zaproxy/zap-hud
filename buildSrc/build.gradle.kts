@@ -4,6 +4,8 @@ plugins {
     id("com.diffplug.gradle.spotless") version "3.15.0"
 }
 
+apply(from = "../gradle/compile.gradle.kts")
+
 gradlePlugin {
     plugins {
         register("zap-add-on-plugin") {
