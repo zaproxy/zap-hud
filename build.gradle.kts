@@ -86,12 +86,23 @@ tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
+fun sourcesWithoutLibs(extension: String) =
+        fileTree("src") {
+            include("**/*.$extension")
+            exclude("**/hud/libraries/**")
+        }
+
 spotless {
     java {
         licenseHeaderFile("gradle/spotless/license.java")
 
         googleJavaFormat().aosp()
     }
+
+    format("css", {
+        target(sourcesWithoutLibs("css"))
+        prettier().config(mapOf("parser" to "css"))
+    })
 }
 
 tasks {
