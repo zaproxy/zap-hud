@@ -7,9 +7,9 @@
 // Injected strings
 var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
 var ZAP_HUD_API = '<<ZAP_HUD_API>>';
+var IS_DEV_MODE = '<<DEV_MODE>>' === 'true' ? true : false ;
 
 var IS_HUD_CONFIGURED = "isHudConfigured";
-var IS_DEBUG_ENABLED = false;
 var IS_FIRST_TIME = "isFirstTime";
 
 var LOG_OFF = 0;	// Just use for setting the level, nothing will be logged
@@ -20,9 +20,9 @@ var LOG_DEBUG = 4;	// Relatively fine grain events which can help debug problems
 var LOG_TRACE = 5;	// Very fine grain events, highest level
 var LOG_STRS = ['OFF', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'];
 
-var LOG_LEVEL = LOG_DEBUG;	// TODO change to INFO before release..
+var LOG_LEVEL = IS_DEV_MODE ? LOG_DEBUG : LOG_INFO;
 var LOG_TO_CONSOLE = true;
-var LOG_TO_ZAP = true;
+var LOG_TO_ZAP = IS_DEV_MODE;
 
 var CLIENT_LEFT = "left";
 var CLIENT_RIGHT = "right";
@@ -35,9 +35,12 @@ var BUTTON_LABEL = /BUTTON_LABEL/g;
 var IMAGE_NAME = /IMAGE_NAME/g;
 
 // default tools
-var DEFAULT_TOOLS_LEFT = ["scope", "break", "showEnable", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational", "hudErrors"];
+var DEFAULT_TOOLS_LEFT = ["scope", "break", "showEnable", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational"];
 var DEFAULT_TOOLS_RIGHT = ["site-tree", "spider", "active-scan", "attack", "site-alerts-high", "site-alerts-medium", "site-alerts-low", "site-alerts-informational"];
 
+if (IS_DEV_MODE) {
+	DEFAULT_TOOLS_LEFT.push("hudErrors");
+}
 
 class NoClientIdError extends Error {};
 
