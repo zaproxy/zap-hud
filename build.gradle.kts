@@ -18,6 +18,7 @@ plugins {
 }
 
 apply(from = "$rootDir/gradle/compile.gradle.kts")
+apply(from = "$rootDir/gradle/travis-ci.gradle.kts")
 
 repositories {
     mavenLocal()
@@ -222,19 +223,6 @@ tasks {
         dependsOn("zapStop")
     }
 
-    register<Exec>("catFirefoxTestReport") {
-        group = LifecycleBasePlugin.VERIFICATION_GROUP
-        description = "Outputs the Firefox html unit test report to stdout."
-
-        commandLine("cat", "$testResultsDir/classes/org.zaproxy.zap.extension.hud.ui.specific.ExampleDotComFirefoxUnitTest.html")
-    }
-
-    register<Exec>("catZapLog") {
-        group = LifecycleBasePlugin.VERIFICATION_GROUP
-        description = "Outputs the zap.log file to stdout."
-
-        commandLine("cat", "$testZapHome/zap.log")
-    }
 }
 
 tasks.named<Test>("test") { 
