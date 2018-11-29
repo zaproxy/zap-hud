@@ -174,8 +174,10 @@ public class HudAPI extends ApiImplementor {
     }
 
     public boolean allowUnsafeEval() {
-        return this.extension.getHudParam().isDevelopmentMode()
-                && this.extension.getHudParam().isAllowUnsafeEval();
+        /*
+         * TODO also require this.extension.getHudParam().isDevelopmentMode() once the HUD works with unsafe eval off.
+         */
+        return this.extension.getHudParam().isAllowUnsafeEval();
     }
 
     @Override
@@ -374,7 +376,14 @@ public class HudAPI extends ApiImplementor {
                                     "<<ZAP_LOCALE>>", Constant.messages.getLocal().toString());
 
                 } else if (file.equals("utils.js")) {
-                    contents = contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl);
+                    contents =
+                            contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
+                                    .replace(
+                                            "<<DEV_MODE>>",
+                                            Boolean.toString(
+                                                    this.extension
+                                                            .getHudParam()
+                                                            .isDevelopmentMode()));
                 } else if (file.equals("serviceworker.js")) {
                     contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
                 } else if (file.equals("websockettest.js")) {
