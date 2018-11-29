@@ -244,3 +244,9 @@ tasks.named<Test>("test") {
     }  
 }
 
+tasks.withType(Test::class).configureEach {
+    systemProperties.putAll(mapOf(
+            "wdm.chromeDriverVersion" to "2.44",
+            "wdm.geckoDriverVersion" to "0.23.0",
+            "wdm.forceCache" to "true"))
+}
