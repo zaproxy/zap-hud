@@ -1,13 +1,13 @@
 body {
-    background-color: transparent;
+  background-color: transparent;
 }
 .site-tree-node {
-    list-style: none;
-    margin-left: 0;
-    padding-left: 1em;
-    text-indent: -1em;
+  list-style: none;
+  margin-left: 0;
+  padding-left: 1em;
+  text-indent: -1em;
 }
 
 span.errorMessages {
-    color:red;
+  color: red;
 }
