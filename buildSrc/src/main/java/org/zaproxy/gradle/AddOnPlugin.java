@@ -38,7 +38,7 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.zaproxy.gradle.jh.JavaHelpIndexerExtension;
 import org.zaproxy.gradle.jh.tasks.JavaHelpIndexer;
 import org.zaproxy.gradle.tasks.CopyAddOn;
-import org.zaproxy.gradle.tasks.CopyZapHome;
+import org.zaproxy.gradle.tasks.DeployAddOn;
 import org.zaproxy.gradle.tasks.UpdateManifestFile;
 
 public class AddOnPlugin implements Plugin<Project> {
@@ -237,8 +237,8 @@ public class AddOnPlugin implements Plugin<Project> {
                 .named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME)
                 .configure(t -> t.dependsOn(generateAddOnProvider));
 
-        TaskProvider<CopyZapHome> deployProvider =
-                project.getTasks().register("deploy", CopyZapHome.class);
+        TaskProvider<DeployAddOn> deployProvider =
+                project.getTasks().register("deploy", DeployAddOn.class);
         deployProvider.configure(
                 task -> {
                     task.setGroup("ZAP Add-On");
@@ -246,10 +246,14 @@ public class AddOnPlugin implements Plugin<Project> {
                             "Deploys the add-on and its home files to ZAP home dir.\n\n"
                                     + "Defaults to dev home dir if not specified through the command line nor\n"
                                     + "through the system property \"zap.home.dir\". The command line argument\n"
-                                    + "takes precedence over the system property.");
+                                    + "takes precedence over the system property.\n"
+                                    + "By default the existing home files are deleted before deploying the new\n"
+                                    + "files, to prevent stale files. This behaviour can be changed through the\n"
+                                    + "command line.");
 
-                    task.from(generateAddOnProvider, spec -> spec.into("plugin"));
-                    task.from(extension.getZapHomeFiles());
+                    task.dependsOn(generateAddOnProvider);
+                    task.getAddOn().set(generateAddOnProvider.map(t -> t.getArchivePath()));
+                    task.getFiles().from(extension.getZapHomeFiles());
                 });
 
         TaskProvider<CopyAddOn> copyAddOnProvider =
