@@ -20,6 +20,7 @@ repositories {
 
 dependencies {
     implementation("org.apache.commons:commons-lang3:3.8.1")
+    implementation("org.zaproxy:zap-clientapi:1.6.0")
 }
 
 java {
