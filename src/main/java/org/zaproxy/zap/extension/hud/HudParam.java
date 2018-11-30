@@ -191,7 +191,8 @@ public class HudParam extends VersionedAbstractParam {
                                 Constant.getZapHome() + ExtensionHUD.DIRECTORY_NAME);
         enabledForDesktop = getConfig().getBoolean(PARAM_ENABLED_DESKTOP, true);
         enabledForDaemon = getConfig().getBoolean(PARAM_ENABLED_DAEMON, false);
-        developmentMode = getConfig().getBoolean(PARAM_DEV_MODE, true);
+        developmentMode = getConfig().getBoolean(PARAM_DEV_MODE, false);
+        // TODO default allowUnsafeEval to false once the HUD works without it set
         allowUnsafeEval = getConfig().getBoolean(PARAM_ALLOW_UNSAFE_EVAL, true);
         inScopeOnly = getConfig().getBoolean(PARAM_IN_SCOPE_ONLY, false);
         removeCSP = getConfig().getBoolean(PARAM_REMOVE_CSP, true);
