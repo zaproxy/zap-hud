@@ -1,5 +1,5 @@
 # Welcome to the OWASP ZAP HUD
-![](https://raw.githubusercontent.com/wiki/psiinon/zap-hud/assets/images/ZAP-HUD-Welcome-small.png)
+![](https://raw.githubusercontent.com/psiinon/zap-hud/master/assets/images/ZAP-HUD-Welcome-small.png)
 
 The HUD is a completely new interface that brings information and functionality from ZAP into your browser.
 
