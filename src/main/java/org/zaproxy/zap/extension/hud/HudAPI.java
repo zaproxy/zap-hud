@@ -25,17 +25,26 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.control.Control;
+import org.parosproxy.paros.core.scanner.Alert;
+import org.parosproxy.paros.model.Model;
+import org.parosproxy.paros.model.SiteNode;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.view.View;
@@ -46,6 +55,7 @@ import org.zaproxy.zap.extension.api.ApiImplementor;
 import org.zaproxy.zap.extension.api.ApiResponse;
 import org.zaproxy.zap.extension.api.ApiResponseElement;
 import org.zaproxy.zap.extension.api.ApiResponseList;
+import org.zaproxy.zap.extension.api.ApiResponseSet;
 import org.zaproxy.zap.extension.api.ApiView;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
@@ -72,6 +82,8 @@ public class HudAPI extends ApiImplementor {
     private static final String ACTION_STOP_TEST = "stopTest";
     private static final String ACTION_RESET_TUTORIAL_TASKS = "resetTutorialTasks";
 
+    private static final String VIEW_HUD_ALERT_DATA = "hudAlertData";
+    private static final String VIEW_HEARTBEAT = "heartbeat";
     private static final String VIEW_TEST_PROGRESS = "testProgress";
     private static final String VIEW_TEST_AVERAGE_LOAD_TIME = "testAverageLoadTime";
     private static final String VIEW_TEST_PASSES = "testPasses";
@@ -82,6 +94,7 @@ public class HudAPI extends ApiImplementor {
     private static final String PARAM_BODY = "body";
     private static final String PARAM_BROWSER = "browser";
     private static final String PARAM_TEST_FILE = "testFile";
+    private static final String PARAM_URL = "url";
 
     /** The only files that can be included on domain */
     private static final List<String> DOMAIN_FILE_WHITELIST =
@@ -114,6 +127,8 @@ public class HudAPI extends ApiImplementor {
         this.addApiAction(new ApiAction(ACTION_STOP_TEST));
         this.addApiAction(new ApiAction(ACTION_RESET_TUTORIAL_TASKS));
 
+        this.addApiView(new ApiView(VIEW_HUD_ALERT_DATA, new String[] {PARAM_URL}));
+        this.addApiView(new ApiView(VIEW_HEARTBEAT));
         this.addApiView(new ApiView(VIEW_TEST_PROGRESS));
         this.addApiView(new ApiView(VIEW_TEST_AVERAGE_LOAD_TIME));
         this.addApiView(new ApiView(VIEW_TEST_PASSES));
@@ -274,6 +289,15 @@ public class HudAPI extends ApiImplementor {
     public ApiResponse handleApiView(String name, JSONObject params) throws ApiException {
 
         switch (name) {
+            case VIEW_HUD_ALERT_DATA:
+                try {
+                    return getAlertSummaries(new URI(params.getString(PARAM_URL), false));
+                } catch (URIException e) {
+                    throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_URL);
+                }
+            case VIEW_HEARTBEAT:
+                logger.debug("Received heartbeat");
+                return ApiResponseElement.OK;
             case VIEW_TEST_PROGRESS:
                 return new ApiResponseElement(
                         name, Integer.toString(getTestThread().getProgress()));
@@ -297,6 +321,82 @@ public class HudAPI extends ApiImplementor {
         }
     }
 
+    private static ApiResponseList getAlertSummaries(URI uri) throws URIException {
+        ApiResponseListWithoutArray result = new ApiResponseListWithoutArray(VIEW_HUD_ALERT_DATA);
+
+        ApiResponseListWithoutArray nodeAlerts = new ApiResponseListWithoutArray("pageAlerts");
+        result.addItem(nodeAlerts);
+
+        ApiResponseListWithoutArray siteAlerts = new ApiResponseListWithoutArray("siteAlerts");
+        result.addItem(siteAlerts);
+
+        SiteNode node = Model.getSingleton().getSession().getSiteTree().findNode(uri);
+        if (node != null) {
+            Map<String, Set<Alert>> alertMap = new HashMap<String, Set<Alert>>();
+            for (String risk : Alert.MSG_RISK) {
+                alertMap.put(risk, new HashSet<Alert>());
+            }
+            // Loop through siblings to find nodes for the same url
+            String cleanName = node.getHierarchicNodeName();
+            @SuppressWarnings("rawtypes")
+            Enumeration en = node.getParent().children();
+            while (en.hasMoreElements()) {
+                SiteNode sibling = (SiteNode) en.nextElement();
+                if (sibling.getHierarchicNodeName().equals(cleanName)) {
+                    for (Alert alert : sibling.getAlerts()) {
+                        SiteNode alertNode =
+                                Model.getSingleton()
+                                        .getSession()
+                                        .getSiteTree()
+                                        .findNode(new URI(alert.getUri(), false));
+                        if (alertNode != null
+                                && alertNode.getHierarchicNodeName().equals(cleanName)) {
+                            alertMap.get(Alert.MSG_RISK[alert.getRisk()]).add(alert);
+                        }
+                    }
+                }
+            }
+            for (String risk : Alert.MSG_RISK) {
+                ApiResponseListWithoutArray riskResult = new ApiResponseListWithoutArray(risk);
+                for (Alert alert : alertMap.get(risk)) {
+                    Map<String, String> alertAtts = new HashMap<String, String>();
+                    alertAtts.put("name", alert.getName());
+                    alertAtts.put("risk", Alert.MSG_RISK[alert.getRisk()]);
+                    alertAtts.put("param", alert.getParam());
+                    alertAtts.put("id", Integer.toString(alert.getAlertId()));
+                    alertAtts.put("uri", alert.getUri());
+                    alertAtts.put("evidence", alert.getEvidence());
+                    riskResult.addItem(new ApiResponseSet<String>(alert.getName(), alertAtts));
+                }
+                nodeAlerts.addItem(riskResult);
+            }
+        }
+        SiteNode parent = Model.getSingleton().getSession().getSiteTree().findClosestParent(uri);
+        if (parent != null) {
+
+            // find the top level site node
+            while (!parent.getParent().isRoot()) {
+                parent = parent.getParent();
+            }
+            Map<String, Set<String>> alertMap = new HashMap<String, Set<String>>();
+            for (String risk : Alert.MSG_RISK) {
+                alertMap.put(risk, new HashSet<String>());
+            }
+            for (Alert alert : parent.getAlerts()) {
+                alertMap.get(Alert.MSG_RISK[alert.getRisk()]).add(alert.getName());
+            }
+            for (String risk : Alert.MSG_RISK) {
+                ApiResponseListJustArray riskResult = new ApiResponseListJustArray(risk);
+                for (String alert : alertMap.get(risk)) {
+                    riskResult.addItem(new ApiResponseElement("alertName", alert));
+                }
+                siteAlerts.addItem(riskResult);
+            }
+        }
+
+        return result;
+    }
+
     private HudBrowserTestThread getTestThread() throws ApiException {
         HudBrowserTestThread tt = this.extension.getTestThread();
         if (tt == null) {
@@ -307,7 +407,7 @@ public class HudAPI extends ApiImplementor {
 
     protected String getSite(HttpMessage msg) throws URIException {
         StringBuilder site = new StringBuilder();
-        // Always force to https - we fakw this for http sites
+        // Always force to https - we fake this for http sites
         site.append("https://");
         site.append(msg.getRequestHeader().getURI().getHost());
         if (msg.getRequestHeader().getURI().getPort() > 0) {
@@ -470,5 +570,45 @@ public class HudAPI extends ApiImplementor {
         sb.append("Content-Type: ").append(contentType).append("\r\n");
 
         return sb.toString();
+    }
+
+    private static class ApiResponseListWithoutArray extends ApiResponseList {
+
+        public ApiResponseListWithoutArray(String name) {
+            super(name);
+        }
+
+        @Override
+        public JSON toJSON() {
+            List<ApiResponse> list = this.getItems();
+            if (list == null) {
+                return null;
+            }
+            JSONObject jo = new JSONObject();
+            for (ApiResponse resp : list) {
+                jo.put(resp.getName(), resp.toJSON());
+            }
+            return jo;
+        }
+    }
+
+    private static class ApiResponseListJustArray extends ApiResponseList {
+
+        public ApiResponseListJustArray(String name) {
+            super(name);
+        }
+
+        @Override
+        public JSON toJSON() {
+            JSONArray array = new JSONArray();
+            for (ApiResponse resp : this.getItems()) {
+                if (resp instanceof ApiResponseElement) {
+                    array.add(((ApiResponseElement) resp).getValue());
+                } else {
+                    array.add(resp.toJSON());
+                }
+            }
+            return array;
+        }
     }
 }
