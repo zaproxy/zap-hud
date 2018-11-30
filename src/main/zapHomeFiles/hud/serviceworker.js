@@ -142,6 +142,10 @@ const onMessage = event => {
 			self.dispatchEvent(e);	
 			break;
 
+		case "heartbeat":
+			webSocket.send('{ "component" : "hud", "type" : "view", "name" : "heartbeat" }');
+			break;
+
 		default:
 			break;
 	}
