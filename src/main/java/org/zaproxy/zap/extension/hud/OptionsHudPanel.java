@@ -268,9 +268,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
 
     @Override
     public String getHelpIndex() {
-        // TODO  add help
-        // return "addon.hud.options";
-        return null;
+        return "addon.hud.options";
     }
 
     private static class FileChooserAction implements ActionListener {
