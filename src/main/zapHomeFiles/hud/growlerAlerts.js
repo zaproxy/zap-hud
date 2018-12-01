@@ -75,7 +75,7 @@ function showGrowlerAlert(alert) {
 
 	expandFrame(lines);
 
-	var content = getRiskFlag(alert.riskString) + alert.name + getHiddenId(alert.alertId); 
+	let content = getRiskFlag(alert.riskString) + alert.name + getHiddenId(alert.alertId); 
 
 	alertify
 		.delay(DELAY_MS)

@@ -68,7 +68,7 @@ var CommonAlerts = (function() {
 					break;
 
 				case "showAlertDetails":
-					alertUtils.showAlertDetails(message.id);
+					alertUtils.showAlertDetails(message.tabId, message.id);
 					break;
 
 				default:
