@@ -207,7 +207,7 @@ var Break = (function() {
 				if (!isVisible) {
 					log(LOG_DEBUG, 'break.showBreakDisplay', 'Target window not ready, stepping');
 					step();
-					messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
+					messageAllTabs('display', {action:'closeModals'})
 					return;
 				}
 			})

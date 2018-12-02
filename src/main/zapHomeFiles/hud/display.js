@@ -742,7 +742,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 			break;
 
 		case "closeModals":
-			if (config.notTabId != tabId) {
+			if (config && config.notTabId != tabId) {
 				eventBus.$emit('closeAllModals', {
 					port: port
 				});
