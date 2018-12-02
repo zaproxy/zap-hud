@@ -51,7 +51,9 @@ var SiteAlertsInformational = (function() {
         .then(tool => {
 			tool.data = event.detail.count;
 
-			messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: event.detail.domain}, tool: {name: NAME, data: event.detail.count}})
+			if (tool.isSelected) {
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: event.detail.domain}, tool: {name: NAME, data: event.detail.count}})
+			}
 			return writeTool(tool);
         })
         .catch(errorHandler));

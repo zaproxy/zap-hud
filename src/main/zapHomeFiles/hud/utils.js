@@ -482,7 +482,8 @@ function removeToolFromPanel(tabId, toolKey) {
 			removedTool.isSelected = false;
 			removedTool.panel = "";
 
-			promises.push(saveTool(removedTool));
+			promises.push(writeTool(removedTool));
+			promises.push(messageAllTabs(panel.key, {action:"removeTool", tool:removedTool}));
 
 			// update panel
 			panel.tools.splice(panel.tools.indexOf(removedTool.name), 1);
@@ -494,17 +495,11 @@ function removeToolFromPanel(tabId, toolKey) {
 				if (tool.position > removedTool.position) {
 					tool.position = tool.position - 1;
 
-					promises.push(saveTool(tool));
+					promises.push(writeTool(tool));
 				}
 			});
 
 			return Promise.all(promises);
-		})
-		.then(results => {
-   			var tool = results[0];
-			var panel = results[1];
-
-			return messageAllTabs(panel.key, {action:"removeTool", tool:tool});
 		})
 		.catch(errorHandler);
 }
@@ -580,7 +575,8 @@ function messageAllTabs(frameId, message) {
 			};
 
 			if (frameClients.length === 0) {
-				throw new NoClientIdError('Could not find any Clients for frameId: ' + frameId);
+				log(LOG_DEBUG, 'utils.messageAllTabs', 'Could not find any clients for frameId: ' + frameId, message);
+				throw new NoClientIdError('Could not find any clients for frameId: ' + frameId);
 			}
 
 			return frameClients;

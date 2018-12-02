@@ -137,7 +137,9 @@ var alertUtils = (function() {
 						}];
 					tool.data = Object.keys(tool.alerts).length;
 
-					messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {url: alertUrl}, tool: {name: toolname, data: tool.data}})
+					if (tool.isSelected) {
+						messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {url: alertUrl}, tool: {name: toolname, data: tool.data}})
+					}
 					return writeTool(tool);	
 				}
 			})
@@ -150,7 +152,9 @@ var alertUtils = (function() {
 				tool.alerts = alerts;
 				tool.data = Object.keys(alerts).length;
 				
-				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {url: url}, tool: {name: toolname, data: tool.data}})
+				if (tool.isSelected) {
+					messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {url: url}, tool: {name: toolname, data: tool.data}})
+				}
 				return writeTool(tool);
 			})
 			.catch(errorHandler);
