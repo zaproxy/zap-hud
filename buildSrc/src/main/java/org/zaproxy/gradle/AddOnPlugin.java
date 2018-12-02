@@ -37,6 +37,7 @@ import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
 import org.zaproxy.gradle.jh.JavaHelpIndexerExtension;
 import org.zaproxy.gradle.jh.tasks.JavaHelpIndexer;
+import org.zaproxy.gradle.tasks.CopyAddOn;
 import org.zaproxy.gradle.tasks.CopyZapHome;
 import org.zaproxy.gradle.tasks.UpdateManifestFile;
 
@@ -249,6 +250,17 @@ public class AddOnPlugin implements Plugin<Project> {
 
                     task.from(generateAddOnProvider, spec -> spec.into("plugin"));
                     task.from(extension.getZapHomeFiles());
+                });
+
+        TaskProvider<CopyAddOn> copyAddOnProvider =
+                project.getTasks().register("copyAddOn", CopyAddOn.class);
+        copyAddOnProvider.configure(
+                task -> {
+                    task.setGroup("ZAP Add-On");
+                    task.setDescription(
+                            "Copies the add-on to zaproxy project (defaults to \"../zaproxy/src/plugin/\").");
+
+                    task.from(generateAddOnProvider);
                 });
     }
 }
