@@ -46,6 +46,13 @@ Some known issues include:
 * We're still using Vue.js in dev mode so can't apply a suitably strong CSP
 * The JavaScript code needs to be properly formatted and linted
 * Firefox has been tested more than Chrome, but both should work
+* JxBrowser, despite being chromium based, doesn't currently work 
 * The code to support the HUD in multiple browser tabs is _very_ new so might be buggy
 * In particular don't close the first tab on Firefox or the HUD _will_ stop working 
 * Documentation could, of course, be better
+* Using the HUD with browser dev tools open can significantly affect performance
+* Using the browser back button may cause problems
+* Promises should be switched over to await pattern
+* Error handling is poor
+* This list is not complete
+ 
