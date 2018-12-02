@@ -154,7 +154,7 @@ Vue.component('hud-buttons', {
 			.catch(errorHandler);
 
 		eventBus.$on('addButton', data => {
-			if (self.tools.filter(tool => tool.name === data.name)) {
+			if (self.tools.filter(tool => tool.name === data.name) > 0) {
 				throw new Error('Attempted to add tool "' + data.name + '" to ' + orientation + 'panel, but it has already been added.')
 			}
 			else {

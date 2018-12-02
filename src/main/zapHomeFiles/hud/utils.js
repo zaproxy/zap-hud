@@ -444,12 +444,22 @@ function addToolToPanel(toolKey, frameId) {
 
 			panel.tools.push(tool.name);
 
-			return Promise.all([saveTool(tool), saveFrame(panel)]);
+			return Promise.all([writeTool(tool), saveFrame(panel)]);
 		})
 		.then(results => {
 			let tool = results[0];
 
-			messageAllTabs(frameId, {action: 'addTool', tool: tool});
+			messageAllTabs(frameId, {action: 'addTool', tool: tool})
+				.catch(err => {
+					if (err instanceof NoClientIdError) {
+						log(LOG_DEBUG, 'utils.addToolToPanel',
+							'Could not add tool to frame: ' + frameId + '. Frame was not yet available to message.', 
+							tool);
+					}
+					else {
+						errorHandler(err);
+					}
+				})
 		})
 		.catch(errorHandler);
 }
