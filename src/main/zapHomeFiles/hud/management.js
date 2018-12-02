@@ -173,6 +173,6 @@ function startServiceWorker() {
  */
 function startHeartBeat() {
 	setInterval(() => {
-		log(LOG_INFO, 'heartbeat', 'heartbeat')
+		navigator.serviceWorker.controller.postMessage({action:"heartbeat"});
 	}, 10000)
 }
