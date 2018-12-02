@@ -166,18 +166,12 @@ var alertUtils = (function() {
 
 		config.tool = toolname;
 		config.toolLabel = toolLabel;
-		config.options = {opt1: "Option 1", opt2: "Option 2", remove: I18n.t("common_remove")};
+		config.options = {remove: I18n.t("common_remove")};
 
 		messageFrame("display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
-				if (response.id == "opt1") {
-					console.log("Option 1 chosen");
-				}
-				else if (response.id == "opt2") {
-					console.log("Option 2 chosen");
-				}
-				else if (response.id == "remove") {
+				if (response.id == "remove") {
 					removeToolFromPanel(toolname);
 				}
 				else {
