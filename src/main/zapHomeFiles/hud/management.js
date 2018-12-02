@@ -4,11 +4,19 @@
  * Description goes here...
  */
 
-var app;
+
 // Injected strings
 var SHOW_WELCOME_SCREEN = '<<SHOW_WELCOME_SCREEN>>' === 'true' ? true : false ;
 var TUTORIAL_URL = '<<TUTORIAL_URL>>';
 var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
+
+var app;
+var tabId = '';
+var frameId = '';
+var context = {
+	url: document.referrer,
+	domain: parseDomainFromUrl(document.referrer)
+};
 
 Vue.component('loading-screen', {
 	template: '#loading-screen-template',
@@ -56,6 +64,11 @@ function dontShowWelcomeAgain() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+	let params = new URL(document.location).searchParams;
+
+	frameId = params.get('frameId');
+	tabId = params.get('tabId');
+
 	// initialize Vue app
 	app = new Vue({
 		el: '#app',
@@ -79,8 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		navigator.serviceWorker.addEventListener('message', serviceWorkerMessageListener)
 
 		// send targetload message 
-		navigator.serviceWorker.controller.postMessage({action:"targetload", targetUrl: document.referrer});
+		navigator.serviceWorker.controller.postMessage({action:"targetload", targetUrl: context.url});
 
+		localforage.setItem(IS_SERVICEWORKER_REFRESHED, true);
 	}
 
 	startHeartBeat();

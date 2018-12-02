@@ -31,14 +31,15 @@ var Spider = (function() {
 		tool.panel = "";
 		tool.position = 0;
 		tool.isRunning = false;
+		tool.runningTabId = '';
 
 		saveTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.spider.SpiderEventPublisher");
 	}
 
-	function showDialog(domain) {
+	function showDialog(tabId, domain) {
 
-		Promise.all([checkIsRunning(), self.tools.scope.isInScope(domain)])
+		Promise.all([checkIsRunning(tabId), self.tools.scope.isInScope(domain)])
 			.then(results => {
 				var isRunning = results[0];
 				var isInScope = results[1];
@@ -63,65 +64,71 @@ var Spider = (function() {
 
 				return config;
 			})
-			.then(config => messageFrame("display", {action:"showDialog", config:config}))
+			.then(config => messageFrame2(tabId, "display", {action:"showDialog", config:config}))
 			.then(response => {
 				// Handle button choice
 				if (response.id === "start") {
-					startSpider(domain);
+					return startSpider(tabId, domain);
 				}
 				else if (response.id === "start-add-to-scope") {
 					self.tools.scope.addToScope(domain)
-						.then(
-							startSpider(domain)
-						);
+						.then(() => {
+							return startSpider(tabId, domain)
+						});
 				}
 				else if (response.id === "stop") {
-					stopSpider(domain);
-				}
-				else {
-					//cancel
+					return stopSpider(tabId);
 				}
 			})
 			.catch(errorHandler);
 	}
 
-	function startSpider(domain) {
-		zapApiCall("/spider/action/scan/?url=" + domainWrapper(domain));
-		spiderStarted();
+	function startSpider(tabId, domain) {
+		getUpgradedDomain(domain)
+			.then(upgradedDomain =>{
+				zapApiCall("/spider/action/scan/?url=" + upgradedDomain);
+				spiderStarted(tabId);
+			})
+			.catch(errorHandler);
 	}
 	
-	function spiderStarted() {
+	function spiderStarted(tabId) {
 		loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = true;
+				tool.runningTabId = tabId;
 				tool.data = "0%";
 
-				saveTool(tool);
+				writeTool(tool);
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notTabId: tabId}, tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.SPIDER}, isToolDisabled: true})
+				messageFrame2(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.SPIDER}});
 			})
 			.catch(errorHandler);
 	}
 
-	function stopSpider() {
+	function stopSpider(tabId) {
 		zapApiCall("/spider/action/stop");
-		spiderStopped();
+		spiderStopped(tabId);
 	}
 	
-	function spiderStopped() {
+	function spiderStopped(tabId) {
 		loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = false;
+				tool.runningTabId = '';
 				tool.data = DATA.START;
 
-				saveTool(tool);
+				writeTool(tool);
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.SPIDER}, isToolDisabled: false});
 			})
 			.catch(errorHandler);
 	}
 
-	function checkIsRunning() {
+	function checkIsRunning(tabId) {
 		return new Promise(resolve => {
 			loadTool(NAME)
 				.then(tool => {
-					resolve(tool.isRunning);
+					resolve(tool.runningTabId === tabId);
 				});
 		});
 	}
@@ -130,26 +137,45 @@ var Spider = (function() {
 		if (progress !== "-1") {
 			loadTool(NAME)
 				.then(tool => {
-					tool.data = progress;
+					if (tool.isRunning) {
+						tool.data = progress;
 
-					saveTool(tool);
+						writeTool(tool);
+						messageFrame2(tool.runningTabId, tool.panel, {action: 'updateData', tool: tool})
+					}
 				})
 				.catch(errorHandler);
 		}
 	}
 
-	function showOptions() {
+	function getTool(tabId, context, port) {
+		loadTool(NAME)
+			.then(tool => {
+				if (tabId === tool.runningTabId) {
+					port.postMessage({label: LABEL, data: tool.data, icon: ICONS.SPIDER});
+				}
+				else if (tool.isRunning) {
+					port.postMessage({label: LABEL, data: DATA.START, icon: ICONS.SPIDER, isDisabled: true});
+				}
+				else {
+					port.postMessage({label: LABEL, data: DATA.START, icon: ICONS.SPIDER});
+				}
+			})
+			.catch(errorHandler)
+	}
+
+	function showOptions(tabId) {
 		var config = {};
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame("display", {action:"showButtonOptions", config:config})
+		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(NAME);
+					removeToolFromPanel(tabId, NAME);
 				}
 				else {
 					//cancel
@@ -179,11 +205,15 @@ var Spider = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showDialog(message.domain);
+					showDialog(message.tabId, message.domain);
 					break;
 
 				case "buttonMenuClicked":
-					showOptions();
+					showOptions(message.tabId);
+					break;
+
+				case "getTool":
+					getTool(message.tabId, message.context, event.ports[0]);
 					break;
 
 				default:

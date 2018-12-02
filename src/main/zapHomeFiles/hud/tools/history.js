@@ -27,22 +27,22 @@ var History = (function() {
         tool.position = 0;
         tool.messages = [];
 
-        saveTool(tool);
+        writeTool(tool);
         registerForZapEvents("org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher");
 	}
 
-	function showOptions() {
+	function showOptions(tabId) {
 		var config = {};
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame("display", {action:"showButtonOptions", config:config})
+		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(NAME);
+					removeToolFromPanel(tabId, NAME);
 				}
 			})
 			.catch(errorHandler);
@@ -60,7 +60,7 @@ var History = (function() {
 			.catch(errorHandler);
 	}
 
-	function showHttpMessageDetails(data) {
+	function showHttpMessageDetails(tabId, data) {
 		if (!data) {
 			throw new Error('Coud not load HTTP message details')
 		}
@@ -83,7 +83,7 @@ var History = (function() {
 			config.activeTab = data.activeTab;
 		}
 
-		return messageFrame("display", {action:"showHistoryMessage", config:config})
+		return messageFrame2(tabId, "display", {action:"showHistoryMessage", config:config})
 			.then(data => {
 				// Handle button choice
 				if (data.buttonSelected === "replay") {
@@ -92,7 +92,7 @@ var History = (function() {
 					.then(json => {
 						let data = json.sendRequest[0];
 						data.activeTab = "Response"
-						return showHttpMessageDetails(data);
+						return showHttpMessageDetails(tabId, data);
 					})
 					.catch(errorHandler)
 				}
@@ -136,11 +136,11 @@ var History = (function() {
         message.code = event.detail.statusCode;
 		message.id = event.detail.historyReferenceId;
 
-        messageFrame('drawer', {action: 'updateMessages', messages: [message]})
+        messageAllTabs('drawer', {action: 'updateMessages', messages: [message]})
             .catch(errorHandler);
 
-        tool.messages.push(message);
-        saveTool(tool);
+		tool.messages.push(message);
+		writeTool(tool)
 	});
 
 	self.addEventListener("activate", event => {
@@ -148,8 +148,12 @@ var History = (function() {
 	});
 
 	function trimMessages(lastPageUnloadTime) {
-		tool.messages = tool.messages.filter(message => message.timeInMs > lastPageUnloadTime)
-		saveTool(tool);
+		loadTool(NAME)
+			.then(tool => {
+				tool.messages = tool.messages.filter(message => message.timeInMs > lastPageUnloadTime)
+				writeTool(tool)
+			})
+			.catch(errorHandler);
 	}
 
 	self.addEventListener("message", event => {
@@ -173,12 +177,14 @@ var History = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonMenuCicked":
-					showOptions();
+					showOptions(message.tabId);
 					break;
 
 				case "showHttpMessageDetails":
 					getMessageDetails(message.id)
-						.then(showHttpMessageDetails)
+						.then(data => {
+							return showHttpMessageDetails(message.tabId, data)
+						})
 						.catch(errorHandler)
 					break;
 

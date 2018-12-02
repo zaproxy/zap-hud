@@ -11,14 +11,25 @@ var MAX_LINE_LENGTH = 45;
 
 var alertQueue = [];
 
+var tabId = '';
+var frameId = '';
+var context = {
+	url: document.referrer,
+	domain: parseDomainFromUrl(document.referrer)
+};
+
 document.addEventListener("DOMContentLoaded", () => {
-	if (typeof alertify != "undefined") {
-		alertify.maxLogItems(QUEUE_SIZE);
-		alertify.logPosition("bottom right");
-	} 
-	else {
+	if (typeof alertify == "undefined") {
 		errorHandler('Problem loading Alertify. Alertify is undefined.')
 	}
+
+	let params = new URL(document.location).searchParams;
+
+	frameId = params.get('frameId')
+	tabId = params.get('tabId')
+
+	alertify.maxLogItems(QUEUE_SIZE);
+	alertify.logPosition("bottom right");
 });
 
 navigator.serviceWorker.addEventListener("message", event => {
@@ -26,7 +37,9 @@ navigator.serviceWorker.addEventListener("message", event => {
 	
 	switch(message.action) {
 		case "showGrowlerAlert":
-			enqueueGrowlerAlert(message.alert, event.ports[0]);
+			if (parseDomainFromUrl(message.alert.uri) === context.domain) {
+				enqueueGrowlerAlert(message.alert, event.ports[0]);
+			}
 			break;
 
 		default:
@@ -65,7 +78,7 @@ function showGrowlerAlert(alert) {
 
 	expandFrame(lines);
 
-	var content = getRiskFlag(alert.riskString) + alert.name + getHiddenId(alert.alertId); 
+	let content = getRiskFlag(alert.riskString) + alert.name + getHiddenId(alert.alertId); 
 
 	alertify
 		.delay(DELAY_MS)
@@ -73,7 +86,7 @@ function showGrowlerAlert(alert) {
 		.log(content, event => {
 			var alertId = event.target.querySelector("#alertId").value;
 
-			navigator.serviceWorker.controller.postMessage({tool: "common-alerts", action: "showAlertDetails", "id": alertId});
+			navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, tool: "common-alerts", action: "showAlertDetails", "id": alertId});
 		});
 
 	setTimeout(() => {

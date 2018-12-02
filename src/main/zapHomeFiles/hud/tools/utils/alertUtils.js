@@ -1,29 +1,30 @@
 var alertUtils = (function() {
 	
-	function showSiteAlerts(title, target, alertRisk) {
+	function showSiteAlerts(tabId, title, target, alertRisk) {
 		// Note that theres no need to load any tool data here
 		var config = {};
 
 		config.title = title;
 		config.risk = alertRisk;
 		
-		zapApiCall("/alert/view/alertsByRisk/?url=" + domainWrapper(target) + "&recurse=true")
-		.then(response => {
-			response.json().
-				then(json => {
-					config.alerts = flattenAllAlerts(json);
-					
-					messageFrame("display", {action: "showAllAlerts", config:config}).then(response => {
-						// Handle button choice
-						if (response.alertId) {
-							let backFunction = function() {showSiteAlerts(title, target, alertRisk)};
-							showAlertDetails(response.alertId, backFunction);
-						}
-					})
-					.catch(errorHandler);
-					
+		getUpgradedDomain(target)
+			.then(upgradedDomain => {
+				return zapApiCall("/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
+			})
+			.then(response => {
+				return response.json()
+			})
+			.then(json => {
+				config.alerts = flattenAllAlerts(json);
+				
+				messageFrame2(tabId, "display", {action: "showAllAlerts", config:config}).then(response => {
+					// Handle button choice
+					if (response.alertId) {
+						let backFunction = function() {showSiteAlerts(tabId, title, target, alertRisk)};
+						showAlertDetails(tabId, response.alertId, backFunction);
+					}
 				})
-				.catch(errorHandler);
+				.catch(errorHandler)
 			})
 			.catch(errorHandler);
 	}
@@ -48,7 +49,7 @@ var alertUtils = (function() {
 		return json;
 	}
 
-	function showPageAlerts(title, target, alertRisk) {
+	function showPageAlerts(tabId, title, target, alertRisk) {
 		// Note that theres no need to load any tool data here
 		var config = {};
 
@@ -56,37 +57,40 @@ var alertUtils = (function() {
 		config.risk = alertRisk;
 
 		let targetDomain = parseDomainFromUrl(target);
-		if (sharedData.upgradedDomains.has(targetDomain)) {
-			// Its been upgraded to https by ZAP, but the alerts wont have been
-			target = target.replace("https://", "http://");
-		}
-		if (target.indexOf("?") > 0) {
-			// Remove any url params
-			target = target.substring(0, target.indexOf("?"));
-		}
-		
-		zapApiCall("/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
-		.then(response => {
-			response.json().
-				then(json => {
-					config.alerts = flattenAllAlerts(json);
-					
-					messageFrame("display", {action: "showAllAlerts", config:config}).then(response => {
-						// Handle button choice
-						if (response.alertId) {
-							let backFunction = function() {showPageAlerts(title, target, alertRisk)};
-							showAlertDetails(response.alertId, backFunction);
-						}
-					})
-					.catch(errorHandler);
-					
-				})
-				.catch(errorHandler);
+
+		localforage.getItem('upgradedDomains')
+			.then(upgradedDomains => {
+				if (targetDomain in upgradedDomains) {
+					// Its been upgraded to https by ZAP, but the alerts wont have been
+					target = target.replace("https://", "http://");
+				}
+
+				if (target.indexOf("?") > 0) {
+					// Remove any url params
+					target = target.substring(0, target.indexOf("?"));
+				}
+				
+				return zapApiCall("/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
+			})
+			.then(response => {
+				return response.json()
+			})
+			.then(json => {
+				config.alerts = flattenAllAlerts(json);
+				
+				return messageFrame2(tabId, "display", {action: "showAllAlerts", config:config})
+			})
+			.then(response => {
+				// Handle button choice
+				if (response.alertId) {
+					let backFunction = function() {showPageAlerts(tabId, title, target, alertRisk)};
+					return showAlertDetails(tabId, response.alertId, backFunction);
+				}
 			})
 			.catch(errorHandler);
-	}
+		}
 
-	function showAlertDetails(id, backFunction) { 
+	function showAlertDetails(tabId, id, backFunction) {
 		log (LOG_DEBUG, 'showAlertDetails', '' + id);
 
 		zapApiCall("/core/view/alert/?id=" + id)
@@ -99,7 +103,7 @@ var alertUtils = (function() {
 						config.title = json.alert.alert;
 						config.details = json.alert;
 
-						messageFrame("display", {action: "showAlertDetails", config: config})
+						messageFrame2(tabId, "display", {action: "showAlertDetails", config: config})
 							.then(response => {
 								if (response.back) {
 									backFunction();
@@ -112,38 +116,46 @@ var alertUtils = (function() {
 			.catch(errorHandler);
 	}
 
-	function updatePageAlertCount(toolname, target, alertEvent, risk) {
+	function updatePageAlertCount(toolname, alertEvent) {
 		let alertUrl = alertEvent.uri;
 		if (alertUrl.startsWith("http://")) {
 			// It will have been upgraded to https in the HUD
 			alertUrl = alertUrl.replace("http://", "https://");
 		}
-		if (targetUrl === alertUrl && risk === alertEvent.riskString) {
-			loadTool(toolname)
-				.then(tool => {
-					let alertData = tool.alerts[alertEvent.name];
-					if (!alertData) {
-						// Don't need to add much, its the fact its here that matters
-						tool.alerts[alertEvent.name] = [{
-								"confidence": alertEvent["confidence"],
-								"name": alertEvent["name"],
-								"id": alertEvent["alertId"],
-								"url": alertEvent["uri"]
-							}];
-						tool.data = Object.keys(tool.alerts).length;
-						return saveTool(tool);	
+
+		loadTool(toolname)
+			.then(tool => {
+				let alertData = tool.alerts[alertEvent.name];
+
+				if (!alertData) {
+					// Don't need to add much, its the fact its here that matters
+					tool.alerts[alertEvent.name] = [{
+							"confidence": alertEvent["confidence"],
+							"name": alertEvent["name"],
+							"id": alertEvent["alertId"],
+							"url": alertEvent["uri"]
+						}];
+					tool.data = Object.keys(tool.alerts).length;
+
+					if (tool.isSelected) {
+						messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {url: alertUrl}, tool: {name: toolname, data: tool.data}})
 					}
-				})
-			.catch(errorHandler);
-		}
+					return writeTool(tool);	
+				}
+			})
+		.catch(errorHandler);
 	}
 
-	function setPageAlerts(toolname, alerts) {
+	function setPageAlerts(toolname, url, alerts) {
 		loadTool(toolname)
 			.then(tool => {
 				tool.alerts = alerts;
 				tool.data = Object.keys(alerts).length;
-				return saveTool(tool);
+				
+				if (tool.isSelected) {
+					messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {url: url}, tool: {name: toolname, data: tool.data}})
+				}
+				return writeTool(tool);
 			})
 			.catch(errorHandler);
 	}
@@ -158,17 +170,17 @@ var alertUtils = (function() {
 	}
 
 	function showGrowlerAlert(alert) {
-		return messageFrame("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
+		return messageAllTabs("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
 	}
 
-	function showOptions(toolname, toolLabel) {
+	function showOptions(tabId, toolname, toolLabel) {
 		var config = {};
 
 		config.tool = toolname;
 		config.toolLabel = toolLabel;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame("display", {action:"showButtonOptions", config:config})
+		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {

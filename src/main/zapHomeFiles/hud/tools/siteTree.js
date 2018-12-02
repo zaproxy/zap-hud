@@ -30,30 +30,35 @@ var SiteTree = (function() {
 		saveTool(tool);
 	}
 
-	function showSiteTree() {
-		messageFrame("display", {action:"showSiteTree"})
+	function showSiteTree(tabId) {
+		messageFrame2(tabId, "display", {action:"showSiteTree"})
 			.catch(errorHandler);
 	}
 
-	function onPanelLoad(data) {
-	}
-
-	function showOptions() {
+	function showOptions(tabId) {
 		var config = {};
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame("display", {action:"showButtonOptions", config:config})
+		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(NAME);
+					removeToolFromPanel(tabId, NAME);
 				}
 				else {
 					//cancel
 				}
+			})
+			.catch(errorHandler);
+	}
+
+	function getTool(port) {
+		loadTool(NAME)
+			.then(tool => {
+				port.postMessage({label: LABEL, data: DATA.SITES, icon: ICONS.WORLD});
 			})
 			.catch(errorHandler);
 	}
@@ -79,11 +84,15 @@ var SiteTree = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showSiteTree();
+					showSiteTree(message.tabId);
 					break;
 
 				case "buttonMenuClicked":
-					showOptions();
+					showOptions(message.tabId);
+					break;
+
+				case "getTool":
+					getTool(event.ports[0]);
 					break;
 
 				default:
@@ -94,7 +103,6 @@ var SiteTree = (function() {
 
 	return {
 		name: NAME,
-		onPanelLoad: onPanelLoad,
 		initialize: initializeStorage
 	};
 })();
