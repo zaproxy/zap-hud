@@ -1,0 +1,45 @@
+#history-header{
+  position:sticky;
+  top:0;
+  right:0;
+  z-index: 1; /*Needed to override absolute positioning from spectre lib*/ 
+  background-color: #fff;
+}
+
+#history-messages{
+
+}
+
+#history-messages .message-tr{
+
+}
+
+.table .field, .table .title{
+
+}
+.table .field.time, .table .title.time{
+  width: 125px;
+}
+
+.table .field.code, .table .title.code{
+  width: 75px;
+}
+
+.table .field.method, .table .title.method{
+  width: 75px;
+}
+
+.table .field.url, .table .title.url{
+  width: 75px;
+}
+
+.table .title.filter{
+  width: auto;
+  font-weight: normal;
+}
+
+.table .title.hidden{
+  width: auto;
+  font-weight: normal;
+  text-align: right;
+}
