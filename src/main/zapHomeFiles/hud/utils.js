@@ -11,6 +11,7 @@ var IS_DEV_MODE = '<<DEV_MODE>>' === 'true' ? true : false ;
 
 var IS_HUD_CONFIGURED = "isHudConfigured";
 var IS_FIRST_TIME = "isFirstTime";
+var IS_SERVICEWORKER_REFRESHED = 'isServiceWorkerRefreshed';
 
 var LOG_OFF = 0;	// Just use for setting the level, nothing will be logged
 var LOG_ERROR = 1;	// Errors that should be addressed
@@ -195,7 +196,9 @@ function configureStorage() {
 
 	promises.push(localforage.setItem(IS_HUD_CONFIGURED, true));
 	promises.push(localforage.setItem(IS_FIRST_TIME, true));
-		
+	promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false))
+	promises.push(localforage.setItem('upgradedDomains', {}))
+
 	promises.push(loadFrame("rightPanel").then(oldPanel => {
 		var panel = {};
 
@@ -350,6 +353,11 @@ function loadTool(name) {
 	return localforage.getItem(name);
 }
 
+function writeTool(tool) {
+	log(LOG_TRACE, 'utils.writeTool', tool.name);
+	return localforage.setItem(tool.name, tool);
+}
+
 /* 
  * saves the tool blob to indexeddb
  */
@@ -415,27 +423,43 @@ function loadAllTools() {
 /* 
  * Add a tool to a specific panel using the tool and panel keys.
  */
-function addToolToPanel(toolKey, panelKey) {
+function addToolToPanel(toolKey, frameId) {
 	log(LOG_DEBUG, 'utils.addToolToPanel', toolKey);
 
-	var promises = [loadTool(toolKey), loadFrame(panelKey)];
+	var promises = [loadTool(toolKey), loadFrame(frameId)];
 	
 	return Promise.all(promises)
 		.then(results => {
 			var tool = results[0];
 			var panel = results[1];
+
 			if (! tool) {
-				log(LOG_WARN, 'utils.addToolToPanel', 'Failed to load tool?', toolKey);
+				log(LOG_ERROR, 'utils.addToolToPanel', 'Failed to load tool.', toolKey);
 				return;
 			}
 
 			tool.isSelected = true;
-			tool.panel = panelKey;
+			tool.panel = frameId;
 			tool.position = panel.tools.length;
 
 			panel.tools.push(tool.name);
 
-			return Promise.all([saveTool(tool), saveFrame(panel)]);
+			return Promise.all([writeTool(tool), saveFrame(panel)]);
+		})
+		.then(results => {
+			let tool = results[0];
+
+			messageAllTabs(frameId, {action: 'addTool', tool: tool})
+				.catch(err => {
+					if (err instanceof NoClientIdError) {
+						log(LOG_DEBUG, 'utils.addToolToPanel',
+							'Could not add tool to frame: ' + frameId + '. Frame was not yet available to message.', 
+							tool);
+					}
+					else {
+						errorHandler(err);
+					}
+				})
 		})
 		.catch(errorHandler);
 }
@@ -443,7 +467,7 @@ function addToolToPanel(toolKey, panelKey) {
 /*
  * Remove a tool from a panel using the tool key.
  */
-function removeToolFromPanel(toolKey) {
+function removeToolFromPanel(tabId, toolKey) {
 
 	return loadTool(toolKey)
 		.then(tool => Promise.all([tool, loadFrame(tool.panel), loadPanelTools(tool.panel)]))
@@ -458,7 +482,8 @@ function removeToolFromPanel(toolKey) {
 			removedTool.isSelected = false;
 			removedTool.panel = "";
 
-			promises.push(saveTool(removedTool));
+			promises.push(writeTool(removedTool));
+			promises.push(messageAllTabs(panel.key, {action:"removeTool", tool:removedTool}));
 
 			// update panel
 			panel.tools.splice(panel.tools.indexOf(removedTool.name), 1);
@@ -470,17 +495,11 @@ function removeToolFromPanel(toolKey) {
 				if (tool.position > removedTool.position) {
 					tool.position = tool.position - 1;
 
-					promises.push(saveTool(tool));
+					promises.push(writeTool(tool));
 				}
 			});
 
 			return Promise.all(promises);
-		})
-		.then(results => {
-   			var tool = results[0];
-			var panel = results[1];
-
-			return messageFrame(panel.key, {action:"removeTool", tool:tool});
 		})
 		.catch(errorHandler);
 }
@@ -501,6 +520,112 @@ function messageFrame(key, message) {
 					errorHandler(err);
 				}
 			});
+}
+
+function messageFrame2(tabId, frameId, message) {
+	return clients.matchAll({includeUncontrolled: true})
+		.then(clients => {
+			for (let i = 0; i < clients.length; i++) {
+				let client = clients[i];
+				let params = new URL(client.url).searchParams;
+
+				let tid = params.get('tabId');
+				let fid = params.get('frameId');
+
+				if (tid == tabId && fid == frameId) {
+					return client;
+				}
+			};
+
+			throw new NoClientIdError('Could not find a ClientId for tabId: ' + tabId + ', frameId: ' + frameId);
+		})
+		.then(client => {
+			return new Promise(function(resolve, reject) {
+				let channel = new MessageChannel();
+
+				channel.port1.onmessage = function(event) {
+					if (event.data.error) {
+						reject(event.data.error);
+					}
+					else {
+						resolve(event.data);
+					}
+				};
+
+				client.postMessage(message, [channel.port2]);
+			})
+		})
+		.catch(errorHandler);
+}
+
+function messageAllTabs(frameId, message) {
+	return clients.matchAll({includeUncontrolled: true})
+		.then(clients => {
+			let frameClients = [];
+
+			for (let i = 0; i < clients.length; i++) {
+				let client = clients[i];
+				let params = new URL(client.url).searchParams;
+
+				let fid = params.get('frameId');
+
+				if (fid === frameId) {
+					frameClients.push(client);
+				}
+			};
+
+			if (frameClients.length === 0) {
+				log(LOG_DEBUG, 'utils.messageAllTabs', 'Could not find any clients for frameId: ' + frameId, message);
+				throw new NoClientIdError('Could not find any clients for frameId: ' + frameId);
+			}
+
+			return frameClients;
+		})
+		.then(clients => {
+			return new Promise(function(resolve, reject) {
+				for (var i = 0 ; i < clients.length ; i++) {
+					let client = clients[i];
+
+					let channel = new MessageChannel();
+
+					channel.port1.onmessage = function(event) {
+						if (event.data.error) {
+							reject(event.data.error);
+						}
+						else {
+							resolve(event.data);
+						}
+					};
+
+				client.postMessage(message, [channel.port2]);
+				}
+			});
+		})
+		.catch(errorHandler);
+}
+
+/*
+ * Returns the visibilityState of the specified iframe window
+ */
+function getAllClients(frameId) {
+	return clients.matchAll({includeUncontrolled: true})
+		.then(clients => {
+			let frameClients = [];
+
+			for (let i = 0; i < clients.length; i++) {
+				let client = clients[i];
+				let params = new URL(client.url).searchParams;
+
+				let fid = params.get('frameId');
+
+				if (fid === frameId) {
+					frameClients.push(client);
+				}
+			};
+
+			return frameClients;
+		})
+		.catch(errorHandler);
 }
 
 /*
@@ -588,15 +713,20 @@ function configureButtonHtml(tool) {
  * Adds the correct scheme to a domain, handling the fact the ZAP could be upgrading an http domain to https
  * Is only available in the serviceworker and Should always be used when supplying a domain to the ZAP API.
  */
-function domainWrapper(domain) {
-	var scheme = "https";
-	if (sharedData.upgradedDomains && sharedData.upgradedDomains.has(domain)) {
-		scheme = "http";
-	}
-	return scheme + "://" + domain + (domain.endsWith("/") ? "" : "/");
+
+function getUpgradedDomain(domain) {
+	return localforage.getItem('upgradedDomains')
+		.then(upgradedDomains => {
+			let scheme = 'https';
+
+			if (upgradedDomains && domain in upgradedDomains) {
+				scheme = "http";
+			}
+
+			return scheme + "://" + domain + (domain.endsWith("/") ? "" : "/");
+		})
+		.catch(errorHandler)
 }
-
-
 
 // todo: maybe needed instead of passing info through postmessage
 function getTargetDomain() {

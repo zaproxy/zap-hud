@@ -32,7 +32,7 @@ var Break = (function() {
 		tool.panel = "";
 		tool.position = 0;
 
-		saveTool(tool);
+		writeTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.brk.BreakEventPublisher");
 	}
 
@@ -102,7 +102,8 @@ var Break = (function() {
 				tool.data = DATA.ON;
 				tool.icon = ICONS.ON;
 
-				saveTool(tool);
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: DATA.ON, icon: ICONS.ON}})
+				writeTool(tool);
 			})
 			.catch(errorHandler);
 	}
@@ -118,7 +119,8 @@ var Break = (function() {
 				tool.data = DATA.OFF;
 				tool.icon = ICONS.OFF;
 
-				saveTool(tool);
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: DATA.OFF, icon: ICONS.OFF}})
+				writeTool(tool)
 			})
 			.catch(errorHandler);
 	}
@@ -129,7 +131,8 @@ var Break = (function() {
 	}
 
 	function drop() {
-		return zapApiCall("/break/action/drop/");
+		return zapApiCall("/break/action/drop/")
+			.catch(errorHandler);
 	}
 
 	function setHttpMessage(header, body) {
@@ -179,25 +182,45 @@ var Break = (function() {
 		config.request.method = parseRequestHeader(data.requestHeader).method;
 		config.request.header = data.requestHeader.trim();
 		config.request.body = data.requestBody;
-		
-		getWindowVisibilityState('display')
-			.then(state => {
-				if (state != 'visible') {
-					// The target window isn't ready to accept the break event so just step through it.
-					// Not ideal but most of these requests will be less interesting (css and JS)
+
+		getAllClients('display')
+			.then(clients => {
+				let isFirefox = this.navigator.userAgent.indexOf("Firefox") > -1 ? true : false;
+				let r = false;
+
+				if (isFirefox) {
+					for(let i=0; i<clients.length; i++) {
+						if (clients[i].visibilityState == 'visible') {
+							r = true;
+						}
+					}
+				}
+				else {
+					if (clients.length > 0) {
+						r = true;
+					}
+				}
+
+				return r;
+			})
+			.then(isVisible => {
+				if (!isVisible) {
 					log(LOG_DEBUG, 'break.showBreakDisplay', 'Target window not ready, stepping');
 					step();
+					messageAllTabs('display', {action:'closeModals'})
 					return;
 				}
-			});
+			})
+			.catch(errorHandler)
 
-		messageFrame("display", {action:"showBreakMessage", config:config})
+		messageAllTabs("display", {action:"showBreakMessage", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.buttonSelected === "step") {
 					setHttpMessage(response.header, response.body)
 						.then(() => {
 							step();
+							messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
 						})
 						.catch(errorHandler);
 				}
@@ -205,12 +228,13 @@ var Break = (function() {
 					setHttpMessage(response.header, response.body)
 						.then(() => {
 							stopBreaking();
+							messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
 						})
 						.catch(errorHandler);
 				}
 				else if (response.buttonSelected === "drop") {
-					drop()
-						.catch(errorHandler);
+					drop();
+					messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
 				}
 				else {
 					//cancel
@@ -219,18 +243,18 @@ var Break = (function() {
 			.catch(errorHandler);
 	}
 
-	function showOptions() {
+	function showOptions(tabId) {
 		var config = {};
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove"), filter: "Add Filter"};
 
-		messageFrame("display", {action:"showButtonOptions", config:config})
+		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(NAME);
+					removeToolFromPanel(tabId, NAME);
 				}
 			})
 			.catch(errorHandler);
@@ -261,7 +285,7 @@ var Break = (function() {
 					break;
 
 				case "buttonMenuClicked":
-					showOptions();
+					showOptions(message.tabId);
 					break;
 
 				default:
