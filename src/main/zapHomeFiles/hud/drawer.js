@@ -7,27 +7,54 @@ Vue.component('history', {
     data() {
         return {
             filter: '',
-            messages: []
+            regex: false,
+            messages: [],
+            hiddenMessageCount: 0
         }
     },
     computed: {
         timeDescendingMessages() {
             return this.messages.slice().reverse();
         },
+        messageCount() {
+            return this.messages.length;
+        },
         filteredMessages() {
-            const self=this;
+            const self=this,
+                  isRegex = this.regex;
+            let re;
+
+            if (isRegex){
+                try {
+                    re = new RegExp(this.filter);
+                }
+                catch (ex) {
+                    re = new RegExp(''); //hack for now to prevent errors being thrown for invalid RegExp
+                }
+            }
 
             return this.messages.filter( message => {
                 if (self.filter.trim().length === 0) {
-                    return message;
+                    return true;
                 }
-                return message.url.indexOf(self.filter)>=0; 
+                if (isRegex){
+                    return re.test(message.url);
+                }
+                else{
+                    return message.url.indexOf(self.filter)>=0; 
+                }
             });
         }
     },
     methods: {
         messageSelected(id) {
             navigator.serviceWorker.controller.postMessage({action: "showHttpMessageDetails", tool: "history", id:id});
+        },
+    },
+    watch: {
+        filter() {
+            const visibleMessages = document.querySelectorAll("#history-messages .message-tr");
+            this.hiddenMessageCount = (!this.messages) ? 0 : this.messages.length - visibleMessages.length;
         }
     },
     created() {
@@ -52,13 +79,18 @@ Vue.component('history', {
         if (this.messages.length > 0) {
             let lastMessage = this.messages[this.messages.length - 1]
             let lastid = 'message-tr-' + lastMessage.id
-
-            document.getElementById(lastid).scrollIntoView({block:'end', behaviour:'smooth'});
-            //move horizontal scroll bar to the left
-            var tabsDetails = document.getElementsByClassName('tabs-details')[0];
-            tabsDetails.scrollTo(0,tabsDetails.scrollHeight)
+            let lastIdElem = document.querySelector(lastid);
+            if(lastIdElem){
+                lastIdElem.scrollIntoView({block:'end', behavior:'smooth'});
+            }
+            
+            // //move horizontal scroll bar to the left
+            let tabsDetailsElems = document.querySelectorAll('tabs-details');
+            if (tabsDetailsElems.length > 0){
+                tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
+            }
         }
-    }
+    },
 });
 
 Vue.component('tabs', {

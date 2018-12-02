@@ -2,6 +2,7 @@
 <head>
 	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre.css"/>
 	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre-icons.css"/>
+    <link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=drawer.css"/>
 
 	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js"></script>
 	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue.js"></script>
@@ -20,29 +21,50 @@
     </div>
 
     <template id="history-template">
-        <table class="table table-striped table-hover table-scroll table-history" style="min-width: fit-content;">
-            <thead>
-                <tr>
-                    <th style="width: 125px"> {{ $t('message.history_http_message_field_time') }} </th>
-                    <th style="width: 75px"> {{ $t('message.history_http_message_field_code') }} </th>
-                    <th style="width: 75px"> {{ $t('message.history_http_message_field_method') }} </th>
-                    <th style="width: 800px"> {{ $t('message.history_http_message_field_url') }} </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="4">
-                        <input v-model="filter" type="text" placeholder="Filter" />
-                    </td>
-                </tr>
-                <tr v-for="message in filteredMessages" @click="messageSelected(message.id)" :id="'message-tr-'+message.id">
-                    <td> {{ message.time }} </td>
-                    <td> {{ message.code }} </td>
-                    <td> {{ message.method }} </td>
-                    <td> {{ message.url }} </td>
-                </tr>
-            </tbody>
-        </table>
+        <div>
+            <table id="history-header" class="table">
+                <thead>
+                    <tr>
+                        <th class="title time"> 
+                            {{ $t('message.history_http_message_field_time') }}
+                        </th>
+                        <th class="title code"> 
+                            {{ $t('message.history_http_message_field_code') }}
+                        </th>
+                        <th class="title method"> 
+                            {{ $t('message.history_http_message_field_method') }}
+                        </th>
+                        <th class="title url"> 
+                            {{ $t('message.history_http_message_field_url') }}
+                        </th>
+                        <th class="title filter"> 
+                            <span>
+                                <input v-model="filter" type="text" placeholder="Filter" />
+                            </span>
+                            <span>
+                                <input v-model="regex" type="checkbox" />
+                            </span>
+                            <span>
+                                Enable RegEx
+                            </span>
+                        </th>
+                        <th class="title hidden">
+                            <span>{{ hiddenMessageCount }} of {{ messageCount }} items hidden by filters</span>
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+            <table id="history-messages" class="table table-striped table-hover table-scroll table-history" style="min-width: fit-content;">
+                <tbody>
+                    <tr v-for="message in filteredMessages" @click="messageSelected(message.id)" :id="'message-tr-'+message.id" class="message-tr">
+                        <td class="field time"> {{ message.time }} </td>
+                        <td class="field code"> {{ message.code }} </td>
+                        <td class="field method"> {{ message.method }} </td>
+                        <td class="field url"> {{ message.url }} </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </template>
 
     <!-- tabs component -->
