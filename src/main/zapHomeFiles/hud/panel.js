@@ -4,7 +4,7 @@
  * Description goes here...
  */
 
-var IMAGE_URL = "<<ZAP_HUD_FILES>>?image=";
+var IMAGE_URL = '<<ZAP_HUD_FILES>>?image=';
 var orientation = "";
 var panelKey = "";
 var frameId = '';
@@ -84,7 +84,7 @@ Vue.component('hud-button', {
 
 			if (self.name === data.name) {
 				if (data.icon !== undefined) {
-					self.currentIcon = '<<ZAP_HUD_FILES>>?image=' + data.icon;
+					self.currentIcon = IMAGE_URL + data.icon;
 				}
 
 				if (data.data !== undefined) {

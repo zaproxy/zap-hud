@@ -1,9 +1,17 @@
-importScripts("<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js"); 
-importScripts("<<ZAP_HUD_FILES>>?name=libraries/vue.js"); 
-importScripts("<<ZAP_HUD_FILES>>?name=libraries/vue-i18n.js"); 
-importScripts("<<ZAP_HUD_FILES>>?name=i18n.js");
-importScripts("<<ZAP_HUD_FILES>>?name=utils.js");
-importScripts("<<ZAP_HUD_FILES>>?name=tools/alertUtils.js");
+// Injected strings
+var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
+var ZAP_HUD_WS = '<<ZAP_HUD_WS>>';
+var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
+var toolScripts = [
+	'<<ZAP_HUD_TOOLS>>'
+];
+
+importScripts(ZAP_HUD_FILES + "?name=libraries/localforage.min.js"); 
+importScripts(ZAP_HUD_FILES + "?name=libraries/vue.js"); 
+importScripts(ZAP_HUD_FILES + "?name=libraries/vue-i18n.js"); 
+importScripts(ZAP_HUD_FILES + "?name=i18n.js");
+importScripts(ZAP_HUD_FILES + "?name=utils.js");
+importScripts(ZAP_HUD_FILES + "?name=tools/utils/alertUtils.js");
 
 var CACHE_NAME = "hud-cache-1.0";
 
@@ -14,26 +22,22 @@ var isDebugging = true;
 var webSocket;
 
 var urlsToCache = [
-	"<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js",
-	"<<ZAP_HUD_FILES>>?name=libraries/vue.js",
-	"<<ZAP_HUD_FILES>>?name=libraries/vue-i18n.js",
-	"<<ZAP_HUD_FILES>>?name=i18n.js",
-	"<<ZAP_HUD_FILES>>?name=utils.js",
-	"<<ZAP_HUD_FILES>>?name=panel.html",
-	"<<ZAP_HUD_FILES>>?name=panel.css",
-	"<<ZAP_HUD_FILES>>?name=panel.js",
-	"<<ZAP_HUD_FILES>>?name=display.css",
-	"<<ZAP_HUD_FILES>>?name=display.html",
-	"<<ZAP_HUD_FILES>>?name=display.js",
-	"<<ZAP_HUD_FILES>>?name=management.css",
-	"<<ZAP_HUD_FILES>>?name=management.html",
-	"<<ZAP_HUD_FILES>>?name=management.js",
-	"<<ZAP_HUD_FILES>>?name=growlerAlerts.html",
-	"<<ZAP_HUD_FILES>>?name=growlerAlerts.js"
-];
-
-var toolScripts = [
-	<<ZAP_HUD_TOOLS>>
+	ZAP_HUD_FILES + "?name=libraries/localforage.min.js",
+	ZAP_HUD_FILES + "?name=libraries/vue.js",
+	ZAP_HUD_FILES + "?name=libraries/vue-i18n.js",
+	ZAP_HUD_FILES + "?name=i18n.js",
+	ZAP_HUD_FILES + "?name=utils.js",
+	ZAP_HUD_FILES + "?name=panel.html",
+	ZAP_HUD_FILES + "?name=panel.css",
+	ZAP_HUD_FILES + "?name=panel.js",
+	ZAP_HUD_FILES + "?name=display.css",
+	ZAP_HUD_FILES + "?name=display.html",
+	ZAP_HUD_FILES + "?name=display.js",
+	ZAP_HUD_FILES + "?name=management.css",
+	ZAP_HUD_FILES + "?name=management.html",
+	ZAP_HUD_FILES + "?name=management.js",
+	ZAP_HUD_FILES + "?name=growlerAlerts.html",
+	ZAP_HUD_FILES + "?name=growlerAlerts.js"
 ];
 
 self.tools = {};
@@ -136,6 +140,10 @@ const onMessage = event => {
 
 			break;
 
+		case "heartbeat":
+			webSocket.send('{ "component" : "hud", "type" : "view", "name" : "heartbeat" }');
+			break;
+
 		default:
 			break;
 	}
@@ -149,7 +157,7 @@ self.addEventListener('error', errorHandler);
 
 /* Set up WebSockets */
 
-webSocket = new WebSocket("<<ZAP_HUD_WS>>");
+webSocket = new WebSocket(ZAP_HUD_WS);
 
 webSocket.onopen = function (event) {
 	// Basic test
@@ -223,7 +231,7 @@ function showAddToolDialog(tabId, frameId) {
 			// reformat for displaying in list
 			tools = tools.map(tool => ({
                 'label': tool.label,
-                'image': '<<ZAP_HUD_FILES>>?image=' + tool.icon,
+                'image': ZAP_HUD_FILES + '?image=' + tool.icon,
                 'toolname': tool.name
             }));
 

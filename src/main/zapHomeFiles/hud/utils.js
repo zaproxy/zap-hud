@@ -4,8 +4,12 @@
  * Description goes here...
  */
 
+// Injected strings
+var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
+var ZAP_HUD_API = '<<ZAP_HUD_API>>';
+var IS_DEV_MODE = '<<DEV_MODE>>' === 'true' ? true : false ;
+
 var IS_HUD_CONFIGURED = "isHudConfigured";
-var IS_DEBUG_ENABLED = false;
 var IS_FIRST_TIME = "isFirstTime";
 var IS_SERVICEWORKER_REFRESHED = 'isServiceWorkerRefreshed';
 
@@ -17,14 +21,14 @@ var LOG_DEBUG = 4;	// Relatively fine grain events which can help debug problems
 var LOG_TRACE = 5;	// Very fine grain events, highest level
 var LOG_STRS = ['OFF', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'];
 
-var LOG_LEVEL = LOG_DEBUG;	// TODO change to INFO before release..
+var LOG_LEVEL = IS_DEV_MODE ? LOG_DEBUG : LOG_INFO;
 var LOG_TO_CONSOLE = true;
-var LOG_TO_ZAP = true;
+var LOG_TO_ZAP = IS_DEV_MODE;
 
 var CLIENT_LEFT = "left";
 var CLIENT_RIGHT = "right";
 
-var BUTTON_HTML = '<div class="button" id="BUTTON_NAME-button">\n<div class="button-icon" id="BUTTON_NAME-button-icon"><img src="<<ZAP_HUD_FILES>>?image=IMAGE_NAME" alt="IMAGE_NAME" height="16" width="16"></div>\n<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA</div>\n<div class="button-label" id="BUTTON_NAME-button-label">BUTTON_LABEL</div>\n</div>\n';
+var BUTTON_HTML = '<div class="button" id="BUTTON_NAME-button">\n<div class="button-icon" id="BUTTON_NAME-button-icon"><img src="' + ZAP_HUD_FILES + '?image=IMAGE_NAME" alt="IMAGE_NAME" height="16" width="16"></div>\n<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA</div>\n<div class="button-label" id="BUTTON_NAME-button-label">BUTTON_LABEL</div>\n</div>\n';
 var BUTTON_NAME = /BUTTON_NAME/g;
 var BUTTON_DATA_DIV  = /<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA<\/div>/g;
 var BUTTON_DATA = /BUTTON_DATA/g;
@@ -32,9 +36,12 @@ var BUTTON_LABEL = /BUTTON_LABEL/g;
 var IMAGE_NAME = /IMAGE_NAME/g;
 
 // default tools
-var DEFAULT_TOOLS_LEFT = ["scope", "break", "showEnable", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational", "hudErrors"];
+var DEFAULT_TOOLS_LEFT = ["scope", "break", "showEnable", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational"];
 var DEFAULT_TOOLS_RIGHT = ["site-tree", "spider", "active-scan", "attack", "site-alerts-high", "site-alerts-medium", "site-alerts-low", "site-alerts-informational"];
 
+if (IS_DEV_MODE) {
+	DEFAULT_TOOLS_LEFT.push("hudErrors");
+}
 
 class NoClientIdError extends Error {};
 
@@ -592,6 +599,17 @@ function messageAllTabs(frameId, message) {
 }
 
 /*
+ * Returns the visibilityState of the specified iframe window
+ */
+function getWindowVisibilityState(key) {
+	return loadFrame(key)
+		.then(getWindowFromFrame)
+		.then(window => {
+			return window.visibilityState;
+		});
+}
+
+/*
  * Get the window object from a stored frame blob. Throws NoClientIdError if
  * the clientId doesn't exist.
  */
@@ -714,6 +732,23 @@ function errorHandler(err) {
 	log(LOG_ERROR, 'errorHandler', message, err);
 }
 
+
+function getZapFilePath(file) {
+	return ZAP_HUD_FILES + '?name=' + file;
+}
+
+function getZapImagePath(file) {
+	return ZAP_HUD_FILES + '?image=' + file;
+}
+
+function zapApiCall(apiCall) {
+	return fetch(ZAP_HUD_API + apiCall);
+}
+
+function zapApiCall(apiCall, init) {
+	return fetch(ZAP_HUD_API + apiCall, init);
+}
+
 function log(level, method, message, object) {
 	if (level > LOG_LEVEL || (! LOG_TO_CONSOLE && ! LOG_TO_ZAP)) {
 		return;
@@ -733,7 +768,7 @@ function log(level, method, message, object) {
 		console[logLevel.toLowerCase()](record);
 	}
 	if (LOG_TO_ZAP) {
-		fetch("<<ZAP_HUD_API>>/hud/action/log/?record=" + record);
+		zapApiCall("/hud/action/log/?record=" + record);
 	}
 	if (level == LOG_ERROR) {
 		self.dispatchEvent(new CustomEvent("hud.error", {detail: {record: record}}));

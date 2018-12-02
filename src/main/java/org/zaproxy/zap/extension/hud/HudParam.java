@@ -19,7 +19,10 @@
  */
 package org.zaproxy.zap.extension.hud;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.log4j.Logger;
 import org.parosproxy.paros.Constant;
 import org.zaproxy.zap.common.VersionedAbstractParam;
 import org.zaproxy.zap.extension.api.ZapApiIgnore;
@@ -29,7 +32,8 @@ public class HudParam extends VersionedAbstractParam {
     /** The base configuration key for all HUD configurations. */
     private static final String PARAM_BASE_KEY = "hud";
 
-    private static final String PARAM_ENABLED = PARAM_BASE_KEY + ".enabled";
+    private static final String PARAM_ENABLED_DESKTOP = PARAM_BASE_KEY + ".enabledForDesktop";
+    private static final String PARAM_ENABLED_DAEMON = PARAM_BASE_KEY + ".enabledForDaemon";
     private static final String PARAM_BASE_DIRECTORY = PARAM_BASE_KEY + ".dir";
     private static final String PARAM_DEV_MODE = PARAM_BASE_KEY + ".devMode";
     private static final String PARAM_ALLOW_UNSAFE_EVAL = PARAM_BASE_KEY + ".unsafeEval";
@@ -37,6 +41,10 @@ public class HudParam extends VersionedAbstractParam {
     private static final String PARAM_REMOVE_CSP = PARAM_BASE_KEY + ".removeCsp";
     private static final String PARAM_TUTORIAL_PORT = PARAM_BASE_KEY + ".tutorialPort";
     private static final String PARAM_TUTORIAL_HOST = PARAM_BASE_KEY + ".tutorialHost";
+    private static final String PARAM_TUTORIAL_SKIP_TASKS = PARAM_BASE_KEY + ".tutorialSkipTasks";
+    private static final String PARAM_TUTORIAL_TEST_MODE = PARAM_BASE_KEY + ".tutorialTestMode";
+    private static final String PARAM_TUTORIAL_TASKS = PARAM_BASE_KEY + ".tutorialTasks";
+    private static final String PARAM_SHOW_WELCOME_SCREEN = PARAM_BASE_KEY + ".showWelcomeScreen";
 
     /**
      * The version of the configurations. Used to keep track of configurations changes between
@@ -52,7 +60,8 @@ public class HudParam extends VersionedAbstractParam {
 
     private boolean allowUnsafeEval;
 
-    private boolean enabled;
+    private boolean enabledForDesktop;
+    private boolean enabledForDaemon;
 
     private boolean inScopeOnly;
 
@@ -61,6 +70,16 @@ public class HudParam extends VersionedAbstractParam {
     private int tutorialPort;
 
     private String tutorialHost;
+
+    private boolean isSkipTutorialTasks;
+
+    private boolean isTutorialTestMode;
+
+    private boolean showWelcomeScreen;
+
+    private List<String> tutorialTasks;
+
+    private Logger log = Logger.getLogger(this.getClass());
 
     public String getBaseDirectory() {
         return baseDirectory;
@@ -90,13 +109,22 @@ public class HudParam extends VersionedAbstractParam {
         getConfig().setProperty(PARAM_ALLOW_UNSAFE_EVAL, allowUnsafeEval);
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public boolean isEnabledForDesktop() {
+        return enabledForDesktop;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        getConfig().setProperty(PARAM_ENABLED, enabled);
+    public void setEnabledForDesktop(boolean enabledForDesktop) {
+        this.enabledForDesktop = enabledForDesktop;
+        getConfig().setProperty(PARAM_ENABLED_DESKTOP, enabledForDesktop);
+    }
+
+    public boolean isEnabledForDaemon() {
+        return enabledForDaemon;
+    }
+
+    public void setEnabledForDaemon(boolean enabledForDaemon) {
+        this.enabledForDaemon = enabledForDaemon;
+        getConfig().setProperty(PARAM_ENABLED_DAEMON, enabledForDaemon);
     }
 
     public boolean isInScopeOnly() {
@@ -117,6 +145,33 @@ public class HudParam extends VersionedAbstractParam {
         getConfig().setProperty(PARAM_REMOVE_CSP, removeCSP);
     }
 
+    public boolean isSkipTutorialTasks() {
+        return isSkipTutorialTasks;
+    }
+
+    public void setSkipTutorialTasks(boolean isSkipTutorialTasks) {
+        this.isSkipTutorialTasks = isSkipTutorialTasks;
+        getConfig().setProperty(PARAM_TUTORIAL_SKIP_TASKS, isSkipTutorialTasks);
+    }
+
+    public boolean isTutorialTestMode() {
+        return isTutorialTestMode;
+    }
+
+    public void setTutorialTestMode(boolean isTutorialTestMode) {
+        this.isTutorialTestMode = isTutorialTestMode;
+        getConfig().setProperty(PARAM_TUTORIAL_TEST_MODE, isTutorialTestMode);
+    }
+
+    public boolean isShowWelcomeScreen() {
+        return showWelcomeScreen;
+    }
+
+    public void setShowWelcomeScreen(boolean showWelcomeScreen) {
+        this.showWelcomeScreen = showWelcomeScreen;
+        getConfig().setProperty(PARAM_SHOW_WELCOME_SCREEN, showWelcomeScreen);
+    }
+
     @Override
     protected String getConfigVersionKey() {
         return PARAM_BASE_KEY + VERSION_ATTRIBUTE;
@@ -133,16 +188,28 @@ public class HudParam extends VersionedAbstractParam {
                 getConfig()
                         .getString(
                                 PARAM_BASE_DIRECTORY,
-                                Constant.getZapHome()
-                                        + File.separator
-                                        + ExtensionHUD.DIRECTORY_NAME);
-        enabled = getConfig().getBoolean(PARAM_ENABLED, false);
+                                Constant.getZapHome() + ExtensionHUD.DIRECTORY_NAME);
+        enabledForDesktop = getConfig().getBoolean(PARAM_ENABLED_DESKTOP, true);
+        enabledForDaemon = getConfig().getBoolean(PARAM_ENABLED_DAEMON, false);
         developmentMode = getConfig().getBoolean(PARAM_DEV_MODE, false);
-        allowUnsafeEval = getConfig().getBoolean(PARAM_ALLOW_UNSAFE_EVAL, false);
+        // TODO default allowUnsafeEval to false once the HUD works without it set
+        allowUnsafeEval = getConfig().getBoolean(PARAM_ALLOW_UNSAFE_EVAL, true);
         inScopeOnly = getConfig().getBoolean(PARAM_IN_SCOPE_ONLY, false);
         removeCSP = getConfig().getBoolean(PARAM_REMOVE_CSP, true);
         tutorialPort = getConfig().getInt(PARAM_TUTORIAL_PORT, 0);
         tutorialHost = getConfig().getString(PARAM_TUTORIAL_HOST, "127.0.0.1");
+        isSkipTutorialTasks = getConfig().getBoolean(PARAM_TUTORIAL_SKIP_TASKS, false);
+        isTutorialTestMode = getConfig().getBoolean(PARAM_TUTORIAL_TEST_MODE, false);
+        tutorialTasks = convert(getConfig().getList(PARAM_TUTORIAL_TASKS));
+        showWelcomeScreen = getConfig().getBoolean(PARAM_SHOW_WELCOME_SCREEN, true);
+    }
+
+    private List<String> convert(List<Object> objs) {
+        List<String> strs = new ArrayList<String>(objs.size());
+        for (Object obj : objs) {
+            strs.add(obj.toString());
+        }
+        return strs;
     }
 
     @Override
@@ -171,5 +238,33 @@ public class HudParam extends VersionedAbstractParam {
      */
     public String getTutorialHost() {
         return tutorialHost;
+    }
+
+    public void setTutorialTaskDone(String task) {
+        this.tutorialTasks.add(task);
+        getConfig().setProperty(PARAM_TUTORIAL_TASKS, tutorialTasks);
+        try {
+            this.getConfig().save();
+        } catch (ConfigurationException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public boolean isTutorialTaskDone(String task) {
+        return this.tutorialTasks.contains(task);
+    }
+
+    public List<String> getTutorialTasksDone() {
+        return this.tutorialTasks;
+    }
+
+    public void resetTutorialTasks() {
+        tutorialTasks.clear();
+        getConfig().setProperty(PARAM_TUTORIAL_TASKS, tutorialTasks);
+        try {
+            this.getConfig().save();
+        } catch (ConfigurationException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

@@ -10,17 +10,23 @@
 </head>
 <body>
 	<div id="app"> 
-		<!--TODO: implement this for splash screen on first time load-->
-		<!-- <loading-screen v-show="isLoadingScreenShown"></loading-screen> -->
+		<loading-screen v-show="<<SHOW_WELCOME_SCREEN>>"></loading-screen>
 	</div>
 
-	<!-- TODO: make this a super cool loading screen -->
-	<!--
 	<template id="loading-screen-template">
-		<div>
-			<h1>The HUD is loading.</h1>
+		<div class="welcome-div">
+			<img class="welcome-image" src='<<ZAP_HUD_FILES>>?image=hud-welcome.png'>
+			<div class="tutorial-div">
+				<button class="btn btn-primary" @click="tutorial"> Take the HUD Tutorial </button>
+			</div>
+			<div class="target-div">
+				<button class="btn btn-primary" @click="target"> Continue to your target </button>
+			</div>
+			<div class="dontShowAgain-div">
+				<input type="checkbox" id="dontShowAgain" v-model="dontShowAgain">
+				<label for="dontShowAgain">Don't show this screen again</label>
+			</div>
 		</div>
 	</template>
-	-->
 </body>
 </html>

@@ -107,7 +107,7 @@ var CommonAlerts = (function() {
 				// fetch all of the current alerts from ZAP
 				getUpgradedDomain(targetDomain)
 					.then(upgradedDomain => {
-						return fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
+						return zapApiCall("/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
 					})
 					.then(response => {
 						return response.json()
@@ -137,7 +137,7 @@ var CommonAlerts = (function() {
 					.catch(errorHandler);
 
 				// Fetch all of the alerts on this page
-				fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
+				zapApiCall("/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
 				.then(response => {
 					response.json().
 						then(json => {

@@ -9,7 +9,7 @@ var alertUtils = (function() {
 		
 		getUpgradedDomain(target)
 			.then(upgradedDomain => {
-				return fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
+				return zapApiCall("/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
 			})
 			.then(response => {
 				return response.json()
@@ -70,7 +70,7 @@ var alertUtils = (function() {
 					target = target.substring(0, target.indexOf("?"));
 				}
 				
-				return fetch("<<ZAP_HUD_API>>/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
+				return zapApiCall("/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
 			})
 			.then(response => {
 				return response.json()
@@ -93,7 +93,7 @@ var alertUtils = (function() {
 	function showAlertDetails(tabId, id, backFunction) {
 		log (LOG_DEBUG, 'showAlertDetails', '' + id);
 
-		fetch("<<ZAP_HUD_API>>/core/view/alert/?id=" + id)
+		zapApiCall("/core/view/alert/?id=" + id)
 			.then(response => {
 
 				response.json().

@@ -90,7 +90,7 @@ var ActiveScan = (function() {
 	function startActiveScan(tabId, domain) {
 		getUpgradedDomain(domain)
 			.then(upgradedDomain => {
-				return fetch("<<ZAP_HUD_API>>/ascan/action/scan/?url=" + upgradedDomain)
+				return zapApiCall("/ascan/action/scan/?url=" + upgradedDomain)
 			}).
 			then(response => {
 				return response.json()
@@ -116,7 +116,7 @@ var ActiveScan = (function() {
 	function stopActiveScan() {
 		loadTool(NAME)
 			.then(tool => {
-				fetch("<<ZAP_HUD_API>>/ascan/action/stop/?scanId=" + tool.scanId + "");
+				zapApiCall("/ascan/action/stop/?scanId=" + tool.scanId + "");
 			})
 			.then(activeScanStopped)
 			.catch(errorHandler);

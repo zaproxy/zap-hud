@@ -92,7 +92,7 @@ var Scope = (function() {
 		return loadTool(NAME)
 			.then(tool => {
 				if (! tool.hudContext) {
-					fetch("<<ZAP_HUD_API>>/context/action/newContext/?contextName=" + HUD_CONTEXT)
+					zapApiCall("/context/action/newContext/?contextName=" + HUD_CONTEXT)
 					tool.hudContext = true;
 				}
 
@@ -100,7 +100,7 @@ var Scope = (function() {
 
 				getUpgradedDomain(domain)
 					.then(upgradedDomain => {
-						return fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
+						return zapApiCall("/context/action/includeInContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
 					})
 					.then(response => {
 						if (!response.ok) {
@@ -119,7 +119,7 @@ var Scope = (function() {
 	function removeFromScope(domain) {
 		getUpgradedDomain(domain)
 			.then(upgradedDomain => {
-				return fetch("<<ZAP_HUD_API>>/context/action/excludeFromContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
+				return zapApiCall("/context/action/excludeFromContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
 			})
 			.then(response => {
 				if (!response.ok) {

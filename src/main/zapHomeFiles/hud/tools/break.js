@@ -93,7 +93,7 @@ var Break = (function() {
 	}
 
 	function startBreaking() {
-		fetch("<<ZAP_HUD_API>>/break/action/break/?type=http-all&state=true")
+		zapApiCall("/break/action/break/?type=http-all&state=true")
 			.catch(errorHandler);
 
 		loadTool(NAME)
@@ -110,7 +110,7 @@ var Break = (function() {
 
 	// todo: change this to 'continue' and figure out / fix stopBreaking
 	function stopBreaking() {
-		fetch("<<ZAP_HUD_API>>/break/action/continue")
+		zapApiCall("/break/action/continue")
 			.catch(errorHandler);
 
 		loadTool(NAME)
@@ -126,17 +126,17 @@ var Break = (function() {
 	}
 
 	function step() {
-		return fetch("<<ZAP_HUD_API>>/break/action/step/")
+		return zapApiCall("/break/action/step/")
 			.catch(errorHandler);
 	}
 
 	function drop() {
-		return fetch("<<ZAP_HUD_API>>/break/action/drop/")
+		return zapApiCall("/break/action/drop/")
 			.catch(errorHandler);
 	}
 
 	function setHttpMessage(header, body) {
-		let url = "<<ZAP_HUD_API>>/break/action/setHttpMessage/";
+		let url = "/break/action/setHttpMessage/";
 		let params = "httpHeader=" + encodeURIComponent(header) + "&httpBody=" + encodeURIComponent(body)
 
 		let init = {
@@ -145,7 +145,7 @@ var Break = (function() {
 			headers: {'content-type': 'application/x-www-form-urlencoded'} 
 		};
 
-		return fetch(url, init)
+		return zapApiCall(url, init)
 			.catch(errorHandler);
 	}
 
@@ -182,6 +182,17 @@ var Break = (function() {
 		config.request.method = parseRequestHeader(data.requestHeader).method;
 		config.request.header = data.requestHeader.trim();
 		config.request.body = data.requestBody;
+		
+		getWindowVisibilityState('display')
+			.then(state => {
+				if (state != 'visible') {
+					// The target window isn't ready to accept the break event so just step through it.
+					// Not ideal but most of these requests will be less interesting (css and JS)
+					log(LOG_DEBUG, 'break.showBreakDisplay', 'Target window not ready, stepping');
+					step();
+					return;
+				}
+			});
 
 		messageAllTabs("display", {action:"showBreakMessage", config:config})
 			.then(response => {

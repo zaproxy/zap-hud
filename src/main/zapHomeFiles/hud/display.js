@@ -331,6 +331,7 @@ Vue.component('break-message-modal', {
 			port: null,
 			request: {},
 			response: {},
+			isDropDisabled: false,
 			isResponseDisabled: false,
 			activeTab: I18n.t("common_request")
 		}
@@ -347,6 +348,21 @@ Vue.component('break-message-modal', {
 			
 			self.request.isReadonly = !data.isResponseDisabled;
 			self.response.isReadonly = data.isResponseDisabled;
+
+			// Only show the Drop option for things that dont look like a requests for a web page as this can break the HUD UI
+			if (data.isResponseDisabled) {
+				// Its a request
+				let headerLc = data.request.header.toLowerCase();
+				self.isDropDisabled = headerLc.match('accept:.*text\/html');
+				// Explicitly XHRs should be fine
+				if (headerLc.match('x-requested-with.*xmlhttprequest')) {
+					self.isDropDisabled = false;
+				}
+			} else {
+				// Its a response
+				let headerLc = data.response.header.toLowerCase();
+				self.isDropDisabled = headerLc.match('content-type:.*text\/html');
+			}
 
 			app.isBreakMessageModalShown = true;
 			app.BreakMessageModalTitle = data.title;
@@ -374,7 +390,7 @@ Vue.component('history-message-modal', {
 		replayInBrowser: function() {
 			let self = this;
 			let message = this.request;
-			fetch("<<ZAP_HUD_API>>/hud/action/recordRequest/?header=" + encodeURIComponent(message.header) + "&body=" + encodeURIComponent(message.body))
+			zapApiCall("/hud/action/recordRequest/?header=" + encodeURIComponent(message.header) + "&body=" + encodeURIComponent(message.body))
 			.then(response => response.json())
 			.then(json => {
 				if (json.requestUrl) {
@@ -439,7 +455,7 @@ Vue.component('site-tree-node', {
 	    showChildren: function () {
 	      this.addChild(I18n.t("sites_children_loading"), false);
 			var treeNode = this;
-			fetch("<<ZAP_HUD_API>>/core/view/childNodes/?url=" + this.model.url)
+			zapApiCall("/core/view/childNodes/?url=" + this.model.url)
 			.then(response => {
 
 				response.json().

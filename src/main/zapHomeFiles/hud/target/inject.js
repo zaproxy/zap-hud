@@ -4,6 +4,11 @@
  * Description goes here...
  */
 
+// Injected strings
+var URL = '<<URL>>';
+var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
+var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
+
  var injection  = (function () {
 	 let tabId = '';
 
@@ -111,8 +116,8 @@
 	}
 
 	function contractManagement() {
-		document.getElementById("management").style.width = "50px";
-		document.getElementById("management").style.height = "50px";
+		document.getElementById("management").style.width = "0px";
+		document.getElementById("management").style.height = "0px";
 	}
 	
 	// TODO put this code in a separate file and inject ?
@@ -130,14 +135,28 @@
 		inputs = document.getElementsByTagName('input');
 		for (index = 0; index < inputs.length; ++index) {
 			var counted = false;
+			if (inputs[index].disabled) {
+				inputs[index].disabled = false;
+				inputs[index].style.borderColor = 'blue';
+				showEnabledDisabled.push(inputs[index]);
+				// We dont count disabled fields as they are still visible
+			}
+			if (inputs[index].readOnly) {
+				inputs[index].readOnly = false;
+				inputs[index].style.borderColor = 'blue';
+				showEnabledReadOnly.push(inputs[index]);
+				// We dont count readonly fields as they are still visible
+			}
 			if (inputs[index].type == "hidden") {
 				inputs[index].type = "";
+				inputs[index].style.borderColor = 'purple';
 				showEnableTypeHiddenFields.push(inputs[index]);
 				showEnabledCount++;
 				counted = true;
 			}
 			if (inputs[index].style.display == "none") {
 				inputs[index].style.display = "";
+				inputs[index].style.borderColor = 'purple';
 				showEnableDisplayNoneFields.push(inputs[index]);
 				if (! counted) {
 					showEnabledCount++;
@@ -146,21 +165,12 @@
 			}
 			if (inputs[index].style.visibility == "hidden") {
 				inputs[index].style.visibility = "";
+				inputs[index].style.borderColor = 'purple';
 				showEnableTypeHiddenFields.push(inputs[index]);
 				if (! counted) {
 					showEnabledCount++;
 					counted = true;
 				}
-			}
-			if (inputs[index].disabled) {
-				inputs[index].disabled = false;
-				showEnabledDisabled.push(inputs[index]);
-				// We dont count disabled fields as they are still visible
-			}
-			if (inputs[index].readOnly) {
-				inputs[index].readOnly = false;
-				showEnabledReadOnly.push(inputs[index]);
-				// We dont count readonly fields as they are still visible
 			}
 		}
 		showEnabled = true;
@@ -170,18 +180,23 @@
 		var index;
 		for (index = 0; index < showEnableTypeHiddenFields.length; ++index) {
 			showEnableTypeHiddenFields[index].type = 'hidden';
+			showEnableTypeHiddenFields[index].style.borderColor = '';
 		}
 		for (index = 0; index < showEnableDisplayNoneFields.length; ++index) {
 			showEnableDisplayNoneFields[index].style.display = 'none';
+			showEnableDisplayNoneFields[index].style.borderColor = '';
 		}
 		for (index = 0; index < showEnableDisplayHiddenFields.length; ++index) {
 			showEnableDisplayHiddenFields[index].style.visibility = 'hidden';
+			showEnableDisplayHiddenFields[index].style.borderColor = '';
 		}
 		for (index = 0; index < showEnabledDisabled.length; ++index) {
 			showEnabledDisabled[index].disabled = true;
+			showEnabledDisabled[index].style.borderColor = '';
 		}
 		for (index = 0; index < showEnabledReadOnly.length; ++index) {
 			showEnabledReadOnly[index].readOnly = true;
+			showEnabledReadOnly[index].style.borderColor = '';
 		}
 		showEnableTypeHiddenFields = [];
 		showEnableDisplayNoneFields = [];
@@ -212,7 +227,7 @@
 		}
 		// Send to the management frame with the shared secret
 		var iframe = document.getElementById("management");
-		iframe.contentWindow.postMessage({action: 'showEnable.count', tabId: tabId, count: count, sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
+		iframe.contentWindow.postMessage({action: 'showEnable.count', tabId: tabId, count: count, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
 	}
 	
 	function highlightAlert(alert) {
@@ -237,7 +252,7 @@
 			let colour = colours[alert.risk];
 			el.style.borderColor = colour || 'red';
 			el.insertAdjacentHTML('afterend',
-				'<img src="<<ZAP_HUD_FILES>>?image=flag-' + colour + '.png" ' +
+				'<img src="' + ZAP_HUD_FILES + '?image=flag-' + colour + '.png" ' +
 				'id="zapHudAlert-' + alert.id + '" ' +
 				'title="' + alert.name + '" height="16" width="16" ' +
 				'onclick="injection.showZapAlert(' + alert.id + ');" />');
@@ -248,7 +263,7 @@
 	function showZapAlertInternal (alertId) {
 		// Send to the management frame with the shared secret
 		var iframe = document.getElementById("management");
-		iframe.contentWindow.postMessage({action: 'commonAlerts.showAlert', alertId: alertId, sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
+		iframe.contentWindow.postMessage({action: 'commonAlerts.showAlert', alertId: alertId, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
 	}
 
 
@@ -355,12 +370,12 @@
 		window.addEventListener("message", receiveMessages);
 
 		var template = document.createElement("template");
-		template.innerHTML = '<iframe id="management" src="<<ZAP_HUD_FILES>>?name=management.html&amp;frameId=management&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
-			'<iframe id="left-panel" src="<<ZAP_HUD_FILES>>?name=panel.html&amp;url=<<URL>>&amp;orientation=left&amp;frameId=leftPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="right-panel" src="<<ZAP_HUD_FILES>>?name=panel.html&amp;url=<<URL>>&amp;orientation=right&amp;frameId=rightPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="bottom-drawer" src="<<ZAP_HUD_FILES>>?name=drawer.html&amp;frameId=drawer&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; overflow: hidden; left: 0px; bottom: 0px; width: 100%; height: 50px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="main-display" src="<<ZAP_HUD_FILES>>?name=display.html&amp;frameId=display&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;"></iframe>\n' +
-			'<iframe id="growler-alerts" src="<<ZAP_HUD_FILES>>?name=growlerAlerts.html&amp;frameId=growlerAlerts&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; bottom: 0px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;"></iframe>';
+		template.innerHTML = '<iframe id="management" src="' + ZAP_HUD_FILES + '?name=management.html&amp;frameId=management&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
+			'<iframe id="left-panel" src="' + ZAP_HUD_FILES + '?name=panel.html&amp;url=' + URL + '&amp;orientation=left&amp;frameId=leftPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
+			'<iframe id="right-panel" src="' + ZAP_HUD_FILES + '?name=panel.html&amp;url=' + URL + '&amp;orientation=right&amp;frameId=rightPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
+			'<iframe id="bottom-drawer" src="' + ZAP_HUD_FILES + '?name=drawer.html&amp;frameId=drawer&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; overflow: hidden; left: 0px; bottom: 0px; width: 100%; height: 50px; z-index: 2147483646;"></iframe>\n' +
+			'<iframe id="main-display" src="' + ZAP_HUD_FILES + '?name=display.html&amp;frameId=display&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;"></iframe>\n' +
+			'<iframe id="growler-alerts" src="' + ZAP_HUD_FILES + '?name=growlerAlerts.html&amp;frameId=growlerAlerts&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; bottom: 0px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;"></iframe>';
 		document.body.appendChild(template.content);
 		document.body.style.marginBottom = "50px";
 		

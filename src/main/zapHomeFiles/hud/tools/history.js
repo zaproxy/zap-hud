@@ -49,7 +49,7 @@ var History = (function() {
 	}
 
 	function getMessageDetails(id) {
-		return fetch('<<ZAP_HUD_API>>/core/view/message/?id=' + id)
+		return zapApiCall('/core/view/message/?id=' + id)
 			.then(response => {
 				if (!response.ok) {
 					throw new Error('Could not find a message with id: ' + id);
@@ -101,7 +101,7 @@ var History = (function() {
 	}
 
 	function sendRequest(header, body) {
-		let url = "<<ZAP_HUD_API>>/core/action/sendRequest/";
+		let url = "/core/action/sendRequest/";
 		let req = header;
 
 		if (body) {
@@ -116,7 +116,7 @@ var History = (function() {
 			headers: {'content-type': 'application/x-www-form-urlencoded'}
 		};
 
-		return fetch(url, init)
+		return zapApiCall(url, init)
 			.catch(errorHandler);
 	}
     

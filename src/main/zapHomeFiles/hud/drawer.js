@@ -199,21 +199,21 @@ Vue.component('drawer-button-showhide', {
     props: [],
     data() {
         return {
-            icon: '<<ZAP_HUD_FILES>>?image=radar.png',
+            icon: getZapImagePath('radar.png'),
             isHudVisible: true
         }
     },
     methods: {
         showHud() {
             this.isHudVisible = true;
-            this.icon = '<<ZAP_HUD_FILES>>?image=radar.png';
+            this.icon = getZapImagePath('radar.png');
             localforage.setItem('settings.isHudVisible', true)
                 .catch(errorHandler);
 			parent.postMessage({tabId: tabId, frameId: frameId, action:'showSidePanels'}, document.referrer);
         },
         hideHud() {
             this.isHudVisible = false;
-            this.icon = '<<ZAP_HUD_FILES>>?image=radar-grey.png';
+            this.icon = getZapImagePath('radar-grey.png');
             localforage.setItem('settings.isHudVisible', false)
                 .catch(errorHandler);
 			parent.postMessage({tabId: tabId, frameId: frameId, action:'hideSidePanels'}, document.referrer);
@@ -227,7 +227,7 @@ Vue.component('drawer-button-showhide', {
             .then(isHudVisible => {
                 this.isHudVisible = isHudVisible;
                 if (!this.isHudVisible) {
-                    this.icon = '<<ZAP_HUD_FILES>>?image=radar-grey.png';
+                    this.icon = getZapImagePath('radar-grey.png');
                 }
             })
             .catch(errorHandler);

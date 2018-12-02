@@ -86,7 +86,7 @@ var Spider = (function() {
 	function startSpider(tabId, domain) {
 		getUpgradedDomain(domain)
 			.then(upgradedDomain =>{
-				fetch("<<ZAP_HUD_API>>/spider/action/scan/?url=" + upgradedDomain);
+				zapApiCall("/spider/action/scan/?url=" + upgradedDomain);
 				spiderStarted(tabId);
 			})
 			.catch(errorHandler);
@@ -107,7 +107,7 @@ var Spider = (function() {
 	}
 
 	function stopSpider(tabId) {
-		fetch("<<ZAP_HUD_API>>/spider/action/stop");
+		zapApiCall("/spider/action/stop");
 		spiderStopped(tabId);
 	}
 	
