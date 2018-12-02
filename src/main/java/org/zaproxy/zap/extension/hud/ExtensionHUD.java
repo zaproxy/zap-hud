@@ -59,7 +59,6 @@ import org.zaproxy.zap.extension.script.ExtensionScript;
 import org.zaproxy.zap.extension.script.ScriptEventListener;
 import org.zaproxy.zap.extension.script.ScriptType;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
-import org.zaproxy.zap.extension.selenium.ExtensionSelenium;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 import org.zaproxy.zap.view.ZapToggleButton;
 
@@ -105,7 +104,6 @@ public class ExtensionHUD extends ExtensionAdaptor
     static {
         List<Class<? extends Extension>> dependencies = new ArrayList<>(1);
         dependencies.add(ExtensionScript.class);
-        dependencies.add(ExtensionSelenium.class);
         dependencies.add(ExtensionWebSocket.class);
 
         DEPENDENCIES = Collections.unmodifiableList(dependencies);
@@ -127,7 +125,6 @@ public class ExtensionHUD extends ExtensionAdaptor
     private ExtensionScript extScript = null;
     private String baseDirectory;
     private Set<String> upgradedHttpsDomains = new HashSet<String>();
-    private HudBrowserTestThread testThread;
     private TutorialProxyServer tutorialServer;
 
     /** */
@@ -318,20 +315,6 @@ public class ExtensionHUD extends ExtensionAdaptor
                     });
         }
         return hudButton;
-    }
-
-    public HudBrowserTestThread getTestThread() {
-        return this.testThread;
-    }
-
-    public HudBrowserTestThread newTestThread(File file, String browser)
-            throws IllegalArgumentException {
-        if (this.testThread != null && this.testThread.isAlive()) {
-            return null;
-        }
-        this.testThread = new HudBrowserTestThread(file, browser);
-        this.testThread.start();
-        return this.testThread;
     }
 
     @Override
