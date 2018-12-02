@@ -9,9 +9,6 @@
 	<dependencies>
 		<addons>
 			<addon>
-				<id>selenium</id>
-			</addon>
-			<addon>
 				<id>websocket</id>
 			</addon>
 		</addons>
