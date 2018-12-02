@@ -601,6 +601,30 @@ function messageAllTabs(frameId, message) {
 /*
  * Returns the visibilityState of the specified iframe window
  */
+function getAllClients(frameId) {
+	return clients.matchAll({includeUncontrolled: true})
+		.then(clients => {
+			let frameClients = [];
+
+			for (let i = 0; i < clients.length; i++) {
+				let client = clients[i];
+				let params = new URL(client.url).searchParams;
+
+				let fid = params.get('frameId');
+
+				if (fid === frameId) {
+					frameClients.push(client);
+				}
+			};
+
+			return frameClients;
+		})
+		.catch(errorHandler);
+}
+
+/*
+ * Returns the visibilityState of the specified iframe window
+ */
 function getWindowVisibilityState(key) {
 	return loadFrame(key)
 		.then(getWindowFromFrame)
