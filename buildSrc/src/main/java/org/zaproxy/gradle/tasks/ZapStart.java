@@ -101,7 +101,10 @@ public class ZapStart extends ZapApiTask {
                 .directory(installDir.get());
 
         List<String> command = new ArrayList<>();
-        command.add(Os.isFamily(Os.FAMILY_WINDOWS) ? WINDOWS_START_SCRIPT : LINUX_START_SCRIPT);
+        command.add(
+                Os.isFamily(Os.FAMILY_WINDOWS)
+                        ? new File(installDir.get(), WINDOWS_START_SCRIPT).toString()
+                        : LINUX_START_SCRIPT);
         command.addAll(asList(DIR_ARG, homeDir.get().toString()));
         command.addAll(asList(PORT_ARG, Integer.toString(getPort().get())));
         boolean apiKeyPresent = getApiKey().isPresent();
