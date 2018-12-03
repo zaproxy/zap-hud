@@ -8,4 +8,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 First alpha release.
 
 
-[Unreleased]: https://github.com/psiinon/zap-hud/compare/38d5b771cfca52c50002e7d9fff69dcd22a4acec...HEAD
+[Unreleased]: https://github.com/zaproxy/zap-hud/compare/f41b7a279a3a2d86edbf22e7d48d6b9c24e768c8...HEAD
