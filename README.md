@@ -1,7 +1,9 @@
-# Welcome to the OWASP ZAP HUD
-![](https://raw.githubusercontent.com/zaproxy/zap-hud/master/assets/images/ZAP-HUD-Welcome-small.png)
+# ![HUD Logo](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/assets/images/hud_logo_128px.png) Welcome to the OWASP ZAP HUD
+![Release: Alpha](https://img.shields.io/badge/release-alpha-brightgreen.svg)
 
 The HUD is a completely new interface that brings information and functionality from ZAP into your browser.
+
+![](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/assets/images/ZAP-HUD-Welcome-small.png)
 
 For more details see:
 
