@@ -56,7 +56,7 @@ Limitations while running:
 
 Issues and todos in code:
 * We're using Vue.js in dev mode, which prevents us from using a suitably strong CSP
-* JavaScript code stll needs to be formatted and linted
+* JavaScript code sitll needs to be formatted and linted
 * Documentation could, of course, be better
 * Async functions are handled as via Promises as opposed to using 'await' pattern
 
