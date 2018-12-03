@@ -5,7 +5,11 @@
 	<description>Display information from ZAP in browser.</description>
 	<author>ZAP Dev Team</author>
 	<url></url>
-	<changes>First version</changes>
+	<changes>
+	<![CDATA[
+	First alpha release.
+	]]>
+	</changes>
 	<dependencies>
 		<addons>
 			<addon>
