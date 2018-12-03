@@ -40,6 +40,8 @@ import org.zaproxy.gradle.jh.tasks.JavaHelpIndexer;
 import org.zaproxy.gradle.tasks.CopyAddOn;
 import org.zaproxy.gradle.tasks.DeployAddOn;
 import org.zaproxy.gradle.tasks.UpdateManifestFile;
+import org.zaproxy.gradle.zapversions.VersionsExtension;
+import org.zaproxy.gradle.zapversions.tasks.GenerateZapVersionsFile;
 
 public class AddOnPlugin implements Plugin<Project> {
 
@@ -94,6 +96,7 @@ public class AddOnPlugin implements Plugin<Project> {
                             setUpAddOnFiles(project, extension);
                             setUpManifest(project, extension);
                             setUpJavaHelp(project, jp, extension);
+                            setUpZapVersions(project, extension);
                         });
     }
 
@@ -204,6 +207,9 @@ public class AddOnPlugin implements Plugin<Project> {
                     task.setDestinationDir(
                             project.getLayout().getBuildDirectory().dir("zap").get().getAsFile());
 
+                    task.setPreserveFileTimestamps(false);
+                    task.setReproducibleFileOrder(true);
+
                     Jar jar =
                             project.getTasks()
                                     .withType(Jar.class)
@@ -266,5 +272,30 @@ public class AddOnPlugin implements Plugin<Project> {
 
                     task.from(generateAddOnProvider);
                 });
+    }
+
+    private static void setUpZapVersions(Project project, AddOnPluginExtension extension) {
+        TaskProvider<GenerateZapVersionsFile> tp =
+                project.getTasks()
+                        .register("generateZapVersionsFile", GenerateZapVersionsFile.class);
+        tp.configure(
+                t -> {
+                    TaskProvider<Jar> addOnProvider =
+                            project.getTasks().withType(Jar.class).named("assembleZapAddOn");
+                    t.dependsOn(addOnProvider);
+
+                    VersionsExtension zapVersionsExtension = extension.getVersions();
+                    t.getAddOnId().set(zapVersionsExtension.getAddOnId());
+                    t.getAddOn().set(addOnProvider.map(jar -> jar.getArchivePath()));
+                    t.getDownloadUrl().set(zapVersionsExtension.getDownloadUrl());
+                    t.getChecksumAlgorithm().set(zapVersionsExtension.getChecksumAlgorithm());
+                    t.getFile().set(zapVersionsExtension.getFile());
+
+                    t.setDescription("");
+                    t.setGroup(LifecycleBasePlugin.BUILD_GROUP);
+                });
+        project.getTasks()
+                .named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME)
+                .configure(t -> t.dependsOn(tp));
     }
 }

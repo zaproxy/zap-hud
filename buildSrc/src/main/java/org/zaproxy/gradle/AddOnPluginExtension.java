@@ -19,10 +19,12 @@
  */
 package org.zaproxy.gradle;
 
+import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.provider.Property;
 import org.zaproxy.gradle.jh.JavaHelpIndexerExtension;
+import org.zaproxy.gradle.zapversions.VersionsExtension;
 
 public class AddOnPluginExtension {
 
@@ -32,6 +34,7 @@ public class AddOnPluginExtension {
     private final Property<String> zapVersion;
     private final JavaHelpIndexerExtension jhindexer;
     private final ConfigurableFileCollection zapHomeFiles;
+    private final VersionsExtension versions;
 
     public AddOnPluginExtension(Project project) {
         this.addOnId = project.getObjects().property(String.class);
@@ -43,6 +46,8 @@ public class AddOnPluginExtension {
         this.zapVersion = project.getObjects().property(String.class);
         this.jhindexer = project.getObjects().newInstance(JavaHelpIndexerExtension.class, project);
         this.zapHomeFiles = project.files();
+        this.versions = project.getObjects().newInstance(VersionsExtension.class, project);
+        this.versions.getAddOnId().set(addOnId);
     }
 
     public Property<String> getAddOnId() {
@@ -67,5 +72,13 @@ public class AddOnPluginExtension {
 
     public ConfigurableFileCollection getZapHomeFiles() {
         return zapHomeFiles;
+    }
+
+    public VersionsExtension getVersions() {
+        return versions;
+    }
+
+    public void versions(Action<? super VersionsExtension> action) {
+        action.execute(versions);
     }
 }

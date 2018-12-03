@@ -21,6 +21,9 @@ repositories {
 }
 
 dependencies {
+    implementation("commons-codec:commons-codec:1.11")
+    implementation("commons-configuration:commons-configuration:1.9")
+    implementation("commons-jxpath:commons-jxpath:1.3")
     implementation("org.apache.commons:commons-lang3:3.8.1")
     implementation("org.zaproxy:zap-clientapi:1.6.0")
 }

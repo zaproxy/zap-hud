@@ -31,14 +31,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/psiinon/zap-hud.git"
+    "url": "git+https://github.com/zaproxy/zap-hud.git"
   },
   "author": "David Scrobonia",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/psiinon/zap-hud/issues"
+    "url": "https://github.com/zaproxy/zap-hud/issues"
   },
-  "homepage": "https://github.com/psiinon/zap-hud/wiki",
+  "homepage": "https://github.com/zaproxy/zap-hud/wiki",
   "dependencies": {
     "vue": "^2.5.16",
     "vue-router": "^3.0.1"
