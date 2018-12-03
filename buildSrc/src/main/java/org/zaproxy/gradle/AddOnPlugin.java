@@ -207,6 +207,9 @@ public class AddOnPlugin implements Plugin<Project> {
                     task.setDestinationDir(
                             project.getLayout().getBuildDirectory().dir("zap").get().getAsFile());
 
+                    task.setPreserveFileTimestamps(false);
+                    task.setReproducibleFileOrder(true);
+
                     Jar jar =
                             project.getTasks()
                                     .withType(Jar.class)
