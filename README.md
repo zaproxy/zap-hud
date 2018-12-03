@@ -26,7 +26,7 @@ You will need Java 8+ installed.
 
 With both of these options you will first see the ZAP Desktop displayed. Select either `Firefox` or `Chrome` on the `Quick Start` tab and click on the `Launch Browser` button.
 
-![](https://raw.githubusercontent.com/wiki/zaproxy/zap-hud/assets/images/ZAP-launch-browser.png)
+![](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/assets/images/ZAP-Launch-browser.png)
 
 You can also configure Firefox or Chrome to proxy via ZAP manually, but you will need to import the ZAP Root CA Certificate.
 
