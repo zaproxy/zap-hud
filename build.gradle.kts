@@ -40,6 +40,10 @@ zapAddOn {
     zapHomeFiles.from(generatedI18nJsFileDir)
 
     zapVersion.set("2.8.0")
+
+    versions {
+        downloadUrl.set("https://github.com/zaproxy/zap-hud/releases/download/v$version")
+    }
 }
 
 tasks.named<UpdateManifestFile>("updateManifestFile") {
