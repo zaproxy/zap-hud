@@ -97,10 +97,11 @@ spotless {
         googleJavaFormat().aosp()
     }
 
-    format("css", {
-        target(sourcesWithoutLibs("css"))
-        prettier().config(mapOf("parser" to "css"))
-    })
+    // XXX Don't check for now to not require npm to try the HUD (runZap).
+    // format("css", {
+    //     target(sourcesWithoutLibs("css"))
+    //     prettier().config(mapOf("parser" to "css"))
+    // })
 }
 
 tasks {
