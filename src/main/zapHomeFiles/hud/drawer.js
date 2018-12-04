@@ -13,7 +13,7 @@ Vue.component('history', {
     data() {
         return {
             filter: '',
-            regex: false,
+            regexEnabled: false,
             messages: [],
             hiddenMessageCount: 0
         }
@@ -27,7 +27,7 @@ Vue.component('history', {
         },
         filteredMessages() {
             const self=this,
-                  isRegex = this.regex;
+                  isRegex = this.regexEnabled;
             let re;
 
             if (isRegex){
@@ -96,7 +96,7 @@ Vue.component('history', {
                 tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
             }
         }
-    },
+    }
 });
 
 Vue.component('tabs', {
