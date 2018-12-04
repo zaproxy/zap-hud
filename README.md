@@ -6,7 +6,7 @@ The HUD is new interface that provides the functionality of ZAP **directly in th
 
 Learn more:
 
-* Blog: TBA
+* Blog: [Hacking with a Heads Up Display](https://segment.com/blog/hacking-with-a-heads-up-display/)
 * Video: [The OWASP ZAP HUD - Usable Security Tooling](https://youtu.be/ztfgip-UhWw)
 * Wiki: [Inside the HUD](../../wiki)
 
