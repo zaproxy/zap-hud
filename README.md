@@ -50,7 +50,7 @@ Limitations while running:
 * It's early days, so only a limited amount of ZAP functionality is available
 * Firefox has been tested more than Chrome, but both should work (JxBrowser, doesn't currently work)
 * The code to support the HUD in multiple browser tabs is _very_ new so might be buggy
-    * In particular don't close the first tab on Firefox or the HUD _will_ stop working (weird, we know. See # for details)
+    * In particular don't close the first tab on Firefox or the HUD _will_ stop working (weird, we know. See [#199](https://github.com/zaproxy/zap-hud/issues/199) for details)
 * Using the HUD with browser dev tools open can significantly affect performance
 * Behaviour using the browser back button is currently undefined
 
