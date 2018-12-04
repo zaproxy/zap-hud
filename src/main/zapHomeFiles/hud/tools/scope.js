@@ -34,12 +34,10 @@ var Scope = (function() {
 		tool.panel = "";
 		tool.position = 0;
 		tool.urls = [];
-
-		saveTool(tool);
+		writeTool(tool);
 	}
 
-	function showDialog(domain) {
-
+	function showDialog(tabId, domain) {
 		checkDomainInScope(domain)
 			.then(isInScope => {
 				var config = {};
@@ -64,7 +62,7 @@ var Scope = (function() {
 					];
 				}
 
-				messageFrame("display", {action:"showDialog", config:config})
+				messageFrame2(tabId, "display", {action:"showDialog", config:config})
 					.then(response => {
 
 						// Handle button choice
@@ -73,9 +71,6 @@ var Scope = (function() {
 						}
 						else if (response.id === "remove") {
 							removeFromScope(domain);
-						}
-						else {
-							//cancel
 						}
 					});
 
@@ -87,57 +82,65 @@ var Scope = (function() {
 		return new Promise(resolve => {
 			loadTool(NAME)
 				.then(tool => {
-					var isInScope = tool.urls.includes(domain);
+					let isInScope = tool.urls.includes(domain);
 					resolve(isInScope);
 				});
 		});
 	}
 
 	function addToScope(domain) {
-        loadTool(NAME)
-            .then(tool => {
-                if (! tool.hudContext) {
-                    fetch("<<ZAP_HUD_API>>/context/action/newContext/?contextName=" + HUD_CONTEXT)
-                }
-                tool.urls.push(domain);
-                tool.data = DATA.IN;
-                tool.icon = ICONS.IN;
-                tool.hudContext = true;
+		return loadTool(NAME)
+			.then(tool => {
+				if (! tool.hudContext) {
+					zapApiCall("/context/action/newContext/?contextName=" + HUD_CONTEXT)
+					tool.hudContext = true;
+				}
 
-                fetch("<<ZAP_HUD_API>>/context/action/includeInContext/?contextName=" + HUD_CONTEXT + "&regex=" + domainWrapper(domain) + ".*")
-                .then(response => {
-                    if (!response.ok) {
-                        log (LOG_ERROR, 'scope.addToScope', 'Failed to add ' + domain + ' to scope');
-                    }
-                }).catch(errorHandler)
+				tool.urls.push(domain);
 
-                return saveTool(tool);
+				getUpgradedDomain(domain)
+					.then(upgradedDomain => {
+						return zapApiCall("/context/action/includeInContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
+					})
+					.then(response => {
+						if (!response.ok) {
+							log (LOG_ERROR, 'scope.addToScope', 'Failed to add ' + domain + ' to scope');
+						}
+					})
+					.catch(errorHandler)
+
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain}, tool: {name: NAME, data: DATA.IN, icon: ICONS.IN, label: LABEL}})
+
+                return writeTool(tool);
             })
 			.catch(errorHandler);
 	}
 
 	function removeFromScope(domain) {
-		fetch("<<ZAP_HUD_API>>/context/action/excludeFromContext/?contextName=" + HUD_CONTEXT + "&regex=" + domainWrapper(domain) + ".*")
-        .then(response => {
-            if (!response.ok) {
-                log (LOG_ERROR, 'scope.removeFromScope', 'Failed to remove ' + domain + ' from scope');
-            }
-        }).catch(errorHandler)
+		getUpgradedDomain(domain)
+			.then(upgradedDomain => {
+				return zapApiCall("/context/action/excludeFromContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
+			})
+			.then(response => {
+				if (!response.ok) {
+					log(LOG_ERROR, 'scope.removeFromScope', 'Failed to remove ' + domain + ' from scope');
+				}
+			})
+			.catch(errorHandler)
 
 		// remove from list and save
 		loadTool(NAME)
 			.then(tool => {
 				tool.urls.splice(tool.urls.indexOf(domain), 1);
-				tool.data = DATA.OUT;
-				tool.icon = ICONS.OUT;
 
-				saveTool(tool);
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain, url: ''}, tool: {name: NAME, data: DATA.OUT, icon: ICONS.OUT, label: LABEL}})
+
+				writeTool(tool);
 			})
 			.catch(errorHandler);
 	}
 
 	function requireScope(targetDomain) {
-		
 		return new Promise((resolve, reject) => {
 			checkDomainInScope(targetDomain)
 				.then(isInScope => {
@@ -158,47 +161,34 @@ var Scope = (function() {
 		});
 	}
 
-	self.addEventListener('targetload', event => checkDomainInScope(event.detail.domain)
-        .then(isInScope => {
-            if (isInScope) {
-                loadTool(NAME)
-                    .then(tool => {
-                        tool.data = DATA.IN;
-                        tool.icon = ICONS.IN;
-
-                        saveTool(tool);
-                    });
-            }
-            else {
-                loadTool(NAME)
-                    .then(tool => {
-                        tool.data = DATA.OUT;
-                        tool.icon = ICONS.OUT;
-
-                        saveTool(tool);
-                    });
-            }
-        })
-        .catch(errorHandler));
-
-	function showOptions() {
+	function showOptions(tabId) {
 		var config = {};
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame("display", {action:"showButtonOptions", config:config})
+		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(NAME);
-				}
-				else {
-					//cancel
+					removeToolFromPanel(tabId, NAME);
 				}
 			})
 			.catch(errorHandler);
+	}
+
+	function getTool(context, port) {
+		checkDomainInScope(context.domain)
+			.then(isInScope  => {
+				if (isInScope) {
+					port.postMessage({label: LABEL, data: DATA.IN, icon: ICONS.IN});
+				}
+				else {
+					port.postMessage({label: LABEL, data: DATA.OUT, icon: ICONS.OUT});
+				}
+			})
+			.catch(errorHandler)
 	}
 
 	self.addEventListener("activate", event => {
@@ -222,11 +212,15 @@ var Scope = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showDialog(message.domain);
+					showDialog(message.tabId, message.domain);
 					break;
 
 				case "buttonMenuClicked":
-					showOptions();
+					showOptions(message.tabId);
+					break;
+
+				case 'getTool':
+					getTool(message.context, event.ports[0]);
 					break;
 
 				default:

@@ -35,12 +35,12 @@ var SiteAlertsLow = (function() {
 		saveTool(tool);
 	}
 
-	function showAlerts(domain) {
-		alertUtils.showSiteAlerts(LABEL, domain, ALERT_RISK);
+	function showAlerts(tabId, domain) {
+		alertUtils.showSiteAlerts(tabId, LABEL, domain, ALERT_RISK);
 	}
 
-	function showOptions() {
-		alertUtils.showOptions(NAME, LABEL)
+	function showOptions(tabId) {
+		alertUtils.showOptions(tabId, NAME, LABEL)
 	}
 
 	self.addEventListener("activate", event => {
@@ -49,8 +49,12 @@ var SiteAlertsLow = (function() {
 
 	self.addEventListener("commonAlerts.Low", event => loadTool(NAME)
         .then(tool => {
-            tool.data = event.detail.count;
-            return saveTool(tool);
+			tool.data = event.detail.count;
+
+			if (tool.isSelected) {
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: event.detail.domain}, tool: {name: NAME, data: event.detail.count}})
+			}
+			return writeTool(tool);
         })
         .catch(errorHandler));
 
@@ -71,11 +75,11 @@ var SiteAlertsLow = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showAlerts(message.domain);
+					showAlerts(message.tabId, message.domain);
 					break;
 
 				case "buttonMenuClicked":
-					showOptions();
+					showOptions(message.tabId);
 					break;
 
 				default:

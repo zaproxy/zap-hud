@@ -1,41 +1,43 @@
-importScripts("<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js"); 
-importScripts("<<ZAP_HUD_FILES>>?name=libraries/vue.js"); 
-importScripts("<<ZAP_HUD_FILES>>?name=libraries/vue-i18n.js"); 
-importScripts("<<ZAP_HUD_FILES>>?name=i18n.js");
-importScripts("<<ZAP_HUD_FILES>>?name=utils.js");
-importScripts("<<ZAP_HUD_FILES>>?name=tools/alertUtils.js");
+// Injected strings
+var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
+var ZAP_HUD_WS = '<<ZAP_HUD_WS>>';
+var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
+var toolScripts = [
+	'<<ZAP_HUD_TOOLS>>'
+];
+
+importScripts(ZAP_HUD_FILES + "?name=libraries/localforage.min.js"); 
+importScripts(ZAP_HUD_FILES + "?name=libraries/vue.js"); 
+importScripts(ZAP_HUD_FILES + "?name=libraries/vue-i18n.js"); 
+importScripts(ZAP_HUD_FILES + "?name=i18n.js");
+importScripts(ZAP_HUD_FILES + "?name=utils.js");
+importScripts(ZAP_HUD_FILES + "?name=tools/utils/alertUtils.js");
 
 var CACHE_NAME = "hud-cache-1.0";
 
-var targetDomain = "";
 var targetUrl = "";
 
 var isDebugging = true;
-var sharedData = {};
 
 var webSocket;
 
 var urlsToCache = [
-	"<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js",
-	"<<ZAP_HUD_FILES>>?name=libraries/vue.js",
-	"<<ZAP_HUD_FILES>>?name=libraries/vue-i18n.js",
-	"<<ZAP_HUD_FILES>>?name=i18n.js",
-	"<<ZAP_HUD_FILES>>?name=utils.js",
-	"<<ZAP_HUD_FILES>>?name=panel.html",
-	"<<ZAP_HUD_FILES>>?name=panel.css",
-	"<<ZAP_HUD_FILES>>?name=panel.js",
-	"<<ZAP_HUD_FILES>>?name=display.css",
-	"<<ZAP_HUD_FILES>>?name=display.html",
-	"<<ZAP_HUD_FILES>>?name=display.js",
-	"<<ZAP_HUD_FILES>>?name=management.css",
-	"<<ZAP_HUD_FILES>>?name=management.html",
-	"<<ZAP_HUD_FILES>>?name=management.js",
-	"<<ZAP_HUD_FILES>>?name=growlerAlerts.html",
-	"<<ZAP_HUD_FILES>>?name=growlerAlerts.js"
-];
-
-var toolScripts = [
-	<<ZAP_HUD_TOOLS>>
+	ZAP_HUD_FILES + "?name=libraries/localforage.min.js",
+	ZAP_HUD_FILES + "?name=libraries/vue.js",
+	ZAP_HUD_FILES + "?name=libraries/vue-i18n.js",
+	ZAP_HUD_FILES + "?name=i18n.js",
+	ZAP_HUD_FILES + "?name=utils.js",
+	ZAP_HUD_FILES + "?name=panel.html",
+	ZAP_HUD_FILES + "?name=panel.css",
+	ZAP_HUD_FILES + "?name=panel.js",
+	ZAP_HUD_FILES + "?name=display.css",
+	ZAP_HUD_FILES + "?name=display.html",
+	ZAP_HUD_FILES + "?name=display.js",
+	ZAP_HUD_FILES + "?name=management.css",
+	ZAP_HUD_FILES + "?name=management.html",
+	ZAP_HUD_FILES + "?name=management.js",
+	ZAP_HUD_FILES + "?name=growlerAlerts.html",
+	ZAP_HUD_FILES + "?name=growlerAlerts.js"
 ];
 
 self.tools = {};
@@ -121,21 +123,25 @@ const onMessage = event => {
 	switch(message.action) {
 		case "buttonClicked":
 			if (message.buttonLabel === "add-tool") {
-				showAddToolDialog(message.panelKey);
+				showAddToolDialog(message.tabId, message.frameId);
 			}
 			break;
 
 		case "showHudSettings":
-			showHudSettings();
+			showHudSettings(message.tabId);
 			break;
 
 		case 'targetload':
 
-			targetDomain = parseDomainFromUrl(message.targetUrl);
-			targetUrl = message.targetUrl;
+			let targetDomain = parseDomainFromUrl(message.targetUrl);
 
-			let e = new CustomEvent('targetload', {detail: {url: message.targetUrl, domain: targetDomain}});
+			let e = new CustomEvent('targetload', {detail: {tabId: message.tabId, url: message.targetUrl, domain: targetDomain}});
 			self.dispatchEvent(e);	
+
+			break;
+
+		case "heartbeat":
+			webSocket.send('{ "component" : "hud", "type" : "view", "name" : "heartbeat" }');
 			break;
 
 		default:
@@ -151,7 +157,7 @@ self.addEventListener('error', errorHandler);
 
 /* Set up WebSockets */
 
-webSocket = new WebSocket("<<ZAP_HUD_WS>>");
+webSocket = new WebSocket(ZAP_HUD_WS);
 
 webSocket.onopen = function (event) {
 	// Basic test
@@ -167,6 +173,10 @@ webSocket.onmessage = function (event) {
 		var ev = new CustomEvent(jevent['event.publisher'], {detail: jevent});
 		self.dispatchEvent(ev);
 	}
+}
+
+webSocket.onerror = function (event) {
+	log(LOG_ERROR, 'websocket', '', event)
 }
 
 function registerForZapEvents(publisher) {
@@ -207,7 +217,7 @@ function saveFrameId(event) {
 		.catch(errorHandler);
 }
 
-function showAddToolDialog(panelKey) {
+function showAddToolDialog(tabId, frameId) {
 	var config = {};
 
 	loadAllTools()
@@ -221,7 +231,7 @@ function showAddToolDialog(panelKey) {
 			// reformat for displaying in list
 			tools = tools.map(tool => ({
                 'label': tool.label,
-                'image': '<<ZAP_HUD_FILES>>?image=' + tool.icon,
+                'image': ZAP_HUD_FILES + '?image=' + tool.icon,
                 'toolname': tool.name
             }));
 
@@ -232,21 +242,21 @@ function showAddToolDialog(panelKey) {
 			config.tools = tools;
 
 			// display tools to select
-			return messageFrame("display", {action: "showAddToolList", config: config})
+			return messageFrame2(tabId, "display", {action: "showAddToolList", config: config})
 		})
 		.then(response => {
-			addToolToPanel(response.toolname, panelKey);
+			addToolToPanel(response.toolname, frameId);
 		})
 		.catch(errorHandler);
 }
 
-function showHudSettings() {
+function showHudSettings(tabId) {
 	var config = {};
 	config.settings = {
 		initialize: I18n.t("settings_resets"),
 	};
 
-	messageFrame("display", {action: "showHudSettings", config: config})
+	messageFrame2(tabId, "display", {action: "showHudSettings", config: config})
 		.then(response => {
 			if (response.id === "initialize") {
 				resetToDefault();

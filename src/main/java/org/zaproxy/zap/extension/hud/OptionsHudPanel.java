@@ -168,7 +168,8 @@ public class OptionsHudPanel extends AbstractParamPanel {
 
                         @Override
                         public void actionPerformed(ActionEvent event) {
-                            getAllowUnsafeEval().setEnabled(developmentMode.isSelected());
+                            // TODO uncomment once the HUD works without unsafe eeval
+                            // getAllowUnsafeEval().setEnabled(developmentMode.isSelected());
                         }
                     });
         }
@@ -198,7 +199,8 @@ public class OptionsHudPanel extends AbstractParamPanel {
         getSkipTutorialTasks().setSelected(param.isSkipTutorialTasks());
         getDevelopmentMode().setSelected(param.isDevelopmentMode());
         getAllowUnsafeEval().setSelected(param.isAllowUnsafeEval());
-        getAllowUnsafeEval().setEnabled(developmentMode.isSelected());
+        // TODO uncomment once the HUD works without unsafe eeval
+        // getAllowUnsafeEval().setEnabled(developmentMode.isSelected());
         getResetTutorialTasks().setEnabled(param.getTutorialTasksDone().size() > 0);
     }
 
@@ -266,9 +268,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
 
     @Override
     public String getHelpIndex() {
-        // TODO  add help
-        // return "addon.hud.options";
-        return null;
+        return "addon.hud.options";
     }
 
     private static class FileChooserAction implements ActionListener {

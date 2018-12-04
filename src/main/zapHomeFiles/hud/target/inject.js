@@ -4,7 +4,14 @@
  * Description goes here...
  */
 
+// Injected strings
+var URL = '<<URL>>';
+var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
+var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
+
  var injection  = (function () {
+	 let tabId = '';
+
 	/* HELPERS */
 	function isFromTrustedOrigin (message) {
 		return (
@@ -220,7 +227,7 @@
 		}
 		// Send to the management frame with the shared secret
 		var iframe = document.getElementById("management");
-		iframe.contentWindow.postMessage({action: 'showEnable.count', count: count, sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
+		iframe.contentWindow.postMessage({action: 'showEnable.count', tabId: tabId, count: count, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
 	}
 	
 	function highlightAlert(alert) {
@@ -245,7 +252,7 @@
 			let colour = colours[alert.risk];
 			el.style.borderColor = colour || 'red';
 			el.insertAdjacentHTML('afterend',
-				'<img src="<<ZAP_HUD_FILES>>?image=flag-' + colour + '.png" ' +
+				'<img src="' + ZAP_HUD_FILES + '?image=flag-' + colour + '.png" ' +
 				'id="zapHudAlert-' + alert.id + '" ' +
 				'title="' + alert.name + '" height="16" width="16" ' +
 				'onclick="injection.showZapAlert(' + alert.id + ');" />');
@@ -256,7 +263,7 @@
 	function showZapAlertInternal (alertId) {
 		// Send to the management frame with the shared secret
 		var iframe = document.getElementById("management");
-		iframe.contentWindow.postMessage({action: 'commonAlerts.showAlert', alertId: alertId, sharedSecret: "<<ZAP_SHARED_SECRET>>"}, "<<ZAP_HUD_FILES>>");
+		iframe.contentWindow.postMessage({action: 'commonAlerts.showAlert', alertId: alertId, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
 	}
 
 
@@ -355,17 +362,20 @@
 				break;
 		}
 	}
-	
+
 	/* initializes the HUD Frames */
 	if (window.top == window.self) {
+		tabId = Math.round(Math.random()*5000) //todo: nonsense random number generator;
+
 		window.addEventListener("message", receiveMessages);
+
 		var template = document.createElement("template");
-		template.innerHTML = '<iframe id="management" src="<<ZAP_HUD_FILES>>?name=management.html" scrolling="no" style="position: fixed; left: 0px; top: 0px; width:0px; height:0px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
-			'<iframe id="left-panel" src="<<ZAP_HUD_FILES>>?name=panel.html&amp;url=<<URL>>&amp;orientation=left" scrolling="no" style="position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="right-panel" src="<<ZAP_HUD_FILES>>?name=panel.html&amp;url=<<URL>>&amp;orientation=right" scrolling="no" style="position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="bottom-drawer" src="<<ZAP_HUD_FILES>>?name=drawer.html" scrolling="no" style="position: fixed; border: medium none; overflow: hidden; left: 0px; bottom: 0px; width: 100%; height: 50px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="main-display" src="<<ZAP_HUD_FILES>>?name=display.html" style="position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;"></iframe>\n' +
-			'<iframe id="growler-alerts" src="<<ZAP_HUD_FILES>>?name=growlerAlerts.html" style="position: fixed; right: 0px; bottom: 0px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;"></iframe>';
+		template.innerHTML = '<iframe id="management" src="' + ZAP_HUD_FILES + '?name=management.html&amp;frameId=management&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
+			'<iframe id="left-panel" src="' + ZAP_HUD_FILES + '?name=panel.html&amp;url=' + URL + '&amp;orientation=left&amp;frameId=leftPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
+			'<iframe id="right-panel" src="' + ZAP_HUD_FILES + '?name=panel.html&amp;url=' + URL + '&amp;orientation=right&amp;frameId=rightPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
+			'<iframe id="bottom-drawer" src="' + ZAP_HUD_FILES + '?name=drawer.html&amp;frameId=drawer&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; overflow: hidden; left: 0px; bottom: 0px; width: 100%; height: 50px; z-index: 2147483646;"></iframe>\n' +
+			'<iframe id="main-display" src="' + ZAP_HUD_FILES + '?name=display.html&amp;frameId=display&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;"></iframe>\n' +
+			'<iframe id="growler-alerts" src="' + ZAP_HUD_FILES + '?name=growlerAlerts.html&amp;frameId=growlerAlerts&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; bottom: 0px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;"></iframe>';
 		document.body.appendChild(template.content);
 		document.body.style.marginBottom = "50px";
 		

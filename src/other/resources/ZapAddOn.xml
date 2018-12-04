@@ -5,12 +5,12 @@
 	<description>Display information from ZAP in browser.</description>
 	<author>ZAP Dev Team</author>
 	<url></url>
-	<changes>First version</changes>
+	<changes>
+	<![CDATA[
+	]]>
+	</changes>
 	<dependencies>
 		<addons>
-			<addon>
-				<id>selenium</id>
-			</addon>
 			<addon>
 				<id>websocket</id>
 			</addon>

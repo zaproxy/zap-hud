@@ -33,15 +33,16 @@ var ActiveScan = (function() {
 		tool.panel = "";
 		tool.position = 0;
 		tool.isRunning = false;
+		tool.runningTabId;
 		tool.scanid = -1
 
 		saveTool(tool);
 		registerForZapEvents(ACTIVE_SCAN_EVENT);
 	}
 
-	function showDialog(domain) {
+	function showDialog(tabId, domain) {
 
-		Promise.all([checkIsRunning(), self.tools.scope.isInScope(domain)])
+		Promise.all([checkIsRunning(tabId), self.tools.scope.isInScope(domain)])
 			.then(results => {
 				var isRunning = results[0];
 				var isInScope = results[1];
@@ -66,73 +67,87 @@ var ActiveScan = (function() {
 
 				return config;
 			})
-			.then(config => messageFrame("display", {action:"showDialog", config:config}))
+			.then(config => messageFrame2(tabId, "display", {action:"showDialog", config:config}))
 			.then(response => {
 				// Handle button choice
 				if (response.id === "start") {
-					startActiveScan(domain);
+					startActiveScan(tabId, domain);
 				}
 				else if (response.id === "start-add-to-scope") {
 					self.tools.scope.addToScope(domain)
 						.then(
-							startActiveScan(domain)
+							startActiveScan(tabId, domain)
 						)
 						.catch(errorHandler);
 				}
 				else if (response.id === "stop") {
 					stopActiveScan(domain);
 				}
-				else {
-					//cancel
-				}
 			})
 			.catch(errorHandler);
 	}
 
-	function startActiveScan(domain) {
-		fetch("<<ZAP_HUD_API>>/ascan/action/scan/?url=" + domainWrapper(domain)).then(response => {
-			response.json()
-				.then(data => {
-					loadTool(NAME)
-						.then(tool => {
-							tool.isRunning = true;
-							tool.icon = ICONS.ON;
-							tool.data = "0%";
-							tool.scanid = data.scan;
-							saveTool(tool);
-						})
-						.catch(errorHandler);
-				})
-				.catch(errorHandler);
-		});
+	function startActiveScan(tabId, domain) {
+		getUpgradedDomain(domain)
+			.then(upgradedDomain => {
+				return zapApiCall("/ascan/action/scan/?url=" + upgradedDomain)
+			}).
+			then(response => {
+				return response.json()
+			})
+			.then(data => {
+				loadTool(NAME)
+					.then(tool => {
+						tool.isRunning = true;
+						tool.runningTabId = tabId;
+						tool.icon = ICONS.ON;
+						tool.data = "0%";
+						tool.scanid = data.scan;
+
+						writeTool(tool);
+						messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notTabId: tabId}, tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.OFF}, isToolDisabled: true})
+						messageFrame2(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.ON}});
+					})
+					.catch(errorHandler)
+			})
+			.catch(errorHandler);
 	}
 
 	function stopActiveScan() {
 		loadTool(NAME)
 			.then(tool => {
-				fetch("<<ZAP_HUD_API>>/ascan/action/stop/?scanId=" + tool.scanId + "");
+				zapApiCall("/ascan/action/stop/?scanId=" + tool.scanId + "");
 			})
+			.then(activeScanStopped)
 			.catch(errorHandler);
-		activeScanStopped();
 	}
 
 	function activeScanStopped() {
 		loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = false;
+				tool.runningTabId = '';
 				tool.icon = ICONS.OFF;
 				tool.data = DATA.START;
 				tool.scanid = -1;
 
-				saveTool(tool);
+				writeTool(tool);
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.OFF}, isToolDisabled: false})
 			})
 			.catch(errorHandler);
 	}
 
-	function checkIsRunning() {
+	// if tabId included, then it will check if active scan is running on that tab
+	// if not tabId is included it will check if active scan is running on any tab
+	function checkIsRunning(tabId) {
 		return new Promise(resolve => {
 			loadTool(NAME).then(tool => {
-				resolve(tool.isRunning);
+				if (tabId !== undefined) {
+					resolve(tool.runningTabId === tabId);
+				}
+				else {
+					resolve(tool.isRunning);
+				}
 			});
 		});
 	}
@@ -141,32 +156,51 @@ var ActiveScan = (function() {
 		if (progress !== "-1") {
 			loadTool(NAME)
 				.then(tool => {
-					tool.data = progress;
+					if (tool.isRunning) {
+						tool.data = progress;
 
-					saveTool(tool);
+						writeTool(tool);
+						messageFrame2(tool.runningTabId, tool.panel, {action: 'updateData', tool: tool})
+					}
 				})
 				.catch(errorHandler);
 		}
 	}
 
-	function showOptions() {
+	function showOptions(tabId) {
 		var config = {};
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame("display", {action:"showButtonOptions", config:config})
+		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(NAME);
+					removeToolFromPanel(tabId, NAME);
 				}
 				else {
 					//cancel
 				}
 			})
 			.catch(errorHandler);
+	}
+	
+	function getTool(tabId, context, port) {
+		loadTool(NAME)
+			.then(tool => {
+				if (tabId === tool.runningTabId) {
+					port.postMessage({label: LABEL, data: tool.data, icon: ICONS.ON});
+				}
+				else if (tool.isRunning) {
+					port.postMessage({label: LABEL, data: DATA.START, icon: ICONS.OFF, isDisabled: true});
+				}
+				else {
+					port.postMessage({label: LABEL, data: DATA.START, icon: ICONS.OFF});
+				}
+			})
+			.catch(errorHandler)
 	}
 
 	self.addEventListener("activate", event => {
@@ -190,11 +224,15 @@ var ActiveScan = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showDialog(message.domain);
+					showDialog(message.tabId, message.domain);
 					break;
 
 				case "buttonMenuClicked":
-					showOptions();
+					showOptions(message.tabId);
+					break;
+
+				case "getTool":
+					getTool(message.tabId, message.context, event.ports[0]);
 					break;
 
 				default:

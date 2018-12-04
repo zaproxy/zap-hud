@@ -30,18 +30,19 @@ var Attack = (function() {
 		tool.isSelected = false;
 		tool.panel = "";
 		tool.position = 0;
-		tool.isAttackMode = false;
+		tool.isRunning = false;
+		tool.attackingDomain = '';
 
 		saveTool(tool);
 	}
 
-	function showDialog(domain) {
+	function showDialog(tabId, domain) {
 
-		checkIsRunning()
-			.then(isAttackMode => {
+		checkIsRunning(domain)
+			.then(isRunning => {
 				var config = {};
 
-				if(!isAttackMode) {
+				if(!isRunning) {
 					config.text = DIALOG.OFF;
 					config.buttons = [
 						{text:I18n.t("common_turn_on"),
@@ -53,24 +54,21 @@ var Attack = (function() {
 				else {
 					config.text = DIALOG.ON;
 					config.buttons = [
-						{text:"Turn off",
+						{text:I18n.t("common_turn_off"),
 						id:"turnoff"},
-						{text:"Cancel",
+						{text:I18n.t("common_cancel"),
 						id:"cancel"}
 					];
 				}
 
-				messageFrame("display", {action:"showDialog", config:config})
+				messageFrame2(tabId, "display", {action:"showDialog", config:config})
 					.then(response => {
 						// Handle button choice
 						if (response.id === "turnon") {
-							turnOnAttackMode();
+							turnOnAttackMode(domain);
 						}
 						else if (response.id === "turnoff") {
-							turnOffAttackMode();
-						}
-						else {
-							//cancel
+							turnOffAttackMode(domain);
 						}
 					})
 					.catch(errorHandler);
@@ -80,54 +78,74 @@ var Attack = (function() {
 	}
 
 	function turnOnAttackMode(domain) {
-			fetch("<<ZAP_HUD_API>>/core/action/setMode/?mode=attack");
+			zapApiCall("/core/action/setMode/?mode=attack");
 
 			loadTool(NAME)
 				.then(tool => {
 					tool.isRunning = true;
+					tool.attackingDomain = domain;
 					tool.icon = ICONS.ON;
 					tool.data = DATA.ON;
 
-					saveTool(tool);
+					writeTool(tool);
+					messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notDomain: domain}, tool: {name: NAME, label: LABEL, data: DATA.OFF, icon: ICONS.OFF}, isToolDisabled: true})
+					messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain}, tool: {name: NAME, label: LABEL, data: DATA.ON, icon: ICONS.ON}});
 				})
 				.catch(errorHandler);
 	}
 
 	function turnOffAttackMode() {
-		fetch("<<ZAP_HUD_API>>/core/action/setMode/?mode=standard");
+		zapApiCall("/core/action/setMode/?mode=standard");
 
 		loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = false;
+				tool.attackingDomain = '';
 				tool.icon = ICONS.OFF;
 				tool.data = DATA.OFF;
 
-				saveTool(tool);
+				writeTool(tool);
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: DATA.OFF, icon: ICONS.OFF}, isToolDisabled: false})
 			})
 			.catch(errorHandler);
 	}
 
-	function checkIsRunning() {
+	function checkIsRunning(domain) {
 		return new Promise(resolve => {
 			loadTool(NAME)
 				.then(tool => {
-					resolve(tool.isRunning);
+					resolve(tool.attackingDomain === domain);
 				});
 		});
 	}
 
-	function showOptions() {
+	function getTool(tabId, context, port) {
+		loadTool(NAME)
+			.then(tool => {
+				if (context.domain === tool.attackingDomain) {
+					port.postMessage({label: LABEL, data: DATA.ON, icon: ICONS.ON});
+				}
+				else if (tool.isRunning) {
+					port.postMessage({label: LABEL, data: DATA.OFF, icon: ICONS.OFF, isDisabled: true});
+				} else {
+					port.postMessage({label: LABEL, data: DATA.OFF, icon: ICONS.OFF});
+				}
+			})
+			.catch(errorHandler)
+	}
+
+	function showOptions(tabId) {
 		var config = {};
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame("display", {action:"showButtonOptions", config:config})
+		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(NAME);
+					removeToolFromPanel(tabId, NAME);
 				}
 				else {
 					//cancel
@@ -157,11 +175,15 @@ var Attack = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showDialog(message.domain);
+					showDialog(message.tabId, message.domain);
 					break;
 
 				case "buttonMenuClicked":
-					showOptions();
+					showOptions(message.tabId);
+					break;
+
+				case "getTool":
+					getTool(message.tabId, message.context, event.ports[0]);
 					break;
 
 				default:

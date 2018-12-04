@@ -4,9 +4,15 @@
  * Description goes here...
  */
 
-var IMAGE_URL = "<<ZAP_HUD_FILES>>?image=";
+var IMAGE_URL = '<<ZAP_HUD_FILES>>?image=';
 var orientation = "";
 var panelKey = "";
+var frameId = '';
+var tabId = '';
+var context = {
+	url: document.referrer,
+	domain: parseDomainFromUrl(document.referrer)
+};
 
 // the Vue app
 var app;
@@ -27,6 +33,7 @@ Vue.component('hud-button', {
 			marginleft: '0rem',
 			marginright: '0rem',
 			isActive: false,
+			isDisabled: false
 		}
 	},
 	computed: {
@@ -40,13 +47,15 @@ Vue.component('hud-button', {
 				action: 'buttonClicked',
 				buttonLabel: this.name,
 				tool: this.name,
-				domain: parseDomainFromUrl(document.referrer),
-				url: document.referrer,
-				panelKey: panelKey});
+				domain: context.domain,
+				url: context.url,
+				panelKey: panelKey,
+				frameId: frameId,
+				tabId: tabId});
 		},
 		showContextMenu(event) {
 			event.preventDefault();
-			navigator.serviceWorker.controller.postMessage({action: "buttonMenuClicked", tool: this.name});
+			navigator.serviceWorker.controller.postMessage({action: "buttonMenuClicked", tool: this.name, frameId: frameId, tabId: tabId});
 		},
 		mouseOver() {
 			this.showLabel = true;
@@ -71,9 +80,20 @@ Vue.component('hud-button', {
 		}
 
 		eventBus.$on('updateButton', data => {
+			log(LOG_TRACE, 'panel.updateButton', 'updating button: ' + data.name, data)
+
 			if (self.name === data.name) {
-				self.currentIcon = '<<ZAP_HUD_FILES>>?image=' + data.icon;
-				self.currentData = data.data;
+				if (data.icon !== undefined) {
+					self.currentIcon = IMAGE_URL + data.icon;
+				}
+
+				if (data.data !== undefined) {
+					self.currentData = data.data;
+				}
+
+				if (data.isDisabled !== undefined) {
+					self.isDisabled = data.isDisabled;
+				}
 			}
 		})
 	}
@@ -105,16 +125,39 @@ Vue.component('hud-buttons', {
 			})
 			.catch(errorHandler)
 
-		// initialize panels with tools		
+		// initialize panels with tools
 		loadPanelTools(panel)
 			.then(tools => {
 				self.tools = tools;
+
+				tools.forEach(tool => {
+					let channel = new MessageChannel();
+
+					channel.port1.onmessage = function(event) {
+						eventBus.$emit('updateButton', {
+							name: tool.name,
+							data: event.data.data,
+							icon: event.data.icon,
+							isDisabled: event.data.isDisabled
+						});
+					};
+
+					navigator.serviceWorker.controller.postMessage({
+						action: 'getTool',
+						tool: tool.name,
+						context: context,
+						frameId: frameId,
+						tabId: tabId
+					}, [channel.port2]);
+				})
 			})
 			.catch(errorHandler);
 
-		// listen for update events to add new button
-		eventBus.$on('updateButton', data => {
-			if (self.tools.filter(tool => tool.name === data.name).length === 0) {
+		eventBus.$on('addButton', data => {
+			if (self.tools.filter(tool => tool.name === data.name) > 0) {
+				throw new Error('Attempted to add tool "' + data.name + '" to ' + orientation + 'panel, but it has already been added.')
+			}
+			else {
 				self.tools.push(data.tool)
 			}
 		})
@@ -128,18 +171,14 @@ Vue.component('hud-buttons', {
 })
 
 document.addEventListener("DOMContentLoaded", () => {
-	// set orientation
-	var params = document.location.search.substring(1).split("&");
+	let params = new URL(document.location).searchParams;
 
-	for (var i=0; i<params.length; i++) {
-		var param = params[i].split("=");
-		if (param[0] === "orientation") {
-			orientation = param[1];
-			panelKey = orientation + "Panel";
-		}
-	}
+	orientation = params.get('orientation');
+	panelKey = orientation + 'Panel';
+	frameId = params.get('frameId');
+	tabId = params.get('tabId');
 
-	window.name = orientation+"Panel";
+	window.name = panelKey;
 
 	// initialize vue app
 	app = new Vue({
@@ -150,12 +189,36 @@ document.addEventListener("DOMContentLoaded", () => {
 	}); 
 });
 
+function doesContextApply(toolContext) {
+	return toolContext.domain === context.domain ||
+		toolContext.url === context.url ||
+		toolContext.tabId === tabId ||
+		('notTabId' in toolContext && toolContext.notTabId != tabId) ||
+		('notDomain' in toolContext && toolContext.notDomain != context.domain);
+}
+
 navigator.serviceWorker.addEventListener("message", event => {
 	var message = event.data;
+	let tool;
 	
 	switch(message.action) {
+		case "broadcastUpdate":
+			tool = message.tool;
+
+			if (message.context === undefined || doesContextApply(message.context)) {
+				eventBus.$emit('updateButton', {
+					isDisabled: message.isToolDisabled,
+					name: tool.name,
+					data: tool.data,
+					icon: tool.icon,
+					tool: tool
+				});
+			}
+
+			break;
+
 		case "updateData":
-			var tool = message.tool;
+			tool = message.tool;
 
 			eventBus.$emit('updateButton', {
 				name: tool.name,
@@ -165,8 +228,19 @@ navigator.serviceWorker.addEventListener("message", event => {
 			});
 			break;
 
+		case "addTool":
+			tool = message.tool;
+			eventBus.$emit('addButton', {
+				name: tool.name,
+				data: tool.data,
+				icon: tool.icon,
+				tool: tool
+			});
+
+			break;
+
 		case "removeTool":
-			var tool = message.tool;
+			tool = message.tool;
 
 			eventBus.$emit('removeButton', {
 				name: tool.name

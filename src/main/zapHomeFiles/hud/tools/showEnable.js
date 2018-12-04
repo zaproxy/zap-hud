@@ -55,52 +55,56 @@ var ShowEnable = (function() {
 	}
 
 	function switchOn() {
-		messageFrame("management", {action:"showEnable.on"});
+		messageAllTabs("management", {action:"showEnable.on"});
 
 		loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = true;
 				tool.icon = ICONS.ON;
 
-				saveTool(tool);
+				writeTool(tool);
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, icon: ICONS.ON}});
 			})
 			.catch(errorHandler);
 	}
 
 	function switchOff() {
-		messageFrame("management", {action:"showEnable.off"});
+		messageAllTabs("management", {action:"showEnable.off"});
 
 		loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = false;
 				tool.icon = ICONS.OFF;
 
-				saveTool(tool);
+				writeTool(tool);
+				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, icon: ICONS.OFF}});
 			})
 			.catch(errorHandler);
 	}
 	
-	function setCount(count) {
+	function setCount(tabId, count) {
 		loadTool(NAME)
 			.then(tool => {
 				tool.data = count;
-				saveTool(tool);
+
+				writeTool(tool);
+				messageFrame2(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, data: count}})
 			})
 			.catch(errorHandler);
 	}
 
-	function showOptions() {
+	function showOptions(tabId) {
 		var config = {};
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame("display", {action:"showButtonOptions", config:config})
+		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(NAME);
+					removeToolFromPanel(tabId, NAME);
 				}
 				else {
 					//cancel
@@ -113,20 +117,21 @@ var ShowEnable = (function() {
 		initializeStorage();
 	});
 
-	self.addEventListener("targetload", event => {
-			checkIsRunning()
-				.then(isRunning => {
-					if (isRunning) {
-						switchOn();
-					}
-					else {
-						switchOff();
-					}
-					// Ask for the count of hidden fields
-					messageFrame("management", {action:"showEnable.count"});
-				})
-				.catch(errorHandler);
-	});
+	function getTool(tabId, port) {
+		loadTool(NAME)
+			.then(tool => {
+				if (tool.isRunning) {
+					port.postMessage({label: LABEL, data: 0, icon: ICONS.ON})
+					messageFrame2(tabId, "management", {action: 'showEnable.on'})
+				}
+				else {
+					port.postMessage({label: LABEL, data: 0, icon: ICONS.OFF})
+				}
+
+				messageFrame2(tabId, "management", {action:"showEnable.count"});
+			})
+			.catch(errorHandler)
+	}
 
 	self.addEventListener("message", event => {
 		var message = event.data;
@@ -140,7 +145,7 @@ var ShowEnable = (function() {
 			case "showEnable.count":
 				// Check its an int - its been supplied by the target domain so in theory could have been tampered with
 				if (message.count === parseInt(message.count, 10)) {
-					setCount(message.count);
+					setCount(message.tabId, message.count);
 				}
 				break;
 
@@ -156,8 +161,11 @@ var ShowEnable = (function() {
 					break;
 
 				case "buttonMenuClicked":
-					showOptions();
+					showOptions(message.tabId);
 					break;
+
+				case "getTool":
+					getTool(message.tabId, event.ports[0])
 
 				default:
 					break;

@@ -25,7 +25,9 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
+import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.provider.Property;
@@ -33,12 +35,19 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
-import org.zaproxy.gradle.tasks.CopyZapHome;
+import org.zaproxy.gradle.jh.JavaHelpIndexerExtension;
+import org.zaproxy.gradle.jh.tasks.JavaHelpIndexer;
+import org.zaproxy.gradle.tasks.CopyAddOn;
+import org.zaproxy.gradle.tasks.DeployAddOn;
 import org.zaproxy.gradle.tasks.UpdateManifestFile;
+import org.zaproxy.gradle.zapversions.VersionsExtension;
+import org.zaproxy.gradle.zapversions.tasks.GenerateZapVersionsFile;
 
 public class AddOnPlugin implements Plugin<Project> {
 
     public static final String EXTENSION_NAME = "zapAddOn";
+
+    private static final String JAVA_HELP_DEFAULT_DEPENDENCY = "javax.help:javahelp:2.0.05";
 
     @Override
     public void apply(Project project) {
@@ -86,7 +95,69 @@ public class AddOnPlugin implements Plugin<Project> {
                             setUpAddOn(project, jp, extension);
                             setUpAddOnFiles(project, extension);
                             setUpManifest(project, extension);
+                            setUpJavaHelp(project, jp, extension);
+                            setUpZapVersions(project, extension);
                         });
+    }
+
+    private void setUpJavaHelp(Project project, JavaPlugin jp, AddOnPluginExtension extension) {
+        NamedDomainObjectProvider<Configuration> javaHelpConfig =
+                project.getConfigurations().register("javahelp");
+        javaHelpConfig.configure(
+                conf -> {
+                    conf.setVisible(false)
+                            .setDescription("The data artifacts to be processed for this plugin.")
+                            .defaultDependencies(
+                                    deps ->
+                                            deps.add(
+                                                    project.getDependencies()
+                                                            .create(JAVA_HELP_DEFAULT_DEPENDENCY)));
+                });
+
+        project.getTasks()
+                .withType(JavaHelpIndexer.class)
+                .configureEach(jhi -> jhi.getClasspath().from(javaHelpConfig));
+
+        DirectoryProperty srcDir = project.getLayout().directoryProperty();
+        srcDir.set(project.file("src/main/javahelp"));
+
+        TaskProvider<Jar> generateAddOnProvider =
+                project.getTasks().withType(Jar.class).named("assembleZapAddOn");
+        generateAddOnProvider.configure(t -> t.from(srcDir));
+
+        Directory mainDestDir = project.getLayout().getBuildDirectory().dir("jhindexes").get();
+
+        FileCollection helpsets = project.fileTree(srcDir).filter(e -> e.getName().endsWith(".hs"));
+        helpsets.forEach(
+                helpset -> {
+                    String prefix = helpset.getParentFile().getName();
+                    Directory dir = mainDestDir.dir(prefix);
+
+                    TaskProvider<JavaHelpIndexer> tp =
+                            project.getTasks()
+                                    .register("jhindexer-" + prefix, JavaHelpIndexer.class);
+                    tp.configure(
+                            t -> {
+                                JavaHelpIndexerExtension jhiExtension = extension.getJavaHelp();
+                                t.getHelpset().set(helpset);
+                                t.getOutputPrefix()
+                                        .set(
+                                                srcDir.getAsFile()
+                                                        .get()
+                                                        .toPath()
+                                                        .relativize(helpset.toPath().getParent())
+                                                        .toString());
+                                t.setSource(helpset.getParentFile());
+                                t.getDestinationDir().set(dir);
+
+                                t.getDbName().set(jhiExtension.getDbName());
+
+                                t.setDescription("");
+                                t.setGroup(LifecycleBasePlugin.BUILD_GROUP);
+                            });
+
+                    generateAddOnProvider.configure(t -> t.from(tp.get().getDestinationDir()));
+                });
     }
 
     private void setUpAddOnFiles(Project project, AddOnPluginExtension extension) {
@@ -136,6 +207,9 @@ public class AddOnPlugin implements Plugin<Project> {
                     task.setDestinationDir(
                             project.getLayout().getBuildDirectory().dir("zap").get().getAsFile());
 
+                    task.setPreserveFileTimestamps(false);
+                    task.setReproducibleFileOrder(true);
+
                     Jar jar =
                             project.getTasks()
                                     .withType(Jar.class)
@@ -169,8 +243,8 @@ public class AddOnPlugin implements Plugin<Project> {
                 .named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME)
                 .configure(t -> t.dependsOn(generateAddOnProvider));
 
-        TaskProvider<CopyZapHome> deployProvider =
-                project.getTasks().register("deploy", CopyZapHome.class);
+        TaskProvider<DeployAddOn> deployProvider =
+                project.getTasks().register("deploy", DeployAddOn.class);
         deployProvider.configure(
                 task -> {
                     task.setGroup("ZAP Add-On");
@@ -178,10 +252,50 @@ public class AddOnPlugin implements Plugin<Project> {
                             "Deploys the add-on and its home files to ZAP home dir.\n\n"
                                     + "Defaults to dev home dir if not specified through the command line nor\n"
                                     + "through the system property \"zap.home.dir\". The command line argument\n"
-                                    + "takes precedence over the system property.");
+                                    + "takes precedence over the system property.\n"
+                                    + "By default the existing home files are deleted before deploying the new\n"
+                                    + "files, to prevent stale files. This behaviour can be changed through the\n"
+                                    + "command line.");
 
-                    task.from(generateAddOnProvider, spec -> spec.into("plugin"));
-                    task.from(extension.getZapHomeFiles());
+                    task.dependsOn(generateAddOnProvider);
+                    task.getAddOn().set(generateAddOnProvider.map(t -> t.getArchivePath()));
+                    task.getFiles().from(extension.getZapHomeFiles());
                 });
+
+        TaskProvider<CopyAddOn> copyAddOnProvider =
+                project.getTasks().register("copyAddOn", CopyAddOn.class);
+        copyAddOnProvider.configure(
+                task -> {
+                    task.setGroup("ZAP Add-On");
+                    task.setDescription(
+                            "Copies the add-on to zaproxy project (defaults to \"../zaproxy/src/plugin/\").");
+
+                    task.from(generateAddOnProvider);
+                });
+    }
+
+    private static void setUpZapVersions(Project project, AddOnPluginExtension extension) {
+        TaskProvider<GenerateZapVersionsFile> tp =
+                project.getTasks()
+                        .register("generateZapVersionsFile", GenerateZapVersionsFile.class);
+        tp.configure(
+                t -> {
+                    TaskProvider<Jar> addOnProvider =
+                            project.getTasks().withType(Jar.class).named("assembleZapAddOn");
+                    t.dependsOn(addOnProvider);
+
+                    VersionsExtension zapVersionsExtension = extension.getVersions();
+                    t.getAddOnId().set(zapVersionsExtension.getAddOnId());
+                    t.getAddOn().set(addOnProvider.map(jar -> jar.getArchivePath()));
+                    t.getDownloadUrl().set(zapVersionsExtension.getDownloadUrl());
+                    t.getChecksumAlgorithm().set(zapVersionsExtension.getChecksumAlgorithm());
+                    t.getFile().set(zapVersionsExtension.getFile());
+
+                    t.setDescription("");
+                    t.setGroup(LifecycleBasePlugin.BUILD_GROUP);
+                });
+        project.getTasks()
+                .named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME)
+                .configure(t -> t.dependsOn(tp));
     }
 }
