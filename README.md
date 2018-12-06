@@ -15,7 +15,7 @@ Learn more:
 ## Using the HUD
 
 ### Downloading
-You can download ZAP enabled with the HUD from: 
+You can download ZAP enabled with the HUD from any of: 
 
 1. Download and run the latest [ZAP Weekly Release](https://github.com/zaproxy/zaproxy/wiki/Downloads#zap-weekly)
 2. Run it from this repo using:
@@ -24,7 +24,9 @@ You can download ZAP enabled with the HUD from:
     cd zap-hud
     ./gradlew runZap
     ```
-3. Those of you building ZAP directly from the source code will also be able to install it from the [ZAP Marketplace](https://github.com/zaproxy/zap-extensions/wiki). You will need Java 8+ installed.
+3. Those of you building ZAP directly from the source code will also be able to install it from the [ZAP Marketplace](https://github.com/zaproxy/zap-extensions/wiki). 
+
+In all cases you will need Java 8+ installed.
 
 You'll see the HUD Radar icon ![Radar Icon](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/src/main/resources/org/zaproxy/zap/extension/hud/resources/radar.png) in the tool bar. When the icon is selected the HUD will be added to your browser.
 
