@@ -46,6 +46,9 @@ ZAP is a community project and so we are always very keen to hear from anyone wh
 
 This is definitely still Alpha quality and there are some known issues and limitations with the current release. Development on the HUD is very active and we recommend you check in often for new features and improvements. :)
 
+You should **NOT** use it on sites you do not trust!
+However it **is** in scope for the ZAP bug bounty on [BugCrowd](https://bugcrowd.com/owaspzap)
+
 Limitations while running:
 * It's early days, so only a limited amount of ZAP functionality is available
 * Firefox has been tested more than Chrome, but both should work (JxBrowser, doesn't currently work)
