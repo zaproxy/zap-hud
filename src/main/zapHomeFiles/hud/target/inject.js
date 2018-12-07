@@ -4,12 +4,12 @@
  * Description goes here...
  */
 
-// Injected strings
-var URL = '<<URL>>';
-var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
-var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
-
  var injection  = (function () {
+	// Injected strings
+	var URL = '<<URL>>';
+	var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
+	var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
+
 	 let tabId = '';
 
 	/* HELPERS */
