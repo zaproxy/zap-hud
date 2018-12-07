@@ -19,7 +19,7 @@ repositories {
 }
 
 status = "alpha"
-version = "0.1.0"
+version = "0.1.1"
 
 val genHudFilesDir = layout.buildDirectory.dir("genHudFiles").get()
 val generatedI18nJsFileDir = genHudFilesDir.dir("i18nJs")
