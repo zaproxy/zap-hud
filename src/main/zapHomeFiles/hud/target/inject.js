@@ -263,7 +263,7 @@
 	function showZapAlertInternal (alertId) {
 		// Send to the management frame with the shared secret
 		var iframe = document.getElementById("management");
-		iframe.contentWindow.postMessage({action: 'commonAlerts.showAlert', alertId: alertId, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
+		iframe.contentWindow.postMessage({action: 'commonAlerts.showAlert', alertId: alertId, tabId: tabId, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
 	}
 
 
