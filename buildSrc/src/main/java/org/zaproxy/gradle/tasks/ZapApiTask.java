@@ -24,6 +24,7 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
+import org.gradle.api.tasks.options.Option;
 import org.zaproxy.clientapi.core.ClientApi;
 
 /** A task that accesses the ZAP API. */
@@ -55,6 +56,15 @@ public class ZapApiTask extends DefaultTask {
         return port;
     }
 
+    @Option(option = "port", description = "The port where ZAP is or will be listening.")
+    public void optionPort(String port) {
+        try {
+            getPort().set(Integer.parseInt(port));
+        } catch (NumberFormatException e) {
+            throwInvalidPort(port);
+        }
+    }
+
     @Input
     @Optional
     public Property<String> getApiKey() {
@@ -69,8 +79,14 @@ public class ZapApiTask extends DefaultTask {
 
     private static void validatePort(int port) {
         if (port <= 0 || port > 65535) {
-            throw new IllegalArgumentException(
-                    "The specified port is not valid, it should be > 0 and <= 65535.");
+            throwInvalidPort(port);
         }
+    }
+
+    private static void throwInvalidPort(Object port) {
+        throw new IllegalArgumentException(
+                String.format(
+                        "The specified port '%1s' is not valid, it should be > 0 and <= 65535.",
+                        port));
     }
 }
