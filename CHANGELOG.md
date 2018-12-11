@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+ - Fix bug where field alert flags don't show alert dialog. #290
+
 ## [0.1.1] - 2018-12-06
 
 ## [0.1.0] - 2018-12-03
