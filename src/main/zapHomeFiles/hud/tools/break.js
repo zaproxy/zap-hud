@@ -32,12 +32,12 @@ var Break = (function() {
 		tool.panel = "";
 		tool.position = 0;
 
-		writeTool(tool);
+		utils.writeTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.brk.BreakEventPublisher");
 	}
 
 	function toggleBreak() {
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				if (tool.data === DATA.OFF) {
 					startBreaking();
@@ -46,7 +46,7 @@ var Break = (function() {
 					stopBreaking();
 				}
 			})
-			.catch(errorHandler)
+			.catch(utils.errorHandler)
 	}
 
 	function showDialog(domain) {
@@ -74,7 +74,7 @@ var Break = (function() {
 					];
 				}
 
-				messageFrame("display", {action:"showDialog", config:config}).then(response => {
+				utils.messageFrame("display", {action:"showDialog", config:config}).then(response => {
 
 					// Handle button choice
 					if (response.id === "on") {
@@ -89,50 +89,50 @@ var Break = (function() {
 				});
 
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function startBreaking() {
-		zapApiCall("/break/action/break/?type=http-all&state=true")
-			.catch(errorHandler);
+		utils.zapApiCall("/break/action/break/?type=http-all&state=true")
+			.catch(utils.errorHandler);
 
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = true;
 				tool.data = DATA.ON;
 				tool.icon = ICONS.ON;
 
-				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: DATA.ON, icon: ICONS.ON}})
-				writeTool(tool);
+				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: DATA.ON, icon: ICONS.ON}})
+				utils.writeTool(tool);
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	// todo: change this to 'continue' and figure out / fix stopBreaking
 	function stopBreaking() {
-		zapApiCall("/break/action/continue")
-			.catch(errorHandler);
+		utils.zapApiCall("/break/action/continue")
+			.catch(utils.errorHandler);
 
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = false;
 				tool.data = DATA.OFF;
 				tool.icon = ICONS.OFF;
 
-				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: DATA.OFF, icon: ICONS.OFF}})
-				writeTool(tool)
+				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: DATA.OFF, icon: ICONS.OFF}})
+				utils.writeTool(tool)
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function step() {
-		return zapApiCall("/break/action/step/")
-			.catch(errorHandler);
+		return utils.zapApiCall("/break/action/step/")
+			.catch(utils.errorHandler);
 	}
 
 	function drop() {
-		return zapApiCall("/break/action/drop/")
-			.catch(errorHandler);
+		return utils.zapApiCall("/break/action/drop/")
+			.catch(utils.errorHandler);
 	}
 
 	function setHttpMessage(header, body) {
@@ -145,13 +145,13 @@ var Break = (function() {
 			headers: {'content-type': 'application/x-www-form-urlencoded'} 
 		};
 
-		return zapApiCall(url, init)
-			.catch(errorHandler);
+		return utils.zapApiCall(url, init)
+			.catch(utils.errorHandler);
 	}
 
 	function checkIsRunning() {
 		return new Promise(resolve => {
-			loadTool(NAME)
+			utils.loadTool(NAME)
 				.then(tool => {
 					resolve(tool.isRunning);
 				});
@@ -179,11 +179,11 @@ var Break = (function() {
 			config.activeTab = "Response";
 		}
 		
-		config.request.method = parseRequestHeader(data.requestHeader).method;
+		config.request.method = utils.parseRequestHeader(data.requestHeader).method;
 		config.request.header = data.requestHeader.trim();
 		config.request.body = data.requestBody;
 
-		getAllClients('display')
+		utils.getAllClients('display')
 			.then(clients => {
 				let isFirefox = this.navigator.userAgent.indexOf("Firefox") > -1 ? true : false;
 				let r = false;
@@ -205,42 +205,42 @@ var Break = (function() {
 			})
 			.then(isVisible => {
 				if (!isVisible) {
-					log(LOG_DEBUG, 'break.showBreakDisplay', 'Target window not ready, stepping');
+					utils.log(LOG_DEBUG, 'break.showBreakDisplay', 'Target window not ready, stepping');
 					step();
-					messageAllTabs('display', {action:'closeModals'})
+					utils.messageAllTabs('display', {action:'closeModals'})
 					return;
 				}
 			})
-			.catch(errorHandler)
+			.catch(utils.errorHandler)
 
-		messageAllTabs("display", {action:"showBreakMessage", config:config})
+		utils.messageAllTabs("display", {action:"showBreakMessage", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.buttonSelected === "step") {
 					setHttpMessage(response.header, response.body)
 						.then(() => {
 							step();
-							messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
+							utils.messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
 						})
-						.catch(errorHandler);
+						.catch(utils.errorHandler);
 				}
 				else if (response.buttonSelected === "continue") {
 					setHttpMessage(response.header, response.body)
 						.then(() => {
 							stopBreaking();
-							messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
+							utils.messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
 						})
-						.catch(errorHandler);
+						.catch(utils.errorHandler);
 				}
 				else if (response.buttonSelected === "drop") {
 					drop();
-					messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
+					utils.messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
 				}
 				else {
 					//cancel
 				}
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function showOptions(tabId) {
@@ -250,14 +250,14 @@ var Break = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove"), filter: "Add Filter"};
 
-		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(tabId, NAME);
+					utils.removeToolFromPanel(tabId, NAME);
 				}
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	self.addEventListener("activate", event => {

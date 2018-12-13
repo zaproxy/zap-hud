@@ -27,7 +27,7 @@ var History = (function() {
         tool.position = 0;
         tool.messages = [];
 
-        writeTool(tool);
+        utils.writeTool(tool);
         registerForZapEvents("org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher");
 	}
 
@@ -38,18 +38,18 @@ var History = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(tabId, NAME);
+					utils.removeToolFromPanel(tabId, NAME);
 				}
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function getMessageDetails(id) {
-		return zapApiCall('/core/view/message/?id=' + id)
+		return utils.zapApiCall('/core/view/message/?id=' + id)
 			.then(response => {
 				if (!response.ok) {
 					throw new Error('Could not find a message with id: ' + id);
@@ -57,7 +57,7 @@ var History = (function() {
 				return response.json();
 			})
 			.then(json => json.message)
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function showHttpMessageDetails(tabId, data) {
@@ -67,7 +67,7 @@ var History = (function() {
 
 		var config = {
 			request: {
-				method: parseRequestHeader(data.requestHeader).method,
+				method: utils.parseRequestHeader(data.requestHeader).method,
 				header: data.requestHeader.trim(),
 				body: data.requestBody
 			},
@@ -83,7 +83,7 @@ var History = (function() {
 			config.activeTab = data.activeTab;
 		}
 
-		return messageFrame2(tabId, "display", {action:"showHistoryMessage", config:config})
+		return utils.messageFrame2(tabId, "display", {action:"showHistoryMessage", config:config})
 			.then(data => {
 				// Handle button choice
 				if (data.buttonSelected === "replay") {
@@ -94,10 +94,10 @@ var History = (function() {
 						data.activeTab = "Response"
 						return showHttpMessageDetails(tabId, data);
 					})
-					.catch(errorHandler)
+					.catch(utils.errorHandler)
 				}
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function sendRequest(header, body) {
@@ -116,13 +116,13 @@ var History = (function() {
 			headers: {'content-type': 'application/x-www-form-urlencoded'}
 		};
 
-		return zapApiCall(url, init)
-			.catch(errorHandler);
+		return utils.zapApiCall(url, init)
+			.catch(utils.errorHandler);
 	}
     
     self.addEventListener("org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher", event => {
 		var eventType = event.detail['event.type'];
-        log (LOG_DEBUG, 'HistoryEventPublisher eventListener', 'Received ' + eventType + ' event');
+        utils.log (LOG_DEBUG, 'HistoryEventPublisher eventListener', 'Received ' + eventType + ' event');
 
         let message = {};
         
@@ -136,11 +136,11 @@ var History = (function() {
         message.code = event.detail.statusCode;
 		message.id = event.detail.historyReferenceId;
 
-        messageAllTabs('drawer', {action: 'updateMessages', messages: [message]})
-            .catch(errorHandler);
+        utils.messageAllTabs('drawer', {action: 'updateMessages', messages: [message]})
+            .catch(utils.errorHandler);
 
 		tool.messages.push(message);
-		writeTool(tool)
+		utils.writeTool(tool)
 	});
 
 	self.addEventListener("activate", event => {
@@ -148,12 +148,12 @@ var History = (function() {
 	});
 
 	function trimMessages(lastPageUnloadTime) {
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				tool.messages = tool.messages.filter(message => message.timeInMs > lastPageUnloadTime)
-				writeTool(tool)
+				utils.writeTool(tool)
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	self.addEventListener("message", event => {
@@ -185,7 +185,7 @@ var History = (function() {
 						.then(data => {
 							return showHttpMessageDetails(message.tabId, data)
 						})
-						.catch(errorHandler)
+						.catch(utils.errorHandler)
 					break;
 
 				default:

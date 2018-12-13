@@ -27,12 +27,12 @@ var SiteTree = (function() {
 		tool.position = 0;
 		tool.urls = [];
 
-		saveTool(tool);
+		utils.saveTool(tool);
 	}
 
 	function showSiteTree(tabId) {
-		messageFrame2(tabId, "display", {action:"showSiteTree"})
-			.catch(errorHandler);
+		utils.messageFrame2(tabId, "display", {action:"showSiteTree"})
+			.catch(utils.errorHandler);
 	}
 
 	function showOptions(tabId) {
@@ -42,25 +42,25 @@ var SiteTree = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(tabId, NAME);
+					utils.removeToolFromPanel(tabId, NAME);
 				}
 				else {
 					//cancel
 				}
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function getTool(port) {
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				port.postMessage({label: LABEL, data: DATA.SITES, icon: ICONS.WORLD});
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	self.addEventListener("activate", event => {

@@ -28,13 +28,13 @@ var ShowEnable = (function() {
 		tool.position = 0;
 		tool.count = 0;
 
-		saveTool(tool);
+		utils.saveTool(tool);
 	}
 
 
 	function checkIsRunning() {
 		return new Promise(resolve => {
-			loadTool(NAME)
+			utils.loadTool(NAME)
 				.then(tool => {
 					resolve(tool.isRunning);
 				});
@@ -51,46 +51,46 @@ var ShowEnable = (function() {
 					switchOff();
 				}
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function switchOn() {
-		messageAllTabs("management", {action:"showEnable.on"});
+		utils.messageAllTabs("management", {action:"showEnable.on"});
 
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = true;
 				tool.icon = ICONS.ON;
 
-				writeTool(tool);
-				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, icon: ICONS.ON}});
+				utils.writeTool(tool);
+				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, icon: ICONS.ON}});
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function switchOff() {
-		messageAllTabs("management", {action:"showEnable.off"});
+		utils.messageAllTabs("management", {action:"showEnable.off"});
 
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = false;
 				tool.icon = ICONS.OFF;
 
-				writeTool(tool);
-				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, icon: ICONS.OFF}});
+				utils.writeTool(tool);
+				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, icon: ICONS.OFF}});
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 	
 	function setCount(tabId, count) {
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				tool.data = count;
 
-				writeTool(tool);
-				messageFrame2(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, data: count}})
+				utils.writeTool(tool);
+				utils.messageFrame2(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, data: count}})
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function showOptions(tabId) {
@@ -100,17 +100,17 @@ var ShowEnable = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(tabId, NAME);
+					utils.removeToolFromPanel(tabId, NAME);
 				}
 				else {
 					//cancel
 				}
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	self.addEventListener("activate", event => {
@@ -118,19 +118,19 @@ var ShowEnable = (function() {
 	});
 
 	function getTool(tabId, port) {
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				if (tool.isRunning) {
 					port.postMessage({label: LABEL, data: 0, icon: ICONS.ON})
-					messageFrame2(tabId, "management", {action: 'showEnable.on'})
+					utils.messageFrame2(tabId, "management", {action: 'showEnable.on'})
 				}
 				else {
 					port.postMessage({label: LABEL, data: 0, icon: ICONS.OFF})
 				}
 
-				messageFrame2(tabId, "management", {action:"showEnable.count"});
+				utils.messageFrame2(tabId, "management", {action:"showEnable.count"});
 			})
-			.catch(errorHandler)
+			.catch(utils.errorHandler)
 	}
 
 	self.addEventListener("message", event => {
