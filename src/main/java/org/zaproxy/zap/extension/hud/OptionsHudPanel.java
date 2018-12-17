@@ -52,6 +52,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
     private JCheckBox enabledForDesktop = null;
     private JCheckBox enabledForDaemon = null;
     private JCheckBox inScopeOnly = null;
+    private JCheckBox enableOnDomainMsgs = null;
     private JCheckBox showWelcomeScreen = null;
     private JCheckBox removeCsp = null;
     private JCheckBox developmentMode = null;
@@ -84,6 +85,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
         panel.add(getEnabledForDaemon(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getShowWelcomeScreen(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getInScopeOnly(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
+        panel.add(getEnableOnDomainMsgs(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getRemoveCsp(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getDevelopmentMode(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(directoryLabel, LayoutHelper.getGBC(0, ++i, 1, 1.0, new Insets(2, 2, 2, 2)));
@@ -128,6 +130,16 @@ public class OptionsHudPanel extends AbstractParamPanel {
                             Constant.messages.getString("hud.optionspanel.label.inScopeOnly"));
         }
         return inScopeOnly;
+    }
+
+    private JCheckBox getEnableOnDomainMsgs() {
+        if (enableOnDomainMsgs == null) {
+            enableOnDomainMsgs =
+                    new JCheckBox(
+                            Constant.messages.getString(
+                                    "hud.optionspanel.label.enableOnDomainMsgs"));
+        }
+        return enableOnDomainMsgs;
     }
 
     private JCheckBox getShowWelcomeScreen() {
@@ -194,6 +206,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
         getEnabledForDaemon().setSelected(param.isEnabledForDaemon());
         getBaseDirectory().setText(param.getBaseDirectory());
         getInScopeOnly().setSelected(param.isInScopeOnly());
+        getEnableOnDomainMsgs().setSelected(param.isEnableOnDomainMsgs());
         getShowWelcomeScreen().setSelected(param.isShowWelcomeScreen());
         getRemoveCsp().setSelected(param.isRemoveCSP());
         getSkipTutorialTasks().setSelected(param.isSkipTutorialTasks());
@@ -239,6 +252,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
         param.setEnabledForDaemon(getEnabledForDaemon().isSelected());
         param.setBaseDirectory(getBaseDirectory().getText());
         param.setInScopeOnly(getInScopeOnly().isSelected());
+        param.setEnableOnDomainMsgs(getEnableOnDomainMsgs().isSelected());
         param.setShowWelcomeScreen(getShowWelcomeScreen().isSelected());
         param.setRemoveCSP(getRemoveCsp().isSelected());
         param.setSkipTutorialTasks(getSkipTutorialTasks().isSelected());

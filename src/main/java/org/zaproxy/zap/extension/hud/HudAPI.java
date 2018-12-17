@@ -442,8 +442,13 @@ public class HudAPI extends ApiImplementor {
                                                             .isShowWelcomeScreen()))
                                     .replace(
                                             "<<TUTORIAL_URL>>",
-                                            this.extension.getTutorialUrl("", false))
-                                    .replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
+                                            this.extension.getTutorialUrl("", false));
+                    if (this.extension.getHudParam().isEnableOnDomainMsgs()) {
+                        contents = contents.replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
+                    } else {
+                        // In this case an empty secret is used to turn off this feature
+                        contents = contents.replace("<<ZAP_SHARED_SECRET>>", "");
+                    }
                 }
             }
 
