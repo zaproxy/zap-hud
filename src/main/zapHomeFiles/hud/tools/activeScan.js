@@ -36,7 +36,7 @@ var ActiveScan = (function() {
 		tool.runningTabId;
 		tool.scanid = -1
 
-		saveTool(tool);
+		utils.saveTool(tool);
 		registerForZapEvents(ACTIVE_SCAN_EVENT);
 	}
 
@@ -67,7 +67,7 @@ var ActiveScan = (function() {
 
 				return config;
 			})
-			.then(config => messageFrame2(tabId, "display", {action:"showDialog", config:config}))
+			.then(config => utils.messageFrame2(tabId, "display", {action:"showDialog", config:config}))
 			.then(response => {
 				// Handle button choice
 				if (response.id === "start") {
@@ -78,25 +78,25 @@ var ActiveScan = (function() {
 						.then(
 							startActiveScan(tabId, domain)
 						)
-						.catch(errorHandler);
+						.catch(utils.errorHandler);
 				}
 				else if (response.id === "stop") {
 					stopActiveScan(domain);
 				}
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function startActiveScan(tabId, domain) {
-		getUpgradedDomain(domain)
+		utils.getUpgradedDomain(domain)
 			.then(upgradedDomain => {
-				return zapApiCall("/ascan/action/scan/?url=" + upgradedDomain)
+				return utils.zapApiCall("/ascan/action/scan/?url=" + upgradedDomain)
 			}).
 			then(response => {
 				return response.json()
 			})
 			.then(data => {
-				loadTool(NAME)
+				utils.loadTool(NAME)
 					.then(tool => {
 						tool.isRunning = true;
 						tool.runningTabId = tabId;
@@ -104,26 +104,26 @@ var ActiveScan = (function() {
 						tool.data = "0%";
 						tool.scanid = data.scan;
 
-						writeTool(tool);
-						messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notTabId: tabId}, tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.OFF}, isToolDisabled: true})
-						messageFrame2(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.ON}});
+						utils.writeTool(tool);
+						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notTabId: tabId}, tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.OFF}, isToolDisabled: true})
+						utils.messageFrame2(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.ON}});
 					})
-					.catch(errorHandler)
+					.catch(utils.errorHandler)
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function stopActiveScan() {
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
-				zapApiCall("/ascan/action/stop/?scanId=" + tool.scanId + "");
+				utils.zapApiCall("/ascan/action/stop/?scanId=" + tool.scanId + "");
 			})
 			.then(activeScanStopped)
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function activeScanStopped() {
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = false;
 				tool.runningTabId = '';
@@ -131,17 +131,17 @@ var ActiveScan = (function() {
 				tool.data = DATA.START;
 				tool.scanid = -1;
 
-				writeTool(tool);
-				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.OFF}, isToolDisabled: false})
+				utils.writeTool(tool);
+				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.OFF}, isToolDisabled: false})
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	// if tabId included, then it will check if active scan is running on that tab
 	// if not tabId is included it will check if active scan is running on any tab
 	function checkIsRunning(tabId) {
 		return new Promise(resolve => {
-			loadTool(NAME).then(tool => {
+			utils.loadTool(NAME).then(tool => {
 				if (tabId !== undefined) {
 					resolve(tool.runningTabId === tabId);
 				}
@@ -154,16 +154,16 @@ var ActiveScan = (function() {
 
 	function updateProgress(progress) {
 		if (progress !== "-1") {
-			loadTool(NAME)
+			utils.loadTool(NAME)
 				.then(tool => {
 					if (tool.isRunning) {
 						tool.data = progress;
 
-						writeTool(tool);
-						messageFrame2(tool.runningTabId, tool.panel, {action: 'updateData', tool: tool})
+						utils.writeTool(tool);
+						utils.messageFrame2(tool.runningTabId, tool.panel, {action: 'updateData', tool: tool})
 					}
 				})
-				.catch(errorHandler);
+				.catch(utils.errorHandler);
 		}
 	}
 
@@ -174,21 +174,21 @@ var ActiveScan = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(tabId, NAME);
+					utils.removeToolFromPanel(tabId, NAME);
 				}
 				else {
 					//cancel
 				}
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 	
 	function getTool(tabId, context, port) {
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				if (tabId === tool.runningTabId) {
 					port.postMessage({label: LABEL, data: tool.data, icon: ICONS.ON});
@@ -200,7 +200,7 @@ var ActiveScan = (function() {
 					port.postMessage({label: LABEL, data: DATA.START, icon: ICONS.OFF});
 				}
 			})
-			.catch(errorHandler)
+			.catch(utils.errorHandler)
 	}
 
 	self.addEventListener("activate", event => {
@@ -243,7 +243,7 @@ var ActiveScan = (function() {
 
 	self.addEventListener("org.zaproxy.zap.extension.ascan.ActiveScanEventPublisher", event => {
 		var eventType = event.detail['event.type'];
-		log (LOG_DEBUG, 'ActiveScanEventPublisher eventListener', 'Received ' + eventType + ' event');
+		utils.log (LOG_DEBUG, 'ActiveScanEventPublisher eventListener', 'Received ' + eventType + ' event');
 		checkIsRunning()
 			.then(isRunning => {
 				if (isRunning) {
@@ -256,7 +256,7 @@ var ActiveScan = (function() {
 					}
 				}
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	});
 
 	return {

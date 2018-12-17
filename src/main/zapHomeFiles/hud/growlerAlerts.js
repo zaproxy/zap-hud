@@ -15,12 +15,12 @@ var tabId = '';
 var frameId = '';
 var context = {
 	url: document.referrer,
-	domain: parseDomainFromUrl(document.referrer)
+	domain: utils.parseDomainFromUrl(document.referrer)
 };
 
 document.addEventListener("DOMContentLoaded", () => {
 	if (typeof alertify == "undefined") {
-		errorHandler('Problem loading Alertify. Alertify is undefined.')
+		utils.errorHandler('Problem loading Alertify. Alertify is undefined.')
 	}
 
 	let params = new URL(document.location).searchParams;
@@ -37,7 +37,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 	
 	switch(message.action) {
 		case "showGrowlerAlert":
-			if (parseDomainFromUrl(message.alert.uri) === context.domain) {
+			if (utils.parseDomainFromUrl(message.alert.uri) === context.domain) {
 				enqueueGrowlerAlert(message.alert, event.ports[0]);
 			}
 			break;
