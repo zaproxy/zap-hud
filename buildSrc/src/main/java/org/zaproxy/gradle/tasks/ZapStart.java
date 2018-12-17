@@ -93,7 +93,7 @@ public class ZapStart extends ZapApiTask {
         validateTimeout(timeout.get());
 
         ClientApi client = createClient();
-        checkPortNotUsed(client);
+        checkPortNotUsed(client, getPort().get());
 
         ProcessBuilder pb = new ProcessBuilder();
         pb.redirectErrorStream(true)
@@ -140,10 +140,14 @@ public class ZapStart extends ZapApiTask {
         }
     }
 
-    private static void checkPortNotUsed(ClientApi client) {
+    private static void checkPortNotUsed(ClientApi client, int port) {
         try {
             client.waitForSuccessfulConnectionToZap(1);
-            throw new ZapStartException("The port is already in use, is ZAP already running?");
+            throw new ZapStartException(
+                    String.format(
+                            "The port %1d is already in use, is ZAP already running?"
+                                    + "\nThe port can be changed with --port command line argument.",
+                            port));
         } catch (ClientApiException e) {
             // Ignore, the port is not in use.
         }

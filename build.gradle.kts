@@ -1,3 +1,4 @@
+import org.zaproxy.gradle.AddOnPlugin
 import org.zaproxy.gradle.tasks.GenerateI18nJsFile
 import org.zaproxy.gradle.tasks.UpdateManifestFile
 import org.zaproxy.gradle.tasks.ZapDownloadWeekly
@@ -19,7 +20,7 @@ repositories {
 }
 
 status = "alpha"
-version = "0.1.1"
+version = "0.1.2"
 
 val genHudFilesDir = layout.buildDirectory.dir("genHudFiles").get()
 val generatedI18nJsFileDir = genHudFilesDir.dir("i18nJs")
@@ -97,10 +98,11 @@ spotless {
         googleJavaFormat().aosp()
     }
 
-    format("css", {
-        target(sourcesWithoutLibs("css"))
-        prettier().config(mapOf("parser" to "css"))
-    })
+    // XXX Don't check for now to not require npm to try the HUD (runZap).
+    // format("css", {
+    //     target(sourcesWithoutLibs("css"))
+    //     prettier().config(mapOf("parser" to "css"))
+    // })
 }
 
 tasks {
@@ -124,7 +126,7 @@ tasks {
     }
 
     register<Test>("testTutorial") { 
-        group = "Verification"
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Runs the tutorial tests (ZAP must be running)."
         useJUnitPlatform { 
             includeTags("tutorial") 
@@ -132,7 +134,7 @@ tasks {
     }
 
     register<Test>("testRemote") { 
-        group = "Verification"
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Runs the remote tests (ZAP must be running)."
         useJUnitPlatform { 
             includeTags("remote") 
@@ -140,7 +142,7 @@ tasks {
     }
 
     register<ZapDownloadWeekly>("zapDownload") {
-        group = "Verification"
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Downloads the latest ZAP weekly release for the unit tests"
 
         onlyIf { !zapInstallDir.asFile.exists() }
@@ -160,7 +162,8 @@ tasks {
     }
 
     register<Copy>("copyHudClientFiles") {
-        description = "Copies the HUD files to the (local) home directory for use with continuous mode."
+        group = AddOnPlugin.ADD_ON_GROUP
+        description = "Copies the HUD files to runZap's home directory for use with continuous mode."
 
         from(file("src/main/zapHomeFiles"))
         from(sourceSets["main"].output.dirs)
@@ -168,6 +171,7 @@ tasks {
     }
 
     register<ZapStart>("runZap") {
+        group = AddOnPlugin.ADD_ON_GROUP
         description = "Runs ZAP (weekly) with the HUD in dev mode."
 
         dependsOn("zapDownload", "assembleZapAddOn", "copyHudClientFiles")

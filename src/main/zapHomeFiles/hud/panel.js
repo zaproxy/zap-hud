@@ -11,7 +11,7 @@ var frameId = '';
 var tabId = '';
 var context = {
 	url: document.referrer,
-	domain: parseDomainFromUrl(document.referrer)
+	domain: utils.parseDomainFromUrl(document.referrer)
 };
 
 // the Vue app
@@ -80,7 +80,7 @@ Vue.component('hud-button', {
 		}
 
 		eventBus.$on('updateButton', data => {
-			log(LOG_TRACE, 'panel.updateButton', 'updating button: ' + data.name, data)
+			utils.log(LOG_TRACE, 'panel.updateButton', 'updating button: ' + data.name, data)
 
 			if (self.name === data.name) {
 				if (data.icon !== undefined) {
@@ -123,10 +123,10 @@ Vue.component('hud-buttons', {
 				// hide the panels until we know whether to show them or not to prevent flashing
 				this.isVisible = true;
 			})
-			.catch(errorHandler)
+			.catch(utils.errorHandler)
 
 		// initialize panels with tools
-		loadPanelTools(panel)
+		utils.loadPanelTools(panel)
 			.then(tools => {
 				self.tools = tools;
 
@@ -151,7 +151,7 @@ Vue.component('hud-buttons', {
 					}, [channel.port2]);
 				})
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 
 		eventBus.$on('addButton', data => {
 			if (self.tools.filter(tool => tool.name === data.name) > 0) {

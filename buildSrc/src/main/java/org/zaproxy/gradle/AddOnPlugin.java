@@ -45,6 +45,8 @@ import org.zaproxy.gradle.zapversions.tasks.GenerateZapVersionsFile;
 
 public class AddOnPlugin implements Plugin<Project> {
 
+    public static final String ADD_ON_GROUP = "ZAP Add-On";
+
     public static final String EXTENSION_NAME = "zapAddOn";
 
     private static final String JAVA_HELP_DEFAULT_DEPENDENCY = "javax.help:javahelp:2.0.05";
@@ -247,7 +249,7 @@ public class AddOnPlugin implements Plugin<Project> {
                 project.getTasks().register("deploy", DeployAddOn.class);
         deployProvider.configure(
                 task -> {
-                    task.setGroup("ZAP Add-On");
+                    task.setGroup(ADD_ON_GROUP);
                     task.setDescription(
                             "Deploys the add-on and its home files to ZAP home dir.\n\n"
                                     + "Defaults to dev home dir if not specified through the command line nor\n"
@@ -266,7 +268,7 @@ public class AddOnPlugin implements Plugin<Project> {
                 project.getTasks().register("copyAddOn", CopyAddOn.class);
         copyAddOnProvider.configure(
                 task -> {
-                    task.setGroup("ZAP Add-On");
+                    task.setGroup(ADD_ON_GROUP);
                     task.setDescription(
                             "Copies the add-on to zaproxy project (defaults to \"../zaproxy/src/plugin/\").");
 

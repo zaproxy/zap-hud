@@ -28,11 +28,11 @@ var HudErrors = (function() {
 		tool.position = 0;
 		tool.count = 0;
 
-		saveTool(tool);
+		utils.saveTool(tool);
 	}
 
 	function showDialog(tabId) {
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				var config = {};
 
@@ -42,7 +42,7 @@ var HudErrors = (function() {
 					{text:I18n.t("common_clear"), id:"clear"}
 				];
 
-				messageFrame2(tabId, "display", {action:"showDialog", config:config})
+				utils.messageFrame2(tabId, "display", {action:"showDialog", config:config})
 					.then(response => {
 
 						// Handle button choice
@@ -50,23 +50,23 @@ var HudErrors = (function() {
 							tool.data = 0;
 							tool.records = [];
 							tool.icon = ICONS.NONE;
-							messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: tool.data, icon: ICONS.NONE, label: tool.label}});
-							saveTool(tool);
+							utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: tool.data, icon: ICONS.NONE, label: tool.label}});
+							utils.saveTool(tool);
 						}
 						else {
 							//cancel
 						}
 					});
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function getTool(context, port) {
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				port.postMessage({label: tool.label, data: tool.data, icon: tool.icon});
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function showOptions(tabId) {
@@ -76,17 +76,17 @@ var HudErrors = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(tabId, NAME);
+					utils.removeToolFromPanel(tabId, NAME);
 				}
 				else {
 					//cancel
 				}
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	self.addEventListener("activate", event => {
@@ -129,13 +129,13 @@ var HudErrors = (function() {
 
 	// this cannot keep up with rate of errors. high volume errors will be missed
 	// this can be fixed if ff fixes their service worker implementation bug
-	self.addEventListener("hud.error", event => loadTool(NAME)
+	self.addEventListener("hud.error", event => utils.loadTool(NAME)
 		.then(tool => {
 			tool.data = tool.data + 1;
 			tool.icon = ICONS.SOME;
 			tool.records.push(event.detail.record);
 
-			return Promise.all([writeTool(tool), localforage.getItem(IS_SERVICEWORKER_REFRESHED)]);
+			return Promise.all([utils.writeTool(tool), localforage.getItem(IS_SERVICEWORKER_REFRESHED)]);
 		}).then(params => {
 			let tool = params[0];
 			let isServiceWorkerRefreshed = params[1];
@@ -144,10 +144,10 @@ var HudErrors = (function() {
 			// if not this will cause a NoClientError in the messageAllTab function which will send another
 			// hud.error event and start a noisy loop
 			if (isServiceWorkerRefreshed && tool.isSelected) {
-				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: tool.data, icon: ICONS.SOME, label: tool.label}});
+				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: tool.data, icon: ICONS.SOME, label: tool.label}});
 			}
 		})
-		.catch(errorHandler));
+		.catch(utils.errorHandler));
 
 	return {
 		name: NAME,
