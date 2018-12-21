@@ -19,7 +19,13 @@
  */
 package org.zaproxy.gradle;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -206,8 +212,30 @@ public class AddOnPlugin implements Plugin<Project> {
                     task.setAppendix(extension.getAddOnStatus().get());
                     task.setVersion(extension.getAddOnVersion().get());
                     task.setExtension("zap");
-                    task.setDestinationDir(
-                            project.getLayout().getBuildDirectory().dir("zap").get().getAsFile());
+                    File outputDir =
+                            project.getLayout().getBuildDirectory().dir("zap").get().getAsFile();
+                    task.setDestinationDir(outputDir);
+                    task.getOutputs()
+                            .upToDateWhen(
+                                    t -> {
+                                        Path dir = outputDir.toPath();
+                                        if (!Files.exists(dir)) {
+                                            return true;
+                                        }
+                                        try (Stream<Path> stream =
+                                                Files.find(
+                                                        dir,
+                                                        1,
+                                                        (p, a) ->
+                                                                p.getFileName()
+                                                                        .toString()
+                                                                        .endsWith(".zap"))) {
+                                            return stream.count() == 1;
+                                        } catch (IOException e) {
+                                            throw new UncheckedIOException(e);
+                                        }
+                                    });
+                    task.doFirst(t -> project.delete(project.fileTree(outputDir).getFiles()));
 
                     task.setPreserveFileTimestamps(false);
                     task.setReproducibleFileOrder(true);
