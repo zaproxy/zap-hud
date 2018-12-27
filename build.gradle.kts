@@ -1,4 +1,5 @@
 import org.zaproxy.gradle.AddOnPlugin
+import org.zaproxy.gradle.tasks.CreateManifestChanges
 import org.zaproxy.gradle.tasks.GenerateI18nJsFile
 import org.zaproxy.gradle.tasks.UpdateManifestFile
 import org.zaproxy.gradle.tasks.ZapDownloadWeekly
@@ -47,8 +48,14 @@ zapAddOn {
     }
 }
 
+val createManifestChanges by tasks.registering(CreateManifestChanges::class) {
+    changelog.set(file("CHANGELOG.md"))
+    manifestChanges.set(layout.buildDirectory.file("manifest-changes.html"))
+}
+
 tasks.named<UpdateManifestFile>("updateManifestFile") {
     baseManifest.set(file("src/other/resources/ZapAddOn.xml"))
+    changes.set(createManifestChanges.get().manifestChanges)
     outputDir.set(genHudFilesDir.dir("manifest"))
 }
 
