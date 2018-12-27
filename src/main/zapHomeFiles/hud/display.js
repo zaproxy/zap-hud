@@ -741,6 +741,10 @@ navigator.serviceWorker.addEventListener("message", event => {
 			showDisplayFrame();
 			break;
 
+		case "showHtmlReport":
+			utils.zapApiNewWindow('/core/other/htmlreport');
+			break;
+			
 		case "closeModals":
 			if (config && config.notTabId != tabId) {
 				eventBus.$emit('closeAllModals', {
