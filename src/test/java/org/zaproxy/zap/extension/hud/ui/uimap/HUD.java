@@ -195,6 +195,10 @@ public class HUD {
                 });
     }
 
+    public WebDriver getWebDriver() {
+        return webdriver;
+    }
+
     public void warning(String msg) {
         System.err.println(new Date() + " " + this.getClass().getSimpleName() + " " + msg);
     }

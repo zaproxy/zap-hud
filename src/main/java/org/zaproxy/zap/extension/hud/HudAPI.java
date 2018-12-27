@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.HttpCookie;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -61,6 +62,8 @@ import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 
 public class HudAPI extends ApiImplementor {
+
+    public static final String ZAP_HUD_COOKIE = "ZAP-HUD";
 
     // TODO shouldnt allow unsafe-inline styles - need to work out where they are being used
     protected static final String CSP_POLICY =
@@ -106,6 +109,9 @@ public class HudAPI extends ApiImplementor {
      */
     private final String sharedSecret = UUID.randomUUID().toString();
 
+    /** Cookie used on the ZAP domain - should never be exposed to a target site. */
+    private final String zapHudCookie = UUID.randomUUID().toString();
+
     private static Logger logger = Logger.getLogger(HudAPI.class);
 
     public HudAPI(ExtensionHUD extension) {
@@ -121,7 +127,7 @@ public class HudAPI extends ApiImplementor {
 
         hudFileProxy = new HudFileProxy(this);
         hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S);
-        hudApiProxy = new HudApiProxy();
+        hudApiProxy = new HudApiProxy(this);
         hudApiUrl = API.getInstance().getCallBackUrl(hudApiProxy, API.API_URL_S);
 
         // Temporary hack to make it easier to find the websocket test page
@@ -469,6 +475,20 @@ public class HudAPI extends ApiImplementor {
                             .getCallbackUrl();
         }
         return websocketUrl;
+    }
+
+    protected String getZapHudCookieValue() {
+        return zapHudCookie;
+    }
+
+    public String getRequestCookieValue(HttpMessage msg, String cookieName) {
+        List<HttpCookie> cookies = msg.getRequestHeader().getHttpCookies();
+        for (HttpCookie cookie : cookies) {
+            if (cookie.getName().equals(cookieName)) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 
     public byte[] getImage(String name) {

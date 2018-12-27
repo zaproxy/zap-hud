@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
  - Add option to control on-domain messages. [#294](https://github.com/zaproxy/zap-hud/issues/294)
+ - Require cookie on all API calls
 
 ### Fixed
  - Upgraded vue.js to 2.5.21 and vue-i18n to 8.5.0 
