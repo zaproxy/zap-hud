@@ -45,6 +45,24 @@ public class HudApiProxy extends ApiImplementor {
     }
 
     @Override
+    public void addCustomHeaders(String name, RequestType type, HttpMessage msg) {
+        if (msg.getResponseHeader().getStatusCode() == 200) {
+            // Only check valid responses
+            String[] elements = msg.getRequestHeader().getURI().toString().split("/");
+            if (elements.length > 7
+                    && "core".equals(elements[6])
+                    && RequestType.other.equals(RequestType.valueOf(elements[7]))
+                    && "htmlreport".equals(elements[8])) {
+                // Allow inline styles, just for the htmlreport
+                msg.getResponseHeader()
+                        .setHeader(
+                                "Content-Security-Policy",
+                                "default-src 'none'; script-src 'self'; connect-src 'self'; child-src 'self'; img-src 'self' data:; font-src 'self' data:; style-src 'unsafe-inline'");
+            }
+        }
+    }
+
+    @Override
     public String handleCallBack(HttpMessage msg) throws ApiException {
         try {
 
@@ -87,7 +105,7 @@ public class HudApiProxy extends ApiImplementor {
                 }
             }
 
-            ApiResponse response;
+            ApiResponse response = null;
             try {
                 reqType = RequestType.valueOf(elements[7]);
             } catch (IllegalArgumentException e) {
@@ -107,20 +125,24 @@ public class HudApiProxy extends ApiImplementor {
                     }
                     break;
                 case other:
-                    // Not currently needed
-                    throw new ApiException(ApiException.Type.BAD_TYPE, reqType.name());
+                    msg = impl.handleApiOther(msg, elements[8], params);
+                    break;
                 case pconn:
                     // Not currently supported - we want it, but it will require a load more work :/
                     throw new ApiException(ApiException.Type.BAD_TYPE, reqType.name());
                 default:
                     throw new ApiException(ApiException.Type.BAD_TYPE, reqType.name());
             }
-            msg.setResponseHeader(
-                    API.getDefaultResponseHeader("application/json; charset=UTF-8", 0, false));
-            String body = response.toJSON().toString();
-            msg.setResponseBody(body);
-            msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
-            return body;
+            if (reqType.equals(RequestType.other)) {
+                return msg.getResponseBody().toString();
+            } else {
+                msg.setResponseHeader(
+                        API.getDefaultResponseHeader("application/json; charset=UTF-8", 0, false));
+                String body = response.toJSON().toString();
+                msg.setResponseBody(body);
+                msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
+                return body;
+            }
         } catch (Exception e) {
             LOG.error("Failed at end " + e.getMessage(), e);
             throw new ApiException(
