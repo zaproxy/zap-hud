@@ -3,8 +3,10 @@ import org.zaproxy.gradle.tasks.CreateManifestChanges
 import org.zaproxy.gradle.tasks.GenerateI18nJsFile
 import org.zaproxy.gradle.tasks.UpdateManifestFile
 import org.zaproxy.gradle.tasks.ZapDownloadWeekly
+import org.zaproxy.gradle.tasks.ZapInstallAddOn
 import org.zaproxy.gradle.tasks.ZapStart
 import org.zaproxy.gradle.tasks.ZapShutdown
+import org.zaproxy.gradle.tasks.ZapUninstallAddOn
 
 plugins {
     `java-library`
@@ -187,6 +189,22 @@ tasks {
         homeDir.set(zapHome.asFile)
 
         args.set(listOf("-dev", "-config", "start.checkForUpdates=false", "-config", "start.addonDirs=$buildDir/zap/", "-config", "hud.dir=$zapHome/hud") + hudDevArgs)
+    }
+
+    val assembleZapAddOn = tasks.named<Jar>("assembleZapAddOn");
+    val uninstallAddOn by registering(ZapUninstallAddOn::class) {
+        group = AddOnPlugin.ADD_ON_GROUP
+        description = "Uninstalls the add-on from ZAP (started with \"runZap\")."
+        addOnId.set(zapAddOn.addOnId)
+    }
+    assembleZapAddOn.configure { mustRunAfter(uninstallAddOn) }
+
+    register<ZapInstallAddOn>("installAddOn") {
+        group = AddOnPlugin.ADD_ON_GROUP
+        description = "Installs the add-on into ZAP (started with \"runZap\")."
+
+        dependsOn(uninstallAddOn, assembleZapAddOn)
+        addOn.set(assembleZapAddOn.get().archivePath)
     }
 
     register<ZapStart>("zapStart") {
