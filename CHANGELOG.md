@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Add HTML report tool. [#312](https://github.com/zaproxy/zap-hud/issues/312)
  - Require cookie on all API calls
 
+### Changed
+
+ - Changed Attack Mode icon to crosshairs. [#221](https://github.com/zaproxy/zap-hud/issues/221)
+
 ### Fixed
  - Upgraded vue.js to 2.5.21 and vue-i18n to 8.5.0 
 
