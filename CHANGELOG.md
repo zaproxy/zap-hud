@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
  - Add option to control on-domain messages. [#294](https://github.com/zaproxy/zap-hud/issues/294)
+ - Add HTML report tool. [#312](https://github.com/zaproxy/zap-hud/issues/312)
  - Require cookie on all API calls
 
 ### Fixed

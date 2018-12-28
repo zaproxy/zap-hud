@@ -778,7 +778,11 @@ var utils = (function() {
 	function zapApiCall(apiCall, init) {
 		return fetch(ZAP_HUD_API + apiCall, init);
 	}
-	
+
+	function zapApiNewWindow(apiCall) {
+		window.open(ZAP_HUD_API + apiCall);
+	}
+
 	function log(level, method, message, object) {
 		if (level > LOG_LEVEL || (! LOG_TO_CONSOLE && ! LOG_TO_ZAP)) {
 			return;
@@ -840,6 +844,7 @@ return {
 		getZapFilePath: getZapFilePath,
 		getZapImagePath: getZapImagePath,
 		zapApiCall: zapApiCall,
+		zapApiNewWindow: zapApiNewWindow,
 		log: log
 	};
 })();

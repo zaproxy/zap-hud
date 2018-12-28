@@ -20,12 +20,18 @@
 package org.zaproxy.gradle.tasks;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.tools.ant.filters.ReplaceTokens;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
@@ -49,6 +55,7 @@ public class UpdateManifestFile extends DefaultTask {
 
     private final Property<String> addOnStatus;
     private final Property<String> addOnVersion;
+    private final RegularFileProperty changes;
     private final Property<String> zapVersion;
     private final ConfigurableFileCollection zapHomeFiles;
 
@@ -60,6 +67,7 @@ public class UpdateManifestFile extends DefaultTask {
 
         this.addOnStatus = objectFactory.property(String.class);
         this.addOnVersion = objectFactory.property(String.class);
+        this.changes = newInputFile();
         this.zapVersion = objectFactory.property(String.class);
         this.zapHomeFiles = getProject().files();
     }
@@ -82,6 +90,11 @@ public class UpdateManifestFile extends DefaultTask {
     @Input
     public Property<String> getAddOnVersion() {
         return addOnVersion;
+    }
+
+    @InputFile
+    public RegularFileProperty getChanges() {
+        return changes;
     }
 
     @Input
@@ -109,6 +122,8 @@ public class UpdateManifestFile extends DefaultTask {
                             Map<String, String> tokens = new HashMap<>();
                             tokens.put("version", addOnVersion.get());
                             tokens.put("status", addOnStatus.get());
+                            tokens.put(
+                                    "changes", readChangesFile(changes.get().getAsFile().toPath()));
                             tokens.put("zapVersion", zapVersion.get());
                             tokens.put(
                                     "files",
@@ -120,6 +135,15 @@ public class UpdateManifestFile extends DefaultTask {
                             properties.put("tokens", tokens);
                             copySpec.filter(properties, ReplaceTokens.class);
                         });
+    }
+
+    private static String readChangesFile(Path file) {
+        try {
+            return StringEscapeUtils.escapeXml11(
+                    new String(Files.readAllBytes(file), StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private String getManifestFiles(Set<File> files) {

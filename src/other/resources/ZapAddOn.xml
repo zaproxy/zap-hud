@@ -5,10 +5,7 @@
 	<description>Display information from ZAP in browser.</description>
 	<author>ZAP Dev Team</author>
 	<url></url>
-	<changes>
-	<![CDATA[
-	]]>
-	</changes>
+	<changes>@changes@</changes>
 	<dependencies>
 		<addons>
 			<addon>

@@ -25,7 +25,14 @@ dependencies {
     implementation("commons-configuration:commons-configuration:1.9")
     implementation("commons-jxpath:commons-jxpath:1.3")
     implementation("org.apache.commons:commons-lang3:3.8.1")
+    implementation("org.apache.commons:commons-text:1.6")
     implementation("org.zaproxy:zap-clientapi:1.6.0")
+
+    val flexmarkVersion = "0.35.0"
+    implementation("com.vladsch.flexmark:flexmark-java:$flexmarkVersion")
+    implementation("com.vladsch.flexmark:flexmark-ext-gfm-strikethrough:$flexmarkVersion")
+    implementation("com.vladsch.flexmark:flexmark-ext-gfm-tasklist:$flexmarkVersion")
+    implementation("com.vladsch.flexmark:flexmark-ext-tables:$flexmarkVersion")
 }
 
 java {

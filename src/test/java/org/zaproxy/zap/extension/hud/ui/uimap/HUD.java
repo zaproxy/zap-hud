@@ -34,12 +34,18 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.zaproxy.zap.extension.hud.ui.Constants;
 
+/**
+ * Utility class for making interactions with the HUD easier. Should only be instantiated once per
+ * test.
+ */
 public class HUD {
 
     private WebDriver webdriver;
+    private boolean hudNotInstalled;
 
     public HUD(WebDriver webdriver) {
         this.webdriver = webdriver;
+        this.hudNotInstalled = true;
     }
 
     public static By LEFT_PANEL_BY_ID = By.id("left-panel");
@@ -151,29 +157,14 @@ public class HUD {
 
     public void openUrlWaitForHud(String url) {
         this.webdriver.get(url);
-        try {
-            Thread.sleep(Constants.POST_LOAD_DELAY_MS);
-        } catch (InterruptedException e) {
-            // Ignore
+
+        if (hudNotInstalled) {
+            // Wait for the service worker installation and subsequent page refresh.
+            new WebDriverWait(webdriver, Constants.GENERIC_TESTS_TIMEOUT_SECS)
+                    .until(ExpectedConditions.stalenessOf(waitForLeftPanel()));
+            hudNotInstalled = false;
         }
-        for (int i = 0; i < Constants.GENERIC_TESTS_RETRY_COUNT; i++) {
-            WebElement leftPanel = this.waitForLeftPanel();
-            if (leftPanel != null) {
-                this.webdriver.switchTo().frame(leftPanel);
-                int numButtons = webdriver.findElements(HUD_BUTTON_BY_CLASSNAME).size();
-                this.webdriver.switchTo().parentFrame();
-                if (numButtons >= LEFT_PANEL_MIN_BUTTONS) {
-                    return;
-                }
-            }
-            try {
-                Thread.sleep(Constants.GENERIC_TESTS_RETRY_SLEEP_MS);
-            } catch (InterruptedException e) {
-                // Ignore
-            }
-            // Sometimes helps
-            webdriver.switchTo().defaultContent();
-        }
+        waitForPageLoad();
     }
 
     public void openRelativePage(String page) throws URISyntaxException {

@@ -82,14 +82,16 @@ public class BadSiteUnitTest extends FirefoxUnitTest {
     // so far
     // @Test
     // @Disabled
-    public void cannotOpenUtilsFileDirectly(HUD hud) throws IOException {
+    public void cannotOpenUtilsFileDirectly(FirefoxDriver driver) throws IOException {
+        HUD hud = new HUD(driver);
         hud.getWebDriver().get(getHudUtilsFilesUrl(hud));
         String utilsSrc = hud.getWebDriver().getPageSource();
         assertEquals(-1, utilsSrc.indexOf("ZAP_HUD_API"));
     }
 
     @Test
-    public void cannotOpenApiUrlDirectly(HUD hud) throws IOException {
+    public void cannotOpenApiUrlDirectly(FirefoxDriver driver) throws IOException {
+        HUD hud = new HUD(driver);
         hud.getWebDriver().get(getHudUtilsFilesUrl(hud));
 
         URL url = new URL(getHudApiUrl(hud) + "/core/view/version");
