@@ -99,6 +99,7 @@ public class HudFileProxy extends ApiImplementor {
             if (query != null) {
                 if (query.contains("..")) {
                     // Looks like an injection attack
+                    LOG.warn("Attempted injection attack? " + msg.getRequestHeader().getURI());
                     throw new ApiException(
                             ApiException.Type.ILLEGAL_PARAMETER,
                             msg.getRequestHeader().getURI().toString());
@@ -122,6 +123,17 @@ public class HudFileProxy extends ApiImplementor {
                                     .setHeader("Content-Security-Policy", HudAPI.CSP_POLICY);
                         }
                     }
+                    if (api.getRequestCookieValue(msg, HudAPI.ZAP_HUD_COOKIE) == null) {
+                        // The ZAP-HUD cookie has not been set, so set it or we'll block access to
+                        // key resources
+                        msg.getResponseHeader()
+                                .setHeader(
+                                        HttpHeader.SET_COOKIE,
+                                        HudAPI.ZAP_HUD_COOKIE
+                                                + "="
+                                                + api.getZapHudCookieValue()
+                                                + "; Secure; HttpOnly; SameSite=Strict");
+                    }
 
                     return msg.getResponseBody().toString();
                 } else if (query.indexOf("image=") > 0) {
@@ -132,12 +144,13 @@ public class HudFileProxy extends ApiImplementor {
                     return msg.getResponseBody().toString();
                 }
             }
+        } catch (ApiException e) {
+            throw e;
         } catch (Exception e) {
-            throw new ApiException(
-                    ApiException.Type.URL_NOT_FOUND, msg.getRequestHeader().getURI().toString());
+            throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, e.getMessage());
         }
         throw new ApiException(
-                ApiException.Type.URL_NOT_FOUND, msg.getRequestHeader().getURI().toString());
+                ApiException.Type.ILLEGAL_PARAMETER, msg.getRequestHeader().getURI().toString());
     }
 
     private String getImageContentType(String name) {

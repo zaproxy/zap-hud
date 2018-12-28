@@ -34,6 +34,10 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.zaproxy.zap.extension.hud.ui.Constants;
 
+/**
+ * Utility class for making interactions with the HUD easier. Should only be instantiated once per
+ * test.
+ */
 public class HUD {
 
     private WebDriver webdriver;
@@ -180,6 +184,10 @@ public class HUD {
                                 .equals("complete");
                     }
                 });
+    }
+
+    public WebDriver getWebDriver() {
+        return webdriver;
     }
 
     public void warning(String msg) {

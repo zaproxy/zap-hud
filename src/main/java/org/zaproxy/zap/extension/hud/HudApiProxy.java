@@ -35,9 +35,13 @@ public class HudApiProxy extends ApiImplementor {
 
     private static final String PREFIX = "hudapi";
 
+    private HudAPI api;
+
     private static final Logger LOG = Logger.getLogger(HudApiProxy.class);
 
-    public HudApiProxy() {}
+    public HudApiProxy(HudAPI api) {
+        this.api = api;
+    }
 
     @Override
     public String getPrefix() {
@@ -64,10 +68,24 @@ public class HudApiProxy extends ApiImplementor {
 
     @Override
     public String handleCallBack(HttpMessage msg) throws ApiException {
+        String url = msg.getRequestHeader().getURI().toString();
         try {
 
-            String url = msg.getRequestHeader().getURI().toString();
             LOG.debug("API proxy callback url = " + url);
+
+            if (!api.getZapHudCookieValue()
+                    .equals(api.getRequestCookieValue(msg, HudAPI.ZAP_HUD_COOKIE))) {
+                String errorMsg =
+                        "Missing or incorrect cookie supplied when accessing API "
+                                + msg.getRequestHeader().getURI();
+                if (url.indexOf("hud/action/log") > 0) {
+                    // This will happen on start up, especially in dev mode, so just fail quietly
+                    LOG.debug(errorMsg);
+                    return "";
+                }
+                LOG.warn(errorMsg);
+                throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, errorMsg);
+            }
 
             String[] elements = url.split("/");
 
@@ -144,9 +162,7 @@ public class HudApiProxy extends ApiImplementor {
                 return body;
             }
         } catch (Exception e) {
-            LOG.error("Failed at end " + e.getMessage(), e);
-            throw new ApiException(
-                    ApiException.Type.URL_NOT_FOUND, msg.getRequestHeader().getURI().toString());
+            throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, e.getMessage());
         }
     }
 }
