@@ -10,7 +10,6 @@ var History = (function() {
 	// todo: could probably switch this to a config file?
 	var NAME = "history";
 	var LABEL = I18n.t("history_tool");
-	var DATA = {};
 	var ICONS = {};
         ICONS.CLOCK = "clock.png";
     var tool = {};
@@ -140,7 +139,7 @@ var History = (function() {
             .catch(utils.errorHandler);
 
 		tool.messages.push(message);
-		utils.writeTool(tool)
+		utils.writeTool(tool);
 	});
 
 	self.addEventListener("activate", event => {

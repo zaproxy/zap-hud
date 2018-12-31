@@ -125,22 +125,14 @@ var utils = (function() {
 	 */
 	function parseDomainFromUrl(url) {
 		var hostname;
-		var protocol;
 	
-		var hasProtocol = url.indexOf("://");
-	
-		if (hasProtocol > -1) {
-			protocol = url.substring(0, hasProtocol + 3);
+		if (url.indexOf("://") > -1) {
 			hostname = url.split('/')[2];
 		}
 		else {
-			protocol = "http://";
 			hostname = url.split('/')[0];
 		}
 	
-		//find & remove port number
-		//hostname = hostname.split(':')[0];
-		
 		//find & remove "?" & "#"
 		hostname = hostname.split('?')[0];
 		hostname = hostname.split('#')[0];
@@ -171,21 +163,12 @@ var utils = (function() {
 	
 	
 	/* STORAGE */
-	var KEY_IS_CONFIG = "isHudConfigured";
 	
 	/*
 	 * Return whether configureStorage has been run yet.
 	 */
 	function isStorageConfigured() {
 		return localforage.getItem(IS_HUD_CONFIGURED);
-	}
-	
-	function isFirstTime() {
-		return localforage.getItem(IS_FIRST_TIME);
-	}
-	
-	function setFirstTime() {
-		return localforage.setItem(IS_FIRST_TIME, false);
 	}
 	
 	/*

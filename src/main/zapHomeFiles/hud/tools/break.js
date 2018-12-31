@@ -49,49 +49,6 @@ var Break = (function() {
 			.catch(utils.errorHandler)
 	}
 
-	function showDialog(domain) {
-
-		checkIsRunning()
-			.then(isRunning => {
-				var config = {};
-
-				if(!isRunning) {
-					config.text = DIALOG.START;
-					config.buttons = [
-						{text:"On",
-						id:"on"},
-						{text:"Cancel",
-						id:"cancel"}
-					];
-				}
-				else {
-					config.text = DIALOG.STOP;
-					config.buttons = [
-						{text:"Off",
-						id:"off"},
-						{text:"Cancel",
-						id:"cancel"}
-					];
-				}
-
-				utils.messageFrame("display", {action:"showDialog", config:config}).then(response => {
-
-					// Handle button choice
-					if (response.id === "on") {
-						startBreaking();
-					}
-					else if (response.id === "off") {
-						stopBreaking();
-					}
-					else {
-						//cancel
-					}
-				});
-
-			})
-			.catch(utils.errorHandler);
-	}
-
 	function startBreaking() {
 		utils.zapApiCall("/break/action/break/?type=http-all&state=true")
 			.catch(utils.errorHandler);
@@ -149,15 +106,6 @@ var Break = (function() {
 			.catch(utils.errorHandler);
 	}
 
-	function checkIsRunning() {
-		return new Promise(resolve => {
-			utils.loadTool(NAME)
-				.then(tool => {
-					resolve(tool.isRunning);
-				});
-		});
-	}
-
 	function showBreakDisplay(data) {
 		var config = {
 			request: {
@@ -211,7 +159,7 @@ var Break = (function() {
 					return;
 				}
 			})
-			.catch(utils.errorHandler)
+			.catch(utils.errorHandler);
 
 		utils.messageAllTabs("display", {action:"showBreakMessage", config:config})
 			.then(response => {

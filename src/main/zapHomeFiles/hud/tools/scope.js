@@ -140,27 +140,6 @@ var Scope = (function() {
 			.catch(utils.errorHandler);
 	}
 
-	function requireScope(targetDomain) {
-		return new Promise((resolve, reject) => {
-			checkDomainInScope(targetDomain)
-				.then(isInScope => {
-
-					if (!isInScope) {
-						return showScopeRequiredDialog(targetDomain);
-					}
-					return true;
-				})
-				.then(addedToScope => {
-					if (addedToScope) {
-						resolve();
-					}
-					else {
-						reject();
-					}
-				});
-		});
-	}
-
 	function showOptions(tabId) {
 		var config = {};
 

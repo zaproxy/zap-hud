@@ -10,7 +10,6 @@ var ShowEnable = (function() {
 	// todo: could probably switch this to a config file?
 	var NAME = "showEnable";
 	var LABEL = I18n.t("show_tool");
-	var DATA = {};
 	var ICONS = {};
 		ICONS.OFF = "show-off.png";
 		ICONS.ON = "show-on.png";
@@ -165,7 +164,7 @@ var ShowEnable = (function() {
 					break;
 
 				case "getTool":
-					getTool(message.tabId, event.ports[0])
+					getTool(message.tabId, event.ports[0]);
 
 				default:
 					break;

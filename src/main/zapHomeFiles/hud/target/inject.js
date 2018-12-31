@@ -23,19 +23,6 @@
 	/* TARGET INTERACTIONS */
 	// code that will interact with the target domain will go here
 
-
-	/* FRAMES */
-	// todo: standardize z-indexes. they will need to be really high, see youtube and espn for why
-	function removePanel(panel) {
-		panel.parentNode.removeChild(panel);
-	}
-
-	/* PRESENTATION */
-	// todo: implement hide/show panels
-	function hidePanel(panel) {
-		return 0;
-	}
-
 	function showPanel(panel) {
 		return 0;
 	}
@@ -168,8 +155,8 @@
 				inputs[index].style.borderColor = 'purple';
 				showEnableTypeHiddenFields.push(inputs[index]);
 				if (! counted) {
+					// If any checks are added after this will also need to inc counted
 					showEnabledCount++;
-					counted = true;
 				}
 			}
 		}
@@ -204,7 +191,7 @@
 		showEnabledDisabled = [];
 		showEnabledReadOnly = [];
 		showEnabled = false;
-		showEnabledCount = 0
+		showEnabledCount = 0;
 	}
 	
 
@@ -215,7 +202,7 @@
 		} else {
 			// Count the number of hidden fields
 			var inputs = document.getElementsByTagName('input');
-			for (index = 0; index < inputs.length; ++index) {
+			for (let index = 0; index < inputs.length; ++index) {
 				if (inputs[index].type == "hidden") {
 					count++;
 				} else if (inputs[index].style.display == "none") {
@@ -365,7 +352,7 @@
 
 	/* initializes the HUD Frames */
 	if (window.top == window.self) {
-		tabId = Math.round(Math.random()*5000) //todo: nonsense random number generator;
+		tabId = Math.round(Math.random()*5000); //todo: nonsense random number generator;
 
 		window.addEventListener("message", receiveMessages);
 

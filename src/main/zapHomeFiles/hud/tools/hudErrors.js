@@ -10,7 +10,6 @@ var HudErrors = (function() {
 	// todo: could probably switch this to a config file?
 	var NAME = "hudErrors";
 	var LABEL = I18n.t("hud_errors_tool");
-	var DATA = {};
 	var ICONS = {};
 		ICONS.NONE = "bug-grey.png";
 		ICONS.SOME = "bug-red.png";
@@ -118,7 +117,7 @@ var HudErrors = (function() {
 					break;
 
 				case "getTool":
-					getTool(message.context, event.ports[0])
+					getTool(message.context, event.ports[0]);
 					break;
 
 				default:
