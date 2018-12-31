@@ -252,7 +252,7 @@ public class TutorialProxyServer extends ProxyServer {
                                 .setHeader(HttpHeader.LOCATION, uncompletedPage.getName());
                     } else {
                         if (msg.getRequestHeader().getMethod().equals("POST")) {
-                            page.handlePostRequest(msg);
+                            page.handlePostRequest(msg, page.parsePostParams(msg));
                         } else if (msg.getRequestHeader().getMethod().equals("GET")) {
                             page.handleGetRequest(msg);
                         }
