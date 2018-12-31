@@ -63,7 +63,8 @@ import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 
 public class HudAPI extends ApiImplementor {
 
-    public static final String ZAP_HUD_COOKIE = "ZAP-HUD";
+    public static final String ZAP_HUD_STRICT_COOKIE = "ZAP-HUD-STRICT";
+    public static final String ZAP_HUD_SAFE_COOKIE = "ZAP-HUD-SAFE";
 
     // TODO shouldnt allow unsafe-inline styles - need to work out where they are being used
     protected static final String CSP_POLICY =
@@ -110,7 +111,9 @@ public class HudAPI extends ApiImplementor {
     private final String sharedSecret = UUID.randomUUID().toString();
 
     /** Cookie used on the ZAP domain - should never be exposed to a target site. */
-    private final String zapHudCookie = UUID.randomUUID().toString();
+    private final String zapHudSafeCookie = UUID.randomUUID().toString();
+
+    private final String zapHudStrictCookie = UUID.randomUUID().toString();
 
     private static Logger logger = Logger.getLogger(HudAPI.class);
 
@@ -477,8 +480,12 @@ public class HudAPI extends ApiImplementor {
         return websocketUrl;
     }
 
-    protected String getZapHudCookieValue() {
-        return zapHudCookie;
+    protected String getZapHudSafeCookieValue() {
+        return zapHudSafeCookie;
+    }
+
+    protected String getZapHudStrictCookieValue() {
+        return zapHudStrictCookie;
     }
 
     public String getRequestCookieValue(HttpMessage msg, String cookieName) {

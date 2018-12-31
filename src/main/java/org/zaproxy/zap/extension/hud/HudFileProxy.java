@@ -123,16 +123,27 @@ public class HudFileProxy extends ApiImplementor {
                                     .setHeader("Content-Security-Policy", HudAPI.CSP_POLICY);
                         }
                     }
-                    if (api.getRequestCookieValue(msg, HudAPI.ZAP_HUD_COOKIE) == null) {
-                        // The ZAP-HUD cookie has not been set, so set it or we'll block access to
-                        // key resources
+                    if (api.getRequestCookieValue(msg, HudAPI.ZAP_HUD_STRICT_COOKIE) == null) {
+                        // The ZAP-HUD strict cookie has not been set, so set it or we'll block
+                        // access to key resources
                         msg.getResponseHeader()
                                 .setHeader(
                                         HttpHeader.SET_COOKIE,
-                                        HudAPI.ZAP_HUD_COOKIE
+                                        HudAPI.ZAP_HUD_STRICT_COOKIE
                                                 + "="
-                                                + api.getZapHudCookieValue()
-                                                + "; Secure; HttpOnly; SameSite=Strict");
+                                                + api.getZapHudStrictCookieValue()
+                                                + "; Path=/; Secure; HttpOnly; SameSite=Strict");
+                    }
+                    if (api.getRequestCookieValue(msg, HudAPI.ZAP_HUD_SAFE_COOKIE) == null) {
+                        // The ZAP-HUD safe cookie has not been set, so set it or we'll block access
+                        // to key resources
+                        msg.getResponseHeader()
+                                .setHeader(
+                                        HttpHeader.SET_COOKIE,
+                                        HudAPI.ZAP_HUD_SAFE_COOKIE
+                                                + "="
+                                                + api.getZapHudSafeCookieValue()
+                                                + "; Path=/; Secure; HttpOnly;");
                     }
 
                     return msg.getResponseBody().toString();

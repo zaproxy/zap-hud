@@ -19,6 +19,8 @@
  */
 package org.zaproxy.zap.extension.hud;
 
+import java.util.HashSet;
+import java.util.Set;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.network.HttpHeader;
@@ -36,6 +38,14 @@ public class HudApiProxy extends ApiImplementor {
     private static final String PREFIX = "hudapi";
 
     private HudAPI api;
+
+    private static final Set<String> ALLOWED_ON_DOMAIN_CALLS;
+
+    static {
+        ALLOWED_ON_DOMAIN_CALLS = new HashSet<String>();
+        ALLOWED_ON_DOMAIN_CALLS.add("action/log");
+        ALLOWED_ON_DOMAIN_CALLS.add("action/setOptionShowWelcomeScreen");
+    }
 
     private static final Logger LOG = Logger.getLogger(HudApiProxy.class);
 
@@ -73,20 +83,6 @@ public class HudApiProxy extends ApiImplementor {
 
             LOG.debug("API proxy callback url = " + url);
 
-            if (!api.getZapHudCookieValue()
-                    .equals(api.getRequestCookieValue(msg, HudAPI.ZAP_HUD_COOKIE))) {
-                String errorMsg =
-                        "Missing or incorrect cookie supplied when accessing API "
-                                + msg.getRequestHeader().getURI();
-                if (url.indexOf("hud/action/log") > 0) {
-                    // This will happen on start up, especially in dev mode, so just fail quietly
-                    LOG.debug(errorMsg);
-                    return "";
-                }
-                LOG.warn(errorMsg);
-                throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, errorMsg);
-            }
-
             String[] elements = url.split("/");
 
             // format is url is
@@ -123,27 +119,50 @@ public class HudApiProxy extends ApiImplementor {
                 }
             }
 
+            String reqTypeStr = elements[7];
+            String opName = elements[8];
+
+            if (ALLOWED_ON_DOMAIN_CALLS.contains(reqTypeStr + "/" + opName)) {
+                // Its one of the relatively safe calls we can get which don't always have the
+                // strict cookie on
+                if (!api.getZapHudSafeCookieValue()
+                        .equals(api.getRequestCookieValue(msg, HudAPI.ZAP_HUD_SAFE_COOKIE))) {
+                    String errorMsg =
+                            "Missing or incorrect cookie supplied when accessing safe API call "
+                                    + msg.getRequestHeader().getURI();
+                    LOG.warn(errorMsg);
+                    throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, errorMsg);
+                }
+            } else if (!api.getZapHudStrictCookieValue()
+                    .equals(api.getRequestCookieValue(msg, HudAPI.ZAP_HUD_STRICT_COOKIE))) {
+                String errorMsg =
+                        "Missing or incorrect cookie supplied when accessing strict API call "
+                                + msg.getRequestHeader().getURI();
+                LOG.warn(errorMsg);
+                throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, errorMsg);
+            }
+
             ApiResponse response = null;
             try {
-                reqType = RequestType.valueOf(elements[7]);
+                reqType = RequestType.valueOf(reqTypeStr);
             } catch (IllegalArgumentException e) {
-                throw new ApiException(ApiException.Type.BAD_TYPE, elements[7]);
+                throw new ApiException(ApiException.Type.BAD_TYPE, reqTypeStr);
             }
             switch (reqType) {
                 case action:
-                    response = impl.handleApiOptionAction(elements[8], params);
+                    response = impl.handleApiOptionAction(opName, params);
                     if (response == null) {
-                        response = impl.handleApiAction(elements[8], params);
+                        response = impl.handleApiAction(opName, params);
                     }
                     break;
                 case view:
-                    response = impl.handleApiOptionView(elements[8], params);
+                    response = impl.handleApiOptionView(opName, params);
                     if (response == null) {
-                        response = impl.handleApiView(elements[8], params);
+                        response = impl.handleApiView(opName, params);
                     }
                     break;
                 case other:
-                    msg = impl.handleApiOther(msg, elements[8], params);
+                    msg = impl.handleApiOther(msg, opName, params);
                     break;
                 case pconn:
                     // Not currently supported - we want it, but it will require a load more work :/
