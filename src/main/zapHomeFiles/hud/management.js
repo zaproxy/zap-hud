@@ -110,8 +110,10 @@ function windowMessageListener(event) {
 	if (! event.data.hasOwnProperty('sharedSecret')) {
 		utils.log(LOG_WARN, 'management.receiveMessage', 'Message without sharedSecret rejected');
 		return;
-	}
-	if (event.data.sharedSecret === ZAP_SHARED_SECRET) {
+	} else if ("" === ZAP_SHARED_SECRET) {
+		// A blank secret is used to indicate that this functionality is turned off
+		utils.log(LOG_DEBUG, 'management.receiveMessage', 'Message from target domain ignored as on-domain messaging has been switched off');
+	} else if (event.data.sharedSecret === ZAP_SHARED_SECRET) {
 		navigator.serviceWorker.controller.postMessage(event.data);
 	} else {
 		utils.log(LOG_WARN, 'management.receiveMessage', 'Message with incorrect sharedSecret rejected ' + event.data.sharedSecret);

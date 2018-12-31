@@ -29,6 +29,15 @@
 	The plan is to expose this option via the HUD, but until that time if the option is enabled then you will
 	need to add URLs to the scope via the ZAP Desktop.
 
+	<h2>Enable on-domain messages</h2>
+	
+	Allow messages to be sent from the target domain to the ZAP domain. This is needed for features such as showing the
+	number of hidden fields and displaying the alert associated with a specific field. 
+	If you think that the target domain could be malicious then you can turn this option off. 
+	The HUD does not trust any messages from the target domain but a malicious site could potentially do mildly annoying things such as 
+	causing ZAP alerts to be displayed unexpectedly. 
+	You will need to restart your browser after changing this setting in order for it to take effect.
+
 	<h2>Remove CSP from target pages</h2>
 	
 	The HUD will not currently work if a strong CSP policy is used in target web sites. 

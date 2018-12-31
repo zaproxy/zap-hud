@@ -45,6 +45,8 @@ public class HudParam extends VersionedAbstractParam {
     private static final String PARAM_TUTORIAL_TEST_MODE = PARAM_BASE_KEY + ".tutorialTestMode";
     private static final String PARAM_TUTORIAL_TASKS = PARAM_BASE_KEY + ".tutorialTasks";
     private static final String PARAM_SHOW_WELCOME_SCREEN = PARAM_BASE_KEY + ".showWelcomeScreen";
+    private static final String PARAM_ENABLE_ON_DOMAIN_MSGS =
+            PARAM_BASE_KEY + ".enableOnDomainMsgs";
 
     /**
      * The version of the configurations. Used to keep track of configurations changes between
@@ -76,6 +78,8 @@ public class HudParam extends VersionedAbstractParam {
     private boolean isTutorialTestMode;
 
     private boolean showWelcomeScreen;
+
+    private boolean enableOnDomainMsgs;
 
     private List<String> tutorialTasks;
 
@@ -172,6 +176,15 @@ public class HudParam extends VersionedAbstractParam {
         getConfig().setProperty(PARAM_SHOW_WELCOME_SCREEN, showWelcomeScreen);
     }
 
+    public boolean isEnableOnDomainMsgs() {
+        return enableOnDomainMsgs;
+    }
+
+    public void setEnableOnDomainMsgs(boolean enableOnDomainMsgs) {
+        this.enableOnDomainMsgs = enableOnDomainMsgs;
+        getConfig().setProperty(PARAM_ENABLE_ON_DOMAIN_MSGS, enableOnDomainMsgs);
+    }
+
     @Override
     protected String getConfigVersionKey() {
         return PARAM_BASE_KEY + VERSION_ATTRIBUTE;
@@ -202,6 +215,7 @@ public class HudParam extends VersionedAbstractParam {
         isTutorialTestMode = getConfig().getBoolean(PARAM_TUTORIAL_TEST_MODE, false);
         tutorialTasks = convert(getConfig().getList(PARAM_TUTORIAL_TASKS));
         showWelcomeScreen = getConfig().getBoolean(PARAM_SHOW_WELCOME_SCREEN, true);
+        enableOnDomainMsgs = getConfig().getBoolean(PARAM_ENABLE_ON_DOMAIN_MSGS, true);
     }
 
     private List<String> convert(List<Object> objs) {

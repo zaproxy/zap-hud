@@ -5,11 +5,7 @@
 	<description>Display information from ZAP in browser.</description>
 	<author>ZAP Dev Team</author>
 	<url></url>
-	<changes>
-	<![CDATA[
-		Fix bug where field alert flags don't show alert dialog.
-	]]>
-	</changes>
+	<changes>@changes@</changes>
 	<dependencies>
 		<addons>
 			<addon>
