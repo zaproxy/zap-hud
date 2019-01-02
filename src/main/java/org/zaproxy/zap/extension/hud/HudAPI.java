@@ -274,7 +274,7 @@ public class HudAPI extends ApiImplementor {
     }
 
     private void validateKey(String key) throws ApiException {
-        if (key.length() == 0 || key.length() >= MAX_KEY_LENGTH || !key.matches("[a-zA-Z0-9]+")) {
+        if (key.length() == 0 || key.length() > MAX_KEY_LENGTH || !key.matches("[a-zA-Z0-9]+")) {
             throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_KEY);
         }
     }
