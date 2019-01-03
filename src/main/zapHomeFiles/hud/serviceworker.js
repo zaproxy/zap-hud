@@ -176,8 +176,8 @@ webSocket.onmessage = function (event) {
 };
 
 webSocket.onerror = function (event) {
-	utils.log(LOG_ERROR, 'websocket', '', event)
-}
+	utils.log(LOG_ERROR, 'websocket', '', event);
+};
 
 function registerForZapEvents(publisher) {
 	webSocket.send('{"component" : "event", "type" : "register", "name" : "' + publisher + '"}');
@@ -212,10 +212,10 @@ function saveFrameId(event) {
 
 					return utils.saveFrame(frame);
 				})
-				.catch(utils.errorHandler);
+				.catch(utils.errorHandler)
 		})
 		.catch(utils.errorHandler);
-}
+};
 
 function showAddToolDialog(tabId, frameId) {
 	var config = {};
@@ -248,7 +248,7 @@ function showAddToolDialog(tabId, frameId) {
 			utils.addToolToPanel(response.toolname, frameId);
 		})
 		.catch(utils.errorHandler);
-}
+};
 
 function showHudSettings(tabId) {
 	var config = {};
@@ -263,7 +263,7 @@ function showHudSettings(tabId) {
 			}
 		})
 		.catch(utils.errorHandler);
-}
+};
 
 function resetToDefault() {
 	utils.configureStorage()
@@ -276,8 +276,8 @@ function resetToDefault() {
 				promises.push(self.tools[tools[tool].name].initialize());
 			}
 
-			return Promise.all(promises)
+			return Promise.all(promises);
 		})
 		.then(utils.messageFrame("management", {action: "refreshTarget"}))
 		.catch(utils.errorHandler);
-}
+};
