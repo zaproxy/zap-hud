@@ -169,10 +169,6 @@ var alertUtils = (function() {
 			.catch(utils.errorHandler);
 	}
 
-	function showGrowlerAlert(alert) {
-		return utils.messageAllTabs("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
-	}
-
 	function showOptions(tabId, toolname, toolLabel) {
 		var config = {};
 

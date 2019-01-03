@@ -232,7 +232,7 @@ Vue.component('drawer-button-showhide', {
             })
             .catch(utils.errorHandler);
     }
-})
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     let params = new URL(document.location).searchParams;

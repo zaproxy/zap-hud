@@ -68,7 +68,7 @@ var Attack = (function() {
 							turnOnAttackMode(domain);
 						}
 						else if (response.id === "turnoff") {
-							turnOffAttackMode(domain);
+							turnOffAttackMode();
 						}
 					})
 					.catch(utils.errorHandler);

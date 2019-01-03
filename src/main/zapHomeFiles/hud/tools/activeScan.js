@@ -33,8 +33,8 @@ var ActiveScan = (function() {
 		tool.panel = "";
 		tool.position = 0;
 		tool.isRunning = false;
-		tool.runningTabId;
-		tool.scanid = -1
+		tool.runningTabId = '';
+		tool.scanid = -1;
 
 		utils.saveTool(tool);
 		registerForZapEvents(ACTIVE_SCAN_EVENT);
@@ -81,7 +81,7 @@ var ActiveScan = (function() {
 						.catch(utils.errorHandler);
 				}
 				else if (response.id === "stop") {
-					stopActiveScan(domain);
+					stopActiveScan();
 				}
 			})
 			.catch(utils.errorHandler);

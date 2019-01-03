@@ -111,7 +111,7 @@ const onFetch = event => {
 				}
 			}).catch(utils.errorHandler)
 	);
-}
+};
 
 const onMessage = event => {
 	if (!utils.isFromTrustedOrigin(event)) {
@@ -173,7 +173,7 @@ webSocket.onmessage = function (event) {
 		var ev = new CustomEvent(jevent['event.publisher'], {detail: jevent});
 		self.dispatchEvent(ev);
 	}
-}
+};
 
 webSocket.onerror = function (event) {
 	utils.log(LOG_ERROR, 'websocket', '', event)
@@ -181,7 +181,7 @@ webSocket.onerror = function (event) {
 
 function registerForZapEvents(publisher) {
 	webSocket.send('{"component" : "event", "type" : "register", "name" : "' + publisher + '"}');
-}
+};
 
 /*
  * Saves the clientId of a window which is used to send postMessages.

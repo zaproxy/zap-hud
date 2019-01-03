@@ -714,7 +714,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 				isResponseDisabled: config.isResponseDisabled,
 				activeTab: config.activeTab,
 				port: port
-			})
+			});
 
 			showDisplayFrame();
 			break;
@@ -727,7 +727,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 				isResponseDisabled: config.isResponseDisabled,
 				activeTab: config.activeTab,
 				port: port
-			})
+			});
 
 			showDisplayFrame();
 			break;
