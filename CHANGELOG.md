@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
  - Add API endpoints for getting and setting UI options. [#319](https://github.com/zaproxy/zap-hud/issues/319)
+ - Add tasks for Enable, Show and Break tutorial pages
 
 ## [0.2.0] - 2018-12-31
 

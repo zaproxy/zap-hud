@@ -19,9 +19,9 @@
  */
 package org.zaproxy.zap.extension.hud.tutorial;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.Constant;
@@ -85,6 +85,10 @@ public abstract class TutorialPage {
         if (taskCompleted) {
             this.tutorialProxyServer.getHudParam().setTutorialTaskDone(this.getName());
         }
+    }
+
+    protected void setTaskJustCompleted(boolean taskJustCompleted) {
+        this.taskJustCompleted = taskJustCompleted;
     }
 
     public String getI18nName() {
@@ -163,54 +167,44 @@ public abstract class TutorialPage {
      *
      * @param msg the HTTP message
      */
-    public void handlePostRequest(HttpMessage msg) {
+    public void handlePostRequest(HttpMessage msg, Map<String, String> params) {
         // Check to see if they've solved the task
         String body = msg.getRequestBody().toString();
         if (this.key == null || body.length() == 0) {
             // Key not set yet or no data submitted
             return;
         }
-        try {
-            String supplied = URLDecoder.decode(body, "UTF-8");
+        boolean csrfOk = false;
+        boolean taskOk = false;
 
-            if (this.tutorialProxyServer.isTutorialTestMode()) {
-                log.info("Supplied data: " + supplied);
-            }
-
-            boolean csrfOk = false;
-            boolean taskOk = false;
-
-            for (String keyValue : supplied.split("\\&")) {
-                log.debug("Expecting key=" + key + " got " + keyValue);
-                if (keyValue.trim().equals("key=" + key)) {
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            if (entry.getKey().equals("key")) {
+                log.debug("Expecting key=" + key + " got " + entry.getValue());
+                if (entry.getValue().equals(key)) {
                     if (this.tutorialProxyServer.isTutorialTestMode()) {
                         log.info("Passed the task with key " + key);
                     }
                     taskOk = true;
                     taskPassed();
-                } else if (keyValue.startsWith("key")) {
-                    if (this.tutorialProxyServer.isTutorialTestMode()) {
-                        log.info("Unexpected keyValue pair: " + keyValue);
-                    }
-                } else if (keyValue.trim().equals("anticsrf=" + this.antiCsrfToken)) {
+                } else if (this.tutorialProxyServer.isTutorialTestMode()) {
+                    log.info("Unexpected key value: " + entry.getValue());
+                }
+            } else if (entry.getKey().equals("anticsrf")) {
+                if (entry.getValue().equals(this.antiCsrfToken)) {
                     if (this.tutorialProxyServer.isTutorialTestMode()) {
                         log.info("Anticsrf token ok");
                     }
                     csrfOk = true;
-                } else if (keyValue.trim().startsWith("anticsrf=")) {
-                    if (this.tutorialProxyServer.isTutorialTestMode()) {
-                        log.info("Anticsrf token bad " + keyValue);
-                    }
+                } else if (this.tutorialProxyServer.isTutorialTestMode()) {
+                    log.info("Anticsrf token bad " + entry.getValue());
                 }
             }
-            if (csrfOk && taskOk) {
-                this.setTaskCompleted(true);
-                this.taskJustCompleted = true;
-            }
-
-        } catch (UnsupportedEncodingException e) {
-            log.error(e.getMessage(), e);
         }
+        if (csrfOk && taskOk) {
+            this.setTaskCompleted(true);
+            this.setTaskJustCompleted(true);
+        }
+
         if (this.tutorialProxyServer.isTutorialTestMode() && !this.taskJustCompleted) {
             log.info("Did not pass the task for key " + key);
         }
@@ -285,6 +279,24 @@ public abstract class TutorialPage {
         sb.append("</div>\n");
 
         return sb.toString();
+    }
+
+    protected Map<String, String> parsePostParams(HttpMessage msg) {
+        Map<String, String> map = new HashMap<String, String>();
+        String body = msg.getRequestBody().toString();
+        if (this.tutorialProxyServer.isTutorialTestMode()) {
+            log.info("Supplied data: " + body);
+        }
+
+        for (String keyValue : body.split("\\&")) {
+            int eqOffset = keyValue.indexOf("=");
+            if (eqOffset > -1) {
+                map.put(keyValue.substring(0, eqOffset), keyValue.substring(eqOffset + 1).trim());
+            } else {
+                map.put(keyValue, "");
+            }
+        }
+        return map;
     }
 
     public abstract String getName();

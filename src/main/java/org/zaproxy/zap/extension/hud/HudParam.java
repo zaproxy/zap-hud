@@ -256,12 +256,14 @@ public class HudParam extends VersionedAbstractParam {
     }
 
     public void setTutorialTaskDone(String task) {
-        this.tutorialTasks.add(task);
-        getConfig().setProperty(PARAM_TUTORIAL_TASKS, tutorialTasks);
-        try {
-            this.getConfig().save();
-        } catch (ConfigurationException e) {
-            log.error(e.getMessage(), e);
+        if (!isTutorialTaskDone(task)) {
+            this.tutorialTasks.add(task);
+            getConfig().setProperty(PARAM_TUTORIAL_TASKS, tutorialTasks);
+            try {
+                this.getConfig().save();
+            } catch (ConfigurationException e) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
