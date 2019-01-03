@@ -754,10 +754,6 @@ var utils = (function() {
 		return ZAP_HUD_FILES + '?image=' + file;
 	}
 	
-	function zapApiCall(apiCall) {
-		return fetch(ZAP_HUD_API + apiCall);
-	}
-	
 	function zapApiCall(apiCall, init) {
 		return fetch(ZAP_HUD_API + apiCall, init);
 	}
@@ -771,7 +767,7 @@ var utils = (function() {
 			return;
 		}
 	
-		const logLevel = LOG_STRS[level];
+		var logLevel = LOG_STRS[level];
 	
 		var record = new Date().toTimeString() + ' ' + logLevel + ' ' + method + ': ' + message;
 		if (object) {

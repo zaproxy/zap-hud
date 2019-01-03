@@ -188,11 +188,7 @@ Vue.component('alert-accordion', {
 			this.$emit('close');
 		},
 		urlCount: function(alert) {
-			let count = 0;
-			for (var url in alert) {
-				count += 1;
-			}
-			return count;
+			return alert.length;
 		},
 		alertSelect: function(alert) {
 			// set keepShowing so that we don't hide the display frame
