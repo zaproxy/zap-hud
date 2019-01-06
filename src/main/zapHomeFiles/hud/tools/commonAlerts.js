@@ -155,7 +155,7 @@ var CommonAlerts = (function() {
 										var alert = pageAlerts[alertRisk][alertName][i];
 										if (alert.param.length > 0 && ! reportedParams.has(alert.param)) {
 											reportedParams.add(alert.param);
-											utils.messageFrame2(event.detail.tabId, "management", {
+											utils.messageFrame(event.detail.tabId, "management", {
 												action: "commonAlerts.alert",
 												name: alert.name,
 												id: alert.id,

@@ -242,7 +242,7 @@ function showAddToolDialog(tabId, frameId) {
 			config.tools = tools;
 
 			// display tools to select
-			return utils.messageFrame2(tabId, "display", {action: "showAddToolList", config: config})
+			return utils.messageFrame(tabId, "display", {action: "showAddToolList", config: config})
 		})
 		.then(response => {
 			utils.addToolToPanel(response.toolname, frameId);
@@ -256,7 +256,7 @@ function showHudSettings(tabId) {
 		initialize: I18n.t("settings_resets"),
 	};
 
-	utils.messageFrame2(tabId, "display", {action: "showHudSettings", config: config})
+	utils.messageFrame(tabId, "display", {action: "showHudSettings", config: config})
 		.then(response => {
 			if (response.id === "initialize") {
 				resetToDefault();

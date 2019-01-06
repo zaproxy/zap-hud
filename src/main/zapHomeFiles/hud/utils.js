@@ -470,7 +470,7 @@ var utils = (function() {
 	/*
 	 * Send a postMessage to an iframe window using the custom stored frame key in indexdb.
 	 */
-	function messageFrame2(tabId, frameId, message) {
+	function messageFrame(tabId, frameId, message) {
 		return clients.matchAll({includeUncontrolled: true})
 			.then(clients => {
 				for (let i = 0; i < clients.length; i++) {
@@ -768,7 +768,7 @@ return {
 		loadAllTools: loadAllTools,
 		addToolToPanel: addToolToPanel,
 		removeToolFromPanel: removeToolFromPanel,
-		messageFrame2: messageFrame2,
+		messageFrame: messageFrame,
 		messageAllTabs: messageAllTabs,
 		getAllClients: getAllClients,
 		getWindowVisibilityState: getWindowVisibilityState,

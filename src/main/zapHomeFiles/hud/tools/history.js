@@ -37,7 +37,7 @@ var History = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
@@ -82,7 +82,7 @@ var History = (function() {
 			config.activeTab = data.activeTab;
 		}
 
-		return utils.messageFrame2(tabId, "display", {action:"showHistoryMessage", config:config})
+		return utils.messageFrame(tabId, "display", {action:"showHistoryMessage", config:config})
 			.then(data => {
 				// Handle button choice
 				if (data.buttonSelected === "replay") {

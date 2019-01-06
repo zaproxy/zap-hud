@@ -41,7 +41,7 @@ var HudErrors = (function() {
 					{text:I18n.t("common_clear"), id:"clear"}
 				];
 
-				utils.messageFrame2(tabId, "display", {action:"showDialog", config:config})
+				utils.messageFrame(tabId, "display", {action:"showDialog", config:config})
 					.then(response => {
 
 						// Handle button choice
@@ -75,7 +75,7 @@ var HudErrors = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {

@@ -61,7 +61,7 @@ var Attack = (function() {
 					];
 				}
 
-				utils.messageFrame2(tabId, "display", {action:"showDialog", config:config})
+				utils.messageFrame(tabId, "display", {action:"showDialog", config:config})
 					.then(response => {
 						// Handle button choice
 						if (response.id === "turnon") {
@@ -141,7 +141,7 @@ var Attack = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {

@@ -17,7 +17,7 @@ var alertUtils = (function() {
 			.then(json => {
 				config.alerts = flattenAllAlerts(json);
 				
-				utils.messageFrame2(tabId, "display", {action: "showAllAlerts", config:config}).then(response => {
+				utils.messageFrame(tabId, "display", {action: "showAllAlerts", config:config}).then(response => {
 					// Handle button choice
 					if (response.alertId) {
 						let backFunction = function() {showSiteAlerts(tabId, title, target, alertRisk)};
@@ -78,7 +78,7 @@ var alertUtils = (function() {
 			.then(json => {
 				config.alerts = flattenAllAlerts(json);
 				
-				return utils.messageFrame2(tabId, "display", {action: "showAllAlerts", config:config})
+				return utils.messageFrame(tabId, "display", {action: "showAllAlerts", config:config})
 			})
 			.then(response => {
 				// Handle button choice
@@ -103,7 +103,7 @@ var alertUtils = (function() {
 						config.title = json.alert.alert;
 						config.details = json.alert;
 
-						utils.messageFrame2(tabId, "display", {action: "showAlertDetails", config: config})
+						utils.messageFrame(tabId, "display", {action: "showAlertDetails", config: config})
 							.then(response => {
 								if (response.back) {
 									backFunction();
@@ -167,7 +167,7 @@ var alertUtils = (function() {
 		config.toolLabel = toolLabel;
 		config.options = {remove: I18n.t("common_remove")};
 
-		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
