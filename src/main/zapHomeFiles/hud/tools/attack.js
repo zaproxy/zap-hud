@@ -33,7 +33,7 @@ var Attack = (function() {
 		tool.isRunning = false;
 		tool.attackingDomain = '';
 
-		utils.saveTool(tool);
+		utils.writeTool(tool);
 	}
 
 	function showDialog(tabId, domain) {

@@ -160,15 +160,6 @@ var alertUtils = (function() {
 			.catch(utils.errorHandler);
 	}
 	
-	function updateAlertCount(toolname, count) {
-		utils.loadTool(toolname)
-			.then(tool => {
-				tool.data = count;
-				return utils.saveTool(tool);
-			})
-			.catch(utils.errorHandler);
-	}
-
 	function showOptions(tabId, toolname, toolLabel) {
 		var config = {};
 
@@ -195,7 +186,6 @@ var alertUtils = (function() {
 		showPageAlerts: showPageAlerts,
 		showAlertDetails: showAlertDetails,
 		showOptions: showOptions,
-		updateAlertCount: updateAlertCount,
 		flattenAllAlerts: flattenAllAlerts,
 		setPageAlerts: setPageAlerts
 	};

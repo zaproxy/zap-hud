@@ -33,7 +33,7 @@ var Spider = (function() {
 		tool.isRunning = false;
 		tool.runningTabId = '';
 
-		utils.saveTool(tool);
+		utils.writeTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.spider.SpiderEventPublisher");
 	}
 

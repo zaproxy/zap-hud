@@ -27,7 +27,7 @@ var SiteTree = (function() {
 		tool.position = 0;
 		tool.urls = [];
 
-		utils.saveTool(tool);
+		utils.writeTool(tool);
 	}
 
 	function showSiteTree(tabId) {

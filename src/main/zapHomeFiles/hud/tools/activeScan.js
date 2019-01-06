@@ -36,7 +36,7 @@ var ActiveScan = (function() {
 		tool.runningTabId = '';
 		tool.scanid = -1;
 
-		utils.saveTool(tool);
+		utils.writeTool(tool);
 		registerForZapEvents(ACTIVE_SCAN_EVENT);
 	}
 

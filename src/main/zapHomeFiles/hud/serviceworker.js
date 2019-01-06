@@ -278,6 +278,6 @@ function resetToDefault() {
 
 			return Promise.all(promises);
 		})
-		.then(utils.messageFrame("management", {action: "refreshTarget"}))
+		.then(utils.messageAllTabs("management", {action: "refreshTarget"}))
 		.catch(utils.errorHandler);
 };

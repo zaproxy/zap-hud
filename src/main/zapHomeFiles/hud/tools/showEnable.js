@@ -27,7 +27,7 @@ var ShowEnable = (function() {
 		tool.position = 0;
 		tool.count = 0;
 
-		utils.saveTool(tool);
+		utils.writeTool(tool);
 	}
 
 
