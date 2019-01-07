@@ -99,11 +99,6 @@ const onFetch = event => {
 			.then(response => {  
 
 				if (response) {
-					// save the frame id as a destination for postmesssaging later
-					if (event.request.url.endsWith(".js")) {
-						saveFrameId(event);
-					}
-
 					return response;
 				}
 				else {
@@ -181,40 +176,6 @@ webSocket.onerror = function (event) {
 
 function registerForZapEvents(publisher) {
 	webSocket.send('{"component" : "event", "type" : "register", "name" : "' + publisher + '"}');
-};
-
-/*
- * Saves the clientId of a window which is used to send postMessages.
- */
-function saveFrameId(event) {
-
-	let frameNames = {
-		"management.html": "management",
-		"panel.html": "Panel",
-		"display.html": "display",
-		"growlerAlerts.html": "growlerAlerts",
-		"drawer.html": "drawer"
-	};
-
-	clients.get(event.clientId)
-		.then(client => {
-			let params = new URL(client.url).searchParams;
-
-			let key = frameNames[params.get('name')];
-
-			if (key === "Panel") {
-				key = params.get('orientation') + key;
-			}
-
-			utils.loadFrame(key)
-				.then(frame => {
-					frame.clientId = client.id;
-
-					return utils.saveFrame(frame);
-				})
-				.catch(utils.errorHandler)
-		})
-		.catch(utils.errorHandler);
 };
 
 function showAddToolDialog(tabId, frameId) {

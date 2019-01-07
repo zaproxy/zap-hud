@@ -175,85 +175,31 @@ var utils = (function() {
 	 * Initialize all of the info that will be stored in indexeddb.
 	 */
 	function configureStorage() {
-		var promises = [];
+		let promises = [];
 	
 		promises.push(localforage.setItem(IS_HUD_CONFIGURED, true));
 		promises.push(localforage.setItem(IS_FIRST_TIME, true));
 		promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false))
 		promises.push(localforage.setItem('upgradedDomains', {}))
-	
-		promises.push(loadFrame("rightPanel").then(oldPanel => {
-			var panel = {};
-	
-			panel.key = "rightPanel";
-			panel.orientation = "right";
-			panel.tools = [];
-			if (oldPanel) {
-				panel.clientId = oldPanel.clientId;
-			}
-	
-			return saveFrame(panel);
-		}));
-	
-		promises.push(loadFrame("leftPanel").then(oldPanel => {
-			var panel = {};
-	
-			panel.key = "leftPanel";
-			panel.orientation = "left";
-			panel.tools = [];
-			if (oldPanel) {
-				panel.clientId = oldPanel.clientId;
-			}
-	
-			return saveFrame(panel);
-		}));
-		
-		promises.push(loadFrame("display").then(oldFrame => {
-			var frame = {};
-	
-			frame.key = "display";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-	
-			return saveFrame(frame);
-		}));
-	
-		promises.push(loadFrame("management").then(oldFrame => {
-			var frame = {};
-	
-			frame.key = "management";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-	
-			return saveFrame(frame);
-		}));
-	
-		promises.push(loadFrame("growlerAlerts").then(oldFrame => {
-			var frame = {};
-	
-			frame.key = "growlerAlerts";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-	
-			return saveFrame(frame);
-		}));
-	
-		promises.push(loadFrame('drawer').then(oldFrame => {
-			var frame = {};
-	
-			frame.key = "drawer";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-	
-			return saveFrame(frame);
-		}));
-	
+
 		// set other values to defaults on startup
 		promises.push(initDefaults());
+
+		let leftPanel = {
+			key: 'leftPanel',
+			orientation: 'left',
+			tools: []
+		};
+	
+		promises.push(saveFrame(leftPanel));
+
+		let rightPanel = {
+			key: 'rightPanel',
+			orientation: 'right',
+			tools: []
+		};
+	
+		promises.push(saveFrame(rightPanel));
 	
 		return Promise.all(promises)
 			.catch(errorHandler);
