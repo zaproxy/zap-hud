@@ -175,85 +175,31 @@ var utils = (function() {
 	 * Initialize all of the info that will be stored in indexeddb.
 	 */
 	function configureStorage() {
-		var promises = [];
+		let promises = [];
 	
 		promises.push(localforage.setItem(IS_HUD_CONFIGURED, true));
 		promises.push(localforage.setItem(IS_FIRST_TIME, true));
 		promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false))
 		promises.push(localforage.setItem('upgradedDomains', {}))
-	
-		promises.push(loadFrame("rightPanel").then(oldPanel => {
-			var panel = {};
-	
-			panel.key = "rightPanel";
-			panel.orientation = "right";
-			panel.tools = [];
-			if (oldPanel) {
-				panel.clientId = oldPanel.clientId;
-			}
-	
-			return saveFrame(panel);
-		}));
-	
-		promises.push(loadFrame("leftPanel").then(oldPanel => {
-			var panel = {};
-	
-			panel.key = "leftPanel";
-			panel.orientation = "left";
-			panel.tools = [];
-			if (oldPanel) {
-				panel.clientId = oldPanel.clientId;
-			}
-	
-			return saveFrame(panel);
-		}));
-		
-		promises.push(loadFrame("display").then(oldFrame => {
-			var frame = {};
-	
-			frame.key = "display";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-	
-			return saveFrame(frame);
-		}));
-	
-		promises.push(loadFrame("management").then(oldFrame => {
-			var frame = {};
-	
-			frame.key = "management";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-	
-			return saveFrame(frame);
-		}));
-	
-		promises.push(loadFrame("growlerAlerts").then(oldFrame => {
-			var frame = {};
-	
-			frame.key = "growlerAlerts";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-	
-			return saveFrame(frame);
-		}));
-	
-		promises.push(loadFrame('drawer').then(oldFrame => {
-			var frame = {};
-	
-			frame.key = "drawer";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-	
-			return saveFrame(frame);
-		}));
-	
+
 		// set other values to defaults on startup
 		promises.push(initDefaults());
+
+		let leftPanel = {
+			key: 'leftPanel',
+			orientation: 'left',
+			tools: []
+		};
+	
+		promises.push(saveFrame(leftPanel));
+
+		let rightPanel = {
+			key: 'rightPanel',
+			orientation: 'right',
+			tools: []
+		};
+	
+		promises.push(saveFrame(rightPanel));
 	
 		return Promise.all(promises)
 			.catch(errorHandler);
@@ -329,41 +275,21 @@ var utils = (function() {
 	}
 	
 	/* 
-	 * loads the tool blob from indexeddb using the tool's name
+	 * Loads the tool blob from indexeddb using the tool's name as the key.
 	 */
 	function loadTool(name) {
 		log(LOG_TRACE, 'utils.loadTool', name);
 		return localforage.getItem(name);
 	}
-	
+
+	/* 
+	 * Writes the tool blob to indexeddb using the tool's name as the key.
+	 */
 	function writeTool(tool) {
 		log(LOG_TRACE, 'utils.writeTool', tool.name);
 		return localforage.setItem(tool.name, tool);
 	}
-	
-	/* 
-	 * saves the tool blob to indexeddb
-	 */
-	function saveTool(tool) {
-		log(LOG_TRACE, 'utils.saveTool', tool.name);
-		return localforage.setItem(tool.name, tool)
-			.then(tool => {
-				// Notify Panel of Updated Data
-				if (tool.isSelected) {
-					messageFrame(tool.panel, {action:"updateData", tool:tool})
-						.catch(err => {
-							// this is only catching the NoClientIdError which occurs 
-							// when tools are added on startup and the panels haven't 
-							// been added yet
-							log(LOG_WARN, "messageFrame", "NoClientIdError - panel: " + tool.panel + " not yet available to be messaged", err);
-						});
-				}
-	
-				return tool;
-			})
-			.catch(errorHandler);
-	}
-	
+
 	/*
 	 * Return all tools currently selected in a panel.
 	 */
@@ -490,22 +416,7 @@ var utils = (function() {
 	/*
 	 * Send a postMessage to an iframe window using the custom stored frame key in indexdb.
 	 */
-	function messageFrame(key, message) {
-		return loadFrame(key)
-				.then(getWindowFromFrame)
-				.then(window => messageWindow(window, message))
-				.catch(err => {
-					// this catches all errors, unless it is a NoClientIdError
-					if (err instanceof NoClientIdError) {
-						throw err;
-					}
-					else {
-						errorHandler(err);
-					}
-				});
-	}
-	
-	function messageFrame2(tabId, frameId, message) {
+	function messageFrame(tabId, frameId, message) {
 		return clients.matchAll({includeUncontrolled: true})
 			.then(clients => {
 				for (let i = 0; i < clients.length; i++) {
@@ -711,11 +622,6 @@ var utils = (function() {
 			.catch(errorHandler)
 	}
 	
-	// todo: maybe needed instead of passing info through postmessage
-	function getTargetDomain() {
-		return messageFrame("management", {action:"getTargetDomain"});
-	}
-	
 	/*
 	 * Log an error in a human readable way with a stack trace.
 	 */
@@ -804,13 +710,11 @@ return {
 		registerTools: registerTools,
 		loadTool: loadTool,
 		writeTool: writeTool,
-		saveTool: saveTool,
 		loadPanelTools: loadPanelTools,
 		loadAllTools: loadAllTools,
 		addToolToPanel: addToolToPanel,
 		removeToolFromPanel: removeToolFromPanel,
 		messageFrame: messageFrame,
-		messageFrame2: messageFrame2,
 		messageAllTabs: messageAllTabs,
 		getAllClients: getAllClients,
 		getWindowVisibilityState: getWindowVisibilityState,
@@ -818,7 +722,6 @@ return {
 		sortToolsByPosition: sortToolsByPosition,
 		configureButtonHtml: configureButtonHtml,
 		getUpgradedDomain: getUpgradedDomain,
-		getTargetDomain: getTargetDomain,
 		errorHandler: errorHandler,
 		getZapFilePath: getZapFilePath,
 		getZapImagePath: getZapImagePath,

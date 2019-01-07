@@ -99,11 +99,6 @@ const onFetch = event => {
 			.then(response => {  
 
 				if (response) {
-					// save the frame id as a destination for postmesssaging later
-					if (event.request.url.endsWith(".js")) {
-						saveFrameId(event);
-					}
-
 					return response;
 				}
 				else {
@@ -183,40 +178,6 @@ function registerForZapEvents(publisher) {
 	webSocket.send('{"component" : "event", "type" : "register", "name" : "' + publisher + '"}');
 };
 
-/*
- * Saves the clientId of a window which is used to send postMessages.
- */
-function saveFrameId(event) {
-
-	let frameNames = {
-		"management.html": "management",
-		"panel.html": "Panel",
-		"display.html": "display",
-		"growlerAlerts.html": "growlerAlerts",
-		"drawer.html": "drawer"
-	};
-
-	clients.get(event.clientId)
-		.then(client => {
-			let params = new URL(client.url).searchParams;
-
-			let key = frameNames[params.get('name')];
-
-			if (key === "Panel") {
-				key = params.get('orientation') + key;
-			}
-
-			utils.loadFrame(key)
-				.then(frame => {
-					frame.clientId = client.id;
-
-					return utils.saveFrame(frame);
-				})
-				.catch(utils.errorHandler)
-		})
-		.catch(utils.errorHandler);
-};
-
 function showAddToolDialog(tabId, frameId) {
 	var config = {};
 
@@ -242,7 +203,7 @@ function showAddToolDialog(tabId, frameId) {
 			config.tools = tools;
 
 			// display tools to select
-			return utils.messageFrame2(tabId, "display", {action: "showAddToolList", config: config})
+			return utils.messageFrame(tabId, "display", {action: "showAddToolList", config: config})
 		})
 		.then(response => {
 			utils.addToolToPanel(response.toolname, frameId);
@@ -256,7 +217,7 @@ function showHudSettings(tabId) {
 		initialize: I18n.t("settings_resets"),
 	};
 
-	utils.messageFrame2(tabId, "display", {action: "showHudSettings", config: config})
+	utils.messageFrame(tabId, "display", {action: "showHudSettings", config: config})
 		.then(response => {
 			if (response.id === "initialize") {
 				resetToDefault();
@@ -278,6 +239,6 @@ function resetToDefault() {
 
 			return Promise.all(promises);
 		})
-		.then(utils.messageFrame("management", {action: "refreshTarget"}))
+		.then(utils.messageAllTabs("management", {action: "refreshTarget"}))
 		.catch(utils.errorHandler);
 };

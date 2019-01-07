@@ -32,7 +32,7 @@ var PageAlertsLow = (function() {
 		tool.alerts = {};
 		tool.cache = {};
 
-		utils.saveTool(tool);
+		utils.writeTool(tool);
 	}
 
 	function showAlerts(tabId, url) {

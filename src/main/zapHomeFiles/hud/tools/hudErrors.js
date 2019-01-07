@@ -27,7 +27,7 @@ var HudErrors = (function() {
 		tool.position = 0;
 		tool.count = 0;
 
-		utils.saveTool(tool);
+		utils.writeTool(tool);
 	}
 
 	function showDialog(tabId) {
@@ -41,7 +41,7 @@ var HudErrors = (function() {
 					{text:I18n.t("common_clear"), id:"clear"}
 				];
 
-				utils.messageFrame2(tabId, "display", {action:"showDialog", config:config})
+				utils.messageFrame(tabId, "display", {action:"showDialog", config:config})
 					.then(response => {
 
 						// Handle button choice
@@ -50,7 +50,7 @@ var HudErrors = (function() {
 							tool.records = [];
 							tool.icon = ICONS.NONE;
 							utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: tool.data, icon: ICONS.NONE, label: tool.label}});
-							utils.saveTool(tool);
+							utils.writeTool(tool);
 						}
 						else {
 							//cancel
@@ -75,7 +75,7 @@ var HudErrors = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {

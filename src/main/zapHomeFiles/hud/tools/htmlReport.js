@@ -32,7 +32,7 @@ var HtmlReport = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
@@ -43,7 +43,7 @@ var HtmlReport = (function() {
 	}
 
 	function showHtmlReport(tabId) {
-		utils.messageFrame2(tabId, "display", {action:"showHtmlReport"})
+		utils.messageFrame(tabId, "display", {action:"showHtmlReport"})
 			.catch(utils.errorHandler);
 	}
 

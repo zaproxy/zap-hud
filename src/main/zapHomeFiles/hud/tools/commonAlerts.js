@@ -27,7 +27,7 @@ var CommonAlerts = (function() {
 		tool.position = 0;
 		tool.alerts = {};
 
-		utils.saveTool(tool);
+		utils.writeTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.alert.AlertEventPublisher");
 		registerForZapEvents("org.zaproxy.zap.extension.hud.HudEventPublisher");
 	}
@@ -115,7 +115,7 @@ var CommonAlerts = (function() {
 					.then(json => {
 						alertCache[targetDomain] = alertUtils.flattenAllAlerts(json);
 						tool.alerts = alertCache;
-						return utils.saveTool(tool);
+						return utils.writeTool(tool);
 					})
 					.then(() => {
 						// Raise the events after the data is saved
@@ -155,7 +155,7 @@ var CommonAlerts = (function() {
 										var alert = pageAlerts[alertRisk][alertName][i];
 										if (alert.param.length > 0 && ! reportedParams.has(alert.param)) {
 											reportedParams.add(alert.param);
-											utils.messageFrame("management", {
+											utils.messageFrame(event.detail.tabId, "management", {
 												action: "commonAlerts.alert",
 												name: alert.name,
 												id: alert.id,
@@ -220,7 +220,6 @@ var CommonAlerts = (function() {
 						// backup to localstorage in case the serviceworker dies
 						tool.alerts = alertCache;
 						return utils.writeTool(tool);
-						//return utils.saveTool(tool);
 					})
 					.then(() => {
 						// Raise the event after the data is saved

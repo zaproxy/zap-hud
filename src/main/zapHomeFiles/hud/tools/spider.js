@@ -33,7 +33,7 @@ var Spider = (function() {
 		tool.isRunning = false;
 		tool.runningTabId = '';
 
-		utils.saveTool(tool);
+		utils.writeTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.spider.SpiderEventPublisher");
 	}
 
@@ -64,7 +64,7 @@ var Spider = (function() {
 
 				return config;
 			})
-			.then(config => utils.messageFrame2(tabId, "display", {action:"showDialog", config:config}))
+			.then(config => utils.messageFrame(tabId, "display", {action:"showDialog", config:config}))
 			.then(response => {
 				// Handle button choice
 				if (response.id === "start") {
@@ -101,7 +101,7 @@ var Spider = (function() {
 
 				utils.writeTool(tool);
 				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notTabId: tabId}, tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.SPIDER}, isToolDisabled: true})
-				utils.messageFrame2(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.SPIDER}});
+				utils.messageFrame(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.SPIDER}});
 			})
 			.catch(utils.errorHandler);
 	}
@@ -141,7 +141,7 @@ var Spider = (function() {
 						tool.data = progress;
 
 						utils.writeTool(tool);
-						utils.messageFrame2(tool.runningTabId, tool.panel, {action: 'updateData', tool: tool})
+						utils.messageFrame(tool.runningTabId, tool.panel, {action: 'updateData', tool: tool})
 					}
 				})
 				.catch(utils.errorHandler);
@@ -171,7 +171,7 @@ var Spider = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {

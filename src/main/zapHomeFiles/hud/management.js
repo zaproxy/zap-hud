@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		navigator.serviceWorker.addEventListener('message', serviceWorkerMessageListener)
 
 		// send targetload message 
-		navigator.serviceWorker.controller.postMessage({action:"targetload", targetUrl: context.url});
+		navigator.serviceWorker.controller.postMessage({action: 'targetload', tabId: tabId, targetUrl: context.url});
 
 		localforage.setItem(IS_SERVICEWORKER_REFRESHED, true);
 	}
