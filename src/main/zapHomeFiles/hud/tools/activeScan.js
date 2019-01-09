@@ -154,10 +154,6 @@ var ActiveScan = (function() {
 
 	function updateProgress(progress) {
 		if (progress !== "-1") {
-			/*utils.loadTool(NAME)
-				.then(tool => {
-					return Promise.all([tool, self.tools.scope.getUrlsInScope()])
-				})*/
 			Promise.all([utils.loadTool(NAME), self.tools.scope.getUrlsInScope()])
 				.then(results => {
 					let tool = results[0];
@@ -195,10 +191,6 @@ var ActiveScan = (function() {
 	}
 	
 	function getTool(context, port) {
-		utils.loadTool(NAME)
-			.then(tool => {
-				return Promise.all([tool.isRunning, self.tools.scope.isInScope(context.domain)])
-			})
 		Promise.all([utils.loadTool(NAME), self.tools.scope.isInScope(context.domain)])
 			.then(results => {
 				const tool = results[0];
