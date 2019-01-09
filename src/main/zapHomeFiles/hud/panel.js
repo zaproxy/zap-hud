@@ -194,7 +194,8 @@ function doesContextApply(toolContext) {
 		toolContext.url === context.url ||
 		toolContext.tabId === tabId ||
 		('notTabId' in toolContext && toolContext.notTabId != tabId) ||
-		('notDomain' in toolContext && toolContext.notDomain != context.domain);
+		('notDomain' in toolContext && toolContext.notDomain != context.domain) ||
+		('scope' in toolContext && toolContext.scope.includes(context.domain));
 }
 
 navigator.serviceWorker.addEventListener("message", event => {

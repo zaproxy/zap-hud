@@ -42,7 +42,7 @@ var ActiveScan = (function() {
 
 	function showDialog(tabId, domain) {
 
-		Promise.all([checkIsRunning(tabId), self.tools.scope.isInScope(domain)])
+		Promise.all([checkIsRunning(), self.tools.scope.isInScope(domain)])
 			.then(results => {
 				var isRunning = results[0];
 				var isInScope = results[1];
@@ -154,13 +154,20 @@ var ActiveScan = (function() {
 
 	function updateProgress(progress) {
 		if (progress !== "-1") {
-			utils.loadTool(NAME)
+			/*utils.loadTool(NAME)
 				.then(tool => {
+					return Promise.all([tool, self.tools.scope.getUrlsInScope()])
+				})*/
+			Promise.all([utils.loadTool(NAME), self.tools.scope.getUrlsInScope()])
+				.then(results => {
+					let tool = results[0];
+					let urls = results[1];
+					
 					if (tool.isRunning) {
 						tool.data = progress;
 
 						utils.writeTool(tool);
-						utils.messageFrame(tool.runningTabId, tool.panel, {action: 'updateData', tool: tool})
+						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {scope: urls}, tool: tool})
 					}
 				})
 				.catch(utils.errorHandler);
@@ -187,10 +194,17 @@ var ActiveScan = (function() {
 			.catch(utils.errorHandler);
 	}
 	
-	function getTool(tabId, context, port) {
+	function getTool(context, port) {
 		utils.loadTool(NAME)
 			.then(tool => {
-				if (tabId === tool.runningTabId) {
+				return Promise.all([tool.isRunning, self.tools.scope.isInScope(context.domain)])
+			})
+		Promise.all([utils.loadTool(NAME), self.tools.scope.isInScope(context.domain)])
+			.then(results => {
+				const tool = results[0];
+				const isInScope = results[1];
+
+				if (tool.isRunning && isInScope) {
 					port.postMessage({label: LABEL, data: tool.data, icon: ICONS.ON});
 				}
 				else if (tool.isRunning) {
@@ -232,7 +246,7 @@ var ActiveScan = (function() {
 					break;
 
 				case "getTool":
-					getTool(message.tabId, message.context, event.ports[0]);
+					getTool(message.context, event.ports[0]);
 					break;
 
 				default:
