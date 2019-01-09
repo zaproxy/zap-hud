@@ -39,7 +39,7 @@ var Spider = (function() {
 
 	function showDialog(tabId, domain) {
 
-		Promise.all([checkIsRunning(tabId), self.tools.scope.isInScope(domain)])
+		Promise.all([checkIsRunning(), self.tools.scope.isInScope(domain)])
 			.then(results => {
 				var isRunning = results[0];
 				var isInScope = results[1];
@@ -124,34 +124,46 @@ var Spider = (function() {
 			.catch(utils.errorHandler);
 	}
 
+	// if tabId included, then it will check if active scan is running on that tab
+	// if not tabId is included it will check if active scan is running on any tab
 	function checkIsRunning(tabId) {
 		return new Promise(resolve => {
-			utils.loadTool(NAME)
-				.then(tool => {
+			utils.loadTool(NAME).then(tool => {
+				if (tabId !== undefined) {
 					resolve(tool.runningTabId === tabId);
-				});
+				}
+				else {
+					resolve(tool.isRunning);
+				}
+			});
 		});
 	}
 
 	function updateProgress(progress) {
 		if (progress !== "-1") {
-			utils.loadTool(NAME)
-				.then(tool => {
+			Promise.all([utils.loadTool(NAME), self.tools.scope.getUrlsInScope()])
+				.then(results => {
+					let tool = results[0];
+					let urls = results[1];
+					
 					if (tool.isRunning) {
 						tool.data = progress;
 
 						utils.writeTool(tool);
-						utils.messageFrame(tool.runningTabId, tool.panel, {action: 'updateData', tool: tool})
+						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {scope: urls}, tool: tool})
 					}
 				})
 				.catch(utils.errorHandler);
 		}
 	}
 
-	function getTool(tabId, context, port) {
-		utils.loadTool(NAME)
-			.then(tool => {
-				if (tabId === tool.runningTabId) {
+	function getTool(context, port) {
+		Promise.all([utils.loadTool(NAME), self.tools.scope.isInScope(context.domain)])
+			.then(results => {
+				const tool = results[0];
+				const isInScope = results[1];
+
+				if (tool.isRunning && isInScope) {
 					port.postMessage({label: LABEL, data: tool.data, icon: ICONS.SPIDER});
 				}
 				else if (tool.isRunning) {
@@ -213,7 +225,7 @@ var Spider = (function() {
 					break;
 
 				case "getTool":
-					getTool(message.tabId, message.context, event.ports[0]);
+					getTool(message.context, event.ports[0]);
 					break;
 
 				default:
