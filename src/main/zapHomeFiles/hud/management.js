@@ -20,48 +20,33 @@ var context = {
 
 Vue.component('loading-screen', {
 	template: '#loading-screen-template',
+	props: []
+})
+
+Vue.component('welcome-screen', {
+	template: '#welcome-screen-template',
+	props: [],
 	methods: {
-		target: function() {
+		closeWelcomeScreen: function() {
 			if (dontShowAgain.checked) {
-				dontShowWelcomeAgain().then(() => {
-					// Refresh the target so the HUD buttons appear
-					parent.postMessage( {action: 'refresh'} , document.referrer);
-				})
-				.catch(utils.errorHandler);
-			} else {
-				// Refresh the target so the HUD buttons appear
-				parent.postMessage( {action: 'refresh'} , document.referrer);
+				utils.zapApiCall("/hud/action/setOptionShowWelcomeScreen/?Boolean=false");
 			}
+
+			app.showWelcomeScreen = false;
+			parent.postMessage( {action: 'contractManagement'} , document.referrer);
 		},
-		tutorial: function() {
-			if (dontShowAgain.checked) {
-				dontShowWelcomeAgain().then(() => {
-					// Open the tutorial in a new window / tab
-					window.open(TUTORIAL_URL);
-					// Refresh the target so the HUD buttons appear
-					parent.postMessage( {action: 'refresh'} , document.referrer);
-				})
-				.catch(utils.errorHandler);
-			} else {
-				// Open the tutorial in a new window / tab
-				window.open(TUTORIAL_URL);
-				// Refresh the target so the HUD buttons appear
-				parent.postMessage( {action: 'refresh'} , document.referrer);
-			}
+		continueToTutorial: function() {
+			window.open(TUTORIAL_URL);
+
+			this.closeWelcomeScreen();
 		}
 	},
 	data() {
 		return {
-			isShowWelcomeScreen: SHOW_WELCOME_SCREEN,
 			dontShowAgain: false
 		}
-	},
-	props: []
+	}
 })
-
-function dontShowWelcomeAgain() {
-	return utils.zapApiCall("/hud/action/setOptionShowWelcomeScreen/?Boolean=false");
-}
 
 document.addEventListener('DOMContentLoaded', () => {
 	let params = new URL(document.location).searchParams;
@@ -73,31 +58,43 @@ document.addEventListener('DOMContentLoaded', () => {
 	app = new Vue({
 		el: '#app',
 		data: {
-			isSettingsButtonShown: false
+			isSettingsButtonShown: false,
+			showLoadingScreen: false,
+			showWelcomeScreen: false
 		}
 	});
 
 	// if first time starting HUD boot up the service worker
 	if (navigator.serviceWorker.controller === null) {
-		parent.postMessage( {action: 'expandManagement'} , document.referrer);
+		parent.postMessage( {action: 'hideAllDisplayFrames'} , document.referrer);
+
+		localforage.setItem('is_first_load', true)
+
 		startServiceWorker();
 	}
 	else {
-		// show the settings button
-		app.isSettingsButtonShown = true;
+		parent.postMessage( {action: 'showAllDisplayFrames'} , document.referrer);
+		parent.postMessage( {action: 'fadeAllDisplayFrames'} , document.referrer);
+
+		localforage.setItem(IS_SERVICEWORKER_REFRESHED, true);
+		localforage.getItem('is_first_load')
+			.then(isFirstLoad => {
+				localforage.setItem('is_first_load', false)
+
+				if (isFirstLoad && SHOW_WELCOME_SCREEN) {
+					parent.postMessage( {action: 'expandManagement'} , document.referrer);
+					app.showWelcomeScreen = true;
+				}
+			})
 
 		window.addEventListener('message', windowMessageListener)
 		window.addEventListener('beforeunload', beforeunloadListener)
 
 		navigator.serviceWorker.addEventListener('message', serviceWorkerMessageListener)
-
-		// send targetload message 
 		navigator.serviceWorker.controller.postMessage({action: 'targetload', tabId: tabId, targetUrl: context.url});
 
-		localforage.setItem(IS_SERVICEWORKER_REFRESHED, true);
+		startHeartBeat();
 	}
-
-	startHeartBeat();
 });
 
 
@@ -110,12 +107,15 @@ function windowMessageListener(event) {
 	if (! event.data.hasOwnProperty('sharedSecret')) {
 		utils.log(LOG_WARN, 'management.receiveMessage', 'Message without sharedSecret rejected');
 		return;
-	} else if ("" === ZAP_SHARED_SECRET) {
+	}
+	else if ("" === ZAP_SHARED_SECRET) {
 		// A blank secret is used to indicate that this functionality is turned off
 		utils.log(LOG_DEBUG, 'management.receiveMessage', 'Message from target domain ignored as on-domain messaging has been switched off');
-	} else if (event.data.sharedSecret === ZAP_SHARED_SECRET) {
+	}
+	else if (event.data.sharedSecret === ZAP_SHARED_SECRET) {
 		navigator.serviceWorker.controller.postMessage(event.data);
-	} else {
+	}
+	else {
 		utils.log(LOG_WARN, 'management.receiveMessage', 'Message with incorrect sharedSecret rejected ' + event.data.sharedSecret);
 	}
 }
@@ -157,7 +157,6 @@ function serviceWorkerMessageListener(event) {
 	}
 }
 
-
 /*
  * Starts the service worker and refreshes the target on success.
  */ 
@@ -169,11 +168,9 @@ function startServiceWorker() {
 
 				// wait until serviceworker is installed and activated
 				navigator.serviceWorker.ready
-					.then(serviceWorkerRegistration => {
-						if (! SHOW_WELCOME_SCREEN ) {
-							// refresh the target page
-							parent.postMessage( {action: 'refresh'} , document.referrer);
-						}
+					.then(() => {
+						// refresh the frames so the service worker can take control
+						parent.postMessage( {action: 'refreshAllFrames'} , document.referrer);
 					})
 					.catch(utils.errorHandler);
 			})
