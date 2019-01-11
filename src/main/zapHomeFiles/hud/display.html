@@ -269,6 +269,9 @@
             <http-message-modal ref="messageModal" :title="title" :show="show" @close="close" :request="request" :response="response" :is-response-disabled="isResponseDisabled" :active-tab="activeTab">
                 <div slot="footer">
                 	<div><span class="errorMessages">{{errors}}</span></div>
+                	<div class="float-left">
+                    <button :class="{'btn': true, 'disabled': isAscanDisabled}" @click="ascanRequest"> {{ $t('message.history_ascan_request') }} <img src="<<ZAP_HUD_FILES>>?image=flame.png" /> </button>
+                    </div>
                     <button class="btn btn-primary" @click="replay"> {{ $t('message.history_replay_console') }} </button>
                     <button class="btn" @click="replayInBrowser"> {{ $t('message.history_replay_browser') }} </button>
                 </div>
