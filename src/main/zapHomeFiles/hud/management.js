@@ -4,6 +4,7 @@
  * Description goes here...
  */
 
+var startTime = new Date().getTime();
 
 // Injected strings
 var SHOW_WELCOME_SCREEN = '<<SHOW_WELCOME_SCREEN>>' === 'true' ? true : false ;
@@ -66,6 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// if first time starting HUD boot up the service worker
 	if (navigator.serviceWorker.controller === null) {
+		localforage.setItem('starttime', startTime)
+
 		parent.postMessage( {action: 'hideAllDisplayFrames'} , document.referrer);
 
 		localforage.setItem('is_first_load', true)
@@ -74,7 +77,14 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 	else {
 		parent.postMessage( {action: 'showAllDisplayFrames'} , document.referrer);
-		parent.postMessage( {action: 'fadeAllDisplayFrames'} , document.referrer);
+
+		localforage.getItem('starttime')
+			.then(startT => {
+				let currentTime = new Date().getTime();
+				let diff = currentTime - parseInt(startT);
+				console.log('Time (ms) to load UI: ' + diff)
+			})
+			.catch(errorHandler)
 
 		localforage.setItem(IS_SERVICEWORKER_REFRESHED, true);
 		localforage.getItem('is_first_load')
