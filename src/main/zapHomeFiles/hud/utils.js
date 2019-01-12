@@ -18,7 +18,6 @@ var utils = (function() {
 	/*
 	 * Utility Functions
 	 *
-	 * Description goes here...
 	 */
 	
 	// Injected strings
@@ -188,7 +187,7 @@ var utils = (function() {
 		let leftPanel = {
 			key: 'leftPanel',
 			orientation: 'left',
-			tools: []
+			tools: DEFAULT_TOOLS_LEFT
 		};
 	
 		promises.push(saveFrame(leftPanel));
@@ -196,7 +195,7 @@ var utils = (function() {
 		let rightPanel = {
 			key: 'rightPanel',
 			orientation: 'right',
-			tools: []
+			tools: DEFAULT_TOOLS_RIGHT
 		};
 	
 		promises.push(saveFrame(rightPanel));
@@ -216,20 +215,43 @@ var utils = (function() {
 	 * Add the default tools to the panels.
 	 */
 	function setDefaultTools() {
-	
-		return new Promise(resolve => {
-			var promises = [];
-	
-			DEFAULT_TOOLS_LEFT.forEach(toolName => {
-				promises.push(() => addToolToPanel(toolName, "leftPanel"));
-			});
-	
-			DEFAULT_TOOLS_RIGHT.forEach(toolName => {
-				promises.push(() => addToolToPanel(toolName, "rightPanel"));
-			});
-	
-			return promises.reduce((pacc, fn) => pacc.then(fn), Promise.resolve());
-		});
+		var promises = [];
+
+		for (let i = 0; i < DEFAULT_TOOLS_LEFT.length; i++) {
+			loadTool(DEFAULT_TOOLS_LEFT[i])
+				.then(tool => {
+					if (! tool) {
+						log(LOG_ERROR, 'utils.setDefaultTools', 'Failed to load tool.', tool.name);
+						return;
+					}
+		
+					tool.isSelected = true;
+					tool.panel = "leftPanel";
+					tool.position = i;
+		
+					return writeTool(tool);
+				})
+				.catch(errorHandler)
+		};
+
+		for (let i = 0; i < DEFAULT_TOOLS_RIGHT.length; i++) {
+			loadTool(DEFAULT_TOOLS_RIGHT[i])
+				.then(tool => {
+					if (! tool) {
+						log(LOG_ERROR, 'utils.setDefaultTools', 'Failed to load tool.', tool.name);
+						return;
+					}
+		
+					tool.isSelected = true;
+					tool.panel = "rightPanel";
+					tool.position = i;
+		
+					return writeTool(tool);
+				})
+				.catch(errorHandler)
+		};
+
+		return Promise.all(promises)
 	}
 	
 	/*
@@ -327,7 +349,6 @@ var utils = (function() {
 			})
 			.catch(errorHandler);
 	}
-	
 	
 	/* 
 	 * Add a tool to a specific panel using the tool and panel keys.

@@ -14,11 +14,7 @@ importScripts(ZAP_HUD_FILES + "?name=utils.js");
 importScripts(ZAP_HUD_FILES + "?name=tools/utils/alertUtils.js");
 
 var CACHE_NAME = "hud-cache-1.0";
-
 var targetUrl = "";
-
-var isDebugging = true;
-
 var webSocket;
 
 var urlsToCache = [
@@ -42,14 +38,15 @@ var urlsToCache = [
 
 self.tools = {};
 
-// Load Tool Scripts
 localforage.setItem("tools", [])
 	.then(() => {
+		// load tool scripts
 		toolScripts.forEach(script => {
 			importScripts(script); 
 		});
 	})
 	.then(() => {
+		// save tool list to indexeddb
 		var ts = [];
 		for (var tool in self.tools) {
 			ts.push(self.tools[tool].name);
@@ -59,15 +56,14 @@ localforage.setItem("tools", [])
 	})
 	.catch(utils.errorHandler);
 
-/* Listeners */
 const onInstall = event => {
 	utils.log(LOG_INFO, 'serviceworker.install', 'Installing...');
 
 	// Cache Files
+	// not sure caching in service worker provides advantage over browser - may be able to remove
 	event.waitUntil(
 		caches.open(CACHE_NAME)
 			.then(cache => {
-				console.log("caching urls...");
 				return cache.addAll(urlsToCache);
 			})
 			.catch(utils.errorHandler)
@@ -79,21 +75,18 @@ const onActivate = event => {
 	event.waitUntil(
 		utils.isStorageConfigured()
 			.then(isConfigured => {
-
-				if (!isConfigured || isDebugging) {
+				if (!isConfigured) {
 					return utils.configureStorage();
 				}
 			})
-			.then(() => {
-				// set the default tools after configuring storage
-				utils.setDefaultTools();
-			})
+			.then(utils.setDefaultTools)
 			.catch(utils.errorHandler)
 	);
 };
 
+// if we remove cache we can remove this as well
 const onFetch = event => {
-	// Check Cache
+
 	event.respondWith(
 		caches.match(event.request)
 			.then(response => {  
@@ -163,6 +156,7 @@ webSocket.onopen = function (event) {
 webSocket.onmessage = function (event) {
 	// Rebroadcast for the tools to pick up
 	let jevent = JSON.parse(event.data);
+
 	if ('event.publisher' in jevent) {
 		utils.log(LOG_DEBUG, 'serviceworker.webSocket.onmessage', jevent['event.publisher']);
 		var ev = new CustomEvent(jevent['event.publisher'], {detail: jevent});
@@ -183,13 +177,9 @@ function showAddToolDialog(tabId, frameId) {
 
 	utils.loadAllTools()
 		.then(tools => {
-
-			// filter out unselected tools
 			tools = tools.filter(tool => !tool.isSelected);
-			// filter out hidden tools
 			tools = tools.filter(tool => !tool.isHidden);
 	
-			// reformat for displaying in list
 			tools = tools.map(tool => ({
                 'label': tool.label,
                 'image': ZAP_HUD_FILES + '?image=' + tool.icon,
@@ -199,10 +189,8 @@ function showAddToolDialog(tabId, frameId) {
 			return tools;
 		})
 		.then(tools => {
-			// add tools to the config
 			config.tools = tools;
 
-			// display tools to select
 			return utils.messageFrame(tabId, "display", {action: "showAddToolList", config: config})
 		})
 		.then(response => {

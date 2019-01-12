@@ -1,9 +1,11 @@
 /*
- * Management & HUD Settings
+ * Management Frame
  *
- * Description goes here...
+ * Initializes the service worker and forwards messages between the service worker
+ * and inject.js.
  */
 
+// temp time test
 var startTime = new Date().getTime();
 
 // Injected strings
@@ -19,15 +21,15 @@ var context = {
 	domain: utils.parseDomainFromUrl(document.referrer)
 };
 
-Vue.component('loading-screen', {
-	template: '#loading-screen-template',
-	props: []
-})
-
 Vue.component('welcome-screen', {
 	template: '#welcome-screen-template',
 	props: [],
 	methods: {
+		continueToTutorial: function() {
+			window.open(TUTORIAL_URL);
+
+			this.closeWelcomeScreen();
+		},
 		closeWelcomeScreen: function() {
 			if (dontShowAgain.checked) {
 				utils.zapApiCall("/hud/action/setOptionShowWelcomeScreen/?Boolean=false");
@@ -35,11 +37,6 @@ Vue.component('welcome-screen', {
 
 			app.showWelcomeScreen = false;
 			parent.postMessage( {action: 'contractManagement'} , document.referrer);
-		},
-		continueToTutorial: function() {
-			window.open(TUTORIAL_URL);
-
-			this.closeWelcomeScreen();
 		}
 	},
 	data() {
@@ -55,18 +52,16 @@ document.addEventListener('DOMContentLoaded', () => {
 	frameId = params.get('frameId');
 	tabId = params.get('tabId');
 
-	// initialize Vue app
 	app = new Vue({
 		el: '#app',
 		data: {
-			isSettingsButtonShown: false,
-			showLoadingScreen: false,
 			showWelcomeScreen: false
 		}
 	});
 
 	// if first time starting HUD boot up the service worker
 	if (navigator.serviceWorker.controller === null) {
+		// temp time test
 		localforage.setItem('starttime', startTime)
 
 		parent.postMessage( {action: 'hideAllDisplayFrames'} , document.referrer);
@@ -78,13 +73,13 @@ document.addEventListener('DOMContentLoaded', () => {
 	else {
 		parent.postMessage( {action: 'showAllDisplayFrames'} , document.referrer);
 
+		// temp time test
 		localforage.getItem('starttime')
 			.then(startT => {
 				let currentTime = new Date().getTime();
 				let diff = currentTime - parseInt(startT);
 				console.log('Time (ms) to load UI: ' + diff)
 			})
-			.catch(errorHandler)
 
 		localforage.setItem(IS_SERVICEWORKER_REFRESHED, true);
 		localforage.getItem('is_first_load')
@@ -98,15 +93,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			})
 
 		window.addEventListener('message', windowMessageListener)
-		window.addEventListener('beforeunload', beforeunloadListener)
-
 		navigator.serviceWorker.addEventListener('message', serviceWorkerMessageListener)
 		navigator.serviceWorker.controller.postMessage({action: 'targetload', tabId: tabId, targetUrl: context.url});
 
 		startHeartBeat();
 	}
 });
-
 
 /*
  * Receive messages from the target domain, which is not trusted.
@@ -128,13 +120,6 @@ function windowMessageListener(event) {
 	else {
 		utils.log(LOG_WARN, 'management.receiveMessage', 'Message with incorrect sharedSecret rejected ' + event.data.sharedSecret);
 	}
-}
-
-function beforeunloadListener() {
-	let currentTimeInMs = new Date().getTime();
-
-	navigator.serviceWorker.controller.postMessage({action: 'unload', time: currentTimeInMs})
-		.catch(utils.errorHandler)
 }
 
 function serviceWorkerMessageListener(event) {
@@ -174,20 +159,19 @@ function startServiceWorker() {
 	if ('serviceWorker' in navigator) {
 		navigator.serviceWorker.register(utils.getZapFilePath('serviceworker.js'))
 			.then(registration => {
-				console.log('Service worker registration was successful for the scope: ' + registration.scope);
+				utils.log(LOG_INFO, 'Service worker registration was successful for the scope: ' + registration.scope);
 
 				// wait until serviceworker is installed and activated
-				navigator.serviceWorker.ready
-					.then(() => {
-						// refresh the frames so the service worker can take control
-						parent.postMessage( {action: 'refreshAllFrames'} , document.referrer);
-					})
-					.catch(utils.errorHandler);
+				return navigator.serviceWorker.ready;
+			})
+			.then(() => {
+				// refresh the frames so the service worker can take control
+				parent.postMessage( {action: 'refreshAllFrames'} , document.referrer);
 			})
 			.catch(utils.errorHandler);
 	}
 	else {
-		alert('This browser does not support Service Workers. The HUD will not work properly.')
+		alert('This browser does not support Service Workers. The HUD will not work.')
 	}
 }
 
