@@ -73,13 +73,12 @@ const onInstall = event => {
 const onActivate = event => {
 	// Check Storage & Initiate
 	event.waitUntil(
-		utils.isStorageConfigured()
-			.then(isConfigured => {
-				if (!isConfigured) {
-					return utils.configureStorage();
+		utils.isHUDInitialized()
+			.then(isInitialized => {
+				if (!isInitialized) {
+					return utils.initializeHUD();
 				}
 			})
-			.then(utils.setDefaultTools)
 			.catch(utils.errorHandler)
 	);
 };
@@ -215,8 +214,7 @@ function showHudSettings(tabId) {
 };
 
 function resetToDefault() {
-	utils.configureStorage()
-		.then(utils.setDefaultTools)
+	utils.initializeHUD()
 		.then(utils.loadAllTools)
 		.then(tools => {
 			var promises = [];

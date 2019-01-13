@@ -1,5 +1,5 @@
 // Public variables
-var IS_HUD_CONFIGURED = "isHudConfigured";
+var IS_HUD_INITIALIZED = "isHudInitialized";
 var IS_FIRST_TIME = "isFirstTime";
 var IS_SERVICEWORKER_REFRESHED = 'isServiceWorkerRefreshed';
 
@@ -164,25 +164,26 @@ var utils = (function() {
 	/* STORAGE */
 	
 	/*
-	 * Return whether configureStorage has been run yet.
+	 * Return whether the HUD has been initialized yet.
 	 */
-	function isStorageConfigured() {
-		return localforage.getItem(IS_HUD_CONFIGURED);
+	function isHUDInitialized() {
+		return localforage.getItem(IS_HUD_INITIALIZED);
 	}
 	
 	/*
 	 * Initialize all of the info that will be stored in indexeddb.
 	 */
-	function configureStorage() {
+	function initializeHUD() {
 		let promises = [];
 	
-		promises.push(localforage.setItem(IS_HUD_CONFIGURED, true));
+		promises.push(localforage.setItem(IS_HUD_INITIALIZED, true));
 		promises.push(localforage.setItem(IS_FIRST_TIME, true));
 		promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false))
 		promises.push(localforage.setItem('upgradedDomains', {}))
-
-		// set other values to defaults on startup
-		promises.push(initDefaults());
+		promises.push(localforage.setItem('settings.isHudVisible', true));
+		promises.push(localforage.setItem('drawer.isDrawerOpen', false));
+		// Note: in the below, "activeTab" is to be set to href, not name
+		promises.push(localforage.setItem('drawer.activeTab', '#history'));
 
 		let leftPanel = {
 			key: 'leftPanel',
@@ -201,14 +202,8 @@ var utils = (function() {
 		promises.push(saveFrame(rightPanel));
 	
 		return Promise.all(promises)
+			.then(setDefaultTools)
 			.catch(errorHandler);
-	}
-	
-	function initDefaults() {
-		localforage.setItem('settings.isHudVisible', true);
-		localforage.setItem('drawer.isDrawerOpen', false);
-		// Note: in the below, "activeTab" is to be set to href, not name
-	    localforage.setItem('drawer.activeTab', '#history');
 	}
 	
 	/*
@@ -722,8 +717,8 @@ return {
 		parseDomainFromUrl: parseDomainFromUrl,
 		parsePathFromUrl: parsePathFromUrl,
 		getParamater: getParamater,
-		isStorageConfigured: isStorageConfigured,
-		configureStorage: configureStorage,
+		isHUDInitialized: isHUDInitialized,
+		initializeHUD: initializeHUD,
 		setDefaultTools: setDefaultTools,
 		loadFrame: loadFrame,
 		saveFrame: saveFrame,
