@@ -4,12 +4,12 @@
  * Description goes here...
  */
 
-// Injected strings
-var URL = '<<URL>>';
-var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
-var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
-
  var injection  = (function () {
+	// Injected strings
+	var URL = '<<URL>>';
+	var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
+	var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
+
 	 let tabId = '';
 
 	/* HELPERS */
@@ -20,21 +20,16 @@ var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
 		);
 	}
 
+	function generateTabId() {
+		let millis = new Date().getTime();
+		let r = Math.floor(Math.random()*1000);
+		let tabId = '' + millis + '-' + r;
+
+		return tabId.substring(6);
+	}
+
 	/* TARGET INTERACTIONS */
 	// code that will interact with the target domain will go here
-
-
-	/* FRAMES */
-	// todo: standardize z-indexes. they will need to be really high, see youtube and espn for why
-	function removePanel(panel) {
-		panel.parentNode.removeChild(panel);
-	}
-
-	/* PRESENTATION */
-	// todo: implement hide/show panels
-	function hidePanel(panel) {
-		return 0;
-	}
 
 	function showPanel(panel) {
 		return 0;
@@ -168,8 +163,8 @@ var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
 				inputs[index].style.borderColor = 'purple';
 				showEnableTypeHiddenFields.push(inputs[index]);
 				if (! counted) {
+					// If any checks are added after this will also need to inc counted
 					showEnabledCount++;
-					counted = true;
 				}
 			}
 		}
@@ -204,7 +199,7 @@ var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
 		showEnabledDisabled = [];
 		showEnabledReadOnly = [];
 		showEnabled = false;
-		showEnabledCount = 0
+		showEnabledCount = 0;
 	}
 	
 
@@ -215,7 +210,7 @@ var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
 		} else {
 			// Count the number of hidden fields
 			var inputs = document.getElementsByTagName('input');
-			for (index = 0; index < inputs.length; ++index) {
+			for (let index = 0; index < inputs.length; ++index) {
 				if (inputs[index].type == "hidden") {
 					count++;
 				} else if (inputs[index].style.display == "none") {
@@ -263,7 +258,7 @@ var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
 	function showZapAlertInternal (alertId) {
 		// Send to the management frame with the shared secret
 		var iframe = document.getElementById("management");
-		iframe.contentWindow.postMessage({action: 'commonAlerts.showAlert', alertId: alertId, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
+		iframe.contentWindow.postMessage({action: 'commonAlerts.showAlert', alertId: alertId, tabId: tabId, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
 	}
 
 
@@ -365,7 +360,7 @@ var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
 
 	/* initializes the HUD Frames */
 	if (window.top == window.self) {
-		tabId = Math.round(Math.random()*5000) //todo: nonsense random number generator;
+		tabId = generateTabId();
 
 		window.addEventListener("message", receiveMessages);
 

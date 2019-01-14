@@ -34,7 +34,7 @@ var Scope = (function() {
 		tool.panel = "";
 		tool.position = 0;
 		tool.urls = [];
-		writeTool(tool);
+		utils.writeTool(tool);
 	}
 
 	function showDialog(tabId, domain) {
@@ -62,7 +62,7 @@ var Scope = (function() {
 					];
 				}
 
-				messageFrame2(tabId, "display", {action:"showDialog", config:config})
+				utils.messageFrame(tabId, "display", {action:"showDialog", config:config})
 					.then(response => {
 
 						// Handle button choice
@@ -75,12 +75,12 @@ var Scope = (function() {
 					});
 
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function checkDomainInScope(domain) {
 		return new Promise(resolve => {
-			loadTool(NAME)
+			utils.loadTool(NAME)
 				.then(tool => {
 					let isInScope = tool.urls.includes(domain);
 					resolve(isInScope);
@@ -89,76 +89,55 @@ var Scope = (function() {
 	}
 
 	function addToScope(domain) {
-		return loadTool(NAME)
+		return utils.loadTool(NAME)
 			.then(tool => {
 				if (! tool.hudContext) {
-					zapApiCall("/context/action/newContext/?contextName=" + HUD_CONTEXT)
+					utils.zapApiCall("/context/action/newContext/?contextName=" + HUD_CONTEXT)
 					tool.hudContext = true;
 				}
 
 				tool.urls.push(domain);
 
-				getUpgradedDomain(domain)
+				utils.getUpgradedDomain(domain)
 					.then(upgradedDomain => {
-						return zapApiCall("/context/action/includeInContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
+						return utils.zapApiCall("/context/action/includeInContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
 					})
 					.then(response => {
 						if (!response.ok) {
-							log (LOG_ERROR, 'scope.addToScope', 'Failed to add ' + domain + ' to scope');
+							utils.log (LOG_ERROR, 'scope.addToScope', 'Failed to add ' + domain + ' to scope');
 						}
 					})
-					.catch(errorHandler)
+					.catch(utils.errorHandler)
 
-				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain}, tool: {name: NAME, data: DATA.IN, icon: ICONS.IN, label: LABEL}})
+				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain}, tool: {name: NAME, data: DATA.IN, icon: ICONS.IN, label: LABEL}})
 
-                return writeTool(tool);
+                return utils.writeTool(tool);
             })
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function removeFromScope(domain) {
-		getUpgradedDomain(domain)
+		utils.getUpgradedDomain(domain)
 			.then(upgradedDomain => {
-				return zapApiCall("/context/action/excludeFromContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
+				return utils.zapApiCall("/context/action/excludeFromContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
 			})
 			.then(response => {
 				if (!response.ok) {
-					log(LOG_ERROR, 'scope.removeFromScope', 'Failed to remove ' + domain + ' from scope');
+					utils.log(LOG_ERROR, 'scope.removeFromScope', 'Failed to remove ' + domain + ' from scope');
 				}
 			})
-			.catch(errorHandler)
+			.catch(utils.errorHandler)
 
 		// remove from list and save
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				tool.urls.splice(tool.urls.indexOf(domain), 1);
 
-				messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain, url: ''}, tool: {name: NAME, data: DATA.OUT, icon: ICONS.OUT, label: LABEL}})
+				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain, url: ''}, tool: {name: NAME, data: DATA.OUT, icon: ICONS.OUT, label: LABEL}})
 
-				writeTool(tool);
+				utils.writeTool(tool);
 			})
-			.catch(errorHandler);
-	}
-
-	function requireScope(targetDomain) {
-		return new Promise((resolve, reject) => {
-			checkDomainInScope(targetDomain)
-				.then(isInScope => {
-
-					if (!isInScope) {
-						return showScopeRequiredDialog(targetDomain);
-					}
-					return true;
-				})
-				.then(addedToScope => {
-					if (addedToScope) {
-						resolve();
-					}
-					else {
-						reject();
-					}
-				});
-		});
+			.catch(utils.errorHandler);
 	}
 
 	function showOptions(tabId) {
@@ -168,14 +147,14 @@ var Scope = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(tabId, NAME);
+					utils.removeToolFromPanel(tabId, NAME);
 				}
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function getTool(context, port) {
@@ -188,7 +167,7 @@ var Scope = (function() {
 					port.postMessage({label: LABEL, data: DATA.OUT, icon: ICONS.OUT});
 				}
 			})
-			.catch(errorHandler)
+			.catch(utils.errorHandler)
 	}
 
 	self.addEventListener("activate", event => {

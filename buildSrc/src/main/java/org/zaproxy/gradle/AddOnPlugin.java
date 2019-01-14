@@ -19,7 +19,13 @@
  */
 package org.zaproxy.gradle;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.gradle.api.NamedDomainObjectProvider;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -44,6 +50,8 @@ import org.zaproxy.gradle.zapversions.VersionsExtension;
 import org.zaproxy.gradle.zapversions.tasks.GenerateZapVersionsFile;
 
 public class AddOnPlugin implements Plugin<Project> {
+
+    public static final String ADD_ON_GROUP = "ZAP Add-On";
 
     public static final String EXTENSION_NAME = "zapAddOn";
 
@@ -204,8 +212,30 @@ public class AddOnPlugin implements Plugin<Project> {
                     task.setAppendix(extension.getAddOnStatus().get());
                     task.setVersion(extension.getAddOnVersion().get());
                     task.setExtension("zap");
-                    task.setDestinationDir(
-                            project.getLayout().getBuildDirectory().dir("zap").get().getAsFile());
+                    File outputDir =
+                            project.getLayout().getBuildDirectory().dir("zap").get().getAsFile();
+                    task.setDestinationDir(outputDir);
+                    task.getOutputs()
+                            .upToDateWhen(
+                                    t -> {
+                                        Path dir = outputDir.toPath();
+                                        if (!Files.exists(dir)) {
+                                            return true;
+                                        }
+                                        try (Stream<Path> stream =
+                                                Files.find(
+                                                        dir,
+                                                        1,
+                                                        (p, a) ->
+                                                                p.getFileName()
+                                                                        .toString()
+                                                                        .endsWith(".zap"))) {
+                                            return stream.count() == 1;
+                                        } catch (IOException e) {
+                                            throw new UncheckedIOException(e);
+                                        }
+                                    });
+                    task.doFirst(t -> project.delete(project.fileTree(outputDir).getFiles()));
 
                     task.setPreserveFileTimestamps(false);
                     task.setReproducibleFileOrder(true);
@@ -247,7 +277,7 @@ public class AddOnPlugin implements Plugin<Project> {
                 project.getTasks().register("deploy", DeployAddOn.class);
         deployProvider.configure(
                 task -> {
-                    task.setGroup("ZAP Add-On");
+                    task.setGroup(ADD_ON_GROUP);
                     task.setDescription(
                             "Deploys the add-on and its home files to ZAP home dir.\n\n"
                                     + "Defaults to dev home dir if not specified through the command line nor\n"
@@ -266,7 +296,7 @@ public class AddOnPlugin implements Plugin<Project> {
                 project.getTasks().register("copyAddOn", CopyAddOn.class);
         copyAddOnProvider.configure(
                 task -> {
-                    task.setGroup("ZAP Add-On");
+                    task.setGroup(ADD_ON_GROUP);
                     task.setDescription(
                             "Copies the add-on to zaproxy project (defaults to \"../zaproxy/src/plugin/\").");
 

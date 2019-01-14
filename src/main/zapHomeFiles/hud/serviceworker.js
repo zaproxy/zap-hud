@@ -54,14 +54,14 @@ localforage.setItem("tools", [])
 		for (var tool in self.tools) {
 			ts.push(self.tools[tool].name);
 		}
-		return registerTools(ts); 
+		return utils.registerTools(ts); 
 
 	})
-	.catch(errorHandler);
+	.catch(utils.errorHandler);
 
 /* Listeners */
 const onInstall = event => {
-	log(LOG_INFO, 'serviceworker.install', 'Installing...');
+	utils.log(LOG_INFO, 'serviceworker.install', 'Installing...');
 
 	// Cache Files
 	event.waitUntil(
@@ -70,25 +70,25 @@ const onInstall = event => {
 				console.log("caching urls...");
 				return cache.addAll(urlsToCache);
 			})
-			.catch(errorHandler)
+			.catch(utils.errorHandler)
 	);
 };
 
 const onActivate = event => {
 	// Check Storage & Initiate
 	event.waitUntil(
-		isStorageConfigured()
+		utils.isStorageConfigured()
 			.then(isConfigured => {
 
 				if (!isConfigured || isDebugging) {
-					return configureStorage();
+					return utils.configureStorage();
 				}
 			})
 			.then(() => {
 				// set the default tools after configuring storage
-				setDefaultTools();
+				utils.setDefaultTools();
 			})
-			.catch(errorHandler)
+			.catch(utils.errorHandler)
 	);
 };
 
@@ -99,22 +99,17 @@ const onFetch = event => {
 			.then(response => {  
 
 				if (response) {
-					// save the frame id as a destination for postmesssaging later
-					if (event.request.url.endsWith(".js")) {
-						saveFrameId(event);
-					}
-
 					return response;
 				}
 				else {
 					return fetch(event.request);
 				}
-			}).catch(errorHandler)
+			}).catch(utils.errorHandler)
 	);
-}
+};
 
 const onMessage = event => {
-	if (!isFromTrustedOrigin(event)) {
+	if (!utils.isFromTrustedOrigin(event)) {
 		return;
 	}
 
@@ -133,7 +128,7 @@ const onMessage = event => {
 
 		case 'targetload':
 
-			let targetDomain = parseDomainFromUrl(message.targetUrl);
+			let targetDomain = utils.parseDomainFromUrl(message.targetUrl);
 
 			let e = new CustomEvent('targetload', {detail: {tabId: message.tabId, url: message.targetUrl, domain: targetDomain}});
 			self.dispatchEvent(e);	
@@ -153,7 +148,7 @@ self.addEventListener("install", onInstall);
 self.addEventListener("activate", onActivate);
 self.addEventListener("fetch", onFetch);
 self.addEventListener("message", onMessage);
-self.addEventListener('error', errorHandler);
+self.addEventListener('error', utils.errorHandler);
 
 /* Set up WebSockets */
 
@@ -169,58 +164,24 @@ webSocket.onmessage = function (event) {
 	// Rebroadcast for the tools to pick up
 	let jevent = JSON.parse(event.data);
 	if ('event.publisher' in jevent) {
-		log(LOG_DEBUG, 'serviceworker.webSocket.onmessage', jevent['event.publisher']);
+		utils.log(LOG_DEBUG, 'serviceworker.webSocket.onmessage', jevent['event.publisher']);
 		var ev = new CustomEvent(jevent['event.publisher'], {detail: jevent});
 		self.dispatchEvent(ev);
 	}
-}
+};
 
 webSocket.onerror = function (event) {
-	log(LOG_ERROR, 'websocket', '', event)
-}
+	utils.log(LOG_ERROR, 'websocket', '', event);
+};
 
 function registerForZapEvents(publisher) {
 	webSocket.send('{"component" : "event", "type" : "register", "name" : "' + publisher + '"}');
-}
-
-/*
- * Saves the clientId of a window which is used to send postMessages.
- */
-function saveFrameId(event) {
-
-	let frameNames = {
-		"management.html": "management",
-		"panel.html": "Panel",
-		"display.html": "display",
-		"growlerAlerts.html": "growlerAlerts",
-		"drawer.html": "drawer"
-	};
-
-	clients.get(event.clientId)
-		.then(client => {
-			let params = new URL(client.url).searchParams;
-
-			let key = frameNames[params.get('name')];
-
-			if (key === "Panel") {
-				key = params.get('orientation') + key;
-			}
-
-			loadFrame(key)
-				.then(frame => {
-					frame.clientId = client.id;
-
-					return saveFrame(frame);
-				})
-				.catch(errorHandler);
-		})
-		.catch(errorHandler);
-}
+};
 
 function showAddToolDialog(tabId, frameId) {
 	var config = {};
 
-	loadAllTools()
+	utils.loadAllTools()
 		.then(tools => {
 
 			// filter out unselected tools
@@ -242,13 +203,13 @@ function showAddToolDialog(tabId, frameId) {
 			config.tools = tools;
 
 			// display tools to select
-			return messageFrame2(tabId, "display", {action: "showAddToolList", config: config})
+			return utils.messageFrame(tabId, "display", {action: "showAddToolList", config: config})
 		})
 		.then(response => {
-			addToolToPanel(response.toolname, frameId);
+			utils.addToolToPanel(response.toolname, frameId);
 		})
-		.catch(errorHandler);
-}
+		.catch(utils.errorHandler);
+};
 
 function showHudSettings(tabId) {
 	var config = {};
@@ -256,19 +217,19 @@ function showHudSettings(tabId) {
 		initialize: I18n.t("settings_resets"),
 	};
 
-	messageFrame2(tabId, "display", {action: "showHudSettings", config: config})
+	utils.messageFrame(tabId, "display", {action: "showHudSettings", config: config})
 		.then(response => {
 			if (response.id === "initialize") {
 				resetToDefault();
 			}
 		})
-		.catch(errorHandler);
-}
+		.catch(utils.errorHandler);
+};
 
 function resetToDefault() {
-	configureStorage()
-		.then(setDefaultTools)
-		.then(loadAllTools)
+	utils.configureStorage()
+		.then(utils.setDefaultTools)
+		.then(utils.loadAllTools)
 		.then(tools => {
 			var promises = [];
 
@@ -276,8 +237,8 @@ function resetToDefault() {
 				promises.push(self.tools[tools[tool].name].initialize());
 			}
 
-			return Promise.all(promises)
+			return Promise.all(promises);
 		})
-		.then(messageFrame("management", {action: "refreshTarget"}))
-		.catch(errorHandler);
-}
+		.then(utils.messageAllTabs("management", {action: "refreshTarget"}))
+		.catch(utils.errorHandler);
+};

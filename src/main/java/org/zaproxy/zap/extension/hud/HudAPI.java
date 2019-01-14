@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.HttpCookie;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -62,6 +63,8 @@ import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 
 public class HudAPI extends ApiImplementor {
 
+    public static final String ZAP_HUD_COOKIE = "ZAP-HUD";
+
     // TODO shouldnt allow unsafe-inline styles - need to work out where they are being used
     protected static final String CSP_POLICY =
             "default-src 'none'; script-src 'self'; connect-src https://zap wss://zap; frame-src 'self'; img-src 'self' data:; "
@@ -73,13 +76,17 @@ public class HudAPI extends ApiImplementor {
 
     private static final String PREFIX = "hud";
 
+    private static final int MAX_KEY_LENGTH = 50;
+
     private Map<String, String> siteUrls = new HashMap<String, String>();
     private ExtensionHUD extension;
 
     private static final String ACTION_LOG = "log";
     private static final String ACTION_RECORD_REQUEST = "recordRequest";
     private static final String ACTION_RESET_TUTORIAL_TASKS = "resetTutorialTasks";
+    private static final String ACTION_SET_UI_OPTION = "setUiOption";
 
+    private static final String VIEW_GET_UI_OPTION = "getUiOption";
     private static final String VIEW_HUD_ALERT_DATA = "hudAlertData";
     private static final String VIEW_HEARTBEAT = "heartbeat";
 
@@ -87,6 +94,8 @@ public class HudAPI extends ApiImplementor {
     private static final String PARAM_HEADER = "header";
     private static final String PARAM_BODY = "body";
     private static final String PARAM_URL = "url";
+    private static final String PARAM_KEY = "key";
+    private static final String PARAM_VALUE = "value";
 
     /** The only files that can be included on domain */
     private static final List<String> DOMAIN_FILE_WHITELIST =
@@ -106,6 +115,9 @@ public class HudAPI extends ApiImplementor {
      */
     private final String sharedSecret = UUID.randomUUID().toString();
 
+    /** Cookie used on the ZAP domain - should never be exposed to a target site. */
+    private final String zapHudCookie = UUID.randomUUID().toString();
+
     private static Logger logger = Logger.getLogger(HudAPI.class);
 
     public HudAPI(ExtensionHUD extension) {
@@ -115,13 +127,19 @@ public class HudAPI extends ApiImplementor {
         this.addApiAction(
                 new ApiAction(ACTION_RECORD_REQUEST, new String[] {PARAM_HEADER, PARAM_BODY}));
         this.addApiAction(new ApiAction(ACTION_RESET_TUTORIAL_TASKS));
+        this.addApiAction(
+                new ApiAction(
+                        ACTION_SET_UI_OPTION,
+                        new String[] {PARAM_KEY},
+                        new String[] {PARAM_VALUE}));
 
         this.addApiView(new ApiView(VIEW_HUD_ALERT_DATA, new String[] {PARAM_URL}));
         this.addApiView(new ApiView(VIEW_HEARTBEAT));
+        this.addApiView(new ApiView(VIEW_GET_UI_OPTION, new String[] {PARAM_KEY}));
 
         hudFileProxy = new HudFileProxy(this);
         hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S);
-        hudApiProxy = new HudApiProxy();
+        hudApiProxy = new HudApiProxy(this);
         hudApiUrl = API.getInstance().getCallBackUrl(hudApiProxy, API.API_URL_S);
 
         // Temporary hack to make it easier to find the websocket test page
@@ -241,11 +259,24 @@ public class HudAPI extends ApiImplementor {
                 this.extension.resetTutorialTasks();
                 break;
 
+            case ACTION_SET_UI_OPTION:
+                String key = params.getString(PARAM_KEY);
+                String value = params.optString(PARAM_VALUE, "");
+                validateKey(key);
+                this.extension.getHudParam().setUiOption(key, value);
+                break;
+
             default:
                 throw new ApiException(ApiException.Type.BAD_ACTION);
         }
 
         return ApiResponseElement.OK;
+    }
+
+    private void validateKey(String key) throws ApiException {
+        if (key.length() == 0 || key.length() > MAX_KEY_LENGTH || !key.matches("[a-zA-Z0-9]+")) {
+            throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_KEY);
+        }
     }
 
     @Override
@@ -261,6 +292,10 @@ public class HudAPI extends ApiImplementor {
             case VIEW_HEARTBEAT:
                 logger.debug("Received heartbeat");
                 return ApiResponseElement.OK;
+            case VIEW_GET_UI_OPTION:
+                String key = params.getString(PARAM_KEY);
+                validateKey(key);
+                return new ApiResponseElement(key, this.extension.getHudParam().getUiOption(key));
             default:
                 throw new ApiException(ApiException.Type.BAD_VIEW);
         }
@@ -442,8 +477,13 @@ public class HudAPI extends ApiImplementor {
                                                             .isShowWelcomeScreen()))
                                     .replace(
                                             "<<TUTORIAL_URL>>",
-                                            this.extension.getTutorialUrl("", false))
-                                    .replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
+                                            this.extension.getTutorialUrl("", false));
+                    if (this.extension.getHudParam().isEnableOnDomainMsgs()) {
+                        contents = contents.replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
+                    } else {
+                        // In this case an empty secret is used to turn off this feature
+                        contents = contents.replace("<<ZAP_SHARED_SECRET>>", "");
+                    }
                 }
             }
 
@@ -464,6 +504,20 @@ public class HudAPI extends ApiImplementor {
                             .getCallbackUrl();
         }
         return websocketUrl;
+    }
+
+    protected String getZapHudCookieValue() {
+        return zapHudCookie;
+    }
+
+    public String getRequestCookieValue(HttpMessage msg, String cookieName) {
+        List<HttpCookie> cookies = msg.getRequestHeader().getHttpCookies();
+        for (HttpCookie cookie : cookies) {
+            if (cookie.getName().equals(cookieName)) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 
     public byte[] getImage(String name) {

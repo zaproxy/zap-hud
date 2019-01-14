@@ -15,7 +15,7 @@ var tabId = '';
 var frameId = '';
 var context = {
 	url: document.referrer,
-	domain: parseDomainFromUrl(document.referrer)
+	domain: utils.parseDomainFromUrl(document.referrer)
 };
 
 Vue.component('loading-screen', {
@@ -27,7 +27,7 @@ Vue.component('loading-screen', {
 					// Refresh the target so the HUD buttons appear
 					parent.postMessage( {action: 'refresh'} , document.referrer);
 				})
-				.catch(errorHandler);
+				.catch(utils.errorHandler);
 			} else {
 				// Refresh the target so the HUD buttons appear
 				parent.postMessage( {action: 'refresh'} , document.referrer);
@@ -41,7 +41,7 @@ Vue.component('loading-screen', {
 					// Refresh the target so the HUD buttons appear
 					parent.postMessage( {action: 'refresh'} , document.referrer);
 				})
-				.catch(errorHandler);
+				.catch(utils.errorHandler);
 			} else {
 				// Open the tutorial in a new window / tab
 				window.open(TUTORIAL_URL);
@@ -60,7 +60,7 @@ Vue.component('loading-screen', {
 })
 
 function dontShowWelcomeAgain() {
-	return zapApiCall("/hud/action/setOptionShowWelcomeScreen/?Boolean=false");
+	return utils.zapApiCall("/hud/action/setOptionShowWelcomeScreen/?Boolean=false");
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		navigator.serviceWorker.addEventListener('message', serviceWorkerMessageListener)
 
 		// send targetload message 
-		navigator.serviceWorker.controller.postMessage({action:"targetload", targetUrl: context.url});
+		navigator.serviceWorker.controller.postMessage({action: 'targetload', tabId: tabId, targetUrl: context.url});
 
 		localforage.setItem(IS_SERVICEWORKER_REFRESHED, true);
 	}
@@ -108,13 +108,15 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function windowMessageListener(event) {
 	if (! event.data.hasOwnProperty('sharedSecret')) {
-		log(LOG_WARN, 'management.receiveMessage', 'Message without sharedSecret rejected');
+		utils.log(LOG_WARN, 'management.receiveMessage', 'Message without sharedSecret rejected');
 		return;
-	}
-	if (event.data.sharedSecret === ZAP_SHARED_SECRET) {
+	} else if ("" === ZAP_SHARED_SECRET) {
+		// A blank secret is used to indicate that this functionality is turned off
+		utils.log(LOG_DEBUG, 'management.receiveMessage', 'Message from target domain ignored as on-domain messaging has been switched off');
+	} else if (event.data.sharedSecret === ZAP_SHARED_SECRET) {
 		navigator.serviceWorker.controller.postMessage(event.data);
 	} else {
-		log(LOG_WARN, 'management.receiveMessage', 'Message with incorrect sharedSecret rejected ' + event.data.sharedSecret);
+		utils.log(LOG_WARN, 'management.receiveMessage', 'Message with incorrect sharedSecret rejected ' + event.data.sharedSecret);
 	}
 }
 
@@ -122,7 +124,7 @@ function beforeunloadListener() {
 	let currentTimeInMs = new Date().getTime();
 
 	navigator.serviceWorker.controller.postMessage({action: 'unload', time: currentTimeInMs})
-		.catch(errorHandler)
+		.catch(utils.errorHandler)
 }
 
 function serviceWorkerMessageListener(event) {
@@ -161,7 +163,7 @@ function serviceWorkerMessageListener(event) {
  */ 
 function startServiceWorker() {
 	if ('serviceWorker' in navigator) {
-		navigator.serviceWorker.register(getZapFilePath('serviceworker.js'))
+		navigator.serviceWorker.register(utils.getZapFilePath('serviceworker.js'))
 			.then(registration => {
 				console.log('Service worker registration was successful for the scope: ' + registration.scope);
 
@@ -173,9 +175,9 @@ function startServiceWorker() {
 							parent.postMessage( {action: 'refresh'} , document.referrer);
 						}
 					})
-					.catch(errorHandler);
+					.catch(utils.errorHandler);
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 	else {
 		alert('This browser does not support Service Workers. The HUD will not work properly.')

@@ -27,13 +27,13 @@ var CommonAlerts = (function() {
 		tool.position = 0;
 		tool.alerts = {};
 
-		saveTool(tool);
+		utils.writeTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.alert.AlertEventPublisher");
 		registerForZapEvents("org.zaproxy.zap.extension.hud.HudEventPublisher");
 	}
 
 	function showGrowlerAlert(alert) {
-		return messageAllTabs("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
+		return utils.messageAllTabs("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
 	}
 
 	self.addEventListener("activate", event => {
@@ -52,7 +52,7 @@ var CommonAlerts = (function() {
 			case "commonAlerts.showAlert":
 				// Check its an int - its been supplied by the target domain so in theory could have been tampered with
 				if (message.alertId === parseInt(message.alertId, 10)) {
-					alertUtils.showAlertDetails(message.alertId);
+					alertUtils.showAlertDetails(message.tabId, message.alertId);
 				}
 				break;
 
@@ -78,7 +78,7 @@ var CommonAlerts = (function() {
 	});
 
 	self.addEventListener("targetload", event => {
-		let promises = [loadTool(NAME), localforage.getItem('upgradedDomains')];
+		let promises = [utils.loadTool(NAME), localforage.getItem('upgradedDomains')];
 
 		Promise.all(promises)
 			.then(results => {
@@ -94,7 +94,7 @@ var CommonAlerts = (function() {
 				}
 				let target = origTarget;
 				
-				let targetDomain = parseDomainFromUrl(target);
+				let targetDomain = utils.parseDomainFromUrl(target);
 				if (targetDomain in upgradedDomains) {
 					// Its been upgraded to https by ZAP, but the alerts wont have been
 					target = target.replace("https://", "http://");
@@ -105,9 +105,9 @@ var CommonAlerts = (function() {
 
 				// This is the first time we have seen this domain so
 				// fetch all of the current alerts from ZAP
-				getUpgradedDomain(targetDomain)
+				utils.getUpgradedDomain(targetDomain)
 					.then(upgradedDomain => {
-						return zapApiCall("/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
+						return utils.zapApiCall("/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
 					})
 					.then(response => {
 						return response.json()
@@ -115,7 +115,7 @@ var CommonAlerts = (function() {
 					.then(json => {
 						alertCache[targetDomain] = alertUtils.flattenAllAlerts(json);
 						tool.alerts = alertCache;
-						return saveTool(tool);
+						return utils.writeTool(tool);
 					})
 					.then(() => {
 						// Raise the events after the data is saved
@@ -128,16 +128,16 @@ var CommonAlerts = (function() {
 								domain: targetDomain
 							};
 
-							log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
+							utils.log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
 							var event = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
 							self.dispatchEvent(event);
 						}
 						RISKS.forEach(processRisk);
 					})
-					.catch(errorHandler);
+					.catch(utils.errorHandler);
 
 				// Fetch all of the alerts on this page
-				zapApiCall("/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
+				utils.zapApiCall("/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
 				.then(response => {
 					response.json().
 						then(json => {
@@ -155,7 +155,7 @@ var CommonAlerts = (function() {
 										var alert = pageAlerts[alertRisk][alertName][i];
 										if (alert.param.length > 0 && ! reportedParams.has(alert.param)) {
 											reportedParams.add(alert.param);
-											messageFrame("management", {
+											utils.messageFrame(event.detail.tabId, "management", {
 												action: "commonAlerts.alert",
 												name: alert.name,
 												id: alert.id,
@@ -166,11 +166,11 @@ var CommonAlerts = (function() {
 								}
 							}
 						})
-						.catch(errorHandler);
+						.catch(utils.errorHandler);
 					})
-					.catch(errorHandler);
+					.catch(utils.errorHandler);
 			})
-		.catch(errorHandler);
+		.catch(utils.errorHandler);
 	});
 
 	self.addEventListener("org.zaproxy.zap.extension.hud.HudEventPublisher", event => {
@@ -185,12 +185,12 @@ var CommonAlerts = (function() {
 
 				return localforage.setItem('upgradedDomains', upgradedDomains)
 			})
-			.catch(errorHandler)
+			.catch(utils.errorHandler)
 	});
 
 	self.addEventListener("org.zaproxy.zap.extension.alert.AlertEventPublisher", event => {
 		if (event.detail['event.type'] === 'alert.added') {
-			let targetDomain = parseDomainFromUrl(event.detail.uri)
+			let targetDomain = utils.parseDomainFromUrl(event.detail.uri)
 			let save = false;
 
 			if (alertCache[targetDomain] === undefined) {
@@ -208,33 +208,32 @@ var CommonAlerts = (function() {
 			if (alertCache[targetDomain][risk][name] === undefined) {
 				alertCache[targetDomain][risk][name] = {};
 				// send growler alert (fine with it being async, can change later if its an issue)
-				log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'Show growler alert', risk + ' ' + name);
+				utils.log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'Show growler alert', risk + ' ' + name);
 				showGrowlerAlert(event.detail)
-					.catch(errorHandler);
+					.catch(utils.errorHandler);
 				save = true;
 			}
 
 			if (save) {
-				loadTool(NAME)
+				utils.loadTool(NAME)
 					.then(tool => {
 						// backup to localstorage in case the serviceworker dies
 						tool.alerts = alertCache;
-						return writeTool(tool);
-						//return saveTool(tool);
+						return utils.writeTool(tool);
 					})
 					.then(() => {
 						// Raise the event after the data is saved
 						let raisedEventName = 'commonAlerts.' + risk;
 						// This is the number of the relevant type of risk :)
 						let raisedEventDetails = {risk: risk, domain: targetDomain, url: event.detail.uri, count : Object.keys(alertCache[targetDomain][risk]).length};
-						log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
+						utils.log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'dispatchEvent ' + raisedEventName, raisedEventDetails);
 						var ev = new CustomEvent(raisedEventName, {detail: raisedEventDetails});
 						self.dispatchEvent(ev);
 					})
-					.catch(errorHandler);
+					.catch(utils.errorHandler);
 			}
 		} else {
-			log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'Ignoring event', event.detail['event.type'])
+			utils.log (LOG_DEBUG, 'AlertEventPublisher eventListener', 'Ignoring event', event.detail['event.type'])
 		}
 	});
 

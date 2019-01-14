@@ -14,8 +14,8 @@ var Attack = (function() {
 		DATA.ON = I18n.t("common_on");
 		DATA.OFF = I18n.t("common_off");
 	var ICONS = {};
-		ICONS.ON = "flame.png";
-		ICONS.OFF = "flame-grey.png";
+		ICONS.ON = "crosshairs.png";
+		ICONS.OFF = "crosshairs-grey.png";
 	var DIALOG = {};
 		DIALOG.ON = I18n.t("attack_start");
 		DIALOG.OFF = I18n.t("attack_stop");
@@ -33,7 +33,7 @@ var Attack = (function() {
 		tool.isRunning = false;
 		tool.attackingDomain = '';
 
-		saveTool(tool);
+		utils.writeTool(tool);
 	}
 
 	function showDialog(tabId, domain) {
@@ -61,58 +61,58 @@ var Attack = (function() {
 					];
 				}
 
-				messageFrame2(tabId, "display", {action:"showDialog", config:config})
+				utils.messageFrame(tabId, "display", {action:"showDialog", config:config})
 					.then(response => {
 						// Handle button choice
 						if (response.id === "turnon") {
 							turnOnAttackMode(domain);
 						}
 						else if (response.id === "turnoff") {
-							turnOffAttackMode(domain);
+							turnOffAttackMode();
 						}
 					})
-					.catch(errorHandler);
+					.catch(utils.errorHandler);
 
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function turnOnAttackMode(domain) {
-			zapApiCall("/core/action/setMode/?mode=attack");
+			utils.zapApiCall("/core/action/setMode/?mode=attack");
 
-			loadTool(NAME)
+			utils.loadTool(NAME)
 				.then(tool => {
 					tool.isRunning = true;
 					tool.attackingDomain = domain;
 					tool.icon = ICONS.ON;
 					tool.data = DATA.ON;
 
-					writeTool(tool);
-					messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notDomain: domain}, tool: {name: NAME, label: LABEL, data: DATA.OFF, icon: ICONS.OFF}, isToolDisabled: true})
-					messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain}, tool: {name: NAME, label: LABEL, data: DATA.ON, icon: ICONS.ON}});
+					utils.writeTool(tool);
+					utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notDomain: domain}, tool: {name: NAME, label: LABEL, data: DATA.OFF, icon: ICONS.OFF}, isToolDisabled: true})
+					utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain}, tool: {name: NAME, label: LABEL, data: DATA.ON, icon: ICONS.ON}});
 				})
-				.catch(errorHandler);
+				.catch(utils.errorHandler);
 	}
 
 	function turnOffAttackMode() {
-		zapApiCall("/core/action/setMode/?mode=standard");
+		utils.zapApiCall("/core/action/setMode/?mode=standard");
 
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = false;
 				tool.attackingDomain = '';
 				tool.icon = ICONS.OFF;
 				tool.data = DATA.OFF;
 
-				writeTool(tool);
-				messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: DATA.OFF, icon: ICONS.OFF}, isToolDisabled: false})
+				utils.writeTool(tool);
+				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: DATA.OFF, icon: ICONS.OFF}, isToolDisabled: false})
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	function checkIsRunning(domain) {
 		return new Promise(resolve => {
-			loadTool(NAME)
+			utils.loadTool(NAME)
 				.then(tool => {
 					resolve(tool.attackingDomain === domain);
 				});
@@ -120,7 +120,7 @@ var Attack = (function() {
 	}
 
 	function getTool(tabId, context, port) {
-		loadTool(NAME)
+		utils.loadTool(NAME)
 			.then(tool => {
 				if (context.domain === tool.attackingDomain) {
 					port.postMessage({label: LABEL, data: DATA.ON, icon: ICONS.ON});
@@ -131,7 +131,7 @@ var Attack = (function() {
 					port.postMessage({label: LABEL, data: DATA.OFF, icon: ICONS.OFF});
 				}
 			})
-			.catch(errorHandler)
+			.catch(utils.errorHandler)
 	}
 
 	function showOptions(tabId) {
@@ -141,17 +141,17 @@ var Attack = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					removeToolFromPanel(tabId, NAME);
+					utils.removeToolFromPanel(tabId, NAME);
 				}
 				else {
 					//cancel
 				}
 			})
-			.catch(errorHandler);
+			.catch(utils.errorHandler);
 	}
 
 	self.addEventListener("activate", event => {

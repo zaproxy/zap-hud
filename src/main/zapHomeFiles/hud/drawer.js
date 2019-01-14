@@ -5,7 +5,7 @@ var frameId = '';
 var tabId = '';
 var context = {
     url: document.referrer,
-    domain: parseDomainFromUrl(document.referrer)
+    domain: utils.parseDomainFromUrl(document.referrer)
 };
 
 Vue.component('history', {
@@ -64,11 +64,11 @@ Vue.component('history', {
         }
     },
     created() {
-        loadTool('history')
+        utils.loadTool('history')
             .then(tool => {
                 this.messages = tool.messages
             })
-            .catch(errorHandler)
+            .catch(utils.errorHandler)
 
         eventBus.$on('setMessages', data => {
             this.messages = data.messages;
@@ -113,14 +113,14 @@ Vue.component('tabs', {
             this.isOpen = false;
             this.isArrowUp = true;
             localforage.setItem('drawer.isDrawerOpen', false)
-                .catch(errorHandler);
+                .catch(utils.errorHandler);
             parent.postMessage({tabId: tabId, frameId: frameId, action:"hideBottomDrawer"}, document.referrer);
         },
         openDrawer() {
             this.isOpen = true;
             this.isArrowUp = false;
             localforage.setItem('drawer.isDrawerOpen', true)
-                .catch(errorHandler);
+                .catch(utils.errorHandler);
             parent.postMessage({tabId: tabId, frameId: frameId, action:"showBottomDrawer"}, document.referrer);
         },
         toggleOpenClose() {
@@ -138,7 +138,7 @@ Vue.component('tabs', {
             }
 
             localforage.setItem('drawer.activeTab', selectedTab.href)
-                .catch(errorHandler);
+                .catch(utils.errorHandler);
 
             this.highlightTab(selectedTab.href)
         },
@@ -170,7 +170,7 @@ Vue.component('tabs', {
                     this.openDrawer();
                 }
             })
-            .catch(errorHandler);
+            .catch(utils.errorHandler);
     }
 });
 
@@ -242,23 +242,23 @@ Vue.component('drawer-button-showhide', {
     props: [],
     data() {
         return {
-            icon: getZapImagePath('radar.png'),
+            icon: utils.getZapImagePath('radar.png'),
             isHudVisible: true
         }
     },
     methods: {
         showHud() {
             this.isHudVisible = true;
-            this.icon = getZapImagePath('radar.png');
+            this.icon = utils.getZapImagePath('radar.png');
             localforage.setItem('settings.isHudVisible', true)
-                .catch(errorHandler);
+                .catch(utils.errorHandler);
 			parent.postMessage({tabId: tabId, frameId: frameId, action:'showSidePanels'}, document.referrer);
         },
         hideHud() {
             this.isHudVisible = false;
-            this.icon = getZapImagePath('radar-grey.png');
+            this.icon = utils.getZapImagePath('radar-grey.png');
             localforage.setItem('settings.isHudVisible', false)
-                .catch(errorHandler);
+                .catch(utils.errorHandler);
 			parent.postMessage({tabId: tabId, frameId: frameId, action:'hideSidePanels'}, document.referrer);
         },
 		toggleIsVisible() {
@@ -270,12 +270,12 @@ Vue.component('drawer-button-showhide', {
             .then(isHudVisible => {
                 this.isHudVisible = isHudVisible;
                 if (!this.isHudVisible) {
-                    this.icon = getZapImagePath('radar-grey.png');
+                    this.icon = utils.getZapImagePath('radar-grey.png');
                 }
             })
-            .catch(errorHandler);
+            .catch(utils.errorHandler);
     }
-})
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     let params = new URL(document.location).searchParams;

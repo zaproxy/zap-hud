@@ -1,8 +1,12 @@
+import org.zaproxy.gradle.AddOnPlugin
+import org.zaproxy.gradle.tasks.CreateManifestChanges
 import org.zaproxy.gradle.tasks.GenerateI18nJsFile
 import org.zaproxy.gradle.tasks.UpdateManifestFile
 import org.zaproxy.gradle.tasks.ZapDownloadWeekly
+import org.zaproxy.gradle.tasks.ZapInstallAddOn
 import org.zaproxy.gradle.tasks.ZapStart
 import org.zaproxy.gradle.tasks.ZapShutdown
+import org.zaproxy.gradle.tasks.ZapUninstallAddOn
 
 plugins {
     `java-library`
@@ -19,7 +23,7 @@ repositories {
 }
 
 status = "alpha"
-version = "0.2.0"
+version = "0.3.0"
 
 val genHudFilesDir = layout.buildDirectory.dir("genHudFiles").get()
 val generatedI18nJsFileDir = genHudFilesDir.dir("i18nJs")
@@ -46,8 +50,14 @@ zapAddOn {
     }
 }
 
+val createManifestChanges by tasks.registering(CreateManifestChanges::class) {
+    changelog.set(file("CHANGELOG.md"))
+    manifestChanges.set(layout.buildDirectory.file("manifest-changes.html"))
+}
+
 tasks.named<UpdateManifestFile>("updateManifestFile") {
     baseManifest.set(file("src/other/resources/ZapAddOn.xml"))
+    changes.set(createManifestChanges.get().manifestChanges)
     outputDir.set(genHudFilesDir.dir("manifest"))
 }
 
@@ -97,10 +107,11 @@ spotless {
         googleJavaFormat().aosp()
     }
 
-    format("css", {
-        target(sourcesWithoutLibs("css"))
-        prettier().config(mapOf("parser" to "css"))
-    })
+    // XXX Don't check for now to not require npm to try the HUD (runZap).
+    // format("css", {
+    //     target(sourcesWithoutLibs("css"))
+    //     prettier().config(mapOf("parser" to "css"))
+    // })
 }
 
 tasks {
@@ -124,7 +135,7 @@ tasks {
     }
 
     register<Test>("testTutorial") { 
-        group = "Verification"
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Runs the tutorial tests (ZAP must be running)."
         useJUnitPlatform { 
             includeTags("tutorial") 
@@ -132,7 +143,7 @@ tasks {
     }
 
     register<Test>("testRemote") { 
-        group = "Verification"
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Runs the remote tests (ZAP must be running)."
         useJUnitPlatform { 
             includeTags("remote") 
@@ -140,7 +151,7 @@ tasks {
     }
 
     register<ZapDownloadWeekly>("zapDownload") {
-        group = "Verification"
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Downloads the latest ZAP weekly release for the unit tests"
 
         onlyIf { !zapInstallDir.asFile.exists() }
@@ -160,7 +171,8 @@ tasks {
     }
 
     register<Copy>("copyHudClientFiles") {
-        description = "Copies the HUD files to the (local) home directory for use with continuous mode."
+        group = AddOnPlugin.ADD_ON_GROUP
+        description = "Copies the HUD files to runZap's home directory for use with continuous mode."
 
         from(file("src/main/zapHomeFiles"))
         from(sourceSets["main"].output.dirs)
@@ -168,6 +180,7 @@ tasks {
     }
 
     register<ZapStart>("runZap") {
+        group = AddOnPlugin.ADD_ON_GROUP
         description = "Runs ZAP (weekly) with the HUD in dev mode."
 
         dependsOn("zapDownload", "assembleZapAddOn", "copyHudClientFiles")
@@ -176,6 +189,22 @@ tasks {
         homeDir.set(zapHome.asFile)
 
         args.set(listOf("-dev", "-config", "start.checkForUpdates=false", "-config", "start.addonDirs=$buildDir/zap/", "-config", "hud.dir=$zapHome/hud") + hudDevArgs)
+    }
+
+    val assembleZapAddOn = tasks.named<Jar>("assembleZapAddOn");
+    val uninstallAddOn by registering(ZapUninstallAddOn::class) {
+        group = AddOnPlugin.ADD_ON_GROUP
+        description = "Uninstalls the add-on from ZAP (started with \"runZap\")."
+        addOnId.set(zapAddOn.addOnId)
+    }
+    assembleZapAddOn.configure { mustRunAfter(uninstallAddOn) }
+
+    register<ZapInstallAddOn>("installAddOn") {
+        group = AddOnPlugin.ADD_ON_GROUP
+        description = "Installs the add-on into ZAP (started with \"runZap\")."
+
+        dependsOn(uninstallAddOn, assembleZapAddOn)
+        addOn.set(assembleZapAddOn.get().archivePath)
     }
 
     register<ZapStart>("zapStart") {

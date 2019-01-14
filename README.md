@@ -1,4 +1,8 @@
-# ![HUD Logo](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/assets/images/hud_logo_128px.png) OWASP ZAP Heads Up Display ![Release: Alpha](https://img.shields.io/badge/release-alpha-brightgreen.svg)
+# ![HUD Logo](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/assets/images/hud_logo_128px.png) OWASP ZAP Heads Up Display 
+![Release: Alpha](https://img.shields.io/badge/release-alpha-brightgreen.svg)
+[![Known Vulnerabilities](https://snyk.io/test/github/zaproxy/zap-hud/badge.svg?targetFile=package.json)](https://snyk.io/test/github/zaproxy/zap-hud?targetFile=package.json)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/zaproxy/zap-hud.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/zaproxy/zap-hud/alerts/)
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/zaproxy/zap-hud.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/zaproxy/zap-hud/context:javascript)
 
 <img align="center" alt="Welcome to the HUD" src="assets/images/ZAP-HUD-Welcome-banner.png" width="100%">
 
@@ -15,15 +19,18 @@ Learn more:
 ## Using the HUD
 
 ### Downloading
-You can download ZAP enabled with the HUD from: 
+You can download ZAP enabled with the HUD from any of: 
 
 1. Download and run the latest [ZAP Weekly Release](https://github.com/zaproxy/zaproxy/wiki/Downloads#zap-weekly)
 2. Run it from this repo using:
     ```
     git clone https://github.com/zaproxy/zap-hud.git
+    cd zap-hud
     ./gradlew runZap
     ```
-3. Those of you building ZAP directly from the source code will also be able to install it from the [ZAP Marketplace](https://github.com/zaproxy/zap-extensions/wiki). You will need Java 8+ installed.
+3. Those of you building ZAP directly from the source code will also be able to install it from the [ZAP Marketplace](https://github.com/zaproxy/zap-extensions/wiki). 
+
+In all cases you will need Java 8+ installed.
 
 You'll see the HUD Radar icon ![Radar Icon](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/src/main/resources/org/zaproxy/zap/extension/hud/resources/radar.png) in the tool bar. When the icon is selected the HUD will be added to your browser.
 
@@ -45,6 +52,9 @@ ZAP is a community project and so we are always very keen to hear from anyone wh
 ## Alpha Limitations
 
 This is definitely still Alpha quality and there are some known issues and limitations with the current release. Development on the HUD is very active and we recommend you check in often for new features and improvements. :)
+
+You should **NOT** use it on sites you do not trust!
+However it **is** in scope for the ZAP bug bounty on [BugCrowd](https://bugcrowd.com/owaspzap)
 
 Limitations while running:
 * It's early days, so only a limited amount of ZAP functionality is available

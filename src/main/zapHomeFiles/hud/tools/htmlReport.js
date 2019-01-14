@@ -1,39 +1,29 @@
 /*
- * SiteTree Tool
+ * HTML Report tool
  *
- * Description goes here...
+ * When selected displays the standard HTML report in a new window / tab
  */
 
-var SiteTree = (function() {
+var HtmlReport = (function() {
 
 	// Constants
 	// todo: could probably switch this to a config file?
-	var NAME = "site-tree";
-	var LABEL = I18n.t("sites_tool");
-	var DATA = {};
-		DATA.SITES = I18n.t("sites_status");
-	var ICONS = {};
-		ICONS.WORLD = "world.png";
+	var NAME = "htmlReport";
+	var LABEL = I18n.t("html_report_tool");
+	var ICON = "report.png";
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		var tool = {};
 		tool.name = NAME;
 		tool.label = LABEL;
-		tool.data = DATA.SITES;
-		tool.icon = ICONS.WORLD;
-		tool.isSelected = false;
+		tool.data = '';
+		tool.icon = ICON;
 		tool.panel = "";
 		tool.position = 0;
-		tool.urls = [];
-
 		utils.writeTool(tool);
 	}
 
-	function showSiteTree(tabId) {
-		utils.messageFrame(tabId, "display", {action:"showSiteTree"})
-			.catch(utils.errorHandler);
-	}
 
 	function showOptions(tabId) {
 		var config = {};
@@ -48,18 +38,12 @@ var SiteTree = (function() {
 				if (response.id == "remove") {
 					utils.removeToolFromPanel(tabId, NAME);
 				}
-				else {
-					//cancel
-				}
 			})
 			.catch(utils.errorHandler);
 	}
 
-	function getTool(port) {
-		utils.loadTool(NAME)
-			.then(tool => {
-				port.postMessage({label: LABEL, data: DATA.SITES, icon: ICONS.WORLD});
-			})
+	function showHtmlReport(tabId) {
+		utils.messageFrame(tabId, "display", {action:"showHtmlReport"})
 			.catch(utils.errorHandler);
 	}
 
@@ -84,15 +68,11 @@ var SiteTree = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showSiteTree(message.tabId);
+					showHtmlReport(message.tabId);
 					break;
 
 				case "buttonMenuClicked":
 					showOptions(message.tabId);
-					break;
-
-				case "getTool":
-					getTool(event.ports[0]);
 					break;
 
 				default:
@@ -107,4 +87,4 @@ var SiteTree = (function() {
 	};
 })();
 
-self.tools[SiteTree.name] = SiteTree;
+self.tools[HtmlReport.name] = HtmlReport;
