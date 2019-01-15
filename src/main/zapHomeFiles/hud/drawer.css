@@ -1,13 +1,18 @@
+.table td, .table th {
+  padding:0; /*Override Spectre table cell padding*/
+}
+
 #history-header{
   position:sticky;
   top:0;
   right:0;
   z-index: 1; /*Needed to override absolute positioning from spectre lib*/ 
   background-color: #fff;
+  font-size: .8em;
 }
 
 #history-messages{
-
+  font-size: .8em;
 }
 
 #history-messages .message-tr{
