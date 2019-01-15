@@ -17,7 +17,7 @@ Vue.component('history', {
             messages: [],
             hiddenMessageCount: 0,
             enableRegExText: I18n.t("history_enable_regex"),
-            commonWordsOf: I18n.t("common_words_of"),
+            commonOf: I18n.t("common_of").toLowerCase(),
             historyItemsFilteredSuffix: I18n.t("history_items_filtered_suffix")
         }
     },
