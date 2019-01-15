@@ -45,11 +45,11 @@
                                 <input v-model="regexEnabled" type="checkbox" />
                             </span>
                             <span>
-                                Enable RegEx
+                                {{ enableRegExText }}
                             </span>
                         </th>
                         <th class="title hidden">
-                            <span>{{ hiddenMessageCount }} of {{ messageCount }} items hidden by filters</span>
+                            <span>{{ hiddenMessageCount }} {{ commonWordsOf }} {{ messageCount }} {{ historyItemsFilteredSuffix }}</span>
                         </th>
                     </tr>
                 </thead>
