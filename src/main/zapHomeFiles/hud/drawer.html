@@ -39,7 +39,7 @@
                         </th>
                         <th class="title filter"> 
                             <span>
-                                <input v-model="filter" type="text" placeholder="Filter" />
+                                <input id="history-filter" v-model="filter" type="text" v-bind:class="{ 'error': isRegExError }" placeholder="Filter" />
                             </span>
                             <span>
                                 <input v-model="regexEnabled" type="checkbox" />
