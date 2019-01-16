@@ -16,6 +16,7 @@ Vue.component('history', {
             regexEnabled: false,
             messages: [],
             hiddenMessageCount: 0,
+            isRegExError: false,
             enableRegExText: I18n.t("history_enable_regex"),
             commonOf: I18n.t("common_of").toLowerCase(),
             historyItemsFilteredSuffix: I18n.t("history_items_filtered_suffix")
@@ -36,9 +37,11 @@ Vue.component('history', {
             if (isRegex){
                 try {
                     re = new RegExp(this.filter);
+                    this.isRegExError = false;
                 }
                 catch (ex) {
-                    re = new RegExp(''); //hack for now to prevent errors being thrown for invalid RegExp
+                    this.isRegExError = true;
+                    return []; //Return empty array if invalid RegEx
                 }
             }
 
@@ -64,6 +67,9 @@ Vue.component('history', {
         filter() {
             const visibleMessages = document.querySelectorAll("#history-messages .message-tr");
             this.hiddenMessageCount = (!this.messages) ? 0 : this.messages.length - visibleMessages.length;
+        },
+        regexEnabled(){
+           this.isRegExError = !this.regexEnabled ? false : this.isRegExError;
         }
     },
     created() {
