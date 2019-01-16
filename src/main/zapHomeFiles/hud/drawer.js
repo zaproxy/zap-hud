@@ -65,8 +65,11 @@ Vue.component('history', {
     },
     watch: {
         filter() {
-            const visibleMessages = document.querySelectorAll("#history-messages .message-tr");
-            this.hiddenMessageCount = (!this.messages) ? 0 : this.messages.length - visibleMessages.length;
+            //use the next tick capability to let the filteredMessages state update displayed messages and update count after reactive update
+            this.$nextTick(function () {
+                const visibleMessages = document.querySelectorAll("#history-messages .message-tr");
+                this.hiddenMessageCount = (!this.messages) ? 0 : this.messages.length - visibleMessages.length;
+            })
         },
         regexEnabled(){
            this.isRegExError = !this.regexEnabled ? false : this.isRegExError;
