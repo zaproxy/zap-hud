@@ -102,10 +102,7 @@ public class HudAPI extends ApiImplementor {
             Arrays.asList(new String[] {"inject.js"});
 
     private ApiImplementor hudFileProxy;
-    private ApiImplementor hudApiProxy;
-
     private String hudFileUrl;
-    private String hudApiUrl;
 
     private String websocketUrl;
 
@@ -139,8 +136,6 @@ public class HudAPI extends ApiImplementor {
 
         hudFileProxy = new HudFileProxy(this);
         hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S);
-        hudApiProxy = new HudApiProxy(this);
-        hudApiUrl = API.getInstance().getCallBackUrl(hudApiProxy, API.API_URL_S);
 
         // Temporary hack to make it easier to find the websocket test page
         // We could launch a browser, but then we'd need to depend on selenium
@@ -168,10 +163,6 @@ public class HudAPI extends ApiImplementor {
     @Override
     public String getPrefix() {
         return PREFIX;
-    }
-
-    protected ApiImplementor getHudApiProxy() {
-        return hudApiProxy;
     }
 
     protected ApiImplementor getHudFileProxy() {
@@ -422,9 +413,7 @@ public class HudAPI extends ApiImplementor {
 
             if (url.startsWith(API.API_URL_S)) {
                 // Only do these on the ZAP domain
-                contents =
-                        contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
-                                .replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
+                contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
 
                 if (file.equals("serviceworker.js")) {
                     // Inject the tool filenames
@@ -449,13 +438,10 @@ public class HudAPI extends ApiImplementor {
 
                 } else if (file.equals("utils.js")) {
                     contents =
-                            contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
-                                    .replace(
-                                            "<<DEV_MODE>>",
-                                            Boolean.toString(
-                                                    this.extension
-                                                            .getHudParam()
-                                                            .isDevelopmentMode()));
+                            contents.replace(
+                                    "<<DEV_MODE>>",
+                                    Boolean.toString(
+                                            this.extension.getHudParam().isDevelopmentMode()));
                 } else if (file.equals("serviceworker.js")) {
                     contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
                 } else if (file.equals("websockettest.js")) {

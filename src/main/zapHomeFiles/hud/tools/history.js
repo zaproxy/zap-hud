@@ -48,15 +48,9 @@ var History = (function() {
 	}
 
 	function getMessageDetails(id) {
-		return utils.zapApiCall('/core/view/message/?id=' + id)
-			.then(response => {
-				if (!response.ok) {
-					throw new Error('Could not find a message with id: ' + id);
-				}
-				return response.json();
-			})
-			.then(json => json.message)
-			.catch(utils.errorHandler);
+		return apiCallWithResponse("core", "view", "message", { id: id })
+		.then(json => json.message)
+		.catch(utils.errorHandler);
 	}
 
 	function showHttpMessageDetails(tabId, data) {
@@ -87,7 +81,6 @@ var History = (function() {
 				// Handle button choice
 				if (data.buttonSelected === "replay") {
 					sendRequest(data.header, data.body)
-					.then(response => response.json())
 					.then(json => {
 						let data = json.sendRequest[0];
 						data.activeTab = "Response"
@@ -100,23 +93,14 @@ var History = (function() {
 	}
 
 	function sendRequest(header, body) {
-		let url = "/core/action/sendRequest/";
 		let req = header;
 
 		if (body) {
 			req = req + "\r\n\r\n" + body
 		}
-
-		let params = "request=" + encodeURIComponent(req)
-
-		let init = {
-			method: "POST",
-			body: params,
-			headers: {'content-type': 'application/x-www-form-urlencoded'}
-		};
-
-		return utils.zapApiCall(url, init)
+		return apiCallWithResponse("core", "action", "sendRequest", { request: req })
 			.catch(utils.errorHandler);
+
 	}
     
     self.addEventListener("org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher", event => {
