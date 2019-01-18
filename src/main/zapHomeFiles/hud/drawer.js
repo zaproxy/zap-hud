@@ -17,9 +17,7 @@ Vue.component('history', {
             messages: [],
             hiddenMessageCount: 0,
             isRegExError: false,
-            enableRegExText: I18n.t("history_enable_regex"),
-            commonOf: I18n.t("common_of").toLowerCase(),
-            historyItemsFilteredSuffix: I18n.t("history_items_filtered_suffix")
+            enableRegExText: I18n.t("history_enable_regex")
         }
     },
     computed: {
@@ -56,6 +54,12 @@ Vue.component('history', {
                     return message.url.indexOf(self.filter)>=0; 
                 }
             });
+        },
+        historyItemsFiltered() {
+            let historyItemsFilteredString = I18n.t("history_items_filtered")
+                    .replace('{0}', this.hiddenMessageCount)
+                    .replace('{1}', this.messageCount);
+            return historyItemsFilteredString;
         }
     },
     methods: {
