@@ -56,10 +56,7 @@ Vue.component('history', {
             });
         },
         historyItemsFiltered() {
-            let historyItemsFilteredString = I18n.t("history_items_filtered")
-                    .replace('{0}', this.hiddenMessageCount)
-                    .replace('{1}', this.messageCount);
-            return historyItemsFilteredString;
+            return I18n.t("history_items_filtered", [this.hiddenMessageCount, this.messageCount]);
         }
     },
     methods: {
