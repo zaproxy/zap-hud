@@ -5,11 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
- - Add plain text/regex filtering capability to History section [#286](https://github.com/zaproxy/zap-hud/issues/233)
 
 ### Added
  - Add API endpoints for getting and setting UI options. [#319](https://github.com/zaproxy/zap-hud/issues/319)
  - Add tasks for Enable, Show and Break tutorial pages
+ - Add plain text/regex filtering capability to History section [#286](https://github.com/zaproxy/zap-hud/issues/233)
 
 ## [0.2.0] - 2018-12-31
 
