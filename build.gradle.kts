@@ -36,7 +36,8 @@ val zapPort = 8999
 // Use a key just to make sure the HUD works with one
 val zapApiKey = "password123"
 val hudDevArgs = listOf("-config", "hud.enabledForDesktop=true", "-config", "hud.enabledForDaemon=true", "-config", "hud.devMode=true", "-config", "hud.unsafeEval=true")
-val zapCmdlineOpts = listOf("-config", "hud.tutorialPort=9998", "-config", "hud.tutorialTestMode=true", "-config", "hud.showWelcomeScreen=false", "-daemon", "-config", "start.addonDirs=$buildDir/zap/") + hudDevArgs
+// Use specific TLS version to not break the tests in Java 11.
+val zapCmdlineOpts = listOf("-config", "proxy.securityProtocolsEnabled.protocol=TLSv1.2", "-config", "hud.tutorialPort=9998", "-config", "hud.tutorialTestMode=true", "-config", "hud.showWelcomeScreen=false", "-daemon", "-config", "start.addonDirs=$buildDir/zap/") + hudDevArgs
 
 zapAddOn {
     addOnId.set("hud")

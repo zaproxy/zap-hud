@@ -85,9 +85,13 @@ var Spider = (function() {
 
 	function startSpider(tabId, domain) {
 		utils.getUpgradedDomain(domain)
-			.then(upgradedDomain =>{
-				utils.zapApiCall("/spider/action/scan/?url=" + upgradedDomain);
-				spiderStarted(tabId);
+			.then(upgradedDomain => {
+				apiCallWithResponse("spider", "action", "scan", { url: upgradedDomain }).then (response => {
+					spiderStarted(tabId);
+				})
+				.catch(error => {
+					utils.zapApiErrorDialog(tabId, error)
+				});
 			})
 			.catch(utils.errorHandler);
 	}
@@ -107,8 +111,12 @@ var Spider = (function() {
 	}
 
 	function stopSpider(tabId) {
-		utils.zapApiCall("/spider/action/stop");
-		spiderStopped(tabId);
+		apiCallWithResponse("spider", "action", "stop").then (response => {
+			spiderStopped(tabId);
+		})
+		.catch(error => {
+			utils.zapApiErrorDialog(tabId, error);
+		});
 	}
 	
 	function spiderStopped(tabId) {

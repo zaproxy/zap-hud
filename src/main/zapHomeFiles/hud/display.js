@@ -386,16 +386,18 @@ Vue.component('history-message-modal', {
 		replayInBrowser: function() {
 			let self = this;
 			let message = this.request;
-			utils.zapApiCall("/hud/action/recordRequest/?header=" + encodeURIComponent(message.header) + "&body=" + encodeURIComponent(message.body))
-			.then(response => response.json())
-			.then(json => {
-				if (json.requestUrl) {
-					window.top.location.href = json.requestUrl;
+			let channel = new MessageChannel();
+			channel.port1.onmessage = function(event) {
+				if (event.data.requestUrl) {
+					window.top.location.href = event.data.requestUrl;
 				} else {
 					self.errors = I18n.t("error_invalid_html_header");
 				}
-			})
-			.catch(utils.errorHandler)
+			};
+			navigator.serviceWorker.controller.postMessage({
+				action:"zapApiCall", component: "hud", type: "action", 
+				name: "recordRequest", 
+				params: { header: message.header, body: message.body }}, [channel.port2]);
 		}
 	},
 	data() {
@@ -451,21 +453,19 @@ Vue.component('site-tree-node', {
 	    showChildren: function () {
 	      this.addChild(I18n.t("sites_children_loading"), false);
 			var treeNode = this;
-			utils.zapApiCall("/core/view/childNodes/?url=" + this.model.url)
-			.then(response => {
-
-				response.json().
-					then(json => {
-						// Remove the ..loading.. child
-						Vue.set(treeNode.model, 'children', [])
-						for(var i = 0; i < json.childNodes.length; i++) {
-							var child = json.childNodes[i];
-							treeNode.addChild(child.name, child.method, child.isLeaf, child.hrefId);
-						} 
-					})
-					.catch(utils.errorHandler);
-			})
-			.catch(utils.errorHandler);
+			let channel = new MessageChannel();
+			
+			channel.port1.onmessage = function(event) {
+				// Remove the ..loading.. child
+				Vue.set(treeNode.model, 'children', [])
+				for(var i = 0; i < event.data.childNodes.length; i++) {
+					var child = event.data.childNodes[i];
+					treeNode.addChild(child.name, child.method, child.isLeaf, child.hrefId);
+				} 
+			};
+			navigator.serviceWorker.controller.postMessage({
+				action:"zapApiCall", component: "core", type: "view", 
+				name: "childNodes", "params" : { url: this.model.url }}, [channel.port2]);
 	    },
 	    addChild: function (name, method, isLeaf, hrefId) {
 	      if (name.slice(-1) == '/') {
