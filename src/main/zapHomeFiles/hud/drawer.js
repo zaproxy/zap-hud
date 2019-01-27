@@ -17,6 +17,7 @@ Vue.component('history', {
             messages: [],
             hiddenMessageCount: 0,
             isRegExError: false,
+            historyItemsFilteredMessage: '',
             enableRegExText: I18n.t("history_enable_regex")
         }
     },
@@ -54,26 +55,26 @@ Vue.component('history', {
                     return message.url.indexOf(self.filter)>=0; 
                 }
             });
-        },
-        historyItemsFiltered() {
-            return I18n.t("history_items_filtered", [this.hiddenMessageCount, this.messageCount]);
         }
     },
     methods: {
         messageSelected(id) {
             navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "showHttpMessageDetails", tool: "history", id:id});
+        },
+        historyItemsFiltered() {
+            this.historyItemsFilteredMessage = I18n.t("history_items_filtered", [this.hiddenMessageCount, this.messageCount]);
         }
     },
     watch: {
-        filter() {
-            //use the next tick capability to let the filteredMessages state update displayed messages and update count after reactive update
+        regexEnabled() {
+           this.isRegExError = !this.regexEnabled ? false : this.isRegExError;
+        },
+        filteredMessages() {
             this.$nextTick(function () {
                 const visibleMessages = document.querySelectorAll("#history-messages .message-tr");
                 this.hiddenMessageCount = (!this.messages) ? 0 : this.messages.length - visibleMessages.length;
-            })
-        },
-        regexEnabled(){
-           this.isRegExError = !this.regexEnabled ? false : this.isRegExError;
+                this.historyItemsFiltered();
+            });
         }
     },
     created() {
