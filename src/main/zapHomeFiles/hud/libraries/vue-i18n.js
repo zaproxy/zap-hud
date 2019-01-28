@@ -1,6 +1,6 @@
 /*!
- * vue-i18n v8.5.0 
- * (c) 2018 kazuya kawaguchi
+ * vue-i18n v8.7.0 
+ * (c) 2019 kazuya kawaguchi
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -221,6 +221,8 @@
             options.i18n.formatter = this.$root.$i18n.formatter;
             options.i18n.fallbackLocale = this.$root.$i18n.fallbackLocale;
             options.i18n.silentTranslationWarn = this.$root.$i18n.silentTranslationWarn;
+            options.i18n.pluralizationRules = this.$root.$i18n.pluralizationRules;
+            options.i18n.preserveDirectiveContent = this.$root.$i18n.preserveDirectiveContent;
           }
 
           // init locale messages via custom blocks
@@ -394,7 +396,10 @@
       return
     }
 
-    el.textContent = '';
+    var i18n = vnode.context.$i18n || {};
+    if (!binding.modifiers.preserve && !i18n.preserveDirectiveContent) {
+      el.textContent = '';
+    }
     el._vt = undefined;
     delete el['_vt'];
     el._locale = undefined;
@@ -943,6 +948,8 @@
     'lower': function (str) { return str.toLocaleLowerCase(); }
   };
 
+  var defaultFormatter = new BaseFormatter();
+
   var VueI18n = function VueI18n (options) {
     var this$1 = this;
     if ( options === void 0 ) options = {};
@@ -962,7 +969,7 @@
     var numberFormats = options.numberFormats || {};
 
     this._vm = null;
-    this._formatter = options.formatter || new BaseFormatter();
+    this._formatter = options.formatter || defaultFormatter;
     this._missing = options.missing || null;
     this._root = options.root || null;
     this._sync = options.sync === undefined ? true : !!options.sync;
@@ -978,6 +985,9 @@
     this._dataListeners = [];
 
     this.pluralizationRules = options.pluralizationRules || {};
+    this.preserveDirectiveContent = options.preserveDirectiveContent === undefined
+      ? false
+      : !!options.preserveDirectiveContent;
 
     this._exist = function (message, key) {
       if (!message || !key) { return false }
@@ -1128,7 +1138,7 @@
       ret = this._link(locale, message, ret, host, interpolateMode, values, visitedLinkStack);
     }
 
-    return this._render(ret, interpolateMode, values)
+    return this._render(ret, interpolateMode, values, key)
   };
 
   VueI18n.prototype._link = function _link (
@@ -1207,9 +1217,15 @@
     return ret
   };
 
-  VueI18n.prototype._render = function _render (message, interpolateMode, values) {
-    var ret = this._formatter.interpolate(message, values);
-    // if interpolateMode is **not** 'string' ('raw'),
+  VueI18n.prototype._render = function _render (message, interpolateMode, values, path) {
+    var ret = this._formatter.interpolate(message, values, path);
+
+    // If the custom formatter refuses to work - apply the default one
+    if (!ret) {
+      ret = defaultFormatter.interpolate(message, values, path);
+    }
+
+    // if interpolateMode is **not** 'string' ('row'),
     // return the compiled data (e.g. ['foo', VNode, 'bar']) with formatter
     return interpolateMode === 'string' ? ret.join('') : ret
   };
@@ -1628,7 +1644,7 @@
     }
   });
   VueI18n.install = install;
-  VueI18n.version = '8.5.0';
+  VueI18n.version = '8.7.0';
 
   return VueI18n;
 
