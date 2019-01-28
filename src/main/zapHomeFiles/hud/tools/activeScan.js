@@ -40,7 +40,7 @@ var ActiveScan = (function() {
 		registerForZapEvents(ACTIVE_SCAN_EVENT);
 	}
 
-	function showStdDialog(tabId, domain) {
+	function showDialog(tabId, domain) {
 
 		Promise.all([checkIsRunning(tabId), self.tools.scope.isInScope(domain)])
 			.then(results => {
@@ -96,10 +96,10 @@ var ActiveScan = (function() {
 	}
 	
 	function startActiveScan(tabId, uri, recurse, method, body) {
-		utils.zapApiCall("/ascan/action/scan/?url=" + encodeURIComponent(uri) + 
-			"&recurse=" + recurse + "&method=" + method + "&postData=" + encodeURIComponent(body))
-			.then(response => {
-				return response.json()
+		apiCallWithResponse("ascan", "action", "scan", { url: uri, recurse: recurse, method: method, body: body })
+			.catch(error => {
+				utils.zapApiErrorDialog(tabId, error);
+				throw error;
 			})
 			.then(data => {
 				utils.loadTool(NAME)
@@ -122,7 +122,11 @@ var ActiveScan = (function() {
 	function stopActiveScan() {
 		utils.loadTool(NAME)
 			.then(tool => {
-				utils.zapApiCall("/ascan/action/stop/?scanId=" + tool.scanId + "");
+				return apiCallWithResponse("ascan", "action", "stop", { scanId: tool.scanId })
+			})
+			.catch(error => {
+				utils.zapApiErrorDialog(tabId, error);
+				throw error;
 			})
 			.then(activeScanStopped)
 			.catch(utils.errorHandler);
@@ -230,7 +234,7 @@ var ActiveScan = (function() {
 		if (message.tool === NAME) {
 			switch(message.action) {
 				case "buttonClicked":
-					showStdDialog(message.tabId, message.domain);
+					showDialog(message.tabId, message.domain);
 					break;
 
 				case "buttonMenuClicked":
