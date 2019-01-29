@@ -40,6 +40,8 @@ public abstract class FirefoxUnitTest {
                 .setSslProxy(Constants.ZAP_HOST_PORT);
 
         this.firefoxOptions.addPreference("network.captive-portal-service.enabled", false);
+        this.firefoxOptions.addPreference("browser.safebrowsing.provider.mozilla.gethashURL", "");
+        this.firefoxOptions.addPreference("browser.safebrowsing.provider.mozilla.updateURL", "");
         this.firefoxOptions.addPreference("network.proxy.type", 1);
         this.firefoxOptions.addPreference("network.proxy.http", Constants.ZAP_HOST);
         this.firefoxOptions.addPreference("network.proxy.http_port", Constants.ZAP_PORT);
