@@ -263,15 +263,23 @@ public class ExtensionHUD extends ExtensionAdaptor
     }
 
     public void addUpgradedHttpsDomain(URI uri) throws URIException {
-        this.upgradedHttpsDomains.add(uri.getHost() + ":" + uri.getPort());
+        this.upgradedHttpsDomains.add(getNormalisedDomain(uri));
+    }
+
+    static String getNormalisedDomain(URI uri) throws URIException {
+        int port = uri.getPort();
+        if (port == -1) {
+            return uri.getHost();
+        }
+        return uri.getHost() + ":" + uri.getPort();
     }
 
     public void removeUpgradedHttpsDomain(URI uri) throws URIException {
-        this.upgradedHttpsDomains.remove(uri.getHost() + ":" + uri.getPort());
+        this.upgradedHttpsDomains.remove(getNormalisedDomain(uri));
     }
 
     public boolean isUpgradedHttpsDomain(URI uri) throws URIException {
-        return this.upgradedHttpsDomains.contains(uri.getHost() + ":" + uri.getPort());
+        return this.upgradedHttpsDomains.contains(getNormalisedDomain(uri));
     }
 
     private void addScripts(File file, String prefix, ScriptType hudScriptType) {
@@ -382,9 +390,7 @@ public class ExtensionHUD extends ExtensionAdaptor
                     if (this.isUpgradedHttpsDomain(uri)) {
                         // Advise that we've upgraded this domain to https
                         Map<String, String> map = new HashMap<String, String>();
-                        map.put(
-                                HudEventPublisher.FIELD_DOMAIN,
-                                uri.getHost() + ":" + uri.getPort());
+                        map.put(HudEventPublisher.FIELD_DOMAIN, getNormalisedDomain(uri));
                         ZAP.getEventBus()
                                 .publishSyncEvent(
                                         HudEventPublisher.getPublisher(),
@@ -560,5 +566,9 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     public HudAPI getAPI() {
         return this.api;
+    }
+
+    protected Set<String> getUpgradedHttpsDomains() {
+        return upgradedHttpsDomains;
     }
 }

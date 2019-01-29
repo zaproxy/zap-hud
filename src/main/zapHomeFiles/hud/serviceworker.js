@@ -175,6 +175,17 @@ webSocket.onopen = function (event) {
 	// Basic test
 	webSocket.send('{ "component" : "core", "type" : "view", "name" : "version" }'); 
 	// Tools should register for alerts via the registerForWebSockerEvents function - see the break tool
+
+	apiCallWithResponse("hud", "view", "upgradedDomains")
+		.then(response => {
+			let upgradedDomains = {};
+
+			for (const domain of response.upgradedDomains) {
+				upgradedDomains[domain] = true;
+			}
+			return localforage.setItem('upgradedDomains', upgradedDomains);
+		})
+		.catch(utils.errorHandler);
 };
 
 webSocket.onmessage = function (event) {

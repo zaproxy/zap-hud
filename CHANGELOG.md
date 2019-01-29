@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Add tasks for Enable, Show and Break tutorial pages
  - Add plain text/regex filtering capability to History section [#286](https://github.com/zaproxy/zap-hud/issues/233)
 
+### Fixed
+ - Correct handling of upgraded domains on startup. [#162](https://github.com/zaproxy/zap-hud/issues/162)
+
 ## [0.2.0] - 2018-12-31
 
 ### Added
