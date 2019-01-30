@@ -189,6 +189,8 @@ public class ExtensionHUD extends ExtensionAdaptor
         getExtScript().removeListener(this);
 
         HudEventPublisher.unregister();
+
+        tutorialServer.stopServer();
     }
 
     @Override
