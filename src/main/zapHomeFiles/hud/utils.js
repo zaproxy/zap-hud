@@ -513,7 +513,12 @@ var utils = (function() {
 			})
 			.catch(errorHandler);
 	}
-	
+
+	function zapApiErrorDialog(tabId,  error) {
+		log(LOG_ERROR, 'zapApiErrorDialog', error.message, error.response);
+		messageFrame(tabId, "display", {action:"showDialog", config: {title : I18n.t("api_error_title"), text : error.message}})
+	}
+
 	/*
 	 * Returns the visibilityState of the specified iframe window
 	 */
@@ -742,6 +747,7 @@ return {
 		getZapFilePath: getZapFilePath,
 		getZapImagePath: getZapImagePath,
 		zapApiCall: zapApiCall,
+		zapApiErrorDialog: zapApiErrorDialog,
 		zapApiNewWindow: zapApiNewWindow,
 		log: log
 	};

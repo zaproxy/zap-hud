@@ -20,6 +20,14 @@
 		);
 	}
 
+	function generateTabId() {
+		let millis = new Date().getTime();
+		let r = Math.floor(Math.random()*1000);
+		let tabId = '' + millis + '-' + r;
+
+		return tabId.substring(6);
+	}
+
 	/* TARGET INTERACTIONS */
 	// code that will interact with the target domain will go here
 
@@ -407,7 +415,7 @@
 
 	/* initializes the HUD Frames */
 	if (window.top == window.self) {
-		tabId = Math.round(Math.random()*5000); //todo: nonsense random number generator;
+		tabId = generateTabId();
 
 		window.addEventListener("message", receiveMessages);
 

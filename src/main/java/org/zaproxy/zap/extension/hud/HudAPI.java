@@ -89,6 +89,7 @@ public class HudAPI extends ApiImplementor {
     private static final String VIEW_GET_UI_OPTION = "getUiOption";
     private static final String VIEW_HUD_ALERT_DATA = "hudAlertData";
     private static final String VIEW_HEARTBEAT = "heartbeat";
+    private static final String VIEW_UPGRADED_DOMAINS = "upgradedDomains";
 
     private static final String PARAM_RECORD = "record";
     private static final String PARAM_HEADER = "header";
@@ -136,6 +137,7 @@ public class HudAPI extends ApiImplementor {
         this.addApiView(new ApiView(VIEW_HUD_ALERT_DATA, new String[] {PARAM_URL}));
         this.addApiView(new ApiView(VIEW_HEARTBEAT));
         this.addApiView(new ApiView(VIEW_GET_UI_OPTION, new String[] {PARAM_KEY}));
+        this.addApiView(new ApiView(VIEW_UPGRADED_DOMAINS));
 
         hudFileProxy = new HudFileProxy(this);
         hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S);
@@ -296,6 +298,14 @@ public class HudAPI extends ApiImplementor {
                 String key = params.getString(PARAM_KEY);
                 validateKey(key);
                 return new ApiResponseElement(key, this.extension.getHudParam().getUiOption(key));
+            case VIEW_UPGRADED_DOMAINS:
+                ApiResponseList domains = new ApiResponseList(name);
+                extension
+                        .getUpgradedHttpsDomains()
+                        .forEach(
+                                domain ->
+                                        domains.addItem(new ApiResponseElement("domain", domain)));
+                return domains;
             default:
                 throw new ApiException(ApiException.Type.BAD_VIEW);
         }
