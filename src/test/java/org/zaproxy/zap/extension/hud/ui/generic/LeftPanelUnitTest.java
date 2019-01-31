@@ -45,10 +45,7 @@ public class LeftPanelUnitTest {
 
     public static void testLeftContainsExpectedButtons(WebDriver wd) {
         HUD hud = new HUD(wd);
-        WebElement panel = hud.waitForLeftPanel();
-        assertNotNull(panel);
-        wd.switchTo().frame(panel);
-        List<WebElement> buttons = hud.waitForHudButtons(EXPECTED_BUTTONS);
+        List<WebElement> buttons = hud.waitForHudButtons(HUD.LEFT_PANEL_BY_ID, EXPECTED_BUTTONS);
         assertNotNull(buttons);
         // An exact match would be better, but its proved to be too flaky :/
         if (buttons.size() < EXPECTED_BUTTONS) {
