@@ -154,7 +154,6 @@ public class ExtensionHUD extends ExtensionAdaptor
 
         this.api.addApiOptions(getHudParam());
         extensionHook.addApiImplementor(this.api);
-        extensionHook.addApiImplementor(this.api.getHudApiProxy());
         extensionHook.addApiImplementor(this.api.getHudFileProxy());
 
         extensionHook.addOptionsParamSet(this.getHudParam());

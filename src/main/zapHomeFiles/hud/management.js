@@ -32,7 +32,10 @@ Vue.component('welcome-screen', {
 		},
 		closeWelcomeScreen: function() {
 			if (dontShowAgain.checked) {
-				utils.zapApiCall("/hud/action/setOptionShowWelcomeScreen/?Boolean=false");
+				navigator.serviceWorker.controller.postMessage({
+					action:"zapApiCall", component: "hud", type: "action", 
+					name: "setOptionShowWelcomeScreen",
+					params: { Boolean: 'false' }});
 			}
 
 			app.showWelcomeScreen = false;

@@ -22,7 +22,6 @@ var utils = (function() {
 	
 	// Injected strings
 	var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
-	var ZAP_HUD_API = '<<ZAP_HUD_API>>';
 	var IS_DEV_MODE = '<<DEV_MODE>>' === 'true' ? true : false ;
 
 	var BUTTON_HTML = '<div class="button" id="BUTTON_NAME-button">\n<div class="button-icon" id="BUTTON_NAME-button-icon"><img src="' + ZAP_HUD_FILES + '?image=IMAGE_NAME" alt="IMAGE_NAME" height="16" width="16"></div>\n<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA</div>\n<div class="button-label" id="BUTTON_NAME-button-label">BUTTON_LABEL</div>\n</div>\n';
@@ -179,7 +178,6 @@ var utils = (function() {
 		promises.push(localforage.setItem(IS_HUD_INITIALIZED, true));
 		promises.push(localforage.setItem(IS_FIRST_TIME, true));
 		promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false))
-		promises.push(localforage.setItem('upgradedDomains', {}))
 		promises.push(localforage.setItem('settings.isHudVisible', true));
 		promises.push(localforage.setItem('drawer.isDrawerOpen', false));
 		// Note: in the below, "activeTab" is to be set to href, not name
@@ -681,14 +679,6 @@ var utils = (function() {
 		return ZAP_HUD_FILES + '?image=' + file;
 	}
 	
-	function zapApiCall(apiCall, init) {
-		return fetch(ZAP_HUD_API + apiCall, init);
-	}
-
-	function zapApiNewWindow(apiCall) {
-		window.open(ZAP_HUD_API + apiCall);
-	}
-
 	function log(level, method, message, object) {
 		if (level > LOG_LEVEL || (! LOG_TO_CONSOLE && ! LOG_TO_ZAP)) {
 			return;
@@ -708,7 +698,8 @@ var utils = (function() {
 			console[logLevel.toLowerCase()](record);
 		}
 		if (LOG_TO_ZAP) {
-			zapApiCall("/hud/action/log/?record=" + record);
+			// We dont know if we're in the service worker here, so raise an event
+			self.dispatchEvent(new CustomEvent("hud.log", {detail: {record: record}}));
 		}
 		if (level == LOG_ERROR) {
 			self.dispatchEvent(new CustomEvent("hud.error", {detail: {record: record}}));
@@ -746,9 +737,7 @@ return {
 		errorHandler: errorHandler,
 		getZapFilePath: getZapFilePath,
 		getZapImagePath: getZapImagePath,
-		zapApiCall: zapApiCall,
 		zapApiErrorDialog: zapApiErrorDialog,
-		zapApiNewWindow: zapApiNewWindow,
 		log: log
 	};
 })();

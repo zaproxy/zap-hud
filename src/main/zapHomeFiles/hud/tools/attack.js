@@ -65,10 +65,10 @@ var Attack = (function() {
 					.then(response => {
 						// Handle button choice
 						if (response.id === "turnon") {
-							turnOnAttackMode(domain);
+							turnOnAttackMode(tabId, domain);
 						}
 						else if (response.id === "turnoff") {
-							turnOffAttackMode();
+							turnOffAttackMode(tabId);
 						}
 					})
 					.catch(utils.errorHandler);
@@ -77,37 +77,47 @@ var Attack = (function() {
 			.catch(utils.errorHandler);
 	}
 
-	function turnOnAttackMode(domain) {
-			utils.zapApiCall("/core/action/setMode/?mode=attack");
-
-			utils.loadTool(NAME)
-				.then(tool => {
-					tool.isRunning = true;
-					tool.attackingDomain = domain;
-					tool.icon = ICONS.ON;
-					tool.data = DATA.ON;
-
-					utils.writeTool(tool);
-					utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notDomain: domain}, tool: {name: NAME, label: LABEL, data: DATA.OFF, icon: ICONS.OFF}, isToolDisabled: true})
-					utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain}, tool: {name: NAME, label: LABEL, data: DATA.ON, icon: ICONS.ON}});
+	function turnOnAttackMode(tabId, domain) {
+			apiCallWithResponse("core", "action", "setMode", { mode: 'attack' })
+				.catch(error => {
+					utils.zapApiErrorDialog(tabId, error);
+					throw error;
 				})
-				.catch(utils.errorHandler);
+				.then(response => {
+					utils.loadTool(NAME)
+						.then(tool => {
+							tool.isRunning = true;
+							tool.attackingDomain = domain;
+							tool.icon = ICONS.ON;
+							tool.data = DATA.ON;
+		
+							utils.writeTool(tool);
+							utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notDomain: domain}, tool: {name: NAME, label: LABEL, data: DATA.OFF, icon: ICONS.OFF}, isToolDisabled: true})
+							utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain}, tool: {name: NAME, label: LABEL, data: DATA.ON, icon: ICONS.ON}});
+						})
+						.catch(utils.errorHandler);
+				});
 	}
 
-	function turnOffAttackMode() {
-		utils.zapApiCall("/core/action/setMode/?mode=standard");
-
-		utils.loadTool(NAME)
-			.then(tool => {
-				tool.isRunning = false;
-				tool.attackingDomain = '';
-				tool.icon = ICONS.OFF;
-				tool.data = DATA.OFF;
-
-				utils.writeTool(tool);
-				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: DATA.OFF, icon: ICONS.OFF}, isToolDisabled: false})
+	function turnOffAttackMode(tabId) {
+		apiCallWithResponse("core", "action", "setMode", { mode: 'standard' })
+			.catch(error => {
+				utils.zapApiErrorDialog(tabId, error);
+				throw error;
 			})
-			.catch(utils.errorHandler);
+			.then(response => {
+				utils.loadTool(NAME)
+					.then(tool => {
+						tool.isRunning = false;
+						tool.attackingDomain = '';
+						tool.icon = ICONS.OFF;
+						tool.data = DATA.OFF;
+		
+						utils.writeTool(tool);
+						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: DATA.OFF, icon: ICONS.OFF}, isToolDisabled: false})
+					})
+					.catch(utils.errorHandler);
+			});
 	}
 
 	function checkIsRunning(domain) {

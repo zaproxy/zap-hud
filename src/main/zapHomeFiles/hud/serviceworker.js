@@ -1,7 +1,5 @@
 // Injected strings
 var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
-var ZAP_HUD_WS = '<<ZAP_HUD_WS>>';
-var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
 var toolScripts = [
 	'<<ZAP_HUD_TOOLS>>'
 ];
@@ -153,15 +151,23 @@ const onMessage = event => {
 	}
 };
 
+const logHandler = event => {
+	apiCall("hud", "action", "log", { record: event.detail.record });
+};
+
 self.addEventListener("install", onInstall); 
 self.addEventListener("activate", onActivate);
 self.addEventListener("fetch", onFetch);
 self.addEventListener("message", onMessage);
 self.addEventListener('error', utils.errorHandler);
+self.addEventListener('hud.log', logHandler);
 
 /* Set up WebSockets */
 
-webSocket = new WebSocket(ZAP_HUD_WS);
+{
+	let ZAP_HUD_WS = '<<ZAP_HUD_WS>>';
+	webSocket = new WebSocket(ZAP_HUD_WS);
+}
 
 webSocket.onopen = function (event) {
 	// Basic test
@@ -200,7 +206,7 @@ webSocket.onmessage = function (event) {
 		} else {
 			pFunctions.resolve(response);
 		}
-		delete webSocketCallbacks[jevent['id']]
+		delete webSocketCallbacks[jevent['id']];
 	} else {
 		utils.log(LOG_DEBUG, 'serviceworker.webSocket.onmessage', 'Unexpected message', jevent);
 	}
