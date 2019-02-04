@@ -16,9 +16,13 @@ var Spider = (function() {
 	var ICONS = {};
 		ICONS.SPIDER = "spider.png";
 	var DIALOG = {};
-		DIALOG.START = I18n.t("spider_start");
-		DIALOG.START_ADD_SCOPE = I18n.t("spider_start_scope");
-		DIALOG.STOP = I18n.t("spider_stop");
+		DIALOG.START_1 = I18n.t("spider_start_1");
+		DIALOG.START_2 = I18n.t("spider_start_2");
+		DIALOG.START_ADD_SCOPE_1 = I18n.t("spider_start_scope_1");
+		DIALOG.START_ADD_SCOPE_2 = I18n.t("spider_start_scope_2");
+		DIALOG.START_ADD_SCOPE_3 = I18n.t("spider_start_scope_3");
+		DIALOG.STOP_1 = I18n.t("spider_stop_1")
+		DIALOG.STOP_2 = I18n.t("spider_stop_2");
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -32,6 +36,7 @@ var Spider = (function() {
 		tool.position = 0;
 		tool.isRunning = false;
 		tool.runningTabId = '';
+		tool.runningScope = [];
 
 		utils.writeTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.spider.SpiderEventPublisher");
@@ -39,26 +44,27 @@ var Spider = (function() {
 
 	function showDialog(tabId, domain) {
 
-		Promise.all([checkIsRunning(), self.tools.scope.isInScope(domain)])
+		Promise.all([checkIsRunning(), self.tools.scope.isInScope(domain), utils.loadTool(NAME)])
 			.then(results => {
 				var isRunning = results[0];
 				var isInScope = results[1];
+				var tool = results[2];
 
 				var config = {};
 				config.buttons = [{text: I18n.t("common_cancel"), id: "cancel"}];
 
 				if(!isRunning) {
 					if (!isInScope) {
-						config.text = DIALOG.START_ADD_SCOPE;
+						config.text = DIALOG.START_ADD_SCOPE_1 + domain + DIALOG.START_ADD_SCOPE_2 + domain + DIALOG.START_ADD_SCOPE_3;
 						config.buttons.unshift({text: I18n.t("common_start"), id: "start-add-to-scope"});
 					}
 					else {
-						config.text = DIALOG.START;
+						config.text = DIALOG.START_1 + domain + DIALOG.START_2;
 						config.buttons.unshift({text: I18n.t("common_start"), id: "start"});
 					}
 				}
 				else {
-					config.text = DIALOG.STOP;
+					config.text = DIALOG.STOP_1 + tool.runningScope[0] + DIALOG.STOP_2;
 					config.buttons.unshift({text: I18n.t("common_stop"), id: "stop"});
 				}
 
@@ -87,20 +93,21 @@ var Spider = (function() {
 		utils.getUpgradedDomain(domain)
 			.then(upgradedDomain =>{
 				utils.zapApiCall("/spider/action/scan/?url=" + upgradedDomain);
-				spiderStarted(tabId);
+				spiderStarted(tabId, domain);
 			})
 			.catch(utils.errorHandler);
 	}
 	
-	function spiderStarted(tabId) {
+	function spiderStarted(tabId, domain) {
 		utils.loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = true;
 				tool.runningTabId = tabId;
+				tool.runningScope = [domain];
 				tool.data = "0%";
 
 				utils.writeTool(tool);
-				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notTabId: tabId}, tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.SPIDER}, isToolDisabled: true})
+				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.SPIDER}})
 				utils.messageFrame(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.SPIDER}});
 			})
 			.catch(utils.errorHandler);
@@ -150,7 +157,7 @@ var Spider = (function() {
 						tool.data = progress;
 
 						utils.writeTool(tool);
-						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {scope: urls}, tool: tool})
+						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: tool})
 					}
 				})
 				.catch(utils.errorHandler);
@@ -158,16 +165,12 @@ var Spider = (function() {
 	}
 
 	function getTool(context, port) {
-		Promise.all([utils.loadTool(NAME), self.tools.scope.isInScope(context.domain)])
+		Promise.all([utils.loadTool(NAME)])
 			.then(results => {
 				const tool = results[0];
-				const isInScope = results[1];
 
-				if (tool.isRunning && isInScope) {
+				if (tool.isRunning) {
 					port.postMessage({label: LABEL, data: tool.data, icon: ICONS.SPIDER});
-				}
-				else if (tool.isRunning) {
-					port.postMessage({label: LABEL, data: DATA.START, icon: ICONS.SPIDER, isDisabled: true});
 				}
 				else {
 					port.postMessage({label: LABEL, data: DATA.START, icon: ICONS.SPIDER});
