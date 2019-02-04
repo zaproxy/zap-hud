@@ -39,6 +39,15 @@ public class HtmlEditor {
         this.outputDocument = new OutputDocument(source);
     }
 
+    public void injectAtStartOfHead(String inject) {
+        List<StartTag> headTags = this.source.getAllStartTags("head");
+
+        if (headTags.size() > 0) {
+            this.outputDocument.insert(headTags.get(0).getEnd(), inject);
+            this.changed = true;
+        }
+    }
+
     public void injectAtStartOfBody(String inject) {
         List<StartTag> bodyTags = this.source.getAllStartTags("body");
 

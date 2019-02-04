@@ -405,9 +405,15 @@ public class ExtensionHUD extends ExtensionAdaptor
             try {
                 HtmlEditor htmlEd = new HtmlEditor(msg);
                 String hudScript = this.api.getFile(msg, HUD_HTML);
+                String frontEndTrackerScript =
+                        "<script type='text/javascript' src='"
+                                + api.getUrlPrefix(api.getSite(msg))
+                                + "?zapfile=front-end-tracker.js'></script>";
                 // These are the only files that use FILE_PREFIX
                 hudScript =
                         hudScript.replace("<<FILE_PREFIX>>", api.getUrlPrefix(api.getSite(msg)));
+
+                htmlEd.injectAtStartOfHead(frontEndTrackerScript);
                 htmlEd.injectAtStartOfBody(hudScript);
                 htmlEd.rewriteHttpMessage();
 
