@@ -74,7 +74,7 @@ var ActiveScan = (function() {
 					startActiveScanDomain(tabId, domain);
 				}
 				else if (response.id === "start-add-to-scope") {
-					self.tools.scope.addToScope(domain)
+					self.tools.scope.addToScope(tabId, domain)
 						.then(
 							startActiveScanDomain(tabId, domain)
 						)
