@@ -165,11 +165,8 @@ var ActiveScan = (function() {
 
 	function updateProgress(progress) {
 		if (progress !== "-1") {
-			Promise.all([utils.loadTool(NAME), self.tools.scope.getUrlsInScope()])
-				.then(results => {
-					let tool = results[0];
-					let urls = results[1];
-					
+			utils.loadTool(NAME)
+				.then(tool => {
 					if (tool.isRunning) {
 						tool.data = progress;
 
