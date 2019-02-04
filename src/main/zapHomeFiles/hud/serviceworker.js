@@ -20,6 +20,8 @@ var targetUrl = "";
 var isDebugging = true;
 
 var webSocket;
+var webSocketCallbacks = {};
+var webSocketCallbackId = 0;
 
 var urlsToCache = [
 	ZAP_HUD_FILES + "?name=libraries/localforage.min.js",
@@ -136,10 +138,25 @@ const onMessage = event => {
 			break;
 
 		case "heartbeat":
-			webSocket.send('{ "component" : "hud", "type" : "view", "name" : "heartbeat" }');
+			apiCall("hud", "view", "heartbeat");
 			break;
 
+		case "zapApiCall":
+			if (event.ports.length > 0) {
+				apiCallWithResponse(message.component, message.type, message.name, message.params)
+				.then (response => {
+					event.ports[0].postMessage(response);
+				})
+				.catch(error => {
+					event.ports[0].postMessage(error.response);
+				});
+			} else {
+				apiCall(message.component, message.type, message.name, message.params);
+			}
+			break;
+			
 		default:
+			utils.log(LOG_DEBUG, 'serviceworker.onMessage', 'Unexpected action: ' + message.action, message);
 			break;
 	}
 };
@@ -158,6 +175,17 @@ webSocket.onopen = function (event) {
 	// Basic test
 	webSocket.send('{ "component" : "core", "type" : "view", "name" : "version" }'); 
 	// Tools should register for alerts via the registerForWebSockerEvents function - see the break tool
+
+	apiCallWithResponse("hud", "view", "upgradedDomains")
+		.then(response => {
+			let upgradedDomains = {};
+
+			for (const domain of response.upgradedDomains) {
+				upgradedDomains[domain] = true;
+			}
+			return localforage.setItem('upgradedDomains', upgradedDomains);
+		})
+		.catch(utils.errorHandler);
 };
 
 webSocket.onmessage = function (event) {
@@ -167,6 +195,21 @@ webSocket.onmessage = function (event) {
 		utils.log(LOG_DEBUG, 'serviceworker.webSocket.onmessage', jevent['event.publisher']);
 		var ev = new CustomEvent(jevent['event.publisher'], {detail: jevent});
 		self.dispatchEvent(ev);
+	} else if ('id' in jevent && 'response' in jevent) {
+		let pFunctions = webSocketCallbacks[jevent['id']];
+		let response = jevent['response'];
+		if ('code' in response && 'message' in response) {
+			// These always indicate a failure
+			let error = new Error(I18n.t("error_with_message", [response['message']]));
+			error.response = response;
+
+			pFunctions.reject(error);
+		} else {
+			pFunctions.resolve(response);
+		}
+		delete webSocketCallbacks[jevent['id']]
+	} else {
+		utils.log(LOG_DEBUG, 'serviceworker.webSocket.onmessage', 'Unexpected message', jevent);
 	}
 };
 
@@ -175,7 +218,32 @@ webSocket.onerror = function (event) {
 };
 
 function registerForZapEvents(publisher) {
-	webSocket.send('{"component" : "event", "type" : "register", "name" : "' + publisher + '"}');
+	apiCall("event", "register", publisher);
+};
+
+function apiCall(component, type, name, params) {
+	if (! params) {
+		params = {};
+	}
+	let call = { component : component, type: type, name: name, params: params }; 
+	webSocket.send(JSON.stringify(call));
+};
+
+function apiCallWithResponse(component, type, name, params) {
+	if (! params) {
+		params = {};
+	}
+	let call = { component : component, type: type, name: name, params: params }; 
+	let pFunctions = {};
+	let p = new Promise(function(resolve, reject) { 
+		pFunctions.resolve = resolve; 
+		pFunctions.reject = reject; 
+	});
+	let callId = webSocketCallbackId++;
+	call['id'] = callId;
+	webSocketCallbacks[callId] = pFunctions;
+	webSocket.send(JSON.stringify(call));
+	return p;
 };
 
 function showAddToolDialog(tabId, frameId) {

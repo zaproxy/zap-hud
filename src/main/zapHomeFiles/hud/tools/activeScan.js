@@ -96,10 +96,11 @@ var ActiveScan = (function() {
 	function startActiveScan(tabId, domain) {
 		utils.getUpgradedDomain(domain)
 			.then(upgradedDomain => {
-				return utils.zapApiCall("/ascan/action/scan/?url=" + upgradedDomain)
-			}).
-			then(response => {
-				return response.json()
+				return apiCallWithResponse("ascan", "action", "scan", { url: upgradedDomain })
+			})
+			.catch(error => {
+				utils.zapApiErrorDialog(tabId, error);
+				throw error;
 			})
 			.then(data => {
 				utils.loadTool(NAME)
@@ -122,7 +123,11 @@ var ActiveScan = (function() {
 	function stopActiveScan() {
 		utils.loadTool(NAME)
 			.then(tool => {
-				utils.zapApiCall("/ascan/action/stop/?scanId=" + tool.scanId + "");
+				return apiCallWithResponse("ascan", "action", "stop", { scanId: tool.scanId })
+			})
+			.catch(error => {
+				utils.zapApiErrorDialog(tabId, error);
+				throw error;
 			})
 			.then(activeScanStopped)
 			.catch(utils.errorHandler);

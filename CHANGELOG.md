@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Add API endpoints for getting and setting UI options. [#319](https://github.com/zaproxy/zap-hud/issues/319)
  - Add tasks for Enable, Show and Break tutorial pages
+ - Add plain text/regex filtering capability to History section [#286](https://github.com/zaproxy/zap-hud/issues/233)
+
+### Fixed
+ - Correct handling of upgraded domains on startup. [#162](https://github.com/zaproxy/zap-hud/issues/162)
+ - Stop the tutorial server when the add-on is uninstalled.
 
 ## [0.2.0] - 2018-12-31
 
@@ -22,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Changed Attack Mode icon to crosshairs. [#221](https://github.com/zaproxy/zap-hud/issues/221)
 
 ### Fixed
- - Upgraded vue.js to 2.5.21 and vue-i18n to 8.5.0 
+ - Upgraded vue.js to 2.5.21 and vue-i18n to 8.5.0
 
 ## [0.1.2] - 2018-12-17
 

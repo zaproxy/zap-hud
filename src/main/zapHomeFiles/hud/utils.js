@@ -180,7 +180,6 @@ var utils = (function() {
 		promises.push(localforage.setItem(IS_HUD_CONFIGURED, true));
 		promises.push(localforage.setItem(IS_FIRST_TIME, true));
 		promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false))
-		promises.push(localforage.setItem('upgradedDomains', {}))
 
 		// set other values to defaults on startup
 		promises.push(initDefaults());
@@ -497,7 +496,12 @@ var utils = (function() {
 			})
 			.catch(errorHandler);
 	}
-	
+
+	function zapApiErrorDialog(tabId,  error) {
+		log(LOG_ERROR, 'zapApiErrorDialog', error.message, error.response);
+		messageFrame(tabId, "display", {action:"showDialog", config: {title : I18n.t("api_error_title"), text : error.message}})
+	}
+
 	/*
 	 * Returns the visibilityState of the specified iframe window
 	 */
@@ -726,6 +730,7 @@ return {
 		getZapFilePath: getZapFilePath,
 		getZapImagePath: getZapImagePath,
 		zapApiCall: zapApiCall,
+		zapApiErrorDialog: zapApiErrorDialog,
 		zapApiNewWindow: zapApiNewWindow,
 		log: log
 	};
