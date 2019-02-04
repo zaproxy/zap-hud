@@ -108,7 +108,6 @@ var Spider = (function() {
 
 				utils.writeTool(tool);
 				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.SPIDER}})
-				utils.messageFrame(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.SPIDER}});
 			})
 			.catch(utils.errorHandler);
 	}
@@ -126,7 +125,7 @@ var Spider = (function() {
 				tool.data = DATA.START;
 
 				utils.writeTool(tool);
-				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.SPIDER}, isToolDisabled: false});
+				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.SPIDER}});
 			})
 			.catch(utils.errorHandler);
 	}
