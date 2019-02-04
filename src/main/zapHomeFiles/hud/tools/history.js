@@ -58,36 +58,48 @@ var History = (function() {
 			throw new Error('Coud not load HTTP message details')
 		}
 
-		var config = {
-			request: {
-				method: utils.parseRequestHeader(data.requestHeader).method,
-				header: data.requestHeader.trim(),
-				body: data.requestBody
-			},
-			response: {
-				header: data.responseHeader.trim(),
-				body: data.responseBody
-			},
-			isResponseDisabled: false,
-			activeTab: "Request"
-		};
+		var parsedReqData = utils.parseRequestHeader(data.requestHeader);
 
-		if ('activeTab' in data) {
-			config.activeTab = data.activeTab;
-		}
-
-		return utils.messageFrame(tabId, "display", {action:"showHistoryMessage", config:config})
-			.then(data => {
-				// Handle button choice
-				if (data.buttonSelected === "replay") {
-					sendRequest(data.header, data.body)
-					.then(json => {
-						let data = json.sendRequest[0];
-						data.activeTab = "Response"
-						return showHttpMessageDetails(tabId, data);
-					})
-					.catch(utils.errorHandler)
+		Promise.all([self.tools['active-scan'].isRunning(), self.tools.scope.isInScope(utils.parseDomainFromUrl(parsedReqData.uri))])
+			.then(results => {
+				var isAscanRunning = results[0];
+				var isInScope = results[1];
+		
+				var config = {
+					request: {
+						method: parsedReqData.method,
+						uri: parsedReqData.uri,
+						header: data.requestHeader.trim(),
+						body: data.requestBody
+					},
+					response: {
+						header: data.responseHeader.trim(),
+						body: data.responseBody
+					},
+					isResponseDisabled: false,
+					isAscanDisabled: ! isInScope ||isAscanRunning,
+					activeTab: "Request"
+				};
+		
+				if ('activeTab' in data) {
+					config.activeTab = data.activeTab;
 				}
+		
+				return utils.messageFrame(tabId, "display", {action:"showHistoryMessage", config:config})
+					.then(data => {
+						// Handle button choice
+						if (data.buttonSelected === "replay") {
+							sendRequest(data.header, data.body)
+							.then(response => response.json())
+							.then(json => {
+								let data = json.sendRequest[0];
+								data.activeTab = "Response"
+								return showHttpMessageDetails(tabId, data);
+							})
+							.catch(utils.errorHandler)
+						}
+					})
+					.catch(utils.errorHandler);
 			})
 			.catch(utils.errorHandler);
 	}

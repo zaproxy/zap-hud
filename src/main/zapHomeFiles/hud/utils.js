@@ -179,7 +179,6 @@ var utils = (function() {
 		promises.push(localforage.setItem(IS_HUD_CONFIGURED, true));
 		promises.push(localforage.setItem(IS_FIRST_TIME, true));
 		promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false))
-		promises.push(localforage.setItem('upgradedDomains', {}))
 
 		// set other values to defaults on startup
 		promises.push(initDefaults());

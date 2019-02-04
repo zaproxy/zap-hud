@@ -398,6 +398,13 @@ Vue.component('history-message-modal', {
 				action:"zapApiCall", component: "hud", type: "action", 
 				name: "recordRequest", 
 				params: { header: message.header, body: message.body }}, [channel.port2]);
+		},
+		ascanRequest: function() {
+			let req = this.request;
+			this.$emit('close');
+			navigator.serviceWorker.controller.postMessage(
+				{tabId: tabId, frameId: frameId, action: "ascanRequest", tool: "active-scan", 
+					uri: req.uri, method: req.method, body: req.body});
 		}
 	},
 	data() {
@@ -405,6 +412,7 @@ Vue.component('history-message-modal', {
 			port: null,
 			request: {},
 			response: {},
+			isAscanDisabled: true,
 			isResponseDisabled: false,
 			activeTab: 'Request',
 			errors: ''
@@ -418,6 +426,7 @@ Vue.component('history-message-modal', {
 			self.response = data.response;
 			self.port = data.port;
 			self.isResponseDisabled = data.isResponseDisabled;
+			self.isAscanDisabled = data.isAscanDisabled;
 			self.activeTab = data.activeTab;
 
 			self.request.isReadonly = false;
@@ -721,6 +730,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 				request: config.request,
 				response: config.response,
 				isResponseDisabled: config.isResponseDisabled,
+				isAscanDisabled: config.isAscanDisabled,
 				activeTab: config.activeTab,
 				port: port
 			});

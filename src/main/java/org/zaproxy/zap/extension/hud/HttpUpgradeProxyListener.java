@@ -101,7 +101,7 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
                         Map<String, String> map = new HashMap<String, String>();
                         map.put(
                                 HudEventPublisher.FIELD_DOMAIN,
-                                url.getHost() + ":" + url.getPort());
+                                ExtensionHUD.getNormalisedDomain(url));
                         ZAP.getEventBus()
                                 .publishSyncEvent(
                                         HudEventPublisher.getPublisher(),
