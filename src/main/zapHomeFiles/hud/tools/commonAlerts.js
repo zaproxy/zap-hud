@@ -107,10 +107,7 @@ var CommonAlerts = (function() {
 				// fetch all of the current alerts from ZAP
 				utils.getUpgradedDomain(targetDomain)
 					.then(upgradedDomain => {
-						return utils.zapApiCall("/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
-					})
-					.then(response => {
-						return response.json()
+						return apiCallWithResponse("alert", "view", "alertsByRisk", { url: upgradedDomain, recurse: 'true' })
 					})
 					.then(json => {
 						alertCache[targetDomain] = alertUtils.flattenAllAlerts(json);
@@ -137,36 +134,32 @@ var CommonAlerts = (function() {
 					.catch(utils.errorHandler);
 
 				// Fetch all of the alerts on this page
-				utils.zapApiCall("/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
-				.then(response => {
-					response.json().
-						then(json => {
-							let pageAlerts = alertUtils.flattenAllAlerts(json);
-							let raisedEventDetails = {domain: targetDomain, url: event.detail.uri, target: origTarget, pageAlerts : pageAlerts};
-							var ev = new CustomEvent("commonAlerts.pageAlerts", {detail: raisedEventDetails});
-							self.dispatchEvent(ev);
+				apiCallWithResponse("alert", "view", "alertsByRisk", { url: target, recurse: 'false' })
+					.then(json => {
+						let pageAlerts = alertUtils.flattenAllAlerts(json);
+						let raisedEventDetails = {domain: targetDomain, url: event.detail.uri, target: origTarget, pageAlerts : pageAlerts};
+						var ev = new CustomEvent("commonAlerts.pageAlerts", {detail: raisedEventDetails});
+						self.dispatchEvent(ev);
 
-							// Highlight any alerts related to form params
-							for (var risk in RISKS) {
-								var alertRisk = RISKS[risk];
-								for (var alertName in pageAlerts[alertRisk]) {
-									let reportedParams = new Set();
-									for (var i = 0; i < pageAlerts[alertRisk][alertName].length; i++) {
-										var alert = pageAlerts[alertRisk][alertName][i];
-										if (alert.param.length > 0 && ! reportedParams.has(alert.param)) {
-											reportedParams.add(alert.param);
-											utils.messageFrame(event.detail.tabId, "management", {
-												action: "commonAlerts.alert",
-												name: alert.name,
-												id: alert.id,
-												risk: alert.risk,
-												param: alert.param});
-										}
-									} 
-								}
+						// Highlight any alerts related to form params
+						for (var risk in RISKS) {
+							var alertRisk = RISKS[risk];
+							for (var alertName in pageAlerts[alertRisk]) {
+								let reportedParams = new Set();
+								for (var i = 0; i < pageAlerts[alertRisk][alertName].length; i++) {
+									var alert = pageAlerts[alertRisk][alertName][i];
+									if (alert.param.length > 0 && ! reportedParams.has(alert.param)) {
+										reportedParams.add(alert.param);
+										utils.messageFrame(event.detail.tabId, "management", {
+											action: "commonAlerts.alert",
+											name: alert.name,
+											id: alert.id,
+											risk: alert.risk,
+											param: alert.param});
+									}
+								} 
 							}
-						})
-						.catch(utils.errorHandler);
+						}
 					})
 					.catch(utils.errorHandler);
 			})

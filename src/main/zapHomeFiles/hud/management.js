@@ -60,7 +60,10 @@ Vue.component('loading-screen', {
 })
 
 function dontShowWelcomeAgain() {
-	return utils.zapApiCall("/hud/action/setOptionShowWelcomeScreen/?Boolean=false");
+	// TODO - we can no longer call the API directly from the display frames, but at this point the service worker
+	// will not be available.
+	// Plan to fix once the startup rework has stabilised
+	// return utils.zapApiCall("/hud/action/setOptionShowWelcomeScreen/?Boolean=false");
 }
 
 document.addEventListener('DOMContentLoaded', () => {

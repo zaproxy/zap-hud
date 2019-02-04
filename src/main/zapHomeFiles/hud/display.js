@@ -748,7 +748,16 @@ navigator.serviceWorker.addEventListener("message", event => {
 			break;
 
 		case "showHtmlReport":
-			utils.zapApiNewWindow('/core/other/htmlreport');
+			let channel = new MessageChannel();
+			
+			channel.port1.onmessage = function(event) {
+				// Open window and inject the HTML report
+				window.open('').document.body.innerHTML = event.data.response;
+			};
+			navigator.serviceWorker.controller.postMessage({
+				action:"zapApiCall", component: "core", type: "other", 
+				name: "htmlreport"}, [channel.port2]);
+
 			break;
 			
 		case "closeModals":
