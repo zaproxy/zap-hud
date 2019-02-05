@@ -36,74 +36,86 @@ var Break = (function() {
 		registerForZapEvents("org.zaproxy.zap.extension.brk.BreakEventPublisher");
 	}
 
-	function toggleBreak() {
+	function toggleBreak(tabId) {
 		utils.loadTool(NAME)
 			.then(tool => {
 				if (tool.data === DATA.OFF) {
-					startBreaking();
+					startBreaking(tabId);
 				}
 				else {
-					stopBreaking();
+					stopBreaking(tabId);
 				}
 			})
 			.catch(utils.errorHandler)
 	}
 
-	function startBreaking() {
-		utils.zapApiCall("/break/action/break/?type=http-all&state=true")
-			.catch(utils.errorHandler);
-
-		utils.loadTool(NAME)
-			.then(tool => {
-				tool.isRunning = true;
-				tool.data = DATA.ON;
-				tool.icon = ICONS.ON;
-
-				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: DATA.ON, icon: ICONS.ON}})
-				utils.writeTool(tool);
+	function startBreaking(tabId) {
+		return apiCallWithResponse("break", "action", "break", { type: "http-all", state: "true" })
+			.catch(error => {
+				utils.zapApiErrorDialog(tabId, error);
+				throw error;
 			})
-			.catch(utils.errorHandler);
+			.then(response => {
+				utils.loadTool(NAME)
+				.then(tool => {
+					tool.isRunning = true;
+					tool.data = DATA.ON;
+					tool.icon = ICONS.ON;
+	
+					utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: DATA.ON, icon: ICONS.ON}})
+					utils.writeTool(tool);
+				})
+			})
+			.catch(utils.errorHandler)
+
 	}
 
 	// todo: change this to 'continue' and figure out / fix stopBreaking
-	function stopBreaking() {
-		utils.zapApiCall("/break/action/continue")
-			.catch(utils.errorHandler);
-
-		utils.loadTool(NAME)
-			.then(tool => {
-				tool.isRunning = false;
-				tool.data = DATA.OFF;
-				tool.icon = ICONS.OFF;
-
-				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: DATA.OFF, icon: ICONS.OFF}})
-				utils.writeTool(tool)
+	function stopBreaking(tabId) {
+		return apiCallWithResponse("break", "action", "continue")
+			.catch(error => {
+				utils.zapApiErrorDialog(tabId, error);
+				throw error;
+			})
+			.then(response => {
+				utils.loadTool(NAME)
+					.then(tool => {
+						tool.isRunning = false;
+						tool.data = DATA.OFF;
+						tool.icon = ICONS.OFF;
+		
+						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, data: DATA.OFF, icon: ICONS.OFF}})
+						utils.writeTool(tool)
+					})
 			})
 			.catch(utils.errorHandler);
 	}
 
-	function step() {
-		return utils.zapApiCall("/break/action/step/")
-			.catch(utils.errorHandler);
+	function step(tabId) {
+		return apiCallWithResponse("break", "action", "step")
+			.catch(error => {
+				if (tabId) {
+					// tabId wont be supplied if we're stepping through reqs that arrive when the window isnt ready
+					utils.zapApiErrorDialog(tabId, error);
+					throw error;
+				}
+			});
 	}
 
-	function drop() {
-		return utils.zapApiCall("/break/action/drop/")
-			.catch(utils.errorHandler);
+	function drop(tabId) {
+		return apiCallWithResponse("break", "action", "drop")
+			.catch(error => {
+				utils.zapApiErrorDialog(tabId, error);
+				throw error;
+			});
 	}
 
-	function setHttpMessage(header, body) {
-		let url = "/break/action/setHttpMessage/";
-		let params = "httpHeader=" + encodeURIComponent(header) + "&httpBody=" + encodeURIComponent(body)
-
-		let init = {
-			method: "POST",
-			body: params,
-			headers: {'content-type': 'application/x-www-form-urlencoded'} 
-		};
-
-		return utils.zapApiCall(url, init)
-			.catch(utils.errorHandler);
+	function setHttpMessage(tabId, header, body) {
+		return apiCallWithResponse("break", "action", "setHttpMessage", { httpHeader: header, httpBody: body })
+			.catch(error => {
+				utils.zapApiErrorDialog(tabId, error);
+				throw error;
+			});
 	}
 
 	function showBreakDisplay(data) {
@@ -165,23 +177,23 @@ var Break = (function() {
 			.then(response => {
 				// Handle button choice
 				if (response.buttonSelected === "step") {
-					setHttpMessage(response.header, response.body)
+					setHttpMessage(response.tabId, response.header, response.body)
 						.then(() => {
-							step();
+							step(response.tabId);
 							utils.messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
 						})
 						.catch(utils.errorHandler);
 				}
 				else if (response.buttonSelected === "continue") {
-					setHttpMessage(response.header, response.body)
+					setHttpMessage(response.tabId, response.header, response.body)
 						.then(() => {
-							stopBreaking();
+							stopBreaking(response.tabId);
 							utils.messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
 						})
 						.catch(utils.errorHandler);
 				}
 				else if (response.buttonSelected === "drop") {
-					drop();
+					drop(response.tabId);
 					utils.messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
 				}
 				else {

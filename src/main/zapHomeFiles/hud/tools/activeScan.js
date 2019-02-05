@@ -71,12 +71,12 @@ var ActiveScan = (function() {
 			.then(response => {
 				// Handle button choice
 				if (response.id === "start") {
-					startActiveScan(tabId, domain);
+					startActiveScanDomain(tabId, domain);
 				}
 				else if (response.id === "start-add-to-scope") {
-					self.tools.scope.addToScope(domain)
+					self.tools.scope.addToScope(tabId, domain)
 						.then(
-							startActiveScan(tabId, domain)
+							startActiveScanDomain(tabId, domain)
 						)
 						.catch(utils.errorHandler);
 				}
@@ -87,11 +87,16 @@ var ActiveScan = (function() {
 			.catch(utils.errorHandler);
 	}
 
-	function startActiveScan(tabId, domain) {
+	function startActiveScanDomain(tabId, domain) {
 		utils.getUpgradedDomain(domain)
 			.then(upgradedDomain => {
-				return apiCallWithResponse("ascan", "action", "scan", { url: upgradedDomain })
+				startActiveScan(tabId, upgradedDomain, "true", "GET", "");
 			})
+			.catch(utils.errorHandler);
+	}
+	
+	function startActiveScan(tabId, uri, recurse, method, body) {
+		apiCallWithResponse("ascan", "action", "scan", { url: uri, recurse: recurse, method: method, body: body })
 			.catch(error => {
 				utils.zapApiErrorDialog(tabId, error);
 				throw error;
@@ -240,6 +245,11 @@ var ActiveScan = (function() {
 					getTool(message.tabId, message.context, event.ports[0]);
 					break;
 
+				case "ascanRequest":
+					utils.log (LOG_DEBUG, 'activeScan message eventListener', 'Received ascanRequest', message);
+					startActiveScan(message.tabId, message.uri, "false", message.method, message.body);
+					break;
+
 				default:
 					break;
 			}
@@ -266,7 +276,8 @@ var ActiveScan = (function() {
 
 	return {
 		name: NAME,
-		initialize: initializeStorage
+		initialize: initializeStorage,
+		isRunning: checkIsRunning,
 	};
 })();
 

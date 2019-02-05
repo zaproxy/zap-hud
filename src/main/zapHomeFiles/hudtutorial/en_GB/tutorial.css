@@ -20,7 +20,17 @@
 
 .buttonsDiv {
   position: absolute;
-  bottom: 20px;
+  bottom: 60px;
+  width: 100%;
+}
+
+.indexDiv {
+  position: absolute;
+  left: 20px;
+}
+
+.prevNextDiv {
+  position: absolute;
   right: 20px;
 }
 

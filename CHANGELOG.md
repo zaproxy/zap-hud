@@ -9,8 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Add API endpoints for getting and setting UI options. [#319](https://github.com/zaproxy/zap-hud/issues/319)
  - Add tasks for Enable, Show and Break tutorial pages
- - Add plain text/regex filtering capability to History section [#286](https://github.com/zaproxy/zap-hud/issues/233)
+ - Add plain text/regex filtering capability to History section [#233](https://github.com/zaproxy/zap-hud/issues/233)
+ - Add tutorial index page [#333](https://github.com/zaproxy/zap-hud/issues/333)
  - Add tutorial pages for tool configuration and the HTML report tool.
+
+### Fixed
+ - Correct handling of upgraded domains on startup. [#162](https://github.com/zaproxy/zap-hud/issues/162)
+ - Stop the tutorial server when the add-on is uninstalled.
+
+### Changed
+ - Use websockets instead of HTTP for all ZAP API calls
 
 ## [0.2.0] - 2018-12-31
 

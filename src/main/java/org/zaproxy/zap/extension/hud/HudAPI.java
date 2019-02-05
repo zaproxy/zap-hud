@@ -89,6 +89,7 @@ public class HudAPI extends ApiImplementor {
     private static final String VIEW_GET_UI_OPTION = "getUiOption";
     private static final String VIEW_HUD_ALERT_DATA = "hudAlertData";
     private static final String VIEW_HEARTBEAT = "heartbeat";
+    private static final String VIEW_UPGRADED_DOMAINS = "upgradedDomains";
 
     private static final String PARAM_RECORD = "record";
     private static final String PARAM_HEADER = "header";
@@ -102,10 +103,7 @@ public class HudAPI extends ApiImplementor {
             Arrays.asList(new String[] {"inject.js"});
 
     private ApiImplementor hudFileProxy;
-    private ApiImplementor hudApiProxy;
-
     private String hudFileUrl;
-    private String hudApiUrl;
 
     private String websocketUrl;
 
@@ -136,11 +134,10 @@ public class HudAPI extends ApiImplementor {
         this.addApiView(new ApiView(VIEW_HUD_ALERT_DATA, new String[] {PARAM_URL}));
         this.addApiView(new ApiView(VIEW_HEARTBEAT));
         this.addApiView(new ApiView(VIEW_GET_UI_OPTION, new String[] {PARAM_KEY}));
+        this.addApiView(new ApiView(VIEW_UPGRADED_DOMAINS));
 
         hudFileProxy = new HudFileProxy(this);
         hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S);
-        hudApiProxy = new HudApiProxy(this);
-        hudApiUrl = API.getInstance().getCallBackUrl(hudApiProxy, API.API_URL_S);
 
         // Temporary hack to make it easier to find the websocket test page
         // We could launch a browser, but then we'd need to depend on selenium
@@ -168,10 +165,6 @@ public class HudAPI extends ApiImplementor {
     @Override
     public String getPrefix() {
         return PREFIX;
-    }
-
-    protected ApiImplementor getHudApiProxy() {
-        return hudApiProxy;
     }
 
     protected ApiImplementor getHudFileProxy() {
@@ -296,6 +289,14 @@ public class HudAPI extends ApiImplementor {
                 String key = params.getString(PARAM_KEY);
                 validateKey(key);
                 return new ApiResponseElement(key, this.extension.getHudParam().getUiOption(key));
+            case VIEW_UPGRADED_DOMAINS:
+                ApiResponseList domains = new ApiResponseList(name);
+                extension
+                        .getUpgradedHttpsDomains()
+                        .forEach(
+                                domain ->
+                                        domains.addItem(new ApiResponseElement("domain", domain)));
+                return domains;
             default:
                 throw new ApiException(ApiException.Type.BAD_VIEW);
         }
@@ -422,9 +423,7 @@ public class HudAPI extends ApiImplementor {
 
             if (url.startsWith(API.API_URL_S)) {
                 // Only do these on the ZAP domain
-                contents =
-                        contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
-                                .replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
+                contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
 
                 if (file.equals("serviceworker.js")) {
                     // Inject the tool filenames
@@ -449,13 +448,10 @@ public class HudAPI extends ApiImplementor {
 
                 } else if (file.equals("utils.js")) {
                     contents =
-                            contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
-                                    .replace(
-                                            "<<DEV_MODE>>",
-                                            Boolean.toString(
-                                                    this.extension
-                                                            .getHudParam()
-                                                            .isDevelopmentMode()));
+                            contents.replace(
+                                    "<<DEV_MODE>>",
+                                    Boolean.toString(
+                                            this.extension.getHudParam().isDevelopmentMode()));
                 } else if (file.equals("serviceworker.js")) {
                     contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
                 } else if (file.equals("websockettest.js")) {

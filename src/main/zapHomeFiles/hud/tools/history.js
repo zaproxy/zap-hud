@@ -48,15 +48,9 @@ var History = (function() {
 	}
 
 	function getMessageDetails(id) {
-		return utils.zapApiCall('/core/view/message/?id=' + id)
-			.then(response => {
-				if (!response.ok) {
-					throw new Error('Could not find a message with id: ' + id);
-				}
-				return response.json();
-			})
-			.then(json => json.message)
-			.catch(utils.errorHandler);
+		return apiCallWithResponse("core", "view", "message", { id: id })
+		.then(json => json.message)
+		.catch(utils.errorHandler);
 	}
 
 	function showHttpMessageDetails(tabId, data) {
@@ -64,59 +58,61 @@ var History = (function() {
 			throw new Error('Coud not load HTTP message details')
 		}
 
-		var config = {
-			request: {
-				method: utils.parseRequestHeader(data.requestHeader).method,
-				header: data.requestHeader.trim(),
-				body: data.requestBody
-			},
-			response: {
-				header: data.responseHeader.trim(),
-				body: data.responseBody
-			},
-			isResponseDisabled: false,
-			activeTab: "Request"
-		};
+		var parsedReqData = utils.parseRequestHeader(data.requestHeader);
 
-		if ('activeTab' in data) {
-			config.activeTab = data.activeTab;
-		}
-
-		return utils.messageFrame(tabId, "display", {action:"showHistoryMessage", config:config})
-			.then(data => {
-				// Handle button choice
-				if (data.buttonSelected === "replay") {
-					sendRequest(data.header, data.body)
-					.then(response => response.json())
-					.then(json => {
-						let data = json.sendRequest[0];
-						data.activeTab = "Response"
-						return showHttpMessageDetails(tabId, data);
-					})
-					.catch(utils.errorHandler)
+		Promise.all([self.tools['active-scan'].isRunning(), self.tools.scope.isInScope(utils.parseDomainFromUrl(parsedReqData.uri))])
+			.then(results => {
+				var isAscanRunning = results[0];
+				var isInScope = results[1];
+		
+				var config = {
+					request: {
+						method: parsedReqData.method,
+						uri: parsedReqData.uri,
+						header: data.requestHeader.trim(),
+						body: data.requestBody
+					},
+					response: {
+						header: data.responseHeader.trim(),
+						body: data.responseBody
+					},
+					isResponseDisabled: false,
+					isAscanDisabled: ! isInScope ||isAscanRunning,
+					activeTab: "Request"
+				};
+		
+				if ('activeTab' in data) {
+					config.activeTab = data.activeTab;
 				}
+		
+				return utils.messageFrame(tabId, "display", {action:"showHistoryMessage", config:config})
+					.then(data => {
+						// Handle button choice
+						if (data.buttonSelected === "replay") {
+							sendRequest(data.header, data.body)
+							.then(response => response.json())
+							.then(json => {
+								let data = json.sendRequest[0];
+								data.activeTab = "Response"
+								return showHttpMessageDetails(tabId, data);
+							})
+							.catch(utils.errorHandler)
+						}
+					})
+					.catch(utils.errorHandler);
 			})
 			.catch(utils.errorHandler);
 	}
 
 	function sendRequest(header, body) {
-		let url = "/core/action/sendRequest/";
 		let req = header;
 
 		if (body) {
 			req = req + "\r\n\r\n" + body
 		}
-
-		let params = "request=" + encodeURIComponent(req)
-
-		let init = {
-			method: "POST",
-			body: params,
-			headers: {'content-type': 'application/x-www-form-urlencoded'}
-		};
-
-		return utils.zapApiCall(url, init)
+		return apiCallWithResponse("core", "action", "sendRequest", { request: req })
 			.catch(utils.errorHandler);
+
 	}
     
     self.addEventListener("org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher", event => {

@@ -49,6 +49,7 @@ import org.zaproxy.zap.extension.hud.tutorial.pages.FramesPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.HistoryJsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.HistoryPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.HtmlReportPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.IndexPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.PageAlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.ResendPage;
@@ -103,6 +104,7 @@ public class TutorialProxyServer extends ProxyServer {
         prev = addPage(new CompletePage(this, prev));
 
         // Tutorial pages that are not part of the standard flow
+        addPage(new IndexPage(this));
         addPage(new ErrorPage(this));
         addPage(new SiteAlertsJsPage(this));
         addPage(new HistoryJsPage(this));
@@ -320,6 +322,10 @@ public class TutorialProxyServer extends ProxyServer {
             }
             return false;
         }
+    }
+
+    public TutorialPage getTutorialPage(String name) {
+        return this.pages.get(name);
     }
 
     private class TutorialProxyThread extends ProxyThread {
