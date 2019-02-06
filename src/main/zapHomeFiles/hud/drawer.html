@@ -57,7 +57,7 @@
                     </tr>
                 </thead>
             </table>
-            <table id="history-messages" class="table table-striped table-hover table-scroll table-history drawer-messages" style="min-width: fit-content;">
+            <table id="history-messages" class="table table-striped table-hover table-scroll table-bottom-drawer drawer-messages" style="min-width: fit-content;">
                 <tbody>
                     <tr v-for="message in filteredMessages" @click="messageSelected(message.id)" :id="'message-tr-'+message.id" class="message-tr">
                         <td class="field time"> {{ message.time }} </td>

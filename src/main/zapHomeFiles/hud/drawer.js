@@ -84,11 +84,11 @@ Vue.component('history', {
             })
             .catch(utils.errorHandler)
 
-        eventBus.$on('setMessages', data => {
+        eventBus.$on('setHistoryMessages', data => {
             this.messages = data.messages;
         })
 
-		eventBus.$on('updateMessages', data => {
+		eventBus.$on('updateHistoryMessages', data => {
             this.messages = this.messages.concat(data.messages);
 
             let count = data.messages.length;
@@ -421,8 +421,8 @@ navigator.serviceWorker.addEventListener('message', event => {
 	var port = event.ports[0];
 
 	switch(action) {
-        case 'updateMessages':
-            eventBus.$emit('updateMessages', {
+        case 'updateHistoryMessages':
+            eventBus.$emit('updateHistoryMessages', {
                 messages: event.data.messages,
 				port: port
 			});

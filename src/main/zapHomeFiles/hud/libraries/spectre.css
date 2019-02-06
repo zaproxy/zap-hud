@@ -534,8 +534,8 @@ html {
     border-bottom-width: .1rem;
   }
 
-  .table-history td,
-  .table-history th {
+  .table-bottom-drawer td,
+  .table-bottom-drawer th {
     padding: .1em .6em .1em .6em;
     white-space: nowrap;
   }
