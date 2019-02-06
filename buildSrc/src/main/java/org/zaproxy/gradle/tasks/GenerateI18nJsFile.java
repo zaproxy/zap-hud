@@ -33,6 +33,7 @@ import java.util.ResourceBundle;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
@@ -85,10 +86,11 @@ public class GenerateI18nJsFile extends DefaultTask {
     private final RegularFileProperty i18nJsFile;
 
     public GenerateI18nJsFile() {
-        bundleName = getProject().getObjects().property(String.class);
-        srcDir = newInputDirectory();
-        reviewMode = getProject().getObjects().property(Boolean.class);
-        i18nJsFile = newOutputFile();
+        ObjectFactory objects = getProject().getObjects();
+        bundleName = objects.property(String.class);
+        srcDir = objects.directoryProperty();
+        reviewMode = objects.property(Boolean.class);
+        i18nJsFile = objects.fileProperty();
 
         setDescription("Generates the i18n.js file used by the HUD web UI.");
     }
