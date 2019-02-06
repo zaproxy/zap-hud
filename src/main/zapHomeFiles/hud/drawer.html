@@ -129,6 +129,7 @@
             <thead>
                 <tr>
                     <th style="width: 200px"> {{ $t('message.storage_tool_field_time') }} </th>
+                    <th style="width: 200px"> {{ $t('message.storage_tool_field_type') }} </th>
                     <th style="width: 200px"> {{ $t('message.storage_tool_field_action') }} </th>
                     <th style="width: 200px"> {{ $t('message.storage_tool_field_key') }} </th>
                     <th style="width: 800px"> {{ $t('message.storage_tool_field_value') }} </th>
@@ -137,6 +138,7 @@
             <tbody>
                 <tr v-for="message in messages" @click="messageSelected(message.id)" :id="'message-tr-'+message.id">
                     <td> {{ message.time }} </td>
+                    <td> {{ message.type }} </td>
                     <td> {{ message.action }} </td>
                     <td> {{ message.key }} </td>
                     <td> {{ message.value }} </td>
