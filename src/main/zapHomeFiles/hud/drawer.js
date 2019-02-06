@@ -8,6 +8,57 @@ var context = {
     domain: utils.parseDomainFromUrl(document.referrer)
 };
 
+Vue.component('storage', {
+  template: '#storage-template',
+  data() {
+    return { messages: [] }
+  },
+  computed: {
+    timeDescendingMessages() {
+      return this.messages.slice().reverse();
+    }
+  },
+  created() {
+    utils.loadTool('storage')
+      .then(tool => {
+        this.messages = tool.messages
+      })
+      .catch(utils.errorHandler)
+
+    eventBus.$on('setMessages', data => {
+      this.messages = data.messages;
+    })
+
+    eventBus.$on('updateStorageMessages', data => {
+      let messages = data.messages.map(message => {
+        let time = new Date(message.timestamp);
+        let formattedTime = time.getHours() + 'h' + time.getMinutes() + 'min' + time.getSeconds() + 's';
+
+        return {
+          ...message,
+          'time': formattedTime
+        };
+      });
+      let count = messages.length;
+
+      this.messages = this.messages.concat(messages);
+
+      this.$parent.$emit('badgeDataEvent', {data: count})
+    });
+  },
+  updated() {
+    if (this.messages.length > 0) {
+      let lastMessage = this.messages[this.messages.length - 1]
+      let lastid = 'message-tr-' + lastMessage.id
+
+      document.getElementById(lastid).scrollIntoView({block:'end', behaviour:'smooth'});
+      //move horizontal scroll bar to the left
+      var tabsDetails = document.getElementsByClassName('tabs-details')[0];
+      tabsDetails.scrollTo(0,tabsDetails.scrollHeight)
+    }
+  }
+});
+
 Vue.component('history', {
     template: '#history-template',
     data() {
