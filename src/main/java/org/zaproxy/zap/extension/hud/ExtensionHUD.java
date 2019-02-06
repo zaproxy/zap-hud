@@ -60,6 +60,8 @@ import org.zaproxy.zap.extension.script.ScriptEventListener;
 import org.zaproxy.zap.extension.script.ScriptType;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
+import org.zaproxy.zap.utils.DesktopUtils;
+import org.zaproxy.zap.view.ZapMenuItem;
 import org.zaproxy.zap.view.ZapToggleButton;
 
 /*
@@ -72,6 +74,8 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     // The name is public so that other extensions can access it
     public static final String NAME = "ExtensionHUD";
+
+    public static final String ZAP_HUD_GROUP_PAGE = "https://groups.google.com/group/zaproxy-hud";
 
     // The i18n prefix, by default the package name - defined in one place to make it easier
     // to copy and change this example
@@ -164,6 +168,17 @@ public class ExtensionHUD extends ExtensionAdaptor
         if (getView() != null) {
             extensionHook.getHookView().addOptionPanel(getOptionsPanel());
             extensionHook.getHookView().addMainToolBarComponent(getHudButton());
+
+            ZapMenuItem menuExtPage = new ZapMenuItem("hud.menu.hudGroup");
+            menuExtPage.setEnabled(DesktopUtils.canOpenUrlInBrowser());
+            menuExtPage.addActionListener(
+                    new java.awt.event.ActionListener() {
+                        @Override
+                        public void actionPerformed(java.awt.event.ActionEvent e) {
+                            DesktopUtils.openUrlInBrowser(ZAP_HUD_GROUP_PAGE);
+                        }
+                    });
+            extensionHook.getHookMenu().addOnlineMenuItem(menuExtPage);
         }
 
         // No reason this cant be used in daemon mode ;)

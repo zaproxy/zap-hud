@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
  - Use websockets instead of HTTP for all ZAP API calls
+ - Replaced link to ZAP User Group with one to the new ZAP HUD group and added a desktop menu item for it.
 
 ## [0.2.0] - 2018-12-31
 
