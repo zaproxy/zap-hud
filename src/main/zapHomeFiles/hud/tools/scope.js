@@ -20,7 +20,7 @@ var Scope = (function() {
 		DIALOG.IN = I18n.t("scope_remove");
 		DIALOG.OUT = I18n.t("scope_add");
 		DIALOG.REQUIRED = I18n.t("scope_required");
-	var HUD_CONTEXT = encodeURI(I18n.t("scope_hud_context"));
+	var HUD_CONTEXT = I18n.t("scope_hud_context");
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -67,10 +67,10 @@ var Scope = (function() {
 
 						// Handle button choice
 						if (response.id === "add") {
-							addToScope(domain);
+							addToScope(tabId, domain);
 						}
 						else if (response.id === "remove") {
-							removeFromScope(domain);
+							removeFromScope(tabId, domain);
 						}
 					});
 
@@ -99,7 +99,8 @@ var Scope = (function() {
 		return utils.loadTool(NAME)
 			.then(tool => {
 				if (! tool.hudContext) {
-					utils.zapApiCall("/context/action/newContext/?contextName=" + HUD_CONTEXT)
+					// This can fail if the HUD context has already been added
+					apiCall("context", "action", "newContext", { contextName: HUD_CONTEXT });
 					tool.hudContext = true;
 				}
 
@@ -107,44 +108,44 @@ var Scope = (function() {
 
 				utils.getUpgradedDomain(domain)
 					.then(upgradedDomain => {
-						return utils.zapApiCall("/context/action/includeInContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
+						return apiCallWithResponse("context", "action", "includeInContext", { contextName: HUD_CONTEXT, regex:  upgradedDomain + ".*" });
+					})
+					.catch(error => {
+						utils.zapApiErrorDialog(tabId, error);
+						throw error;
 					})
 					.then(response => {
-						if (!response.ok) {
-							utils.log (LOG_ERROR, 'scope.addToScope', 'Failed to add ' + domain + ' to scope');
-						}
+						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain}, tool: {name: NAME, data: DATA.IN, icon: ICONS.IN, label: LABEL}})
+						return utils.writeTool(tool);
 					})
 					.catch(utils.errorHandler)
-
-				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain}, tool: {name: NAME, data: DATA.IN, icon: ICONS.IN, label: LABEL}})
-
-                return utils.writeTool(tool);
             })
 			.catch(utils.errorHandler);
 	}
 
-	function removeFromScope(domain) {
+	function removeFromScope(tabId, domain) {
 		utils.getUpgradedDomain(domain)
 			.then(upgradedDomain => {
-				return utils.zapApiCall("/context/action/excludeFromContext/?contextName=" + HUD_CONTEXT + "&regex=" + upgradedDomain + ".*")
+				return apiCallWithResponse("context", "action", "excludeFromContext", { contextName: HUD_CONTEXT, regex:  upgradedDomain + ".*" });
+			})
+			.catch(error => {
+				utils.zapApiErrorDialog(tabId, error);
+				throw error;
 			})
 			.then(response => {
-				if (!response.ok) {
-					utils.log(LOG_ERROR, 'scope.removeFromScope', 'Failed to remove ' + domain + ' from scope');
-				}
+				// remove from list and save
+				utils.loadTool(NAME)
+					.then(tool => {
+						tool.urls.splice(tool.urls.indexOf(domain), 1);
+
+						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain, url: ''}, tool: {name: NAME, data: DATA.OUT, icon: ICONS.OUT, label: LABEL}})
+
+						utils.writeTool(tool);
+					})
+					.catch(utils.errorHandler);
 			})
 			.catch(utils.errorHandler)
 
-		// remove from list and save
-		utils.loadTool(NAME)
-			.then(tool => {
-				tool.urls.splice(tool.urls.indexOf(domain), 1);
-
-				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: domain, url: ''}, tool: {name: NAME, data: DATA.OUT, icon: ICONS.OUT, label: LABEL}})
-
-				utils.writeTool(tool);
-			})
-			.catch(utils.errorHandler);
 	}
 
 	function showOptions(tabId) {

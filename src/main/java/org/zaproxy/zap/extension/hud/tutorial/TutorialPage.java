@@ -26,6 +26,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.network.HttpMessage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.IndexPage;
 
 public abstract class TutorialPage {
 
@@ -38,7 +39,7 @@ public abstract class TutorialPage {
     private SecureRandom rnd = new SecureRandom();
     private Boolean hasTask;
     private String taskHtml;
-    private boolean taskCompleted = true;
+    private Boolean taskCompleted = null;
     private boolean taskJustCompleted = false;
     private String key;
     private String antiCsrfToken = UUID.randomUUID().toString();
@@ -74,8 +75,12 @@ public abstract class TutorialPage {
     }
 
     public boolean isTaskCompleted() {
-        if (this.getTutorialProxyServer().getHudParam().isTutorialTaskDone(this.getName())) {
-            return true;
+        if (this.taskCompleted == null) {
+            this.taskCompleted =
+                    !this.hasTask()
+                            || this.getTutorialProxyServer()
+                                    .getHudParam()
+                                    .isTutorialTaskDone(this.getName());
         }
         return taskCompleted;
     }
@@ -105,7 +110,6 @@ public abstract class TutorialPage {
     private boolean hasTask() {
         if (this.hasTask == null) {
             this.hasTask = Boolean.valueOf(getTaskHtml() != null);
-            this.taskCompleted = !this.hasTask;
         }
         return hasTask;
     }
@@ -247,6 +251,15 @@ public abstract class TutorialPage {
     private String getButtonsHtml() {
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"buttonsDiv\">\n");
+        sb.append("<div class=\"indexDiv\">\n");
+        sb.append("<a href=\"");
+        sb.append(IndexPage.NAME);
+        sb.append("\"><button id=\"index-button\">");
+        sb.append(Constant.messages.getString("hud.tutorial.button.index"));
+        sb.append("</button></a>\n");
+
+        sb.append("</div>\n");
+        sb.append("<div class=\"prevNextDiv\">\n");
         TutorialPage page = this.getPreviousPage();
         if (page != null) {
             sb.append("<a href=\"");
@@ -276,6 +289,7 @@ public abstract class TutorialPage {
                 sb.append("</button-disabled>\n");
             }
         }
+        sb.append("</div>\n");
         sb.append("</div>\n");
 
         return sb.toString();

@@ -47,7 +47,9 @@ The first time the HUD is launched you'll be prompted with the HUD Tutorial. We 
 
 ## Getting Involved
 
-ZAP is a community project and so we are always very keen to hear from anyone who'd like to contribute, just post to the [ZAP Dev Group](https://groups.google.com/group/zaproxy-develop)
+ZAP is a community project and so we are always very keen to hear from anyone who'd like to contribute, just post to the [ZAP HUD Group](https://groups.google.com/group/zaproxy-hud)
+
+We'd also love to hear some feedback, which you can also give via that group.
 
 ## Alpha Limitations
 
