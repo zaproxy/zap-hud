@@ -138,6 +138,7 @@ var ActiveScan = (function() {
 			.then(tool => {
 				tool.isRunning = false;
 				tool.runningTabId = '';
+				tool.runningScope = [];
 				tool.icon = ICONS.OFF;
 				tool.data = DATA.START;
 				tool.scanid = -1;

@@ -93,7 +93,7 @@ var Spider = (function() {
 		utils.getUpgradedDomain(domain)
 			.then(upgradedDomain => {
 				apiCallWithResponse("spider", "action", "scan", { url: upgradedDomain }).then (response => {
-					spiderStarted(tabId);
+					spiderStarted(tabId, domain);
 				})
 				.catch(error => {
 					utils.zapApiErrorDialog(tabId, error)
@@ -130,6 +130,7 @@ var Spider = (function() {
 			.then(tool => {
 				tool.isRunning = false;
 				tool.runningTabId = '';
+				tool.runningScope = [];
 				tool.data = DATA.START;
 
 				utils.writeTool(tool);
