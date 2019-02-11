@@ -41,11 +41,9 @@ import org.zaproxy.zap.extension.hud.ui.Constants;
 public class HUD {
 
     private WebDriver webdriver;
-    private boolean hudNotInstalled;
 
     public HUD(WebDriver webdriver) {
         this.webdriver = webdriver;
-        this.hudNotInstalled = true;
     }
 
     public static By LEFT_PANEL_BY_ID = By.id("left-panel");
@@ -126,7 +124,7 @@ public class HUD {
         return null;
     }
 
-    public List<WebElement> waitForHudButtons(By byPanel, /*WebElement panel, */ int expected) {
+    public List<WebElement> waitForHudButtons(By byPanel, int expected) {
         List<WebElement> buttons = null;
         for (int i = 0; i < Constants.GENERIC_TESTS_RETRY_COUNT; i++) {
             try {

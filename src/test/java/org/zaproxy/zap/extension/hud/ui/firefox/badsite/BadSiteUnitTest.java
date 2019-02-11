@@ -33,8 +33,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.JavascriptException;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
 import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
 import org.zaproxy.zap.extension.hud.ui.firefox.tutorial.TutorialStatics;
@@ -94,7 +97,7 @@ public class BadSiteUnitTest extends FirefoxUnitTest {
 
         // Now try to make use of it
 
-        Object result = driver.executeScript("return ZAP_HUD_FILES;");
+        Object result = executeScriptWithRetry(driver, "return ZAP_HUD_FILES;");
         assertTrue(result.toString().startsWith("https://zap//zapCallBackUrl"));
         try {
             // ZAP_HUD_WS should be protected via a closure
@@ -106,6 +109,13 @@ public class BadSiteUnitTest extends FirefoxUnitTest {
             assertTrue(e.getMessage().contains("ReferenceError: ZAP_HUD_WS is not defined"));
         }
     }
+
+    private static Object executeScriptWithRetry(WebDriver driver, String script) {
+        return new WebDriverWait(driver, 10L)
+                .ignoring(JavascriptException.class)
+                .until(wd -> ((JavascriptExecutor) wd).executeScript(script));
+    }
+
     /**
      * Obtain the HUD files URL
      *
