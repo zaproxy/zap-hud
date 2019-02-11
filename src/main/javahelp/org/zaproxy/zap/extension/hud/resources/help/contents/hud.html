@@ -13,15 +13,25 @@ The HUD is a completely new interface that brings information and functionality 
 <p>
 For more details see:
 <ul>
-<li>Blog: TBA</li>
+<li>Blog: <a href="https://segment.com/blog/hacking-with-a-heads-up-display/">https://segment.com/blog/hacking-with-a-heads-up-display/</a></li>
 <li>Video: <a href="https://www.youtube.com/watch?v=ztfgip-UhWw">https://www.youtube.com/watch?v=ztfgip-UhWw</a></li>
 <li>The HUD wiki: <a href="https://github.com/zaproxy/zap-hud/wiki">https://github.com/zaproxy/zap-hud/wiki</a></li>
 </ul>
 
+<H2>Command Line Options</H2>
+The HUD works equally well with ZAP in desktop and daemon modes.<br>
+As many people use ZAP in daemon mode for automated testing the HUD is disabled by default in this mode.<br>
+The HUD add-on adds a new ZAP command line option which enables the HUD in daemon mode and launches Firefox
+preconfigured to proxy through ZAP and ignore certificate errors:
+<pre>-hud</pre>
+
+You can also enable the HUD in daemon mode without launching Firefox using the ZAP command line option:
+<pre>-config hud.enabledForDaemon=true</pre>
+
 <H2>Getting Involved</H2>
 
 ZAP is a community project and so we are always very keen to hear from anyone who'd like to contribute, 
-just post to the <a href="https://groups.google.com/group/zaproxy-develop">ZAP Dev Group</a>
+just post to the <a href="https://groups.google.com/group/zaproxy-hud">ZAP HUD Group</a>
 
 <H2>Caveats</H2>
 
