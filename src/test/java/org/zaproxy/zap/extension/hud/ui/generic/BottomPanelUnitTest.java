@@ -43,10 +43,7 @@ public class BottomPanelUnitTest {
 
     public static void testBottomContainsExpectedButtons(WebDriver wd) {
         HUD hud = new HUD(wd);
-        WebElement panel = hud.waitForBottomPanel();
-        Assertions.assertNotNull(panel);
-        wd.switchTo().frame(panel);
-        List<WebElement> buttons = hud.waitForHudButtons(EXPECTED_BUTTONS);
+        List<WebElement> buttons = hud.waitForHudButtons(HUD.BOTTOM_PANEL_BY_ID, EXPECTED_BUTTONS);
         assertNotNull(buttons);
         assertEquals(EXPECTED_BUTTONS, buttons.size());
         wd.switchTo().parentFrame();

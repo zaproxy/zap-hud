@@ -1,5 +1,5 @@
 // Public variables
-var IS_HUD_CONFIGURED = "isHudConfigured";
+var IS_HUD_INITIALIZED = "isHudInitialized";
 var IS_FIRST_TIME = "isFirstTime";
 var IS_SERVICEWORKER_REFRESHED = 'isServiceWorkerRefreshed';
 
@@ -18,7 +18,6 @@ var utils = (function() {
 	/*
 	 * Utility Functions
 	 *
-	 * Description goes here...
 	 */
 	
 	// Injected strings
@@ -164,29 +163,30 @@ var utils = (function() {
 	/* STORAGE */
 	
 	/*
-	 * Return whether configureStorage has been run yet.
+	 * Return whether the HUD has been initialized yet.
 	 */
-	function isStorageConfigured() {
-		return localforage.getItem(IS_HUD_CONFIGURED);
+	function isHUDInitialized() {
+		return localforage.getItem(IS_HUD_INITIALIZED);
 	}
 	
 	/*
 	 * Initialize all of the info that will be stored in indexeddb.
 	 */
-	function configureStorage() {
+	function initializeHUD() {
 		let promises = [];
 	
-		promises.push(localforage.setItem(IS_HUD_CONFIGURED, true));
+		promises.push(localforage.setItem(IS_HUD_INITIALIZED, true));
 		promises.push(localforage.setItem(IS_FIRST_TIME, true));
-		promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false));
-
-		// set other values to defaults on startup
-		promises.push(initDefaults());
+		promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false))
+		promises.push(localforage.setItem('settings.isHudVisible', true));
+		promises.push(localforage.setItem('drawer.isDrawerOpen', false));
+		// Note: in the below, "activeTab" is to be set to href, not name
+		promises.push(localforage.setItem('drawer.activeTab', '#history'));
 
 		let leftPanel = {
 			key: 'leftPanel',
 			orientation: 'left',
-			tools: []
+			tools: DEFAULT_TOOLS_LEFT
 		};
 	
 		promises.push(saveFrame(leftPanel));
@@ -194,40 +194,57 @@ var utils = (function() {
 		let rightPanel = {
 			key: 'rightPanel',
 			orientation: 'right',
-			tools: []
+			tools: DEFAULT_TOOLS_RIGHT
 		};
 	
 		promises.push(saveFrame(rightPanel));
 	
 		return Promise.all(promises)
+			.then(setDefaultTools)
 			.catch(errorHandler);
-	}
-	
-	function initDefaults() {
-		localforage.setItem('settings.isHudVisible', true);
-		localforage.setItem('drawer.isDrawerOpen', false);
-		// Note: in the below, "activeTab" is to be set to href, not name
-	    localforage.setItem('drawer.activeTab', '#history');
 	}
 	
 	/*
 	 * Add the default tools to the panels.
 	 */
 	function setDefaultTools() {
-	
-		return new Promise(resolve => {
-			var promises = [];
-	
-			DEFAULT_TOOLS_LEFT.forEach(toolName => {
-				promises.push(() => addToolToPanel(toolName, "leftPanel"));
-			});
-	
-			DEFAULT_TOOLS_RIGHT.forEach(toolName => {
-				promises.push(() => addToolToPanel(toolName, "rightPanel"));
-			});
-	
-			return promises.reduce((pacc, fn) => pacc.then(fn), Promise.resolve());
-		});
+		var promises = [];
+
+		for (let i = 0; i < DEFAULT_TOOLS_LEFT.length; i++) {
+			loadTool(DEFAULT_TOOLS_LEFT[i])
+				.then(tool => {
+					if (! tool) {
+						log(LOG_ERROR, 'utils.setDefaultTools', 'Failed to load tool.', tool.name);
+						return;
+					}
+		
+					tool.isSelected = true;
+					tool.panel = "leftPanel";
+					tool.position = i;
+		
+					return writeTool(tool);
+				})
+				.catch(errorHandler)
+		};
+
+		for (let i = 0; i < DEFAULT_TOOLS_RIGHT.length; i++) {
+			loadTool(DEFAULT_TOOLS_RIGHT[i])
+				.then(tool => {
+					if (! tool) {
+						log(LOG_ERROR, 'utils.setDefaultTools', 'Failed to load tool.', tool.name);
+						return;
+					}
+		
+					tool.isSelected = true;
+					tool.panel = "rightPanel";
+					tool.position = i;
+		
+					return writeTool(tool);
+				})
+				.catch(errorHandler)
+		};
+
+		return Promise.all(promises)
 	}
 	
 	/*
@@ -325,7 +342,6 @@ var utils = (function() {
 			})
 			.catch(errorHandler);
 	}
-	
 	
 	/* 
 	 * Add a tool to a specific panel using the tool and panel keys.
@@ -697,8 +713,8 @@ return {
 		parseDomainFromUrl: parseDomainFromUrl,
 		parsePathFromUrl: parsePathFromUrl,
 		getParamater: getParamater,
-		isStorageConfigured: isStorageConfigured,
-		configureStorage: configureStorage,
+		isHUDInitialized: isHUDInitialized,
+		initializeHUD: initializeHUD,
 		setDefaultTools: setDefaultTools,
 		loadFrame: loadFrame,
 		saveFrame: saveFrame,

@@ -41,11 +41,9 @@ import org.zaproxy.zap.extension.hud.ui.Constants;
 public class HUD {
 
     private WebDriver webdriver;
-    private boolean hudNotInstalled;
 
     public HUD(WebDriver webdriver) {
         this.webdriver = webdriver;
-        this.hudNotInstalled = true;
     }
 
     public static By LEFT_PANEL_BY_ID = By.id("left-panel");
@@ -126,10 +124,11 @@ public class HUD {
         return null;
     }
 
-    public List<WebElement> waitForHudButtons(int expected) {
+    public List<WebElement> waitForHudButtons(By byPanel, int expected) {
         List<WebElement> buttons = null;
         for (int i = 0; i < Constants.GENERIC_TESTS_RETRY_COUNT; i++) {
             try {
+                webdriver.switchTo().frame(this.waitForElement(byPanel));
                 buttons = webdriver.findElements(HUD_BUTTON_BY_CLASSNAME);
                 if (buttons.size() >= expected) {
                     break;
@@ -157,13 +156,6 @@ public class HUD {
 
     public void openUrlWaitForHud(String url) {
         this.webdriver.get(url);
-
-        if (hudNotInstalled) {
-            // Wait for the service worker installation and subsequent page refresh.
-            new WebDriverWait(webdriver, Constants.GENERIC_TESTS_TIMEOUT_SECS)
-                    .until(ExpectedConditions.stalenessOf(waitForLeftPanel()));
-            hudNotInstalled = false;
-        }
         waitForPageLoad();
     }
 

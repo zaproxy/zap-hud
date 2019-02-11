@@ -33,6 +33,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertNotificationsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.PageAlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.SiteAlertsPage;
+import org.zaproxy.zap.extension.hud.ui.Constants;
 import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
@@ -74,24 +75,29 @@ public class PageAlertsPageUnitTest extends FirefoxUnitTest {
 
         // Wait for the alert - this will depend on the ZAP passive scan thread
         WebElement panel = hud.waitForLeftPanel();
-        assertNotNull(panel);
-        driver.switchTo().frame(panel);
 
         WebElement infoPageButton = null;
-        for (int i = 0; i < TutorialStatics.ALERT_LOOP_COUNT; i++) {
+        for (int i = 0; i < TutorialStatics.ALERT_LONG_LOOP_COUNT; i++) {
             try {
+                assertNotNull(panel);
+                driver.switchTo().frame(panel);
                 List<WebElement> buttons = hud.getHudButtons();
                 if (buttons != null && buttons.size() >= 7) {
                     infoPageButton = buttons.get(6);
-                    if (!infoPageButton.getText().equals("0")) {
+                    if (infoPageButton.getText().length() > 0
+                            && !infoPageButton.getText().equals("0")) {
                         break;
                     }
                 }
+                // Try again - the panel might have been reloaded
+                infoPageButton = null;
+                driver.switchTo().parentFrame();
+                panel = hud.waitForLeftPanel();
             } catch (Exception e1) {
                 System.out.println("PageAlertsPage exception " + e1.getMessage());
             }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(Constants.GENERIC_TESTS_RETRY_SLEEP_MS);
             } catch (InterruptedException e) {
                 // Ignore
             }

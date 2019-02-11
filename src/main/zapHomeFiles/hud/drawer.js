@@ -305,14 +305,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		},
     });
-
-    // notify service worker drawer has been refreshed
-    navigator.serviceWorker.controller.postMessage({
-        action: 'frameload',
-        name: 'drawer',
-        tabId: tabId,
-        frameId: frameId
-    });
 });
 
 navigator.serviceWorker.addEventListener('message', event => {
