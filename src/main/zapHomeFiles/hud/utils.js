@@ -1,5 +1,5 @@
 // Public variables
-var IS_HUD_CONFIGURED = "isHudConfigured";
+var IS_HUD_INITIALIZED = "isHudInitialized";
 var IS_FIRST_TIME = "isFirstTime";
 var IS_SERVICEWORKER_REFRESHED = 'isServiceWorkerRefreshed';
 
@@ -18,12 +18,10 @@ var utils = (function() {
 	/*
 	 * Utility Functions
 	 *
-	 * Description goes here...
 	 */
 	
 	// Injected strings
 	var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
-	var ZAP_HUD_API = '<<ZAP_HUD_API>>';
 	var IS_DEV_MODE = '<<DEV_MODE>>' === 'true' ? true : false ;
 
 	var BUTTON_HTML = '<div class="button" id="BUTTON_NAME-button">\n<div class="button-icon" id="BUTTON_NAME-button-icon"><img src="' + ZAP_HUD_FILES + '?image=IMAGE_NAME" alt="IMAGE_NAME" height="16" width="16"></div>\n<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA</div>\n<div class="button-label" id="BUTTON_NAME-button-label">BUTTON_LABEL</div>\n</div>\n';
@@ -125,22 +123,14 @@ var utils = (function() {
 	 */
 	function parseDomainFromUrl(url) {
 		var hostname;
-		var protocol;
 	
-		var hasProtocol = url.indexOf("://");
-	
-		if (hasProtocol > -1) {
-			protocol = url.substring(0, hasProtocol + 3);
+		if (url.indexOf("://") > -1) {
 			hostname = url.split('/')[2];
 		}
 		else {
-			protocol = "http://";
 			hostname = url.split('/')[0];
 		}
 	
-		//find & remove port number
-		//hostname = hostname.split(':')[0];
-		
 		//find & remove "?" & "#"
 		hostname = hostname.split('?')[0];
 		hostname = hostname.split('#')[0];
@@ -171,136 +161,90 @@ var utils = (function() {
 	
 	
 	/* STORAGE */
-	var KEY_IS_CONFIG = "isHudConfigured";
 	
 	/*
-	 * Return whether configureStorage has been run yet.
+	 * Return whether the HUD has been initialized yet.
 	 */
-	function isStorageConfigured() {
-		return localforage.getItem(IS_HUD_CONFIGURED);
-	}
-	
-	function isFirstTime() {
-		return localforage.getItem(IS_FIRST_TIME);
-	}
-	
-	function setFirstTime() {
-		return localforage.setItem(IS_FIRST_TIME, false);
+	function isHUDInitialized() {
+		return localforage.getItem(IS_HUD_INITIALIZED);
 	}
 	
 	/*
 	 * Initialize all of the info that will be stored in indexeddb.
 	 */
-	function configureStorage() {
-		var promises = [];
+	function initializeHUD() {
+		let promises = [];
 	
-		promises.push(localforage.setItem(IS_HUD_CONFIGURED, true));
+		promises.push(localforage.setItem(IS_HUD_INITIALIZED, true));
 		promises.push(localforage.setItem(IS_FIRST_TIME, true));
 		promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false))
-		promises.push(localforage.setItem('upgradedDomains', {}))
+		promises.push(localforage.setItem('settings.isHudVisible', true));
+		promises.push(localforage.setItem('drawer.isDrawerOpen', false));
+		// Note: in the below, "activeTab" is to be set to href, not name
+		promises.push(localforage.setItem('drawer.activeTab', '#history'));
+
+		let leftPanel = {
+			key: 'leftPanel',
+			orientation: 'left',
+			tools: DEFAULT_TOOLS_LEFT
+		};
 	
-		promises.push(loadFrame("rightPanel").then(oldPanel => {
-			var panel = {};
+		promises.push(saveFrame(leftPanel));
+
+		let rightPanel = {
+			key: 'rightPanel',
+			orientation: 'right',
+			tools: DEFAULT_TOOLS_RIGHT
+		};
 	
-			panel.key = "rightPanel";
-			panel.orientation = "right";
-			panel.tools = [];
-			if (oldPanel) {
-				panel.clientId = oldPanel.clientId;
-			}
-	
-			return saveFrame(panel);
-		}));
-	
-		promises.push(loadFrame("leftPanel").then(oldPanel => {
-			var panel = {};
-	
-			panel.key = "leftPanel";
-			panel.orientation = "left";
-			panel.tools = [];
-			if (oldPanel) {
-				panel.clientId = oldPanel.clientId;
-			}
-	
-			return saveFrame(panel);
-		}));
-		
-		promises.push(loadFrame("display").then(oldFrame => {
-			var frame = {};
-	
-			frame.key = "display";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-	
-			return saveFrame(frame);
-		}));
-	
-		promises.push(loadFrame("management").then(oldFrame => {
-			var frame = {};
-	
-			frame.key = "management";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-	
-			return saveFrame(frame);
-		}));
-	
-		promises.push(loadFrame("growlerAlerts").then(oldFrame => {
-			var frame = {};
-	
-			frame.key = "growlerAlerts";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-	
-			return saveFrame(frame);
-		}));
-	
-		promises.push(loadFrame('drawer').then(oldFrame => {
-			var frame = {};
-	
-			frame.key = "drawer";
-			if (oldFrame) {
-				frame.clientId = oldFrame.clientId;
-			}
-	
-			return saveFrame(frame);
-		}));
-	
-		// set other values to defaults on startup
-		promises.push(initDefaults());
+		promises.push(saveFrame(rightPanel));
 	
 		return Promise.all(promises)
+			.then(setDefaultTools)
 			.catch(errorHandler);
-	}
-	
-	function initDefaults() {
-		localforage.setItem('settings.isHudVisible', true);
-		localforage.setItem('drawer.isDrawerOpen', false);
-		// Note: in the below, "activeTab" is to be set to href, not name
-	    localforage.setItem('drawer.activeTab', '#history');
 	}
 	
 	/*
 	 * Add the default tools to the panels.
 	 */
 	function setDefaultTools() {
-	
-		return new Promise(resolve => {
-			var promises = [];
-	
-			DEFAULT_TOOLS_LEFT.forEach(toolName => {
-				promises.push(() => addToolToPanel(toolName, "leftPanel"));
-			});
-	
-			DEFAULT_TOOLS_RIGHT.forEach(toolName => {
-				promises.push(() => addToolToPanel(toolName, "rightPanel"));
-			});
-	
-			return promises.reduce((pacc, fn) => pacc.then(fn), Promise.resolve());
-		});
+		var promises = [];
+
+		for (let i = 0; i < DEFAULT_TOOLS_LEFT.length; i++) {
+			loadTool(DEFAULT_TOOLS_LEFT[i])
+				.then(tool => {
+					if (! tool) {
+						log(LOG_ERROR, 'utils.setDefaultTools', 'Failed to load tool.', tool.name);
+						return;
+					}
+		
+					tool.isSelected = true;
+					tool.panel = "leftPanel";
+					tool.position = i;
+		
+					return writeTool(tool);
+				})
+				.catch(errorHandler)
+		};
+
+		for (let i = 0; i < DEFAULT_TOOLS_RIGHT.length; i++) {
+			loadTool(DEFAULT_TOOLS_RIGHT[i])
+				.then(tool => {
+					if (! tool) {
+						log(LOG_ERROR, 'utils.setDefaultTools', 'Failed to load tool.', tool.name);
+						return;
+					}
+		
+					tool.isSelected = true;
+					tool.panel = "rightPanel";
+					tool.position = i;
+		
+					return writeTool(tool);
+				})
+				.catch(errorHandler)
+		};
+
+		return Promise.all(promises)
 	}
 	
 	/*
@@ -346,41 +290,21 @@ var utils = (function() {
 	}
 	
 	/* 
-	 * loads the tool blob from indexeddb using the tool's name
+	 * Loads the tool blob from indexeddb using the tool's name as the key.
 	 */
 	function loadTool(name) {
 		log(LOG_TRACE, 'utils.loadTool', name);
 		return localforage.getItem(name);
 	}
-	
+
+	/* 
+	 * Writes the tool blob to indexeddb using the tool's name as the key.
+	 */
 	function writeTool(tool) {
 		log(LOG_TRACE, 'utils.writeTool', tool.name);
 		return localforage.setItem(tool.name, tool);
 	}
-	
-	/* 
-	 * saves the tool blob to indexeddb
-	 */
-	function saveTool(tool) {
-		log(LOG_TRACE, 'utils.saveTool', tool.name);
-		return localforage.setItem(tool.name, tool)
-			.then(tool => {
-				// Notify Panel of Updated Data
-				if (tool.isSelected) {
-					messageFrame(tool.panel, {action:"updateData", tool:tool})
-						.catch(err => {
-							// this is only catching the NoClientIdError which occurs 
-							// when tools are added on startup and the panels haven't 
-							// been added yet
-							log(LOG_WARN, "messageFrame", "NoClientIdError - panel: " + tool.panel + " not yet available to be messaged", err);
-						});
-				}
-	
-				return tool;
-			})
-			.catch(errorHandler);
-	}
-	
+
 	/*
 	 * Return all tools currently selected in a panel.
 	 */
@@ -418,7 +342,6 @@ var utils = (function() {
 			})
 			.catch(errorHandler);
 	}
-	
 	
 	/* 
 	 * Add a tool to a specific panel using the tool and panel keys.
@@ -507,22 +430,7 @@ var utils = (function() {
 	/*
 	 * Send a postMessage to an iframe window using the custom stored frame key in indexdb.
 	 */
-	function messageFrame(key, message) {
-		return loadFrame(key)
-				.then(getWindowFromFrame)
-				.then(window => messageWindow(window, message))
-				.catch(err => {
-					// this catches all errors, unless it is a NoClientIdError
-					if (err instanceof NoClientIdError) {
-						throw err;
-					}
-					else {
-						errorHandler(err);
-					}
-				});
-	}
-	
-	function messageFrame2(tabId, frameId, message) {
+	function messageFrame(tabId, frameId, message) {
 		return clients.matchAll({includeUncontrolled: true})
 			.then(clients => {
 				for (let i = 0; i < clients.length; i++) {
@@ -603,7 +511,12 @@ var utils = (function() {
 			})
 			.catch(errorHandler);
 	}
-	
+
+	function zapApiErrorDialog(tabId,  error) {
+		log(LOG_ERROR, 'zapApiErrorDialog', error.message, error.response);
+		messageFrame(tabId, "display", {action:"showDialog", config: {title : I18n.t("api_error_title"), text : error.message}})
+	}
+
 	/*
 	 * Returns the visibilityState of the specified iframe window
 	 */
@@ -728,11 +641,6 @@ var utils = (function() {
 			.catch(errorHandler)
 	}
 	
-	// todo: maybe needed instead of passing info through postmessage
-	function getTargetDomain() {
-		return messageFrame("management", {action:"getTargetDomain"});
-	}
-	
 	/*
 	 * Log an error in a human readable way with a stack trace.
 	 */
@@ -771,24 +679,12 @@ var utils = (function() {
 		return ZAP_HUD_FILES + '?image=' + file;
 	}
 	
-	function zapApiCall(apiCall) {
-		return fetch(ZAP_HUD_API + apiCall);
-	}
-	
-	function zapApiCall(apiCall, init) {
-		return fetch(ZAP_HUD_API + apiCall, init);
-	}
-
-	function zapApiNewWindow(apiCall) {
-		window.open(ZAP_HUD_API + apiCall);
-	}
-
 	function log(level, method, message, object) {
 		if (level > LOG_LEVEL || (! LOG_TO_CONSOLE && ! LOG_TO_ZAP)) {
 			return;
 		}
 	
-		const logLevel = LOG_STRS[level];
+		var logLevel = LOG_STRS[level];
 	
 		var record = new Date().toTimeString() + ' ' + logLevel + ' ' + method + ': ' + message;
 		if (object) {
@@ -802,7 +698,8 @@ var utils = (function() {
 			console[logLevel.toLowerCase()](record);
 		}
 		if (LOG_TO_ZAP) {
-			zapApiCall("/hud/action/log/?record=" + record);
+			// We dont know if we're in the service worker here, so raise an event
+			self.dispatchEvent(new CustomEvent("hud.log", {detail: {record: record}}));
 		}
 		if (level == LOG_ERROR) {
 			self.dispatchEvent(new CustomEvent("hud.error", {detail: {record: record}}));
@@ -816,8 +713,8 @@ return {
 		parseDomainFromUrl: parseDomainFromUrl,
 		parsePathFromUrl: parsePathFromUrl,
 		getParamater: getParamater,
-		isStorageConfigured: isStorageConfigured,
-		configureStorage: configureStorage,
+		isHUDInitialized: isHUDInitialized,
+		initializeHUD: initializeHUD,
 		setDefaultTools: setDefaultTools,
 		loadFrame: loadFrame,
 		saveFrame: saveFrame,
@@ -825,13 +722,11 @@ return {
 		registerTools: registerTools,
 		loadTool: loadTool,
 		writeTool: writeTool,
-		saveTool: saveTool,
 		loadPanelTools: loadPanelTools,
 		loadAllTools: loadAllTools,
 		addToolToPanel: addToolToPanel,
 		removeToolFromPanel: removeToolFromPanel,
 		messageFrame: messageFrame,
-		messageFrame2: messageFrame2,
 		messageAllTabs: messageAllTabs,
 		getAllClients: getAllClients,
 		getWindowVisibilityState: getWindowVisibilityState,
@@ -839,12 +734,10 @@ return {
 		sortToolsByPosition: sortToolsByPosition,
 		configureButtonHtml: configureButtonHtml,
 		getUpgradedDomain: getUpgradedDomain,
-		getTargetDomain: getTargetDomain,
 		errorHandler: errorHandler,
 		getZapFilePath: getZapFilePath,
 		getZapImagePath: getZapImagePath,
-		zapApiCall: zapApiCall,
-		zapApiNewWindow: zapApiNewWindow,
+		zapApiErrorDialog: zapApiErrorDialog,
 		log: log
 	};
 })();

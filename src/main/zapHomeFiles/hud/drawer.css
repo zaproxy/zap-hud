@@ -1,0 +1,70 @@
+.table td, .table th {
+  padding:0; /*Override Spectre table cell padding*/
+}
+
+#history-header{
+  position:sticky;
+  top:0;
+  right:0;
+  z-index: 1; /*Needed to override absolute positioning from spectre lib*/ 
+  background-color: #fff;
+  font-size: .8em;
+}
+
+#history-header tr{
+  text-align: center;
+}
+
+#history-filter{
+  border-color: none;
+}
+
+#history-filter.error{
+  border-color: rgb(252, 130, 130);
+  background-color: rgb(248, 230, 230);
+}
+
+#history-messages{
+  font-size: .7em;
+  padding: 0 1%;
+  margin-bottom: 1%;
+}
+
+#history-messages .message-tr{
+
+}
+
+#history-messages .message-tr td{
+  padding: 0 5px;
+}
+
+.table .field, .table .title{
+
+}
+.table .field.time, .table .title.time{
+  width: 125px;
+}
+
+.table .field.code, .table .title.code{
+  width: 75px;
+}
+
+.table .field.method, .table .title.method{
+  width: 75px;
+}
+
+.table .field.url, .table .title.url{
+  width: 75px;
+}
+
+.table .title.filter{
+  width: auto;
+  font-weight: normal;
+}
+
+.table .title.hidden{
+  width: auto;
+  font-weight: normal;
+  text-align: right;
+  padding-right: 2%;
+}

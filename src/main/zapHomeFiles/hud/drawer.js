@@ -12,17 +12,69 @@ Vue.component('history', {
     template: '#history-template',
     data() {
         return {
-            messages: []
+            filter: '',
+            regexEnabled: false,
+            messages: [],
+            hiddenMessageCount: 0,
+            isRegExError: false,
+            historyItemsFilteredMessage: '',
+            enableRegExText: I18n.t("history_enable_regex")
         }
     },
     computed: {
         timeDescendingMessages() {
             return this.messages.slice().reverse();
+        },
+        messageCount() {
+            return this.messages.length;
+        },
+        filteredMessages() {
+            const self=this,
+                  isRegex = this.regexEnabled;
+            let re;
+
+            if (isRegex){
+                try {
+                    re = new RegExp(this.filter);
+                    this.isRegExError = false;
+                }
+                catch (ex) {
+                    this.isRegExError = true;
+                    return []; //Return empty array if invalid RegEx
+                }
+            }
+
+            return this.messages.filter( message => {
+                if (self.filter.trim().length === 0) {
+                    return true;
+                }
+                if (isRegex){
+                    return re.test(message.url);
+                }
+                else{
+                    return message.url.indexOf(self.filter)>=0; 
+                }
+            });
         }
     },
     methods: {
         messageSelected(id) {
             navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "showHttpMessageDetails", tool: "history", id:id});
+        },
+        historyItemsFiltered() {
+            this.historyItemsFilteredMessage = I18n.t("history_items_filtered", [this.hiddenMessageCount, this.messageCount]);
+        }
+    },
+    watch: {
+        regexEnabled() {
+           this.isRegExError = !this.regexEnabled ? false : this.isRegExError;
+        },
+        filteredMessages() {
+            this.$nextTick(function () {
+                const visibleMessages = document.querySelectorAll("#history-messages .message-tr");
+                this.hiddenMessageCount = (!this.messages) ? 0 : this.messages.length - visibleMessages.length;
+                this.historyItemsFiltered();
+            });
         }
     },
     created() {
@@ -47,11 +99,16 @@ Vue.component('history', {
         if (this.messages.length > 0) {
             let lastMessage = this.messages[this.messages.length - 1]
             let lastid = 'message-tr-' + lastMessage.id
-
-            document.getElementById(lastid).scrollIntoView({block:'end', behaviour:'smooth'});
+            let lastIdElem = document.querySelector(lastid);
+            if(lastIdElem){
+                lastIdElem.scrollIntoView({block:'end', behavior:'smooth'});
+            }
+            
             //move horizontal scroll bar to the left
-            var tabsDetails = document.getElementsByClassName('tabs-details')[0];
-            tabsDetails.scrollTo(0,tabsDetails.scrollHeight)
+            let tabsDetailsElems = document.querySelectorAll('tabs-details');
+            if (tabsDetailsElems.length > 0){
+                tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
+            }
         }
     }
 });
@@ -232,7 +289,7 @@ Vue.component('drawer-button-showhide', {
             })
             .catch(utils.errorHandler);
     }
-})
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     let params = new URL(document.location).searchParams;
@@ -247,14 +304,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		data: {
 
 		},
-    });
-
-    // notify service worker drawer has been refreshed
-    navigator.serviceWorker.controller.postMessage({
-        action: 'frameload',
-        name: 'drawer',
-        tabId: tabId,
-        frameId: frameId
     });
 });
 

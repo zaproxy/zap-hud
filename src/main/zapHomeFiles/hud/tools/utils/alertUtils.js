@@ -9,15 +9,12 @@ var alertUtils = (function() {
 		
 		utils.getUpgradedDomain(target)
 			.then(upgradedDomain => {
-				return utils.zapApiCall("/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
-			})
-			.then(response => {
-				return response.json()
+				return apiCallWithResponse("alert", "view", "alertsByRisk", { url: upgradedDomain, recurse: 'true' })
 			})
 			.then(json => {
 				config.alerts = flattenAllAlerts(json);
 				
-				utils.messageFrame2(tabId, "display", {action: "showAllAlerts", config:config}).then(response => {
+				utils.messageFrame(tabId, "display", {action: "showAllAlerts", config:config}).then(response => {
 					// Handle button choice
 					if (response.alertId) {
 						let backFunction = function() {showSiteAlerts(tabId, title, target, alertRisk)};
@@ -70,15 +67,12 @@ var alertUtils = (function() {
 					target = target.substring(0, target.indexOf("?"));
 				}
 				
-				return utils.zapApiCall("/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
-			})
-			.then(response => {
-				return response.json()
+				return apiCallWithResponse("alert", "view", "alertsByRisk", { url: target, recurse: 'false' })
 			})
 			.then(json => {
 				config.alerts = flattenAllAlerts(json);
 				
-				return utils.messageFrame2(tabId, "display", {action: "showAllAlerts", config:config})
+				return utils.messageFrame(tabId, "display", {action: "showAllAlerts", config:config})
 			})
 			.then(response => {
 				// Handle button choice
@@ -93,23 +87,18 @@ var alertUtils = (function() {
 	function showAlertDetails(tabId, id, backFunction) {
 		utils.log (LOG_DEBUG, 'showAlertDetails', '' + id);
 
-		utils.zapApiCall("/core/view/alert/?id=" + id)
-			.then(response => {
+		apiCallWithResponse("core", "view", "alert", { id: id })
+			.then(json => {
 
-				response.json().
-					then(json => {
+				var config = {};
+				config.title = json.alert.alert;
+				config.details = json.alert;
 
-						var config = {};
-						config.title = json.alert.alert;
-						config.details = json.alert;
-
-						utils.messageFrame2(tabId, "display", {action: "showAlertDetails", config: config})
-							.then(response => {
-								if (response.back) {
-									backFunction();
-								}
-							})
-							.catch(utils.errorHandler);
+				utils.messageFrame(tabId, "display", {action: "showAlertDetails", config: config})
+					.then(response => {
+						if (response.back) {
+							backFunction();
+						}
 					})
 					.catch(utils.errorHandler);
 			})
@@ -160,19 +149,6 @@ var alertUtils = (function() {
 			.catch(utils.errorHandler);
 	}
 	
-	function updateAlertCount(toolname, count) {
-		utils.loadTool(toolname)
-			.then(tool => {
-				tool.data = count;
-				return utils.saveTool(tool);
-			})
-			.catch(utils.errorHandler);
-	}
-
-	function showGrowlerAlert(alert) {
-		return utils.messageAllTabs("growlerAlerts", {action: "showGrowlerAlert", alert: alert});
-	}
-
 	function showOptions(tabId, toolname, toolLabel) {
 		var config = {};
 
@@ -180,11 +156,11 @@ var alertUtils = (function() {
 		config.toolLabel = toolLabel;
 		config.options = {remove: I18n.t("common_remove")};
 
-		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
-					utils.removeToolFromPanel(toolname);
+					utils.removeToolFromPanel(tabId, toolname);
 				}
 				else {
 					//cancel
@@ -199,7 +175,6 @@ var alertUtils = (function() {
 		showPageAlerts: showPageAlerts,
 		showAlertDetails: showAlertDetails,
 		showOptions: showOptions,
-		updateAlertCount: updateAlertCount,
 		flattenAllAlerts: flattenAllAlerts,
 		setPageAlerts: setPageAlerts
 	};

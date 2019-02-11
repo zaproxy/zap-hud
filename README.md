@@ -1,4 +1,8 @@
-# ![HUD Logo](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/assets/images/hud_logo_128px.png) OWASP ZAP Heads Up Display ![Release: Alpha](https://img.shields.io/badge/release-alpha-brightgreen.svg)
+# ![HUD Logo](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/assets/images/hud_logo_128px.png) OWASP ZAP Heads Up Display 
+![Release: Alpha](https://img.shields.io/badge/release-alpha-brightgreen.svg)
+[![Known Vulnerabilities](https://snyk.io/test/github/zaproxy/zap-hud/badge.svg?targetFile=package.json)](https://snyk.io/test/github/zaproxy/zap-hud?targetFile=package.json)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/zaproxy/zap-hud.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/zaproxy/zap-hud/alerts/)
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/zaproxy/zap-hud.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/zaproxy/zap-hud/context:javascript)
 
 <img align="center" alt="Welcome to the HUD" src="assets/images/ZAP-HUD-Welcome-banner.png" width="100%">
 
@@ -43,7 +47,9 @@ The first time the HUD is launched you'll be prompted with the HUD Tutorial. We 
 
 ## Getting Involved
 
-ZAP is a community project and so we are always very keen to hear from anyone who'd like to contribute, just post to the [ZAP Dev Group](https://groups.google.com/group/zaproxy-develop)
+ZAP is a community project and so we are always very keen to hear from anyone who'd like to contribute, just post to the [ZAP HUD Group](https://groups.google.com/group/zaproxy-hud)
+
+We'd also love to hear some feedback, which you can also give via that group.
 
 ## Alpha Limitations
 

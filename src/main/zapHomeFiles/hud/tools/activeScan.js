@@ -33,10 +33,10 @@ var ActiveScan = (function() {
 		tool.panel = "";
 		tool.position = 0;
 		tool.isRunning = false;
-		tool.runningTabId;
-		tool.scanid = -1
+		tool.runningTabId = '';
+		tool.scanid = -1;
 
-		utils.saveTool(tool);
+		utils.writeTool(tool);
 		registerForZapEvents(ACTIVE_SCAN_EVENT);
 	}
 
@@ -67,33 +67,39 @@ var ActiveScan = (function() {
 
 				return config;
 			})
-			.then(config => utils.messageFrame2(tabId, "display", {action:"showDialog", config:config}))
+			.then(config => utils.messageFrame(tabId, "display", {action:"showDialog", config:config}))
 			.then(response => {
 				// Handle button choice
 				if (response.id === "start") {
-					startActiveScan(tabId, domain);
+					startActiveScanDomain(tabId, domain);
 				}
 				else if (response.id === "start-add-to-scope") {
-					self.tools.scope.addToScope(domain)
+					self.tools.scope.addToScope(tabId, domain)
 						.then(
-							startActiveScan(tabId, domain)
+							startActiveScanDomain(tabId, domain)
 						)
 						.catch(utils.errorHandler);
 				}
 				else if (response.id === "stop") {
-					stopActiveScan(domain);
+					stopActiveScan();
 				}
 			})
 			.catch(utils.errorHandler);
 	}
 
-	function startActiveScan(tabId, domain) {
+	function startActiveScanDomain(tabId, domain) {
 		utils.getUpgradedDomain(domain)
 			.then(upgradedDomain => {
-				return utils.zapApiCall("/ascan/action/scan/?url=" + upgradedDomain)
-			}).
-			then(response => {
-				return response.json()
+				startActiveScan(tabId, upgradedDomain, "true", "GET", "");
+			})
+			.catch(utils.errorHandler);
+	}
+	
+	function startActiveScan(tabId, uri, recurse, method, body) {
+		apiCallWithResponse("ascan", "action", "scan", { url: uri, recurse: recurse, method: method, body: body })
+			.catch(error => {
+				utils.zapApiErrorDialog(tabId, error);
+				throw error;
 			})
 			.then(data => {
 				utils.loadTool(NAME)
@@ -106,7 +112,7 @@ var ActiveScan = (function() {
 
 						utils.writeTool(tool);
 						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notTabId: tabId}, tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.OFF}, isToolDisabled: true})
-						utils.messageFrame2(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.ON}});
+						utils.messageFrame(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.ON}});
 					})
 					.catch(utils.errorHandler)
 			})
@@ -116,7 +122,11 @@ var ActiveScan = (function() {
 	function stopActiveScan() {
 		utils.loadTool(NAME)
 			.then(tool => {
-				utils.zapApiCall("/ascan/action/stop/?scanId=" + tool.scanId + "");
+				return apiCallWithResponse("ascan", "action", "stop", { scanId: tool.scanId })
+			})
+			.catch(error => {
+				utils.zapApiErrorDialog(tabId, error);
+				throw error;
 			})
 			.then(activeScanStopped)
 			.catch(utils.errorHandler);
@@ -160,7 +170,7 @@ var ActiveScan = (function() {
 						tool.data = progress;
 
 						utils.writeTool(tool);
-						utils.messageFrame2(tool.runningTabId, tool.panel, {action: 'updateData', tool: tool})
+						utils.messageFrame(tool.runningTabId, tool.panel, {action: 'updateData', tool: tool})
 					}
 				})
 				.catch(utils.errorHandler);
@@ -174,7 +184,7 @@ var ActiveScan = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
@@ -235,6 +245,11 @@ var ActiveScan = (function() {
 					getTool(message.tabId, message.context, event.ports[0]);
 					break;
 
+				case "ascanRequest":
+					utils.log (LOG_DEBUG, 'activeScan message eventListener', 'Received ascanRequest', message);
+					startActiveScan(message.tabId, message.uri, "false", message.method, message.body);
+					break;
+
 				default:
 					break;
 			}
@@ -261,7 +276,8 @@ var ActiveScan = (function() {
 
 	return {
 		name: NAME,
-		initialize: initializeStorage
+		initialize: initializeStorage,
+		isRunning: checkIsRunning,
 	};
 })();
 

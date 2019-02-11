@@ -60,6 +60,8 @@ import org.zaproxy.zap.extension.script.ScriptEventListener;
 import org.zaproxy.zap.extension.script.ScriptType;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
+import org.zaproxy.zap.utils.DesktopUtils;
+import org.zaproxy.zap.view.ZapMenuItem;
 import org.zaproxy.zap.view.ZapToggleButton;
 
 /*
@@ -72,6 +74,8 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     // The name is public so that other extensions can access it
     public static final String NAME = "ExtensionHUD";
+
+    public static final String ZAP_HUD_GROUP_PAGE = "https://groups.google.com/group/zaproxy-hud";
 
     // The i18n prefix, by default the package name - defined in one place to make it easier
     // to copy and change this example
@@ -119,6 +123,7 @@ public class ExtensionHUD extends ExtensionAdaptor
     private ZapToggleButton hudButton = null;
     private boolean hudEnabledForDesktop = false;
     private boolean hudEnabledForDaemon = false;
+    private boolean hudCmdlineOptionUsed = false;
     private HudParam hudParam = null;
     private OptionsHudPanel optionsPanel = null;
 
@@ -154,7 +159,6 @@ public class ExtensionHUD extends ExtensionAdaptor
 
         this.api.addApiOptions(getHudParam());
         extensionHook.addApiImplementor(this.api);
-        extensionHook.addApiImplementor(this.api.getHudApiProxy());
         extensionHook.addApiImplementor(this.api.getHudFileProxy());
 
         extensionHook.addOptionsParamSet(this.getHudParam());
@@ -165,6 +169,17 @@ public class ExtensionHUD extends ExtensionAdaptor
         if (getView() != null) {
             extensionHook.getHookView().addOptionPanel(getOptionsPanel());
             extensionHook.getHookView().addMainToolBarComponent(getHudButton());
+
+            ZapMenuItem menuExtPage = new ZapMenuItem("hud.menu.hudGroup");
+            menuExtPage.setEnabled(DesktopUtils.canOpenUrlInBrowser());
+            menuExtPage.addActionListener(
+                    new java.awt.event.ActionListener() {
+                        @Override
+                        public void actionPerformed(java.awt.event.ActionEvent e) {
+                            DesktopUtils.openUrlInBrowser(ZAP_HUD_GROUP_PAGE);
+                        }
+                    });
+            extensionHook.getHookMenu().addOnlineMenuItem(menuExtPage);
         }
 
         // No reason this cant be used in daemon mode ;)
@@ -189,6 +204,8 @@ public class ExtensionHUD extends ExtensionAdaptor
         getExtScript().removeListener(this);
 
         HudEventPublisher.unregister();
+
+        tutorialServer.stopServer();
     }
 
     @Override
@@ -216,8 +233,17 @@ public class ExtensionHUD extends ExtensionAdaptor
         if (View.isInitialised()) {
             return hudEnabledForDesktop;
         } else {
-            return hudEnabledForDaemon;
+            return hudEnabledForDaemon || this.hudCmdlineOptionUsed;
         }
+    }
+
+    /**
+     * Used to override the hudEnabledForDaemon setting without changing the configs
+     *
+     * @param hudCmdlineOptionUsed
+     */
+    public void setHudCmdlineOptionUsed(boolean hudCmdlineOptionUsed) {
+        this.hudCmdlineOptionUsed = hudCmdlineOptionUsed;
     }
 
     /**
@@ -263,15 +289,23 @@ public class ExtensionHUD extends ExtensionAdaptor
     }
 
     public void addUpgradedHttpsDomain(URI uri) throws URIException {
-        this.upgradedHttpsDomains.add(uri.getHost() + ":" + uri.getPort());
+        this.upgradedHttpsDomains.add(getNormalisedDomain(uri));
+    }
+
+    static String getNormalisedDomain(URI uri) throws URIException {
+        int port = uri.getPort();
+        if (port == -1) {
+            return uri.getHost();
+        }
+        return uri.getHost() + ":" + uri.getPort();
     }
 
     public void removeUpgradedHttpsDomain(URI uri) throws URIException {
-        this.upgradedHttpsDomains.remove(uri.getHost() + ":" + uri.getPort());
+        this.upgradedHttpsDomains.remove(getNormalisedDomain(uri));
     }
 
     public boolean isUpgradedHttpsDomain(URI uri) throws URIException {
-        return this.upgradedHttpsDomains.contains(uri.getHost() + ":" + uri.getPort());
+        return this.upgradedHttpsDomains.contains(getNormalisedDomain(uri));
     }
 
     private void addScripts(File file, String prefix, ScriptType hudScriptType) {
@@ -382,9 +416,7 @@ public class ExtensionHUD extends ExtensionAdaptor
                     if (this.isUpgradedHttpsDomain(uri)) {
                         // Advise that we've upgraded this domain to https
                         Map<String, String> map = new HashMap<String, String>();
-                        map.put(
-                                HudEventPublisher.FIELD_DOMAIN,
-                                uri.getHost() + ":" + uri.getPort());
+                        map.put(HudEventPublisher.FIELD_DOMAIN, getNormalisedDomain(uri));
                         ZAP.getEventBus()
                                 .publishSyncEvent(
                                         HudEventPublisher.getPublisher(),
@@ -560,5 +592,9 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     public HudAPI getAPI() {
         return this.api;
+    }
+
+    protected Set<String> getUpgradedHttpsDomains() {
+        return upgradedHttpsDomains;
     }
 }

@@ -19,6 +19,8 @@
  */
 package org.zaproxy.zap.extension.hud.tutorial.pages;
 
+import java.util.Map;
+import org.parosproxy.paros.network.HttpMessage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialPage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialProxyServer;
 
@@ -32,6 +34,17 @@ public class EnablePage extends TutorialPage {
 
     public EnablePage(TutorialProxyServer tutorialProxyServer, TutorialPage prev) {
         super(tutorialProxyServer, prev);
+    }
+
+    @Override
+    public void handlePostRequest(HttpMessage msg, Map<String, String> params) {
+        if ("ZAP".equals(params.get("field1"))
+                && "ZAP".equals(params.get("field2"))
+                && "ZAP".equals(params.get("field3"))) {
+            this.setTaskCompleted(true);
+            this.setTaskJustCompleted(true);
+        }
+        super.handlePostRequest(msg, params);
     }
 
     @Override

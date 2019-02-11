@@ -47,6 +47,7 @@ public class HudParam extends VersionedAbstractParam {
     private static final String PARAM_SHOW_WELCOME_SCREEN = PARAM_BASE_KEY + ".showWelcomeScreen";
     private static final String PARAM_ENABLE_ON_DOMAIN_MSGS =
             PARAM_BASE_KEY + ".enableOnDomainMsgs";
+    private static final String PARAM_UI_OPTION_PREFIX = PARAM_BASE_KEY + ".uiOption.";
 
     /**
      * The version of the configurations. Used to keep track of configurations changes between
@@ -255,12 +256,14 @@ public class HudParam extends VersionedAbstractParam {
     }
 
     public void setTutorialTaskDone(String task) {
-        this.tutorialTasks.add(task);
-        getConfig().setProperty(PARAM_TUTORIAL_TASKS, tutorialTasks);
-        try {
-            this.getConfig().save();
-        } catch (ConfigurationException e) {
-            log.error(e.getMessage(), e);
+        if (!isTutorialTaskDone(task)) {
+            this.tutorialTasks.add(task);
+            getConfig().setProperty(PARAM_TUTORIAL_TASKS, tutorialTasks);
+            try {
+                this.getConfig().save();
+            } catch (ConfigurationException e) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -280,5 +283,18 @@ public class HudParam extends VersionedAbstractParam {
         } catch (ConfigurationException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    public void setUiOption(String key, String value) {
+        getConfig().setProperty(PARAM_UI_OPTION_PREFIX + key, value);
+        try {
+            this.getConfig().save();
+        } catch (ConfigurationException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public String getUiOption(String key) {
+        return getConfig().getString(PARAM_UI_OPTION_PREFIX + key, "");
     }
 }

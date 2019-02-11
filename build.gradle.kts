@@ -23,7 +23,7 @@ repositories {
 }
 
 status = "alpha"
-version = "0.2.0"
+version = "0.3.0"
 
 val genHudFilesDir = layout.buildDirectory.dir("genHudFiles").get()
 val generatedI18nJsFileDir = genHudFilesDir.dir("i18nJs")
@@ -36,7 +36,8 @@ val zapPort = 8999
 // Use a key just to make sure the HUD works with one
 val zapApiKey = "password123"
 val hudDevArgs = listOf("-config", "hud.enabledForDesktop=true", "-config", "hud.enabledForDaemon=true", "-config", "hud.devMode=true", "-config", "hud.unsafeEval=true")
-val zapCmdlineOpts = listOf("-config", "hud.tutorialPort=9998", "-config", "hud.tutorialTestMode=true", "-config", "hud.showWelcomeScreen=false", "-daemon", "-config", "start.addonDirs=$buildDir/zap/") + hudDevArgs
+// Use specific TLS version to not break the tests in Java 11.
+val zapCmdlineOpts = listOf("-config", "proxy.securityProtocolsEnabled.protocol=TLSv1.2", "-config", "hud.tutorialPort=9998", "-config", "hud.tutorialTestMode=true", "-config", "hud.showWelcomeScreen=false", "-daemon", "-config", "start.addonDirs=$buildDir/zap/") + hudDevArgs
 
 zapAddOn {
     addOnId.set("hud")
@@ -257,7 +258,7 @@ tasks.named<Test>("test") {
 
 tasks.withType(Test::class).configureEach {
     systemProperties.putAll(mapOf(
-            "wdm.chromeDriverVersion" to "2.44",
-            "wdm.geckoDriverVersion" to "0.23.0",
+            "wdm.chromeDriverVersion" to "2.46",
+            "wdm.geckoDriverVersion" to "0.24.0",
             "wdm.forceCache" to "true"))
 }

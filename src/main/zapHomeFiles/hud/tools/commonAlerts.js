@@ -27,7 +27,7 @@ var CommonAlerts = (function() {
 		tool.position = 0;
 		tool.alerts = {};
 
-		utils.saveTool(tool);
+		utils.writeTool(tool);
 		registerForZapEvents("org.zaproxy.zap.extension.alert.AlertEventPublisher");
 		registerForZapEvents("org.zaproxy.zap.extension.hud.HudEventPublisher");
 	}
@@ -50,10 +50,8 @@ var CommonAlerts = (function() {
 				break;
 
 			case "commonAlerts.showAlert":
-				// Check its an int - its been supplied by the target domain so in theory could have been tampered with
-				if (message.alertId === parseInt(message.alertId, 10)) {
-					alertUtils.showAlertDetails(message.tabId, message.alertId);
-				}
+				// The message from the target domain will have been validated in management.js
+				alertUtils.showAlertDetails(message.tabId, message.alertId);
 				break;
 
 			default:
@@ -107,15 +105,12 @@ var CommonAlerts = (function() {
 				// fetch all of the current alerts from ZAP
 				utils.getUpgradedDomain(targetDomain)
 					.then(upgradedDomain => {
-						return utils.zapApiCall("/alert/view/alertsByRisk/?url=" + upgradedDomain + "&recurse=true")
-					})
-					.then(response => {
-						return response.json()
+						return apiCallWithResponse("alert", "view", "alertsByRisk", { url: upgradedDomain, recurse: 'true' })
 					})
 					.then(json => {
 						alertCache[targetDomain] = alertUtils.flattenAllAlerts(json);
 						tool.alerts = alertCache;
-						return utils.saveTool(tool);
+						return utils.writeTool(tool);
 					})
 					.then(() => {
 						// Raise the events after the data is saved
@@ -137,36 +132,32 @@ var CommonAlerts = (function() {
 					.catch(utils.errorHandler);
 
 				// Fetch all of the alerts on this page
-				utils.zapApiCall("/alert/view/alertsByRisk/?url=" + target + "&recurse=false")
-				.then(response => {
-					response.json().
-						then(json => {
-							let pageAlerts = alertUtils.flattenAllAlerts(json);
-							let raisedEventDetails = {domain: targetDomain, url: event.detail.uri, target: origTarget, pageAlerts : pageAlerts};
-							var ev = new CustomEvent("commonAlerts.pageAlerts", {detail: raisedEventDetails});
-							self.dispatchEvent(ev);
+				apiCallWithResponse("alert", "view", "alertsByRisk", { url: target, recurse: 'false' })
+					.then(json => {
+						let pageAlerts = alertUtils.flattenAllAlerts(json);
+						let raisedEventDetails = {domain: targetDomain, url: event.detail.uri, target: origTarget, pageAlerts : pageAlerts};
+						var ev = new CustomEvent("commonAlerts.pageAlerts", {detail: raisedEventDetails});
+						self.dispatchEvent(ev);
 
-							// Highlight any alerts related to form params
-							for (var risk in RISKS) {
-								var alertRisk = RISKS[risk];
-								for (var alertName in pageAlerts[alertRisk]) {
-									let reportedParams = new Set();
-									for (var i = 0; i < pageAlerts[alertRisk][alertName].length; i++) {
-										var alert = pageAlerts[alertRisk][alertName][i];
-										if (alert.param.length > 0 && ! reportedParams.has(alert.param)) {
-											reportedParams.add(alert.param);
-											utils.messageFrame("management", {
-												action: "commonAlerts.alert",
-												name: alert.name,
-												id: alert.id,
-												risk: alert.risk,
-												param: alert.param});
-										}
-									} 
-								}
+						// Highlight any alerts related to form params
+						for (var risk in RISKS) {
+							var alertRisk = RISKS[risk];
+							for (var alertName in pageAlerts[alertRisk]) {
+								let reportedParams = new Set();
+								for (var i = 0; i < pageAlerts[alertRisk][alertName].length; i++) {
+									var alert = pageAlerts[alertRisk][alertName][i];
+									if (alert.param.length > 0 && ! reportedParams.has(alert.param)) {
+										reportedParams.add(alert.param);
+										utils.messageFrame(event.detail.tabId, "management", {
+											action: "commonAlerts.alert",
+											name: alert.name,
+											id: alert.id,
+											risk: alert.risk,
+											param: alert.param});
+									}
+								} 
 							}
-						})
-						.catch(utils.errorHandler);
+						}
 					})
 					.catch(utils.errorHandler);
 			})
@@ -220,7 +211,6 @@ var CommonAlerts = (function() {
 						// backup to localstorage in case the serviceworker dies
 						tool.alerts = alertCache;
 						return utils.writeTool(tool);
-						//return utils.saveTool(tool);
 					})
 					.then(() => {
 						// Raise the event after the data is saved

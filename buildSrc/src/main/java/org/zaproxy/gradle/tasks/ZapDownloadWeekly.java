@@ -20,13 +20,17 @@
 package org.zaproxy.gradle.tasks;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.zip.ZipFile;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.file.UnableToDeleteFileException;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
@@ -57,6 +61,7 @@ public class ZapDownloadWeekly extends DefaultTask {
     }
 
     @TaskAction
+    @SuppressWarnings("try")
     public void download() {
         getProject().mkdir(into);
 
@@ -74,9 +79,23 @@ public class ZapDownloadWeekly extends DefaultTask {
             String weeklyUrl = elementNodeList.item(0).getTextContent();
 
             String fileName = weeklyUrl.substring(weeklyUrl.lastIndexOf('/') + 1);
-            try (InputStream in = URI.create(weeklyUrl).toURL().openStream()) {
-                Files.copy(in, into.get().toPath().resolve(fileName));
+            Path file = into.get().toPath().resolve(fileName);
+            if (Files.exists(file)) {
+                try (ZipFile zip = new ZipFile(file.toFile())) {
+                    getLogger().info("Skipping download, the file already exists.");
+                    return;
+                } catch (IOException e) {
+                    getLogger()
+                            .warn("Deleting corrupt ZIP file, a new file will be downloaded.", e);
+                    getProject().delete(file.toFile());
+                }
             }
+            try (InputStream in = URI.create(weeklyUrl).toURL().openStream()) {
+                Files.copy(in, file);
+            }
+        } catch (UnableToDeleteFileException e) {
+            getLogger().error("Failed to delete the ZIP file.", e);
+            throw e;
         } catch (Exception e) {
             throw new ZapDownloadWeeklyException("Failed to download: " + e.getMessage(), e);
         }

@@ -27,11 +27,11 @@ var SiteTree = (function() {
 		tool.position = 0;
 		tool.urls = [];
 
-		utils.saveTool(tool);
+		utils.writeTool(tool);
 	}
 
 	function showSiteTree(tabId) {
-		utils.messageFrame2(tabId, "display", {action:"showSiteTree"})
+		utils.messageFrame(tabId, "display", {action:"showSiteTree"})
 			.catch(utils.errorHandler);
 	}
 
@@ -42,7 +42,7 @@ var SiteTree = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {

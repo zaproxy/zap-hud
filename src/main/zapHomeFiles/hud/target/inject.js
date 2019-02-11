@@ -20,21 +20,16 @@
 		);
 	}
 
+	function generateTabId() {
+		let millis = new Date().getTime();
+		let r = Math.floor(Math.random()*1000);
+		let tabId = '' + millis + '-' + r;
+
+		return tabId.substring(6);
+	}
+
 	/* TARGET INTERACTIONS */
 	// code that will interact with the target domain will go here
-
-
-	/* FRAMES */
-	// todo: standardize z-indexes. they will need to be really high, see youtube and espn for why
-	function removePanel(panel) {
-		panel.parentNode.removeChild(panel);
-	}
-
-	/* PRESENTATION */
-	// todo: implement hide/show panels
-	function hidePanel(panel) {
-		return 0;
-	}
 
 	function showPanel(panel) {
 		return 0;
@@ -90,6 +85,41 @@
 	function hideSidePanels() {
 		document.getElementById("left-panel").style.display = "none";
 		document.getElementById("right-panel").style.display = "none";
+	}
+
+	function hideAllDisplayFrames() {
+		document.getElementById("left-panel").style.display = "none";
+		document.getElementById("right-panel").style.display = "none";
+		document.getElementById("bottom-drawer").style.display = "none";
+		document.getElementById("growler-alerts").style.display = "none";
+	}
+
+	function showAllDisplayFrames() {
+		document.getElementById("left-panel").style.display = "";
+		document.getElementById("right-panel").style.display = "";
+		document.getElementById("bottom-drawer").style.display = "";
+		document.getElementById("growler-alerts").style.display = "";
+	}
+
+	function refreshAllFrames() {
+		document.getElementById("left-panel").src = document.getElementById("left-panel").src;
+		document.getElementById("right-panel").src = document.getElementById("right-panel").src;
+		document.getElementById("main-display").src = document.getElementById("main-display").src;
+		document.getElementById("bottom-drawer").src = document.getElementById("bottom-drawer").src;
+		document.getElementById("growler-alerts").src = document.getElementById("growler-alerts").src;
+		document.getElementById("management").src = document.getElementById("management").src;
+	}
+
+	function refreshDisplayFrames() {
+		document.getElementById("left-panel").src = document.getElementById("left-panel").src;
+		document.getElementById("right-panel").src = document.getElementById("right-panel").src;
+		document.getElementById("main-display").src = document.getElementById("main-display").src;
+		document.getElementById("bottom-drawer").src = document.getElementById("bottom-drawer").src;
+		document.getElementById("growler-alerts").src = document.getElementById("growler-alerts").src;
+	}
+
+	function refreshManagementFrame() {
+		document.getElementById("management").src = document.getElementById("management").src;
 	}
 
 	/* hide or show main iframe for popups and dialogs */
@@ -168,8 +198,8 @@
 				inputs[index].style.borderColor = 'purple';
 				showEnableTypeHiddenFields.push(inputs[index]);
 				if (! counted) {
+					// If any checks are added after this will also need to inc counted
 					showEnabledCount++;
-					counted = true;
 				}
 			}
 		}
@@ -204,7 +234,7 @@
 		showEnabledDisabled = [];
 		showEnabledReadOnly = [];
 		showEnabled = false;
-		showEnabledCount = 0
+		showEnabledCount = 0;
 	}
 	
 
@@ -215,7 +245,7 @@
 		} else {
 			// Count the number of hidden fields
 			var inputs = document.getElementsByTagName('input');
-			for (index = 0; index < inputs.length; ++index) {
+			for (let index = 0; index < inputs.length; ++index) {
 				if (inputs[index].type == "hidden") {
 					count++;
 				} else if (inputs[index].style.display == "none") {
@@ -306,6 +336,14 @@
 				hideBottomDrawer();
 				break;
 
+			case "hideAllDisplayFrames":
+				hideAllDisplayFrames();
+				break;
+
+			case "showAllDisplayFrames":
+				showAllDisplayFrames();
+				break;
+
 			case "expandPanel":
 				expandPanel(message.orientation);
 				break;
@@ -324,6 +362,18 @@
 
 			case "refresh":
 				window.location.reload(false);
+				break;
+
+			case "refreshAllFrames":
+				refreshAllFrames();
+				break;
+
+			case "refreshDisplayFrames":
+				refreshDisplayFrames();
+				break;
+
+			case "refreshManagementFrame":
+				refreshManagementFrame();
 				break;
 
 			case "heighten":
@@ -365,7 +415,7 @@
 
 	/* initializes the HUD Frames */
 	if (window.top == window.self) {
-		tabId = Math.round(Math.random()*5000) //todo: nonsense random number generator;
+		tabId = generateTabId();
 
 		window.addEventListener("message", receiveMessages);
 

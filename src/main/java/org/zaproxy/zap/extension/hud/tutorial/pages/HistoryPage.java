@@ -19,6 +19,7 @@
  */
 package org.zaproxy.zap.extension.hud.tutorial.pages;
 
+import java.util.Map;
 import org.parosproxy.paros.network.HttpMessage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialPage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialProxyServer;
@@ -36,10 +37,10 @@ public class HistoryPage extends TutorialPage {
     }
 
     @Override
-    public void handlePostRequest(HttpMessage msg) {
+    public void handlePostRequest(HttpMessage msg, Map<String, String> params) {
         // The token for this task is set in another page
         this.setTaskToken(HistoryJsPage.key);
-        super.handlePostRequest(msg);
+        super.handlePostRequest(msg, params);
     }
 
     @Override

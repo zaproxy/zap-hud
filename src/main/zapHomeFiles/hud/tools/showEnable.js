@@ -10,7 +10,6 @@ var ShowEnable = (function() {
 	// todo: could probably switch this to a config file?
 	var NAME = "showEnable";
 	var LABEL = I18n.t("show_tool");
-	var DATA = {};
 	var ICONS = {};
 		ICONS.OFF = "show-off.png";
 		ICONS.ON = "show-on.png";
@@ -28,7 +27,7 @@ var ShowEnable = (function() {
 		tool.position = 0;
 		tool.count = 0;
 
-		utils.saveTool(tool);
+		utils.writeTool(tool);
 	}
 
 
@@ -88,7 +87,7 @@ var ShowEnable = (function() {
 				tool.data = count;
 
 				utils.writeTool(tool);
-				utils.messageFrame2(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, data: count}})
+				utils.messageFrame(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, data: count}})
 			})
 			.catch(utils.errorHandler);
 	}
@@ -100,7 +99,7 @@ var ShowEnable = (function() {
 		config.toolLabel = LABEL;
 		config.options = {remove: I18n.t("common_remove")};
 
-		utils.messageFrame2(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
 			.then(response => {
 				// Handle button choice
 				if (response.id == "remove") {
@@ -122,13 +121,13 @@ var ShowEnable = (function() {
 			.then(tool => {
 				if (tool.isRunning) {
 					port.postMessage({label: LABEL, data: 0, icon: ICONS.ON})
-					utils.messageFrame2(tabId, "management", {action: 'showEnable.on'})
+					utils.messageFrame(tabId, "management", {action: 'showEnable.on'})
 				}
 				else {
 					port.postMessage({label: LABEL, data: 0, icon: ICONS.OFF})
 				}
 
-				utils.messageFrame2(tabId, "management", {action:"showEnable.count"});
+				utils.messageFrame(tabId, "management", {action:"showEnable.count"});
 			})
 			.catch(utils.errorHandler)
 	}
@@ -143,10 +142,8 @@ var ShowEnable = (function() {
 				break;
 
 			case "showEnable.count":
-				// Check its an int - its been supplied by the target domain so in theory could have been tampered with
-				if (message.count === parseInt(message.count, 10)) {
-					setCount(message.tabId, message.count);
-				}
+				// The message from the target domain will have been validated in management.js
+				setCount(message.tabId, message.count);
 				break;
 
 			default:
@@ -165,7 +162,7 @@ var ShowEnable = (function() {
 					break;
 
 				case "getTool":
-					getTool(message.tabId, event.ports[0])
+					getTool(message.tabId, event.ports[0]);
 
 				default:
 					break;

@@ -10,17 +10,17 @@
 </head>
 <body>
 	<div id="app"> 
-		<loading-screen v-show="<<SHOW_WELCOME_SCREEN>>"></loading-screen>
+		<welcome-screen v-show="showWelcomeScreen"></welcome-screen>
 	</div>
 
-	<template id="loading-screen-template">
+	<template id="welcome-screen-template">
 		<div class="welcome-div">
 			<img class="welcome-image" src='<<ZAP_HUD_FILES>>?image=hud-welcome.png'>
 			<div class="tutorial-div">
-				<button class="btn btn-primary" @click="tutorial"> Take the HUD Tutorial </button>
+				<button class="btn btn-primary" @click="continueToTutorial"> Take the HUD Tutorial </button>
 			</div>
 			<div class="target-div">
-				<button class="btn btn-primary" @click="target"> Continue to your target </button>
+				<button class="btn btn-primary" @click="closeWelcomeScreen"> Continue to your target </button>
 			</div>
 			<div class="dontShowAgain-div">
 				<input type="checkbox" id="dontShowAgain" v-model="dontShowAgain">

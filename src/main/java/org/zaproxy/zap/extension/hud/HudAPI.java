@@ -76,38 +76,47 @@ public class HudAPI extends ApiImplementor {
 
     private static final String PREFIX = "hud";
 
+    private static final int MAX_KEY_LENGTH = 50;
+
     private Map<String, String> siteUrls = new HashMap<String, String>();
     private ExtensionHUD extension;
 
     private static final String ACTION_LOG = "log";
     private static final String ACTION_RECORD_REQUEST = "recordRequest";
     private static final String ACTION_RESET_TUTORIAL_TASKS = "resetTutorialTasks";
+    private static final String ACTION_SET_UI_OPTION = "setUiOption";
 
+    private static final String VIEW_GET_UI_OPTION = "getUiOption";
     private static final String VIEW_HUD_ALERT_DATA = "hudAlertData";
     private static final String VIEW_HEARTBEAT = "heartbeat";
+    private static final String VIEW_UPGRADED_DOMAINS = "upgradedDomains";
 
     private static final String PARAM_RECORD = "record";
     private static final String PARAM_HEADER = "header";
     private static final String PARAM_BODY = "body";
     private static final String PARAM_URL = "url";
+    private static final String PARAM_KEY = "key";
+    private static final String PARAM_VALUE = "value";
 
     /** The only files that can be included on domain */
     private static final List<String> DOMAIN_FILE_WHITELIST =
             Arrays.asList(new String[] {"inject.js"});
 
     private ApiImplementor hudFileProxy;
-    private ApiImplementor hudApiProxy;
-
     private String hudFileUrl;
-    private String hudApiUrl;
 
     private String websocketUrl;
 
     /**
+     * Test non secret used to simulate the case where a malicious target site has got hold of the
+     * real shared secret
+     */
+    public static final String SHARED_TEST_NON_SECRET = "TEST_MODE";
+    /**
      * Shared secret used to ensure that we only accept messages from the ZAP code running on the
      * target domain
      */
-    private final String sharedSecret = UUID.randomUUID().toString();
+    private static final String SHARED_SECRET = UUID.randomUUID().toString();
 
     /** Cookie used on the ZAP domain - should never be exposed to a target site. */
     private final String zapHudCookie = UUID.randomUUID().toString();
@@ -121,14 +130,19 @@ public class HudAPI extends ApiImplementor {
         this.addApiAction(
                 new ApiAction(ACTION_RECORD_REQUEST, new String[] {PARAM_HEADER, PARAM_BODY}));
         this.addApiAction(new ApiAction(ACTION_RESET_TUTORIAL_TASKS));
+        this.addApiAction(
+                new ApiAction(
+                        ACTION_SET_UI_OPTION,
+                        new String[] {PARAM_KEY},
+                        new String[] {PARAM_VALUE}));
 
         this.addApiView(new ApiView(VIEW_HUD_ALERT_DATA, new String[] {PARAM_URL}));
         this.addApiView(new ApiView(VIEW_HEARTBEAT));
+        this.addApiView(new ApiView(VIEW_GET_UI_OPTION, new String[] {PARAM_KEY}));
+        this.addApiView(new ApiView(VIEW_UPGRADED_DOMAINS));
 
         hudFileProxy = new HudFileProxy(this);
         hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S);
-        hudApiProxy = new HudApiProxy(this);
-        hudApiUrl = API.getInstance().getCallBackUrl(hudApiProxy, API.API_URL_S);
 
         // Temporary hack to make it easier to find the websocket test page
         // We could launch a browser, but then we'd need to depend on selenium
@@ -156,10 +170,6 @@ public class HudAPI extends ApiImplementor {
     @Override
     public String getPrefix() {
         return PREFIX;
-    }
-
-    protected ApiImplementor getHudApiProxy() {
-        return hudApiProxy;
     }
 
     protected ApiImplementor getHudFileProxy() {
@@ -247,11 +257,24 @@ public class HudAPI extends ApiImplementor {
                 this.extension.resetTutorialTasks();
                 break;
 
+            case ACTION_SET_UI_OPTION:
+                String key = params.getString(PARAM_KEY);
+                String value = params.optString(PARAM_VALUE, "");
+                validateKey(key);
+                this.extension.getHudParam().setUiOption(key, value);
+                break;
+
             default:
                 throw new ApiException(ApiException.Type.BAD_ACTION);
         }
 
         return ApiResponseElement.OK;
+    }
+
+    private void validateKey(String key) throws ApiException {
+        if (key.length() == 0 || key.length() > MAX_KEY_LENGTH || !key.matches("[a-zA-Z0-9]+")) {
+            throw new ApiException(ApiException.Type.ILLEGAL_PARAMETER, PARAM_KEY);
+        }
     }
 
     @Override
@@ -267,6 +290,18 @@ public class HudAPI extends ApiImplementor {
             case VIEW_HEARTBEAT:
                 logger.debug("Received heartbeat");
                 return ApiResponseElement.OK;
+            case VIEW_GET_UI_OPTION:
+                String key = params.getString(PARAM_KEY);
+                validateKey(key);
+                return new ApiResponseElement(key, this.extension.getHudParam().getUiOption(key));
+            case VIEW_UPGRADED_DOMAINS:
+                ApiResponseList domains = new ApiResponseList(name);
+                extension
+                        .getUpgradedHttpsDomains()
+                        .forEach(
+                                domain ->
+                                        domains.addItem(new ApiResponseElement("domain", domain)));
+                return domains;
             default:
                 throw new ApiException(ApiException.Type.BAD_VIEW);
         }
@@ -385,17 +420,18 @@ public class HudAPI extends ApiImplementor {
             }
             // Inject content into specific files
             if (file.equals("target/inject.js")) {
+                String secret =
+                        this.extension.getHudParam().isTutorialTestMode()
+                                ? SHARED_TEST_NON_SECRET
+                                : SHARED_SECRET;
                 contents =
-                        contents.replace("<<URL>>", url)
-                                .replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
+                        contents.replace("<<URL>>", url).replace("<<ZAP_SHARED_SECRET>>", secret);
             }
             contents = contents.replace("<<ZAP_HUD_FILES>>", this.hudFileUrl);
 
             if (url.startsWith(API.API_URL_S)) {
                 // Only do these on the ZAP domain
-                contents =
-                        contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
-                                .replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
+                contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
 
                 if (file.equals("serviceworker.js")) {
                     // Inject the tool filenames
@@ -420,13 +456,10 @@ public class HudAPI extends ApiImplementor {
 
                 } else if (file.equals("utils.js")) {
                     contents =
-                            contents.replace("<<ZAP_HUD_API>>", this.hudApiUrl)
-                                    .replace(
-                                            "<<DEV_MODE>>",
-                                            Boolean.toString(
-                                                    this.extension
-                                                            .getHudParam()
-                                                            .isDevelopmentMode()));
+                            contents.replace(
+                                    "<<DEV_MODE>>",
+                                    Boolean.toString(
+                                            this.extension.getHudParam().isDevelopmentMode()));
                 } else if (file.equals("serviceworker.js")) {
                     contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
                 } else if (file.equals("websockettest.js")) {
@@ -450,7 +483,11 @@ public class HudAPI extends ApiImplementor {
                                             "<<TUTORIAL_URL>>",
                                             this.extension.getTutorialUrl("", false));
                     if (this.extension.getHudParam().isEnableOnDomainMsgs()) {
-                        contents = contents.replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
+                        String secret =
+                                this.extension.getHudParam().isTutorialTestMode()
+                                        ? SHARED_TEST_NON_SECRET
+                                        : SHARED_SECRET;
+                        contents = contents.replace("<<ZAP_SHARED_SECRET>>", secret);
                     } else {
                         // In this case an empty secret is used to turn off this feature
                         contents = contents.replace("<<ZAP_SHARED_SECRET>>", "");

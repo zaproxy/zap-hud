@@ -115,7 +115,7 @@ Vue.component('hud-buttons', {
 		// check if currently hidden
 		localforage.getItem('settings.isHudVisible')
 			.then(isHudVisible => {
-				if (!isHudVisible) {
+				if (isHudVisible !== null && !isHudVisible) {
 					return parent.postMessage({action:'hideSidePanels'}, document.referrer);
 				}
 			})
@@ -168,7 +168,7 @@ Vue.component('hud-buttons', {
 		})
 	}
 
-})
+});
 
 document.addEventListener("DOMContentLoaded", () => {
 	let params = new URL(document.location).searchParams;
@@ -244,7 +244,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 
 			eventBus.$emit('removeButton', {
 				name: tool.name
-			})
+			});
 			break;
 
 		default:
