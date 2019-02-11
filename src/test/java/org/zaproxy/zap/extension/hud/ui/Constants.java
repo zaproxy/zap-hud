@@ -23,6 +23,9 @@ public class Constants {
     public static int ZAP_PORT = 8999;
     public static String ZAP_HOST = "localhost";
     public static String ZAP_HOST_PORT = ZAP_HOST + ":" + ZAP_PORT;
+    /** This key is set in /build.gradle.kts - these must be kept the same */
+    public static String ZAP_TEST_API_KEY = "password123";
+
     public static int POST_LOAD_DELAY_MS = 10000;
     public static int GENERIC_TESTS_RETRY_COUNT = 30;
     public static int GENERIC_TESTS_RETRY_SLEEP_MS = 1000;

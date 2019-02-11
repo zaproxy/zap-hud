@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
  - Correct handling of upgraded domains on startup. [#162](https://github.com/zaproxy/zap-hud/issues/162)
  - Stop the tutorial server when the add-on is uninstalled.
+ - Perform stricter validation and filtering on messages from the target domain.
 
 ### Changed
  - Use websockets instead of HTTP for all ZAP API calls
