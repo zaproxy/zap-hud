@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2019-02-11
+ - Many thanks to Matt Austin (@mattaustin) for reporting security vulnerabilities with the HUD and working with us to fix them.
+
 ### Added
  - Add API endpoints for getting and setting UI options. [#319](https://github.com/zaproxy/zap-hud/issues/319)
  - Add tasks for Enable, Show and Break tutorial pages
@@ -48,7 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2018-12-03
 First alpha release.
 
-[Unreleased]: https://github.com/zaproxy/zap-hud/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/zaproxy/zap-hud/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/zaproxy/zap-hud/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/zaproxy/zap-hud/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/zaproxy/zap-hud/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/zaproxy/zap-hud/compare/v0.1.0...v0.1.1
