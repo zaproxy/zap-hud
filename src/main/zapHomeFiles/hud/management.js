@@ -1,9 +1,12 @@
 /*
- * Management & HUD Settings
+ * Management Frame
  *
- * Description goes here...
+ * Initializes the service worker and forwards messages between the service worker
+ * and inject.js.
  */
 
+// temp time test
+var startTime = new Date().getTime();
 
 // Injected strings
 var SHOW_WELCOME_SCREEN = '<<SHOW_WELCOME_SCREEN>>' === 'true' ? true : false ;
@@ -18,53 +21,33 @@ var context = {
 	domain: utils.parseDomainFromUrl(document.referrer)
 };
 
-Vue.component('loading-screen', {
-	template: '#loading-screen-template',
+Vue.component('welcome-screen', {
+	template: '#welcome-screen-template',
+	props: [],
 	methods: {
-		target: function() {
-			if (dontShowAgain.checked) {
-				dontShowWelcomeAgain().then(() => {
-					// Refresh the target so the HUD buttons appear
-					parent.postMessage( {action: 'refresh'} , document.referrer);
-				})
-				.catch(utils.errorHandler);
-			} else {
-				// Refresh the target so the HUD buttons appear
-				parent.postMessage( {action: 'refresh'} , document.referrer);
-			}
+		continueToTutorial: function() {
+			window.open(TUTORIAL_URL);
+
+			this.closeWelcomeScreen();
 		},
-		tutorial: function() {
+		closeWelcomeScreen: function() {
 			if (dontShowAgain.checked) {
-				dontShowWelcomeAgain().then(() => {
-					// Open the tutorial in a new window / tab
-					window.open(TUTORIAL_URL);
-					// Refresh the target so the HUD buttons appear
-					parent.postMessage( {action: 'refresh'} , document.referrer);
-				})
-				.catch(utils.errorHandler);
-			} else {
-				// Open the tutorial in a new window / tab
-				window.open(TUTORIAL_URL);
-				// Refresh the target so the HUD buttons appear
-				parent.postMessage( {action: 'refresh'} , document.referrer);
+				navigator.serviceWorker.controller.postMessage({
+					action:"zapApiCall", component: "hud", type: "action", 
+					name: "setOptionShowWelcomeScreen",
+					params: { Boolean: 'false' }});
 			}
+
+			app.showWelcomeScreen = false;
+			parent.postMessage( {action: 'contractManagement'} , document.referrer);
 		}
 	},
 	data() {
 		return {
-			isShowWelcomeScreen: SHOW_WELCOME_SCREEN,
 			dontShowAgain: false
 		}
-	},
-	props: []
+	}
 })
-
-function dontShowWelcomeAgain() {
-	// TODO - we can no longer call the API directly from the display frames, but at this point the service worker
-	// will not be available.
-	// Plan to fix once the startup rework has stabilised
-	// return utils.zapApiCall("/hud/action/setOptionShowWelcomeScreen/?Boolean=false");
-}
 
 document.addEventListener('DOMContentLoaded', () => {
 	let params = new URL(document.location).searchParams;
@@ -72,37 +55,53 @@ document.addEventListener('DOMContentLoaded', () => {
 	frameId = params.get('frameId');
 	tabId = params.get('tabId');
 
-	// initialize Vue app
 	app = new Vue({
 		el: '#app',
 		data: {
-			isSettingsButtonShown: false
+			showWelcomeScreen: false
 		}
 	});
 
 	// if first time starting HUD boot up the service worker
 	if (navigator.serviceWorker.controller === null) {
-		parent.postMessage( {action: 'expandManagement'} , document.referrer);
+		// temp time test
+		localforage.setItem('starttime', startTime)
+
+		parent.postMessage( {action: 'hideAllDisplayFrames'} , document.referrer);
+
+		localforage.setItem('is_first_load', true)
+
 		startServiceWorker();
 	}
 	else {
-		// show the settings button
-		app.isSettingsButtonShown = true;
+		parent.postMessage( {action: 'showAllDisplayFrames'} , document.referrer);
 
-		window.addEventListener('message', windowMessageListener)
-		window.addEventListener('beforeunload', beforeunloadListener)
-
-		navigator.serviceWorker.addEventListener('message', serviceWorkerMessageListener)
-
-		// send targetload message 
-		navigator.serviceWorker.controller.postMessage({action: 'targetload', tabId: tabId, targetUrl: context.url});
+		// temp time test
+		localforage.getItem('starttime')
+			.then(startT => {
+				let currentTime = new Date().getTime();
+				let diff = currentTime - parseInt(startT);
+				console.log('Time (ms) to load UI: ' + diff)
+			})
 
 		localforage.setItem(IS_SERVICEWORKER_REFRESHED, true);
+		localforage.getItem('is_first_load')
+			.then(isFirstLoad => {
+				localforage.setItem('is_first_load', false)
+
+				if (isFirstLoad && SHOW_WELCOME_SCREEN) {
+					parent.postMessage( {action: 'expandManagement'} , document.referrer);
+					app.showWelcomeScreen = true;
+				}
+			})
+
+		window.addEventListener('message', windowMessageListener)
+		navigator.serviceWorker.addEventListener('message', serviceWorkerMessageListener)
+		navigator.serviceWorker.controller.postMessage({action: 'targetload', tabId: tabId, targetUrl: context.url});
+
+		startHeartBeat();
 	}
-
-	startHeartBeat();
 });
-
 
 /*
  * Receive messages from the target domain, which is not trusted.
@@ -114,7 +113,8 @@ function windowMessageListener(event) {
 	if (! message.hasOwnProperty('sharedSecret')) {
 		utils.log(LOG_WARN, 'management.receiveMessage', 'Message without sharedSecret rejected', message);
 		return;
-	} else if ("" === ZAP_SHARED_SECRET) {
+	}
+	else if ("" === ZAP_SHARED_SECRET) {
 		// A blank secret is used to indicate that this functionality is turned off
 		utils.log(LOG_DEBUG, 'management.receiveMessage', 'Message from target domain ignored as on-domain messaging has been switched off');
 	} else if (message.sharedSecret === ZAP_SHARED_SECRET) {
@@ -144,13 +144,6 @@ function windowMessageListener(event) {
 	} else {
 		utils.log(LOG_WARN, 'management.receiveMessage', 'Message with incorrect sharedSecret rejected', message);
 	}
-}
-
-function beforeunloadListener() {
-	let currentTimeInMs = new Date().getTime();
-
-	navigator.serviceWorker.controller.postMessage({action: 'unload', time: currentTimeInMs})
-		.catch(utils.errorHandler)
 }
 
 function serviceWorkerMessageListener(event) {
@@ -183,7 +176,6 @@ function serviceWorkerMessageListener(event) {
 	}
 }
 
-
 /*
  * Starts the service worker and refreshes the target on success.
  */ 
@@ -191,22 +183,19 @@ function startServiceWorker() {
 	if ('serviceWorker' in navigator) {
 		navigator.serviceWorker.register(utils.getZapFilePath('serviceworker.js'))
 			.then(registration => {
-				console.log('Service worker registration was successful for the scope: ' + registration.scope);
+				utils.log(LOG_INFO, 'Service worker registration was successful for the scope: ' + registration.scope);
 
 				// wait until serviceworker is installed and activated
-				navigator.serviceWorker.ready
-					.then(serviceWorkerRegistration => {
-						if (! SHOW_WELCOME_SCREEN ) {
-							// refresh the target page
-							parent.postMessage( {action: 'refresh'} , document.referrer);
-						}
-					})
-					.catch(utils.errorHandler);
+				return navigator.serviceWorker.ready;
+			})
+			.then(() => {
+				// refresh the frames so the service worker can take control
+				parent.postMessage( {action: 'refreshAllFrames'} , document.referrer);
 			})
 			.catch(utils.errorHandler);
 	}
 	else {
-		alert('This browser does not support Service Workers. The HUD will not work properly.')
+		alert('This browser does not support Service Workers. The HUD will not work.')
 	}
 }
 

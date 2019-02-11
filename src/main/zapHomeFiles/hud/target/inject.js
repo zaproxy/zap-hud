@@ -87,6 +87,41 @@
 		document.getElementById("right-panel").style.display = "none";
 	}
 
+	function hideAllDisplayFrames() {
+		document.getElementById("left-panel").style.display = "none";
+		document.getElementById("right-panel").style.display = "none";
+		document.getElementById("bottom-drawer").style.display = "none";
+		document.getElementById("growler-alerts").style.display = "none";
+	}
+
+	function showAllDisplayFrames() {
+		document.getElementById("left-panel").style.display = "";
+		document.getElementById("right-panel").style.display = "";
+		document.getElementById("bottom-drawer").style.display = "";
+		document.getElementById("growler-alerts").style.display = "";
+	}
+
+	function refreshAllFrames() {
+		document.getElementById("left-panel").src = document.getElementById("left-panel").src;
+		document.getElementById("right-panel").src = document.getElementById("right-panel").src;
+		document.getElementById("main-display").src = document.getElementById("main-display").src;
+		document.getElementById("bottom-drawer").src = document.getElementById("bottom-drawer").src;
+		document.getElementById("growler-alerts").src = document.getElementById("growler-alerts").src;
+		document.getElementById("management").src = document.getElementById("management").src;
+	}
+
+	function refreshDisplayFrames() {
+		document.getElementById("left-panel").src = document.getElementById("left-panel").src;
+		document.getElementById("right-panel").src = document.getElementById("right-panel").src;
+		document.getElementById("main-display").src = document.getElementById("main-display").src;
+		document.getElementById("bottom-drawer").src = document.getElementById("bottom-drawer").src;
+		document.getElementById("growler-alerts").src = document.getElementById("growler-alerts").src;
+	}
+
+	function refreshManagementFrame() {
+		document.getElementById("management").src = document.getElementById("management").src;
+	}
+
 	/* hide or show main iframe for popups and dialogs */
 	function showMainDisplay() {
 		document.getElementById("main-display").style.display = "";
@@ -301,6 +336,14 @@
 				hideBottomDrawer();
 				break;
 
+			case "hideAllDisplayFrames":
+				hideAllDisplayFrames();
+				break;
+
+			case "showAllDisplayFrames":
+				showAllDisplayFrames();
+				break;
+
 			case "expandPanel":
 				expandPanel(message.orientation);
 				break;
@@ -319,6 +362,18 @@
 
 			case "refresh":
 				window.location.reload(false);
+				break;
+
+			case "refreshAllFrames":
+				refreshAllFrames();
+				break;
+
+			case "refreshDisplayFrames":
+				refreshDisplayFrames();
+				break;
+
+			case "refreshManagementFrame":
+				refreshManagementFrame();
 				break;
 
 			case "heighten":
