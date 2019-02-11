@@ -108,10 +108,15 @@ public class HudAPI extends ApiImplementor {
     private String websocketUrl;
 
     /**
+     * Test non secret used to simulate the case where a malicious target site has got hold of the
+     * real shared secret
+     */
+    public static final String SHARED_TEST_NON_SECRET = "TEST_MODE";
+    /**
      * Shared secret used to ensure that we only accept messages from the ZAP code running on the
      * target domain
      */
-    private final String sharedSecret = UUID.randomUUID().toString();
+    private static final String SHARED_SECRET = UUID.randomUUID().toString();
 
     /** Cookie used on the ZAP domain - should never be exposed to a target site. */
     private final String zapHudCookie = UUID.randomUUID().toString();
@@ -415,9 +420,12 @@ public class HudAPI extends ApiImplementor {
             }
             // Inject content into specific files
             if (file.equals("target/inject.js")) {
+                String secret =
+                        this.extension.getHudParam().isTutorialTestMode()
+                                ? SHARED_TEST_NON_SECRET
+                                : SHARED_SECRET;
                 contents =
-                        contents.replace("<<URL>>", url)
-                                .replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
+                        contents.replace("<<URL>>", url).replace("<<ZAP_SHARED_SECRET>>", secret);
             }
             contents = contents.replace("<<ZAP_HUD_FILES>>", this.hudFileUrl);
 
@@ -475,7 +483,11 @@ public class HudAPI extends ApiImplementor {
                                             "<<TUTORIAL_URL>>",
                                             this.extension.getTutorialUrl("", false));
                     if (this.extension.getHudParam().isEnableOnDomainMsgs()) {
-                        contents = contents.replace("<<ZAP_SHARED_SECRET>>", this.sharedSecret);
+                        String secret =
+                                this.extension.getHudParam().isTutorialTestMode()
+                                        ? SHARED_TEST_NON_SECRET
+                                        : SHARED_SECRET;
+                        contents = contents.replace("<<ZAP_SHARED_SECRET>>", secret);
                     } else {
                         // In this case an empty secret is used to turn off this feature
                         contents = contents.replace("<<ZAP_SHARED_SECRET>>", "");

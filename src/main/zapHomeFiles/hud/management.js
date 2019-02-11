@@ -110,16 +110,39 @@ document.addEventListener('DOMContentLoaded', () => {
  * The contents of the messages should still be treated as potentially malicious.
  */
 function windowMessageListener(event) {
-	if (! event.data.hasOwnProperty('sharedSecret')) {
-		utils.log(LOG_WARN, 'management.receiveMessage', 'Message without sharedSecret rejected');
+	var message = event.data;
+	if (! message.hasOwnProperty('sharedSecret')) {
+		utils.log(LOG_WARN, 'management.receiveMessage', 'Message without sharedSecret rejected', message);
 		return;
 	} else if ("" === ZAP_SHARED_SECRET) {
 		// A blank secret is used to indicate that this functionality is turned off
 		utils.log(LOG_DEBUG, 'management.receiveMessage', 'Message from target domain ignored as on-domain messaging has been switched off');
-	} else if (event.data.sharedSecret === ZAP_SHARED_SECRET) {
-		navigator.serviceWorker.controller.postMessage(event.data);
+	} else if (message.sharedSecret === ZAP_SHARED_SECRET) {
+		// These are the only messages we allow from the target site, validate and filter out just the info we are expecting
+		var limitedData = {}
+		limitedData.action = message.action;
+		limitedData.tabId = message.tabId;
+		switch(message.action) {
+			case "showEnable.count":
+				if (message.count === parseInt(message.count, 10)) {
+					limitedData.count = message.count;
+					navigator.serviceWorker.controller.postMessage(limitedData);
+					return;
+				}
+				break;
+			case "commonAlerts.showAlert":
+				if (message.alertId === parseInt(message.alertId, 10)) {
+					limitedData.alertId = message.alertId;
+					navigator.serviceWorker.controller.postMessage(limitedData);
+					return;
+				}
+				break;
+			default:
+				break;
+		}
+		utils.log(LOG_DEBUG, 'management.receiveMessage', 'Unrecognised message from target domain ignored', message);
 	} else {
-		utils.log(LOG_WARN, 'management.receiveMessage', 'Message with incorrect sharedSecret rejected ' + event.data.sharedSecret);
+		utils.log(LOG_WARN, 'management.receiveMessage', 'Message with incorrect sharedSecret rejected', message);
 	}
 }
 

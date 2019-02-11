@@ -142,10 +142,8 @@ var ShowEnable = (function() {
 				break;
 
 			case "showEnable.count":
-				// Check its an int - its been supplied by the target domain so in theory could have been tampered with
-				if (message.count === parseInt(message.count, 10)) {
-					setCount(message.tabId, message.count);
-				}
+				// The message from the target domain will have been validated in management.js
+				setCount(message.tabId, message.count);
 				break;
 
 			default:

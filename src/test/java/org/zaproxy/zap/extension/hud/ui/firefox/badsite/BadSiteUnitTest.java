@@ -19,16 +19,21 @@
  */
 package org.zaproxy.zap.extension.hud.ui.firefox.badsite;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import net.sf.json.JSONObject;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -38,7 +43,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.zaproxy.zap.extension.api.API;
+import org.zaproxy.zap.extension.hud.HudAPI;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
+import org.zaproxy.zap.extension.hud.ui.Constants;
 import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
 import org.zaproxy.zap.extension.hud.ui.firefox.tutorial.TutorialStatics;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
@@ -47,6 +55,7 @@ import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 public class BadSiteUnitTest extends FirefoxUnitTest {
 
     private static final String SERVICE_WORKER = "serviceworker.js";
+    private static final String BAD_SITE_TEST_KEY = "badsitetest";
 
     // Cache the files url as it wont change and this will speed things up a little bit
     private static String filesUrl = null;
@@ -107,6 +116,50 @@ public class BadSiteUnitTest extends FirefoxUnitTest {
         } catch (JavascriptException e) {
             // Expected, but double check the error message
             assertTrue(e.getMessage().contains("ReferenceError: ZAP_HUD_WS is not defined"));
+        }
+    }
+
+    @Test
+    public void cannotUseZapApiFromTarget(FirefoxDriver driver)
+            throws InterruptedException, IOException {
+        HUD hud = new HUD(driver);
+        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
+
+        // Test the value is empty to start
+        JSONObject ret = callApi("/JSON/hud/view/getUiOption/?key=" + BAD_SITE_TEST_KEY + "&");
+        assertEquals("", ret.get(BAD_SITE_TEST_KEY));
+
+        String script =
+                "document.getElementById('management').contentWindow.postMessage("
+                        + "{sharedSecret: '"
+                        + HudAPI.SHARED_TEST_NON_SECRET
+                        + "', tabId:'tabId', action: 'zapApiCall', component:'hud',type:'action',name:'setUiOption', "
+                        + "params: { key: '"
+                        + BAD_SITE_TEST_KEY
+                        + "', value: 'this shouldnt work' }}, '*'); "
+                        + "return 'Done';";
+
+        executeScriptWithRetry(driver, script);
+
+        Thread.sleep(5000); // Just to make sure
+
+        // And check its still empty
+        ret = callApi("/JSON/hud/view/getUiOption/?key=" + BAD_SITE_TEST_KEY + "&");
+        assertEquals("", ret.get(BAD_SITE_TEST_KEY));
+    }
+
+    private static JSONObject callApi(String apiCall) throws MalformedURLException, IOException {
+        String apiUrl =
+                "http://"
+                        + Constants.ZAP_HOST_PORT
+                        + apiCall
+                        + API.API_KEY_PARAM
+                        + "="
+                        + Constants.ZAP_TEST_API_KEY;
+
+        try (InputStream in = new URL(apiUrl).openStream()) {
+            String str = IOUtils.toString(in, "UTF-8");
+            return JSONObject.fromObject(str);
         }
     }
 
