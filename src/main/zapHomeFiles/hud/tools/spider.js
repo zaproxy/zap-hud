@@ -139,17 +139,10 @@ var Spider = (function() {
 			.catch(utils.errorHandler);
 	}
 
-	// if tabId included, then it will check if active scan is running on that tab
-	// if not tabId is included it will check if active scan is running on any tab
-	function checkIsRunning(tabId) {
+	function checkIsRunning() {
 		return new Promise(resolve => {
 			utils.loadTool(NAME).then(tool => {
-				if (tabId !== undefined) {
-					resolve(tool.runningTabId === tabId);
-				}
-				else {
-					resolve(tool.isRunning);
-				}
+				resolve(tool.isRunning);
 			});
 		});
 	}

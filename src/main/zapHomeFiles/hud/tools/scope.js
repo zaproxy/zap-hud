@@ -95,7 +95,7 @@ var Scope = (function() {
 			})
 	}
 
-	function addToScope(domain) {
+	function addToScope(tabId, domain) {
 		return utils.loadTool(NAME)
 			.then(tool => {
 				if (! tool.hudContext) {
