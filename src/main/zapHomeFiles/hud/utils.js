@@ -177,7 +177,7 @@ var utils = (function() {
 	
 		promises.push(localforage.setItem(IS_HUD_INITIALIZED, true));
 		promises.push(localforage.setItem(IS_FIRST_TIME, true));
-		promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false))
+		promises.push(localforage.setItem(IS_SERVICEWORKER_REFRESHED, false));
 		promises.push(localforage.setItem('settings.isHudVisible', true));
 		promises.push(localforage.setItem('drawer.isDrawerOpen', false));
 		// Note: in the below, "activeTab" is to be set to href, not name
