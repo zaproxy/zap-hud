@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+ - Add css transitions to tool buttons so that they slide out when hovered over.
+
 ## [0.3.0] - 2019-02-11
  - Many thanks to Matt Austin (@mattaustin) for reporting security vulnerabilities with the HUD and working with us to fix them.
 
