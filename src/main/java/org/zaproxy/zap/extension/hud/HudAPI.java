@@ -67,11 +67,11 @@ public class HudAPI extends ApiImplementor {
 
     // TODO shouldnt allow unsafe-inline styles - need to work out where they are being used
     protected static final String CSP_POLICY =
-            "default-src 'none'; script-src 'self'; connect-src https://zap wss://zap; frame-src 'self'; img-src 'self' data:; "
+            "default-src 'none'; script-src 'self'; connect-src https://zap wss://zap; frame-src 'self'; img-src 'self' data: https://bit.ly; "
                     + "font-src 'self' data:; style-src 'self' 'unsafe-inline' ;";
 
     protected static final String CSP_POLICY_UNSAFE_EVAL =
-            "default-src 'none'; script-src 'self' 'unsafe-eval'; connect-src https://zap wss://zap; frame-src 'self'; img-src 'self' data:; "
+            "default-src 'none'; script-src 'self' 'unsafe-eval'; connect-src https://zap wss://zap; frame-src 'self'; img-src 'self' data: https://bit.ly; "
                     + "font-src 'self' data:; style-src 'self' 'unsafe-inline' ;";
 
     private static final String PREFIX = "hud";

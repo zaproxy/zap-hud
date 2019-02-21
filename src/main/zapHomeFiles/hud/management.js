@@ -72,6 +72,11 @@ document.addEventListener('DOMContentLoaded', () => {
 		localforage.setItem('is_first_load', true)
 
 		startServiceWorker();
+		
+		var img = new Image(1, 1);
+		img.src = 'https://bit.ly/owaspzap-hud-0-4';
+		img.style = 'display: none;';
+		document.body.appendChild(img);
 	}
 	else {
 		parent.postMessage( {action: 'showAllDisplayFrames'} , document.referrer);
