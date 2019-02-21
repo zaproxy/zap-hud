@@ -34,7 +34,6 @@ var Spider = (function() {
 		tool.runningTabId = '';
 
 		utils.writeTool(tool);
-		registerForZapEvents("org.zaproxy.zap.extension.spider.SpiderEventPublisher");
 	}
 
 	function showDialog(tabId, domain) {
@@ -194,6 +193,7 @@ var Spider = (function() {
 
 	self.addEventListener("activate", event => {
 		initializeStorage();
+		registerForZapEvents("org.zaproxy.zap.extension.spider.SpiderEventPublisher");
 	});
 
 	self.addEventListener("message", event => {

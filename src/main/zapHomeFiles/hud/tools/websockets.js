@@ -26,7 +26,6 @@ var WebSockets = (function() {
 		tool.messages = [];
 
 		utils.writeTool(tool);
-		registerForZapEvents("org.zaproxy.zap.extension.websocket.WebSocketEventPublisher");
 	}
 
 	function showOptions(tabId) {
@@ -73,6 +72,7 @@ var WebSockets = (function() {
 
 	self.addEventListener("activate", event => {
 		initializeStorage();
+		registerForZapEvents("org.zaproxy.zap.extension.websocket.WebSocketEventPublisher");
 	});
 
 	function trimMessages(lastPageUnloadTime) {
