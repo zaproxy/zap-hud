@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
  - Add css transitions to tool buttons so that they slide out when hovered over.
- - Initial support for WebSockets - this adds a new lower tab that shows all of the WebSocket messages proxied through ZAP 
+ - Initial support for WebSockets - this adds a new lower tab that shows all of the WebSocket messages proxied through ZAP
+ - Add the option to launch the tutorial again from the HUD configuration page
+ - Add a tutorial page for the HUD Configuration options 
 
 ## [0.3.0] - 2019-02-11
  - Many thanks to Matt Austin (@mattaustin) for reporting security vulnerabilities with the HUD and working with us to fix them.

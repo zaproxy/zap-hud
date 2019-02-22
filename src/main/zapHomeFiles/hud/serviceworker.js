@@ -276,12 +276,15 @@ function showHudSettings(tabId) {
 	var config = {};
 	config.settings = {
 		initialize: I18n.t("settings_resets"),
+		tutorial: I18n.t("settings_tutorial"),
 	};
 
 	utils.messageFrame(tabId, "display", {action: "showHudSettings", config: config})
 		.then(response => {
 			if (response.id === "initialize") {
 				resetToDefault();
+			} else if (response.id === "tutorial") {
+				utils.messageAllTabs("management", {action: "showTutorial"});
 			}
 		})
 		.catch(utils.errorHandler);
