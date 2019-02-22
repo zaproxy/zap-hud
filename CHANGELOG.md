@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
  - Add css transitions to tool buttons so that they slide out when hovered over.
  - Initial support for WebSockets - this adds a new lower tab that shows all of the WebSocket messages proxied through ZAP
+ - Added 'Info / Low / Medium / High' qualifications to the buttons of the Page and Site tools. 
  - Add the option to launch the tutorial again from the HUD configuration page
  - Add a tutorial page for the HUD Configuration options 
 
