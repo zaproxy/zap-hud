@@ -2321,7 +2321,7 @@ html {
   }
 
   .hud-button.active #label {
-    max-width: 100px;
+    max-width: 150px;
   }
 
   .hud-button.disabled {
