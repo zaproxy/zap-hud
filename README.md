@@ -18,7 +18,9 @@ Learn more:
 
 ## Using the HUD
 
-### Downloading
+### Usage
+
+#### From Source Code
 You can download ZAP enabled with the HUD from any of: 
 
 1. Download and run the latest [ZAP Weekly Release](https://github.com/zaproxy/zaproxy/wiki/Downloads#zap-weekly)
@@ -35,6 +37,34 @@ In all cases you will need Java 8+ installed.
 You'll see the HUD Radar icon ![Radar Icon](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/src/main/resources/org/zaproxy/zap/extension/hud/resources/radar.png) in the tool bar. When the icon is selected the HUD will be added to your browser.
 
 ![Toolbar with Radar](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/assets/images/toolbar_radar.png)
+
+#### Docker Compose
+Alternatively if you just want to run ZAP with zero setup and the HUD automatically installed and enabled with Docker you can use the included `docker-compose.yml` to start the environment in a Docker container.
+
+```
+    git clone https://github.com/zaproxy/zap-hud.git
+    cd zap-hud
+    cp .env.example .env
+```
+
+Create a random API key of your choosing and add it to your `.env` file
+```
+ZAP_API_KEY=somevalue
+```
+Start `docker-compose`
+
+```
+    docker-compose up
+```
+
+#### Docker
+If you'd like to run ZAP in a Docker container without cloning the repo, you can run the following `docker` command, swapping out `CHANGE_ME` with your custom API Key value:
+
+```
+docker run -u zap -p 9090:9090 --rm -i owasp/zap2docker-weekly zap.sh -daemon -host 0.0.0.0 -port 9090 \
+-config api.addrs.addr.name=.* -config api.addrs.addr.regex=true -config -config api.key=CHANGE_ME \
+-config hud.enabledForDaemon=true
+```
 
 ### Starting the HUD
 1. Quick Start: Select either `Firefox` or `Chrome` on the `Quick Start` tab and click on the `Launch Browser` button.
