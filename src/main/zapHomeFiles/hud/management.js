@@ -26,8 +26,7 @@ Vue.component('welcome-screen', {
 	props: [],
 	methods: {
 		continueToTutorial: function() {
-			window.open(TUTORIAL_URL);
-
+			showTutorial();
 			this.closeWelcomeScreen();
 		},
 		closeWelcomeScreen: function() {
@@ -48,6 +47,10 @@ Vue.component('welcome-screen', {
 		}
 	}
 });
+
+function showTutorial() {
+	window.open(TUTORIAL_URL);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
 	let params = new URL(document.location).searchParams;
@@ -168,6 +171,10 @@ function serviceWorkerMessageListener(event) {
 
 		case 'commonAlerts.alert':
 			parent.postMessage(message, document.referrer);
+			break;
+
+		case 'showTutorial':
+			showTutorial();
 			break;
 
 		default:
