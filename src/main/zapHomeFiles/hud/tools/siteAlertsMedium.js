@@ -10,6 +10,7 @@ var SiteAlertsMedium = (function() {
 	// todo: could probably switch this to a config file?
 	var NAME = "site-alerts-medium";
 	var LABEL = I18n.t("alerts_site_medium_tool");
+	var DIALOG = I18n.t("alerts_site_title");
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
@@ -36,7 +37,7 @@ var SiteAlertsMedium = (function() {
 	}
 
 	function showAlerts(tabId, domain) {
-		alertUtils.showSiteAlerts(tabId, LABEL, domain, ALERT_RISK);
+		alertUtils.showSiteAlerts(tabId, DIALOG, domain, ALERT_RISK);
 	}
 
 	function showOptions(tabId) {

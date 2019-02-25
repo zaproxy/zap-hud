@@ -50,10 +50,8 @@ var CommonAlerts = (function() {
 				break;
 
 			case "commonAlerts.showAlert":
-				// Check its an int - its been supplied by the target domain so in theory could have been tampered with
-				if (message.alertId === parseInt(message.alertId, 10)) {
-					alertUtils.showAlertDetails(message.tabId, message.alertId);
-				}
+				// The message from the target domain will have been validated in management.js
+				alertUtils.showAlertDetails(message.tabId, message.alertId);
 				break;
 
 			default:

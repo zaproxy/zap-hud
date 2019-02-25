@@ -15,6 +15,20 @@
 	</dependencies>
 	<extensions>
 		<extension>org.zaproxy.zap.extension.hud.ExtensionHUD</extension>
+		<extension v="1">
+			<classname>org.zaproxy.zap.extension.hud.launch.ExtensionHUDlaunch</classname>
+			<classnames>
+				<allowed>org.zaproxy.zap.extension.hud.launch</allowed>
+			</classnames>
+			<dependencies>
+				<addons>
+					<addon>
+						<id>selenium</id>
+						<semver>2.*</semver>
+					</addon>
+				</addons>
+			</dependencies>
+		</extension>
 	</extensions>
 	<ascanrules/>
 	<pscanrules/>

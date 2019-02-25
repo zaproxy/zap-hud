@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.function.Function;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.FramesPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
@@ -95,63 +97,61 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
     }
 
     @Test
-    public void testSidePanelsHiddenAndRevealed(FirefoxDriver driver)
-            throws URISyntaxException, InterruptedException {
+    public void testSidePanelsHiddenAndRevealed(FirefoxDriver driver) throws URISyntaxException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
 
         // check they visible to start with
-        testSidePanesVisible(driver);
+        testSidePanesVisible(hud);
 
         // Check they are hidden after button clicked
         testClickHudButton(driver);
-        testSidePanesHidden(driver);
+        testSidePanesHidden(hud);
 
         // Check they stay hidden when the page is refreshed
         hud.openRelativePage(FramesPage.NAME);
-        testSidePanesHidden(driver);
+
+        testSidePanesHidden(hud);
 
         // Check they are revealed when the button is clicked again
         testClickHudButton(driver);
-        testSidePanesVisible(driver);
+        testSidePanesVisible(hud);
     }
 
-    private static void checkPanelVisible(WebElement panel) {
-        Assertions.assertNotNull(panel);
-        Assertions.assertTrue(panel.isDisplayed());
+    private static void checkPanelVisible(WebDriver wd, WebElement panel) {
+        checkWithRetry(wd, driver -> panel.isDisplayed());
         Assertions.assertEquals("block", panel.getCssValue("display"));
     }
 
-    private static void testSidePanesVisible(WebDriver wd) {
-        HUD hud = new HUD(wd);
-        checkPanelVisible(hud.getLeftPanel());
-        checkPanelVisible(hud.getRightPanel());
-        checkPanelVisible(hud.getBottomPanel());
+    private static void checkWithRetry(WebDriver driver, Function<WebDriver, Object> check) {
+        new WebDriverWait(driver, 10L).until(wd -> check.apply(driver));
+    }
+
+    private static void testSidePanesVisible(HUD hud) {
+        WebDriver wd = hud.getWebDriver();
+        checkPanelVisible(wd, hud.waitForLeftPanel());
+        checkPanelVisible(wd, hud.waitForRightPanel());
+        checkPanelVisible(wd, hud.waitForBottomPanel());
     }
 
     private static void testClickHudButton(WebDriver wd) {
         HUD hud = new HUD(wd);
-        WebElement panel = hud.waitForBottomPanel();
-        Assertions.assertNotNull(panel);
-        Assertions.assertNotNull(panel);
-        wd.switchTo().frame(panel);
-        List<WebElement> buttons = hud.waitForHudButtons(2);
+        List<WebElement> buttons = hud.waitForHudButtons(HUD.BOTTOM_PANEL_BY_ID, 2);
         Assertions.assertEquals(2, buttons.size());
 
         buttons.get(0).click();
-        wd.switchTo().parentFrame();
+        wd.switchTo().defaultContent();
     }
 
-    private static void checkPanelHidden(WebElement panel) {
-        Assertions.assertNotNull(panel);
-        Assertions.assertFalse(panel.isDisplayed());
+    private static void checkPanelHidden(WebDriver wd, WebElement panel) {
+        checkWithRetry(wd, driver -> !panel.isDisplayed());
         Assertions.assertEquals("none", panel.getCssValue("display"));
     }
 
-    private static void testSidePanesHidden(WebDriver wd) {
-        HUD hud = new HUD(wd);
-        checkPanelHidden(hud.getLeftPanel());
-        checkPanelHidden(hud.getRightPanel());
-        checkPanelVisible(hud.getBottomPanel());
+    private static void testSidePanesHidden(HUD hud) {
+        WebDriver wd = hud.getWebDriver();
+        checkPanelHidden(wd, hud.waitForLeftPanel());
+        checkPanelHidden(wd, hud.waitForRightPanel());
+        checkPanelVisible(wd, hud.waitForBottomPanel());
     }
 }

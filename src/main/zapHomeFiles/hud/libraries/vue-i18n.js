@@ -1,5 +1,5 @@
 /*!
- * vue-i18n v8.8.0 
+ * vue-i18n v8.8.2 
  * (c) 2019 kazuya kawaguchi
  * Released under the MIT License.
  */
@@ -279,6 +279,7 @@
 
         if (self._i18nWatcher) {
           self._i18nWatcher();
+          self._i18n.destroyVM();
           delete self._i18nWatcher;
         }
 
@@ -990,11 +991,10 @@
     this._numberFormatters = {};
     this._path = new I18nPath();
     this._dataListeners = [];
-
-    this.pluralizationRules = options.pluralizationRules || {};
-    this.preserveDirectiveContent = options.preserveDirectiveContent === undefined
+    this._preserveDirectiveContent = options.preserveDirectiveContent === undefined
       ? false
       : !!options.preserveDirectiveContent;
+    this.pluralizationRules = options.pluralizationRules || {};
 
     this._exist = function (message, key) {
       if (!message || !key) { return false }
@@ -1013,13 +1013,17 @@
     });
   };
 
-  var prototypeAccessors = { vm: { configurable: true },messages: { configurable: true },dateTimeFormats: { configurable: true },numberFormats: { configurable: true },locale: { configurable: true },fallbackLocale: { configurable: true },missing: { configurable: true },formatter: { configurable: true },silentTranslationWarn: { configurable: true },silentFallbackWarn: { configurable: true } };
+  var prototypeAccessors = { vm: { configurable: true },messages: { configurable: true },dateTimeFormats: { configurable: true },numberFormats: { configurable: true },locale: { configurable: true },fallbackLocale: { configurable: true },missing: { configurable: true },formatter: { configurable: true },silentTranslationWarn: { configurable: true },silentFallbackWarn: { configurable: true },preserveDirectiveContent: { configurable: true } };
 
   VueI18n.prototype._initVM = function _initVM (data) {
     var silent = Vue.config.silent;
     Vue.config.silent = true;
     this._vm = new Vue({ data: data });
     Vue.config.silent = silent;
+  };
+
+  VueI18n.prototype.destroyVM = function destroyVM () {
+    this._vm.$destroy();
   };
 
   VueI18n.prototype.subscribeDataChanging = function subscribeDataChanging (vm) {
@@ -1079,6 +1083,9 @@
 
   prototypeAccessors.silentFallbackWarn.get = function () { return this._silentFallbackWarn };
   prototypeAccessors.silentFallbackWarn.set = function (silent) { this._silentFallbackWarn = silent; };
+
+  prototypeAccessors.preserveDirectiveContent.get = function () { return this._preserveDirectiveContent };
+  prototypeAccessors.preserveDirectiveContent.set = function (preserve) { this._preserveDirectiveContent = preserve; };
 
   VueI18n.prototype._getMessages = function _getMessages () { return this._vm.messages };
   VueI18n.prototype._getDateTimeFormats = function _getDateTimeFormats () { return this._vm.dateTimeFormats };
@@ -1152,7 +1159,7 @@
 
     // Check for the existence of links within the translated string
     if (ret.indexOf('@:') >= 0 || ret.indexOf('@.') >= 0) {
-      ret = this._link(locale, message, ret, host, interpolateMode, values, visitedLinkStack);
+      ret = this._link(locale, message, ret, host, 'raw', values, visitedLinkStack);
     }
 
     return this._render(ret, interpolateMode, values, key)
@@ -1662,7 +1669,7 @@
   });
 
   VueI18n.install = install;
-  VueI18n.version = '8.8.0';
+  VueI18n.version = '8.8.2';
 
   return VueI18n;
 

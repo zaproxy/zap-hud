@@ -55,7 +55,7 @@ var History = (function() {
 
 	function showHttpMessageDetails(tabId, data) {
 		if (!data) {
-			throw new Error('Coud not load HTTP message details')
+			throw new Error('Could not load HTTP message details')
 		}
 
 		var parsedReqData = utils.parseRequestHeader(data.requestHeader);

@@ -24,6 +24,7 @@ import static java.util.Arrays.asList;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.tools.ant.taskdefs.condition.Os;
@@ -33,6 +34,7 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.options.Option;
 import org.zaproxy.clientapi.core.ClientApi;
 import org.zaproxy.clientapi.core.ClientApiException;
 
@@ -79,6 +81,21 @@ public class ZapStart extends ZapApiTask {
     @Optional
     public ListProperty<String> getArgs() {
         return args;
+    }
+
+    @Option(option = "set-args", description = "Sets the command line arguments to start ZAP with.")
+    public void optionSetArgs(String args) {
+        getArgs().set(Arrays.asList(args.split(" ")));
+    }
+
+    @Option(
+        option = "add-args",
+        description =
+                "Additional command line arguments to start ZAP with.\n"
+                        + "                It also uses the arguments specified by the build."
+    )
+    public void optionArgs(String args) {
+        getArgs().addAll(Arrays.asList(args.split(" ")));
     }
 
     @Input

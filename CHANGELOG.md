@@ -7,19 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+ - Add css transitions to tool buttons so that they slide out when hovered over.
+ - Initial support for WebSockets - this adds a new lower tab that shows all of the WebSocket messages proxied through ZAP
+ - Added 'Info / Low / Medium / High' qualifications to the buttons of the Page and Site tools. 
+
+## [0.3.0] - 2019-02-11
+ - Many thanks to Matt Austin (@mattaustin) for reporting security vulnerabilities with the HUD and working with us to fix them.
+
+### Added
  - Add API endpoints for getting and setting UI options. [#319](https://github.com/zaproxy/zap-hud/issues/319)
  - Add tasks for Enable, Show and Break tutorial pages
  - Add plain text/regex filtering capability to History section [#233](https://github.com/zaproxy/zap-hud/issues/233)
  - Add tutorial index page [#333](https://github.com/zaproxy/zap-hud/issues/333)
  - Add tutorial pages for tool configuration and the HTML report tool.
+ - Add -hud ZAP command line option which launches Firefox configured to proxy through ZAP with the HUD enabled, for use in daemon mode
 
 ### Fixed
  - Correct handling of upgraded domains on startup. [#162](https://github.com/zaproxy/zap-hud/issues/162)
  - Stop the tutorial server when the add-on is uninstalled.
+ - Perform stricter validation and filtering on messages from the target domain.
 
 ### Changed
  - Use websockets instead of HTTP for all ZAP API calls
  - Replaced link to ZAP User Group with one to the new ZAP HUD group and added a desktop menu item for it.
+ - Refresh HUD iframes individually instead of refreshing whole page
 
 ## [0.2.0] - 2018-12-31
 
@@ -45,7 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2018-12-03
 First alpha release.
 
-[Unreleased]: https://github.com/zaproxy/zap-hud/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/zaproxy/zap-hud/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/zaproxy/zap-hud/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/zaproxy/zap-hud/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/zaproxy/zap-hud/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/zaproxy/zap-hud/compare/v0.1.0...v0.1.1

@@ -123,6 +123,7 @@ public class ExtensionHUD extends ExtensionAdaptor
     private ZapToggleButton hudButton = null;
     private boolean hudEnabledForDesktop = false;
     private boolean hudEnabledForDaemon = false;
+    private boolean hudCmdlineOptionUsed = false;
     private HudParam hudParam = null;
     private OptionsHudPanel optionsPanel = null;
 
@@ -232,8 +233,17 @@ public class ExtensionHUD extends ExtensionAdaptor
         if (View.isInitialised()) {
             return hudEnabledForDesktop;
         } else {
-            return hudEnabledForDaemon;
+            return hudEnabledForDaemon || this.hudCmdlineOptionUsed;
         }
+    }
+
+    /**
+     * Used to override the hudEnabledForDaemon setting without changing the configs
+     *
+     * @param hudCmdlineOptionUsed
+     */
+    public void setHudCmdlineOptionUsed(boolean hudCmdlineOptionUsed) {
+        this.hudCmdlineOptionUsed = hudCmdlineOptionUsed;
     }
 
     /**
