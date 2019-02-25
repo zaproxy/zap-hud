@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Initial support for WebSockets - this adds a new lower tab that shows all of the WebSocket messages proxied through ZAP
  - Added 'Info / Low / Medium / High' qualifications to the buttons of the Page and Site tools. 
 
+### Fixed
+ - Offset the growl alerts so that they don't block access to the buttons on the lower tab
+
 ## [0.3.0] - 2019-02-11
  - Many thanks to Matt Austin (@mattaustin) for reporting security vulnerabilities with the HUD and working with us to fix them.
 
