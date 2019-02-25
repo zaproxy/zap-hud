@@ -38,6 +38,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.FramesPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
+import org.zaproxy.zap.extension.hud.ui.Constants;
 import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
@@ -124,7 +125,8 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
     }
 
     private static void checkWithRetry(WebDriver driver, Function<WebDriver, Object> check) {
-        new WebDriverWait(driver, 10L).until(wd -> check.apply(driver));
+        new WebDriverWait(driver, Constants.GENERIC_TESTS_TIMEOUT_SECS)
+                .until(wd -> check.apply(driver));
     }
 
     private static void testSidePanesVisible(HUD hud) {
