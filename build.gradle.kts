@@ -168,6 +168,7 @@ tasks {
                 into(zapInstallDir)
                 includeEmptyDirs = false
             }
+            delete(fileTree(zapInstallDir.dir("plugin")) { include("${zapAddOn.addOnId.get()}-*.zap") })
         }
     }
 
@@ -198,7 +199,7 @@ tasks {
         description = "Uninstalls the add-on from ZAP (started with \"runZap\")."
         addOnId.set(zapAddOn.addOnId)
     }
-    assembleZapAddOn.configure { mustRunAfter(uninstallAddOn) }
+    assembleZapAddOn.configure { mustRunAfter(uninstallAddOn, "zapDownload") }
 
     register<ZapInstallAddOn>("installAddOn") {
         group = AddOnPlugin.ADD_ON_GROUP
