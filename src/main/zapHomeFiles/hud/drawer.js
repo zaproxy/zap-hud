@@ -250,7 +250,6 @@ Vue.component('tabs', {
             if (!this.isOpen) {
                 this.openDrawer();
                 selectedTab.badgeData = 0;
-			    analytics.track('ToolButtonClicked', {name: selectedTab.name}, { context: { ip: "0.0.0.0" }})
             }
             else {
                 if (selectedTab.isActive) {
@@ -267,8 +266,11 @@ Vue.component('tabs', {
             this.tabs.forEach(tab => {
                 tab.isActive = (tab.href == href);
                 if (tab.isActive) {
-                	tab.badgeData = 0;
-			        analytics.track('ToolButtonClicked', {name: tab.name}, { context: { ip: "0.0.0.0" }})
+                    tab.badgeData = 0;
+                    
+                    if (this.isOpen) {
+			            analytics.track('ToolButtonClicked', {name: tab.name}, { context: { ip: "0.0.0.0" }})
+                    }
                 }
             });
         }
@@ -387,7 +389,7 @@ Vue.component('drawer-button-showhide', {
             localforage.setItem('settings.isHudVisible', false)
                 .catch(utils.errorHandler);
 			parent.postMessage({tabId: tabId, frameId: frameId, action:'hideSidePanels'}, document.referrer);
-			analytics.track('ButtonsHid', {}. { context: { ip: "0.0.0.0" }})
+			analytics.track('ButtonsHid', {}, { context: { ip: "0.0.0.0" }})
         },
 		toggleIsVisible() {
             this.isHudVisible ? this.hideHud() : this.showHud();
