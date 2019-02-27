@@ -55,6 +55,10 @@ Vue.component('hud-button', {
 				panelKey: panelKey,
 				frameId: frameId,
 				tabId: tabId});
+
+			if (this.name !== 'add-tool') {
+				analytics.track("ToolButtonClicked", {tool: this.name}, { context: { ip: "0.0.0.0" }})
+			}
 		},
 		showContextMenu(event) {
 			event.preventDefault();
@@ -211,6 +215,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		}
 	}); 
+
+	// segment telemetry
+	utils.loadAnalytics();
+	analytics.track('FrameLoaded', {id: frameId}, { context: { ip: "0.0.0.0" }});
 });
 
 function doesContextApply(toolContext) {
@@ -261,6 +269,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 				tool: tool
 			});
 
+			analytics.track('ToolAdded', {name: tool.name}, { context: { ip: "0.0.0.0" }})
 			break;
 
 		case "removeTool":
@@ -269,6 +278,8 @@ navigator.serviceWorker.addEventListener("message", event => {
 			eventBus.$emit('removeButton', {
 				name: tool.name
 			});
+
+			analytics.track('ToolRemoved', {name: tool.name}, { context: { ip: "0.0.0.0" }})
 			break;
 
 		default:

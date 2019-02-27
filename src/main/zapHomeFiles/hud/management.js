@@ -103,6 +103,17 @@ document.addEventListener('DOMContentLoaded', () => {
 		navigator.serviceWorker.controller.postMessage({action: 'targetload', tabId: tabId, targetUrl: context.url});
 
 		startHeartBeat();
+
+		// segment telemetry
+		utils.loadAnalytics();
+
+		localforage.getItem('starttime')
+			.then(startT => {
+				let currentTime = new Date().getTime();
+				let diff = currentTime - parseInt(startT);
+
+				analytics.track('FrameLoaded', {id: frameId, timeToLoad: diff }, { context: { ip: "0.0.0.0" }});
+			})
 	}
 });
 

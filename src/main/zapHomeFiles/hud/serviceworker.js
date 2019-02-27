@@ -83,23 +83,6 @@ const onActivate = event => {
 	);
 };
 
-// if we remove cache we can remove this as well
-const onFetch = event => {
-
-	event.respondWith(
-		caches.match(event.request)
-			.then(response => {  
-
-				if (response) {
-					return response;
-				}
-				else {
-					return fetch(event.request);
-				}
-			}).catch(utils.errorHandler)
-	);
-};
-
 const onMessage = event => {
 	if (!utils.isFromTrustedOrigin(event)) {
 		return;
@@ -157,7 +140,6 @@ const logHandler = event => {
 
 self.addEventListener("install", onInstall); 
 self.addEventListener("activate", onActivate);
-self.addEventListener("fetch", onFetch);
 self.addEventListener("message", onMessage);
 self.addEventListener('error', utils.errorHandler);
 self.addEventListener('hud.log', logHandler);

@@ -250,6 +250,7 @@ Vue.component('tabs', {
             if (!this.isOpen) {
                 this.openDrawer();
                 selectedTab.badgeData = 0;
+			    analytics.track('ToolButtonClicked', {name: selectedTab.name}, { context: { ip: "0.0.0.0" }})
             }
             else {
                 if (selectedTab.isActive) {
@@ -267,6 +268,7 @@ Vue.component('tabs', {
                 tab.isActive = (tab.href == href);
                 if (tab.isActive) {
                 	tab.badgeData = 0;
+			        analytics.track('ToolButtonClicked', {name: tab.name}, { context: { ip: "0.0.0.0" }})
                 }
             });
         }
@@ -356,6 +358,7 @@ Vue.component('drawer-button-settings', {
     methods: {
         showHudSettings() {
             navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action:'showHudSettings'});
+			analytics.track('SettingsOpened', { context: { ip: "0.0.0.0" }})
         }
     }
 });
@@ -376,6 +379,7 @@ Vue.component('drawer-button-showhide', {
             localforage.setItem('settings.isHudVisible', true)
                 .catch(utils.errorHandler);
 			parent.postMessage({tabId: tabId, frameId: frameId, action:'showSidePanels'}, document.referrer);
+			analytics.track('ButtonsShown', {}, { context: { ip: "0.0.0.0" }})
         },
         hideHud() {
             this.isHudVisible = false;
@@ -383,6 +387,7 @@ Vue.component('drawer-button-showhide', {
             localforage.setItem('settings.isHudVisible', false)
                 .catch(utils.errorHandler);
 			parent.postMessage({tabId: tabId, frameId: frameId, action:'hideSidePanels'}, document.referrer);
+			analytics.track('ButtonsHid', {}. { context: { ip: "0.0.0.0" }})
         },
 		toggleIsVisible() {
             this.isHudVisible ? this.hideHud() : this.showHud();
@@ -412,8 +417,12 @@ document.addEventListener("DOMContentLoaded", () => {
 		el: '#app',
 		data: {
 
-		},
+        },
     });
+
+	// segment telemetry
+	utils.loadAnalytics();
+	analytics.track('FrameLoaded', {id: frameId}, { context: { ip: "0.0.0.0" }});
 });
 
 navigator.serviceWorker.addEventListener('message', event => {
