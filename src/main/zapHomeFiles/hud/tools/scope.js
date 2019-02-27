@@ -88,6 +88,13 @@ var Scope = (function() {
 		});
 	}
 
+	function getUrlsInScope() {
+		return utils.loadTool(NAME)
+			.then(tool => {
+				return tool.urls;
+			})
+	}
+
 	function addToScope(tabId, domain) {
 		return utils.loadTool(NAME)
 			.then(tool => {
@@ -213,7 +220,8 @@ var Scope = (function() {
 		name: NAME,
 		initialize: initializeStorage,
 		addToScope: addToScope,
-		isInScope: checkDomainInScope
+		isInScope: checkDomainInScope,
+		getUrlsInScope: getUrlsInScope
 	};
 })();
 
