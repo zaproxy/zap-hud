@@ -42,7 +42,6 @@ var ActiveScan = (function() {
 		tool.scanid = -1;
 
 		utils.writeTool(tool);
-		registerForZapEvents(ACTIVE_SCAN_EVENT);
 	}
 
 	function showDialog(tabId, domain) {
@@ -221,6 +220,7 @@ var ActiveScan = (function() {
 
 	self.addEventListener("activate", event => {
 		initializeStorage();
+		registerForZapEvents(ACTIVE_SCAN_EVENT);
 	});
 
 	self.addEventListener("message", event => {

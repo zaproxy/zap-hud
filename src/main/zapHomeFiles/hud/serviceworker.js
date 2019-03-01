@@ -3,6 +3,9 @@ var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
 var toolScripts = [
 	'<<ZAP_HUD_TOOLS>>'
 ];
+// The configured tools
+var CONFIG_TOOLS_LEFT = '<<ZAP_HUD_CONFIG_TOOLS_LEFT>>';
+var CONFIG_TOOLS_RIGHT = '<<ZAP_HUD_CONFIG_TOOLS_RIGHT>>';
 
 importScripts(ZAP_HUD_FILES + "?name=libraries/localforage.min.js"); 
 importScripts(ZAP_HUD_FILES + "?name=libraries/vue.js"); 
@@ -56,9 +59,61 @@ localforage.setItem("tools", [])
 	})
 	.catch(utils.errorHandler);
 
-const onInstall = event => {
-	utils.log(LOG_INFO, 'serviceworker.install', 'Installing...');
+initWebSockets();
 
+function initWebSockets() {
+	/* Set up WebSockets */
+	let ZAP_HUD_WS = '<<ZAP_HUD_WS>>';
+	webSocket = new WebSocket(ZAP_HUD_WS);
+
+	webSocket.onopen = function (event) {
+		// Wont be able to log until ther websocket is set up
+		utils.log(LOG_INFO, 'serviceworker.initWebSockets', 'Initialized');
+		// Basic test
+		webSocket.send('{ "component" : "core", "type" : "view", "name" : "version" }'); 
+
+		apiCallWithResponse("hud", "view", "upgradedDomains")
+		.then(response => {
+			let upgradedDomains = {};
+
+			for (const domain of response.upgradedDomains) {
+				upgradedDomains[domain] = true;
+			}
+			return localforage.setItem('upgradedDomains', upgradedDomains);
+		})
+		.catch(utils.errorHandler);
+	};
+
+	webSocket.onmessage = function (event) {
+		// Rebroadcast for the tools to pick up
+		let jevent = JSON.parse(event.data);
+
+		if ('event.publisher' in jevent) {
+			utils.log(LOG_DEBUG, 'serviceworker.webSocket.onmessage', jevent['event.publisher']);
+			var ev = new CustomEvent(jevent['event.publisher'], {detail: jevent});
+			self.dispatchEvent(ev);
+		} else if ('id' in jevent && 'response' in jevent) {
+			let pFunctions = webSocketCallbacks[jevent['id']];
+			let response = jevent['response'];
+			if ('code' in response && 'message' in response) {
+				// These always indicate a failure
+				let error = new Error(I18n.t("error_with_message", [response['message']]));
+				error.response = response;
+
+				pFunctions.reject(error);
+			} else {
+				pFunctions.resolve(response);
+			}
+			delete webSocketCallbacks[jevent['id']];
+		}
+	};
+
+	webSocket.onerror = function (event) {
+		utils.log(LOG_ERROR, 'websocket', '', event);
+	};
+};
+
+const onInstall = event => {
 	// Cache Files
 	// not sure caching in service worker provides advantage over browser - may be able to remove
 	event.waitUntil(
@@ -69,18 +124,18 @@ const onInstall = event => {
 			.catch(utils.errorHandler)
 	);
 };
-
+	
 const onActivate = event => {
 	// Check Storage & Initiate
 	event.waitUntil(
 		utils.isHUDInitialized()
 			.then(isInitialized => {
 				if (!isInitialized) {
-					return utils.initializeHUD();
+					return utils.initializeHUD(CONFIG_TOOLS_LEFT, CONFIG_TOOLS_RIGHT);
 				}
 			})
 			.catch(utils.errorHandler)
-	);
+		);
 };
 
 // if we remove cache we can remove this as well
@@ -155,72 +210,32 @@ const logHandler = event => {
 	apiCall("hud", "action", "log", { record: event.detail.record });
 };
 
+const backupHandler = event => {
+	backup(event.detail.key, event.detail.value);
+};
+
+function backup(key, value) {
+	apiCall("hud", "action", "setUiOption", { key: key, value: value });
+}
+
 self.addEventListener("install", onInstall); 
 self.addEventListener("activate", onActivate);
 self.addEventListener("fetch", onFetch);
 self.addEventListener("message", onMessage);
 self.addEventListener('error', utils.errorHandler);
 self.addEventListener('hud.log', logHandler);
-
-/* Set up WebSockets */
-
-{
-	let ZAP_HUD_WS = '<<ZAP_HUD_WS>>';
-	webSocket = new WebSocket(ZAP_HUD_WS);
-}
-
-webSocket.onopen = function (event) {
-	// Basic test
-	webSocket.send('{ "component" : "core", "type" : "view", "name" : "version" }'); 
-	// Tools should register for alerts via the registerForWebSockerEvents function - see the break tool
-
-	apiCallWithResponse("hud", "view", "upgradedDomains")
-		.then(response => {
-			let upgradedDomains = {};
-
-			for (const domain of response.upgradedDomains) {
-				upgradedDomains[domain] = true;
-			}
-			return localforage.setItem('upgradedDomains', upgradedDomains);
-		})
-		.catch(utils.errorHandler);
-};
-
-webSocket.onmessage = function (event) {
-	// Rebroadcast for the tools to pick up
-	let jevent = JSON.parse(event.data);
-
-	if ('event.publisher' in jevent) {
-		utils.log(LOG_DEBUG, 'serviceworker.webSocket.onmessage', jevent['event.publisher']);
-		var ev = new CustomEvent(jevent['event.publisher'], {detail: jevent});
-		self.dispatchEvent(ev);
-	} else if ('id' in jevent && 'response' in jevent) {
-		let pFunctions = webSocketCallbacks[jevent['id']];
-		let response = jevent['response'];
-		if ('code' in response && 'message' in response) {
-			// These always indicate a failure
-			let error = new Error(I18n.t("error_with_message", [response['message']]));
-			error.response = response;
-
-			pFunctions.reject(error);
-		} else {
-			pFunctions.resolve(response);
-		}
-		delete webSocketCallbacks[jevent['id']];
-	} else {
-		utils.log(LOG_DEBUG, 'serviceworker.webSocket.onmessage', 'Unexpected message', jevent);
-	}
-};
-
-webSocket.onerror = function (event) {
-	utils.log(LOG_ERROR, 'websocket', '', event);
-};
+self.addEventListener('hud.backup', backupHandler);
 
 function registerForZapEvents(publisher) {
 	apiCall("event", "register", publisher);
 };
 
 function apiCall(component, type, name, params) {
+	if (!webSocket) {
+		// Can't use utils.log here as that could then put us in a loop
+		console.log("serviceworker.apiCall no WebSocket " + component + " " + type + " " + name);
+		return;
+	}
 	if (! params) {
 		params = {};
 	}
@@ -229,6 +244,10 @@ function apiCall(component, type, name, params) {
 };
 
 function apiCallWithResponse(component, type, name, params) {
+	if (!webSocket) {
+		console.log("serviceworker.apiCallWithResponse no WebSocket " + component + " " + type + " " + name);
+		return;
+	}
 	if (! params) {
 		params = {};
 	}
@@ -291,16 +310,27 @@ function showHudSettings(tabId) {
 };
 
 function resetToDefault() {
-	utils.initializeHUD()
-		.then(utils.loadAllTools)
+	utils.loadAllTools()
 		.then(tools => {
 			var promises = [];
+			// Clearing these values means they will go back to the default when next read
+			promises.push(backup('leftPanel', ''));
+			promises.push(backup('rightPanel', ''));
 
 			for (var tool in tools) {
-				promises.push(self.tools[tools[tool].name].initialize());
+				self.tools[tools[tool].name].initialize();
 			}
 
 			return Promise.all(promises);
+		})
+		.then(() => {
+			var promises = [];
+			promises.push(apiCallWithResponse("hud", "view", "getUiOption",  { key: 'leftPanel' }));
+			promises.push(apiCallWithResponse("hud", "view", "getUiOption",  { key: 'rightPanel' }));
+			return Promise.all(promises);
+		})
+		.then(responses => {
+			return utils.initializeHUD(responses[0].leftPanel, responses[1].rightPanel);
 		})
 		.then(utils.messageAllTabs("management", {action: "refreshTarget"}))
 		.catch(utils.errorHandler);

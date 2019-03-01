@@ -28,8 +28,6 @@ var CommonAlerts = (function() {
 		tool.alerts = {};
 
 		utils.writeTool(tool);
-		registerForZapEvents("org.zaproxy.zap.extension.alert.AlertEventPublisher");
-		registerForZapEvents("org.zaproxy.zap.extension.hud.HudEventPublisher");
 	}
 
 	function showGrowlerAlert(alert) {
@@ -38,6 +36,8 @@ var CommonAlerts = (function() {
 
 	self.addEventListener("activate", event => {
 		initializeStorage();
+		registerForZapEvents("org.zaproxy.zap.extension.alert.AlertEventPublisher");
+		registerForZapEvents("org.zaproxy.zap.extension.hud.HudEventPublisher");
 	});
 
 	self.addEventListener("message", event => {
