@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.apache.tools.ant.taskdefs.condition.Os;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.ListProperty;
@@ -41,7 +40,7 @@ import org.zaproxy.clientapi.core.ClientApiException;
 /** A task that starts ZAP. */
 public class ZapStart extends ZapApiTask {
 
-    private static final int DEFAULT_TIMEOUT = 20;
+    private static final int DEFAULT_TIMEOUT = 90;
 
     private static final String DIR_ARG = "-dir";
     private static final String PORT_ARG = "-port";
@@ -138,9 +137,7 @@ public class ZapStart extends ZapApiTask {
         getLogger().debug("Starting ZAP in {} with {}", installDir.get(), pb.command());
 
         try {
-            pb.start().waitFor(timeout.get(), TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new ZapStartException("Interrupted while waiting for ZAP to start.", e);
+            pb.start();
         } catch (IOException e) {
             throw new ZapStartException(
                     "An error occurred while starting ZAP: " + e.getMessage(), e);
