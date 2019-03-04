@@ -45,6 +45,28 @@ var WebSockets = (function() {
 			.catch(utils.errorHandler);
 	}
 	
+	function getMessageDetails(channelId, messageId) {
+		return apiCallWithResponse("websocket", "view", "message", { channelId: channelId, messageId: messageId })
+		.catch(utils.errorHandler);
+	}
+
+	function showWebSocketMessageDetails(tabId, data) {
+		if (!data) {
+			throw new Error('Could not load WebSocket message details')
+		}
+
+		return utils.messageFrame(tabId, "display", {action:"showWebSocketMessage", config:data})
+		.then(data => {
+			// Handle button choice
+			if (data.buttonSelected === "replay") {
+				apiCall("websocket", "action", "sendTextMessage", { 
+					channelId: data.channelId, outgoing: data.outgoing, message: data.message });
+			}
+		})
+		.catch(utils.errorHandler);
+		
+	}
+
 	self.addEventListener("org.zaproxy.zap.extension.websocket.WebSocketEventPublisher", event => {
 		var eventType = event.detail['event.type'];
 		
@@ -60,7 +82,8 @@ var WebSockets = (function() {
 			message.length = event.detail.length;
 			message.messageSummary = event.detail.messageSummary;
 			message.opCode = event.detail.opCode + '=' + event.detail.opCodeString;
-			message.id = event.detail.messageId;
+			message.channelId = event.detail.channelId;
+			message.messageId = event.detail.messageId;
 	
 			utils.messageAllTabs('drawer', {action: 'updateWebSockets', messages: [message]})
 				.catch(utils.errorHandler);
@@ -109,7 +132,11 @@ var WebSockets = (function() {
 					break;
 
 				case "showWebSocketMessageDetails":
-					// TODO
+					getMessageDetails(message.channelId, message.messageId)
+						.then(data => {
+							return showWebSocketMessageDetails(message.tabId, data)
+						})
+						.catch(utils.errorHandler)
 					break;
 
 				default:

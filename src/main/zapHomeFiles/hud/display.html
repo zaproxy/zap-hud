@@ -22,7 +22,8 @@
             <simple-menu-modal :show="isSimpleMenuModalShown" :title="simpleMenuModalTitle" @close="isSimpleMenuModalShown = false"></simple-menu-modal>
             <break-message-modal :show="isBreakMessageModalShown" :title="breakMessageModalTitle" @close="isBreakMessageModalShown = false"></break-message-modal>
             <history-message-modal :show="isHistoryMessageModalShown" :title="historyMessageModalTitle" @close="isHistoryMessageModalShown = false"></history-message-modal>
-            <site-tree-modal :show="isSiteTreeModalShown" :title="siteTreeModalTitle" @close="isSiteTreeModalShown = false"></http-message-modal>
+            <websocket-message-modal :show="isWebsocketMessageModalShown" :title="websocketMessageModalTitle" @close="isWebsocketMessageModalShown = false"></websocket-message-modal>
+            <site-tree-modal :show="isSiteTreeModalShown" :title="siteTreeModalTitle" @close="isSiteTreeModalShown = false"></site-tree-modal>
         </div>
         
         <!-- a base modal component -->
@@ -276,6 +277,37 @@
                     <button class="btn" @click="replayInBrowser"> {{ $t('message.history_replay_browser') }} </button>
                 </div>
             </http-message-modal>
+        </template>
+
+        <template id="websocket-message-modal-template">
+            <modal :title="title" :show="show" size="wide" @close="close">
+                <div slot="body">
+                    <table class="table table-striped table-hover">
+                        <tbody>
+                            <tr>
+                                <td> {{ $t('message.websockets_message_field_time') }} </td>
+                                <td> {{ time }}</td>
+                            </tr>
+                            <tr>
+                                <td> {{ $t('message.websockets_message_field_direction') }} </td>
+                                <td> {{ direction }}</td>
+                            </tr>
+                            <tr>
+                                <td> {{ $t('message.websockets_message_field_opcode') }} </td>
+                                <td> {{ opcode }}</td>
+                            </tr>
+                            <tr>
+                                <td> {{ $t('message.websockets_message_field_payload') }} </td>
+                                <td> </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <textarea class="form-input hud-websocket-message" rows="10" spellcheck="false" v-model="payload"></textarea>
+                </div>
+                <div slot="footer">
+                    <button class="btn btn-primary" @click="replay" :disabled="isReplayDisabled"> {{ $t('message.websockets_replay') }} </button>
+                </div>
+            </modal>
         </template>
 
         <!-- tabs component -->
