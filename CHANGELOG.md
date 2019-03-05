@@ -15,8 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
  - Offset the growl alerts so that they don't block access to the buttons on the lower tab
-
-### Fixed
  - The UI configs are now persisted to ZAP [#321](https://github.com/zaproxy/zap-hud/issues/321)
 
 ## [0.3.0] - 2019-02-11
