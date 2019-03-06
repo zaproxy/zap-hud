@@ -30,17 +30,10 @@
   margin-bottom: 1%;
 }
 
-.drawer-messages .message-tr{
-
-}
-
 .drawer-messages .message-tr td{
   padding: 0 5px;
 }
 
-.table .field, .table .title{
-
-}
 .table .field.time, .table .title.time{
   width: 125px;
 }
