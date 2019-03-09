@@ -37,13 +37,24 @@ public class HtmlEditorUnitTest {
     }
 
     @Test
+    public void testNoHeadTag() {
+        genericTestWithNoHeadTag("<body></body>");
+    }
+
+    @Test
     public void testCommentedBody() {
         genericTestWithNoBodyTag("<head></head><!--<body></body>-->");
     }
 
     @Test
+    public void testCommentedHead() {
+        genericTestWithNoHeadTag("<!--<head></head>--><body></body>");
+    }
+
+    @Test
     public void testSimpleHtml() {
         genericTestWithBodyTag("<head></head><body>" + EOB_TOKEN + "</body>");
+        genericTestWithHeadTag("<head>" + EOB_TOKEN + "</head><body></body>");
     }
 
     @Test
@@ -71,6 +82,12 @@ public class HtmlEditorUnitTest {
         genericTestWithBodyTag("<head></head><body>" + EOB_TOKEN + "</body><body></body>");
     }
 
+    @Test
+    public void testMultipleHeadTags() {
+        genericTestWithHeadTag(
+                "<head>" + EOB_TOKEN + "</head><head></head><body></body><body></body>");
+    }
+
     private void genericTestWithBodyTag(String htmlBody) {
         // Given
         HttpMessage msg = new HttpMessage();
@@ -94,6 +111,36 @@ public class HtmlEditorUnitTest {
 
         // When
         htmlEd.injectAtStartOfBody(INJECT_TOKEN);
+        htmlEd.rewriteHttpMessage();
+
+        // Then
+        assertFalse(htmlEd.isChanged());
+        assertTrue(msg.getResponseBody().toString().equals(htmlBody));
+    }
+
+    private void genericTestWithHeadTag(String htmlBody) {
+        // Given
+        HttpMessage msg = new HttpMessage();
+        msg.setResponseBody(htmlBody);
+        HtmlEditor htmlEd = new HtmlEditor(msg);
+
+        // When
+        htmlEd.injectAtStartOfHead(INJECT_TOKEN);
+        htmlEd.rewriteHttpMessage();
+
+        // Then
+        assertTrue(htmlEd.isChanged());
+        assertTrue(msg.getResponseBody().toString().indexOf(INJECT_TOKEN + EOB_TOKEN) > 0);
+    }
+
+    private void genericTestWithNoHeadTag(String htmlBody) {
+        // Given
+        HttpMessage msg = new HttpMessage();
+        msg.setResponseBody(htmlBody);
+        HtmlEditor htmlEd = new HtmlEditor(msg);
+
+        // When
+        htmlEd.injectAtStartOfHead(INJECT_TOKEN);
         htmlEd.rewriteHttpMessage();
 
         // Then

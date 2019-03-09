@@ -130,7 +130,7 @@ var History = (function() {
         message.code = event.detail.statusCode;
 		message.id = event.detail.historyReferenceId;
 
-        utils.messageAllTabs('drawer', {action: 'updateMessages', messages: [message]})
+        utils.messageAllTabs('drawer', {action: 'updateHistoryMessages', messages: [message]})
             .catch(utils.errorHandler);
 
 		tool.messages.push(message);

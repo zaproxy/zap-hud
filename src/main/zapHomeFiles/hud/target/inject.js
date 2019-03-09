@@ -441,7 +441,22 @@
 			history.pushState({},document.title,origUrl);
 		}
 	}
-	
+
+  window.addEventListener("load", function() {
+    // Forward the front-end-tracker content reporting to the HUD interface
+    const bottomDrawerWindow = document.getElementById('bottom-drawer').contentWindow;
+    const topic = 'storage';
+
+    mailbox.subscribe(topic, (_, data) => {
+      bottomDrawerWindow.postMessage({
+        action: 'addStorageEventToBottomDrawer',
+        data: [data],
+        tabId: tabId,
+        sharedSecret: ZAP_SHARED_SECRET
+      }, ZAP_HUD_FILES);
+    });
+  });
+
 	return {
 		showZapAlert: function(alertId) {
 			showZapAlertInternal(alertId);
