@@ -164,8 +164,8 @@ Vue.component('websockets', {
         }
     },
     methods: {
-        messageSelected(id) {
-            navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "showWebSocketMessageDetails", tool: "websockets", id:id});
+        messageSelected(channelId, messageId) {
+            navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "showWebSocketMessageDetails", tool: "websockets", channelId: channelId, messageId: messageId});
         },
         websocketsItemsFiltered() {
             this.websocketsItemsFilteredMessage = I18n.t("common_items_filtered", [this.hiddenMessageCount, this.messageCount]);
@@ -204,7 +204,7 @@ Vue.component('websockets', {
     updated() {
         if (this.messages.length > 0) {
             let lastMessage = this.messages[this.messages.length - 1]
-            let lastid = 'message-tr-' + lastMessage.id
+            let lastid = 'message-tr-' + lastMessage.messageId
             let lastIdElem = document.querySelector(lastid);
             if(lastIdElem){
                 lastIdElem.scrollIntoView({block:'end', behavior:'smooth'});
