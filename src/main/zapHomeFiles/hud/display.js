@@ -438,6 +438,22 @@ Vue.component('history-message-modal', {
 	}
 })
 
+Vue.component('ws-message-modal', {
+	template: '#ws-message-modal-template',
+	props: ['show', 'title', 'time', 'direction', 'opcode', 'payload'],
+	methods: {
+		close: function() {
+			this.$emit('close');
+		},
+	},
+	computed:{
+		currentMessage() {
+			let payload = this.payload;
+			return {'payload': payload};
+		}
+	}
+})
+
 Vue.component('websocket-message-modal', {
 	template: '#websocket-message-modal-template',
 	props: ['show', 'title'],
@@ -446,7 +462,7 @@ Vue.component('websocket-message-modal', {
 			this.$emit('close');
 		},
 		replay: function() {
-			this.port.postMessage({buttonSelected: 'replay', channelId: this.channelId, outgoing: this.outgoing, message: this.payload});
+			this.port.postMessage({buttonSelected: 'replay', channelId: this.channelId, outgoing: this.outgoing, message: this.$refs.messageModal.currentMessage.payload});
 			this.$emit('close');
 		}
 	},
@@ -483,6 +499,69 @@ Vue.component('websocket-message-modal', {
 
 			app.isWebsocketMessageModalShown = true;
 			app.websocketMessageModalTitle = data.title;
+		})
+	}
+})
+
+
+Vue.component('break-websocket-message-modal', {
+	template: '#break-websocket-message-modal-template',
+	props: ['show', 'title'],
+	methods: {
+		close: function() {
+			this.step();
+			this.$emit('close');
+		},
+		step: function() {
+			let message = this.$refs.messageModal.currentMessage;
+			this.$emit('close');
+			this.port.postMessage({buttonSelected: 'step', tabId: tabId, payload: message.payload, outgoing: this.outgoing});
+		},
+		continueOn: function() {
+			let message = this.$refs.messageModal.currentMessage;
+			this.$emit('close');
+			this.port.postMessage({buttonSelected: 'continue', tabId: tabId, payload: message.payload, outgoing: this.outgoing});
+		},
+		drop: function() {
+			this.port.postMessage({buttonSelected: 'drop', frameId: frameId});
+			this.$emit('close');
+		}
+	},
+	data() {
+		return {
+			port: null,
+			time: null,
+			direction: null,
+			outgoing: null,
+			opcode: null,
+			channelId: null,
+			payload: null
+		}
+	},
+	created() {
+		let self = this;
+
+		eventBus.$on('showBreakWebSocketMessageModal', data => {
+			let date = new Date(Number(data.msg.timestamp));
+			self.time = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
+			self.payload = data.msg.payload;
+			self.channelId = data.msg.channelId;
+			self.outgoing = data.msg.outgoing;
+			// The outgoing field is actually a string not a boolean
+			if (data.msg.outgoing === "true") {
+				self.direction = I18n.t("websockets_direction_outgoing");
+			} else {
+				self.direction = I18n.t("websockets_direction_incoming");
+			}
+			self.opcode = data.msg.opcodeString;
+			self.port = data.port;
+
+			app.isBreakWebSocketMessageModalShown = true;
+			app.BreakWebSocketMessageModalTitle = data.title;
+		})
+
+		eventBus.$on('closeAllModals', () => {
+			this.$emit('close');
 		})
 	}
 })
@@ -678,6 +757,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			historyMessageModalTitle: I18n.t("history_http_message_title"),
 			isWebsocketMessageModalShown: false,
 			websocketMessageModalTitle: I18n.t("websockets_message_title"),
+			isBreakWebSocketMessageModalShown: false,
+			breakWebSocketMessageModalTitle: I18n.t("break_intercept_ws_title"),
 			isSiteTreeModalShown: false,
 			siteTreeModalTitle: I18n.t("sites_tool"),
 			keepShowing: false,
@@ -764,7 +845,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 
 		case "showBreakMessage":
 			eventBus.$emit('showBreakMessageModal', {
-				title: I18n.t("break_intercept_title"),
+				title: I18n.t("break_intercept_http_title"),
 				request: config.request,
 				response: config.response,
 				isResponseDisabled: config.isResponseDisabled,
@@ -792,6 +873,16 @@ navigator.serviceWorker.addEventListener("message", event => {
 		case "showWebSocketMessage":
 			eventBus.$emit('showWebSocketMessageModal', {
 				title: I18n.t("websockets_message_title"),
+				msg: config,
+				port: port
+			});
+
+			showDisplayFrame();
+			break;
+
+		case "showBreakWebSocketMessage":
+			eventBus.$emit('showBreakWebSocketMessageModal', {
+				title: I18n.t("break_intercept_ws_title"),
 				msg: config,
 				port: port
 			});

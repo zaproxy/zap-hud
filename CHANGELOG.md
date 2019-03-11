@@ -8,11 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
  - Add css transitions to tool buttons so that they slide out when hovered over.
- - Initial support for WebSockets - this adds a new lower tab that shows all of the WebSocket messages proxied through ZAP
+ - Support for WebSockets
+   - Add a lower tab that shows all of the WebSocket messages proxied through ZAP
+   - Add dialog which shows the full WebSocket message when selected in the table with the option to replay it
+   - Support breaking on WebSocket messages with the option to change or drop them
  - Added 'Info / Low / Medium / High' qualifications to the buttons of the Page and Site tools. 
  - Add the option to launch the tutorial again from the HUD configuration page
  - Add a tutorial page for the HUD Configuration options 
- - Add dialog which shows the full websocket message when selected in the table with the option to replay it
 
 ### Fixed
  - Offset the growl alerts so that they don't block access to the buttons on the lower tab
