@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.tools.ant.taskdefs.condition.Os;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
@@ -52,27 +53,26 @@ public class ZapStart extends ZapApiTask {
     private static final String LINUX_START_SCRIPT = "./zap.sh";
     private static final String WINDOWS_START_SCRIPT = "zap.bat";
 
-    private final Property<File> installDir;
-    private final Property<File> homeDir;
+    private final DirectoryProperty installDir;
+    private final DirectoryProperty homeDir;
     private final ListProperty<String> args;
-    private final Property<Integer> timeout;
+    private final Property<Integer> connectionTimeout;
 
     public ZapStart() {
         ObjectFactory objects = getProject().getObjects();
-        installDir = objects.property(File.class);
-        homeDir = objects.property(File.class);
+        installDir = objects.directoryProperty();
+        homeDir = objects.directoryProperty();
         args = objects.listProperty(String.class);
-        timeout = objects.property(Integer.class);
-        timeout.set(DEFAULT_TIMEOUT);
+        connectionTimeout = objects.property(Integer.class).value(DEFAULT_TIMEOUT);
     }
 
     @Input
-    public Property<File> getInstallDir() {
+    public DirectoryProperty getInstallDir() {
         return installDir;
     }
 
     @Input
-    public Property<File> getHomeDir() {
+    public DirectoryProperty getHomeDir() {
         return homeDir;
     }
 
@@ -98,28 +98,29 @@ public class ZapStart extends ZapApiTask {
     }
 
     @Input
-    public Property<Integer> getTimeout() {
-        return timeout;
+    public Property<Integer> getConnectionTimeout() {
+        return connectionTimeout;
     }
 
     @TaskAction
     public void start() {
         getProject().mkdir(homeDir.get());
 
-        validateTimeout(timeout.get());
+        int timeout = connectionTimeout.get();
+        validateTimeout(timeout);
 
         ClientApi client = createClient();
         checkPortNotUsed(client, getPort().get());
 
         ProcessBuilder pb = new ProcessBuilder();
         pb.redirectErrorStream(true)
-                .redirectOutput(new File(homeDir.get(), "output"))
-                .directory(installDir.get());
+                .redirectOutput(new File(homeDir.get().getAsFile(), "output"))
+                .directory(installDir.get().getAsFile());
 
         List<String> command = new ArrayList<>();
         command.add(
                 Os.isFamily(Os.FAMILY_WINDOWS)
-                        ? new File(installDir.get(), WINDOWS_START_SCRIPT).toString()
+                        ? new File(installDir.get().getAsFile(), WINDOWS_START_SCRIPT).toString()
                         : LINUX_START_SCRIPT);
         command.addAll(asList(DIR_ARG, homeDir.get().toString()));
         command.addAll(asList(PORT_ARG, Integer.toString(getPort().get())));
@@ -144,12 +145,12 @@ public class ZapStart extends ZapApiTask {
         }
 
         try {
-            client.waitForSuccessfulConnectionToZap(timeout.get());
+            client.waitForSuccessfulConnectionToZap(timeout);
         } catch (ClientApiException e) {
             throw new ZapStartException(
                     String.format(
                             "ZAP did not fully start after %1d seconds, cause: %2s",
-                            timeout.get(), e.getMessage()),
+                            timeout, e.getMessage()),
                     e);
         }
     }
