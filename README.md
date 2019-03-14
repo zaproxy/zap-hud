@@ -54,7 +54,7 @@ ZAP_API_KEY=somevalue
 Start `docker-compose` environment
 
 ```
-    docker-compose up
+    docker-compose up -d
 ```
 
 #### Docker Stand-Alone
