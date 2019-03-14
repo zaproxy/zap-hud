@@ -39,11 +39,11 @@ You'll see the HUD Radar icon ![Radar Icon](https://raw.githubusercontent.com/za
 ![Toolbar with Radar](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/assets/images/toolbar_radar.png)
 
 #### Docker Compose
-Alternatively if you just want to run ZAP with zero setup and the HUD automatically installed and enabled with Docker you can use the included `docker-compose.yml` to start the environment in a Docker container.
+Alternatively if you just want to run ZAP with zero setup and the HUD automatically installed and enabled with Docker you can use the included `docker/docker-compose.yml` to start the environment in a Docker container.
 
 ```
     git clone https://github.com/zaproxy/zap-hud.git
-    cd zap-hud
+    cd zap-hud/docker
     cp .env.example .env
 ```
 
@@ -51,14 +51,14 @@ Create a random API key of your choosing and add it to your `.env` file
 ```
 ZAP_API_KEY=somevalue
 ```
-Start `docker-compose`
+Start `docker-compose` environment
 
 ```
     docker-compose up
 ```
 
-#### Docker
-If you'd like to run ZAP in a Docker container without cloning the repo, you can run the following `docker` command, swapping out `CHANGE_ME` with your custom API Key value:
+#### Docker Stand-Alone
+If you'd like to run ZAP in a Docker container without cloning the repo and a `docker-compose` environment, you can run the following `docker` command, swapping out `CHANGE_ME` with your custom API Key value:
 
 ```
 docker run -u zap -p 9090:9090 --rm -i owasp/zap2docker-weekly zap.sh -daemon -host 0.0.0.0 -port 9090 \
