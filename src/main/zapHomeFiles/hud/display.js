@@ -438,6 +438,55 @@ Vue.component('history-message-modal', {
 	}
 })
 
+Vue.component('websocket-message-modal', {
+	template: '#websocket-message-modal-template',
+	props: ['show', 'title'],
+	methods: {
+		close: function() {
+			this.$emit('close');
+		},
+		replay: function() {
+			this.port.postMessage({buttonSelected: 'replay', channelId: this.channelId, outgoing: this.outgoing, message: this.payload});
+			this.$emit('close');
+		}
+	},
+	data() {
+		return {
+			port: null,
+			time: null,
+			direction: null,
+			outgoing: null,
+			opcode: null,
+			channelId: null,
+			payload: null,
+			isReplayDisabled: false,
+		}
+	},
+	created() {
+		let self = this;
+
+		eventBus.$on('showWebSocketMessageModal', data => {
+			let date = new Date(Number(data.msg.timestamp));
+			self.time = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
+			self.payload = data.msg.payload;
+			self.channelId = data.msg.channelId;
+			self.outgoing = data.msg.outgoing;
+			// The outgoing field is actually a string not a boolean
+			if (data.msg.outgoing === "true") {
+				self.direction = I18n.t("websockets_direction_outgoing");
+			} else {
+				self.direction = I18n.t("websockets_direction_incoming");
+			}
+			self.opcode = data.msg.opcodeString;
+			self.isReplayDisabled = data.msg.opcodeString != 'TEXT';
+			self.port = data.port;
+
+			app.isWebsocketMessageModalShown = true;
+			app.websocketMessageModalTitle = data.title;
+		})
+	}
+})
+
 Vue.component('site-tree-node', {
 	template: '#site-tree-node-template',
 	props: {
@@ -627,6 +676,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			breakMessageModalTitle: I18n.t("break_http_message_title"),
 			isHistoryMessageModalShown: false,
 			historyMessageModalTitle: I18n.t("history_http_message_title"),
+			isWebsocketMessageModalShown: false,
+			websocketMessageModalTitle: I18n.t("websockets_message_title"),
 			isSiteTreeModalShown: false,
 			siteTreeModalTitle: I18n.t("sites_tool"),
 			keepShowing: false,
@@ -732,6 +783,16 @@ navigator.serviceWorker.addEventListener("message", event => {
 				isResponseDisabled: config.isResponseDisabled,
 				isAscanDisabled: config.isAscanDisabled,
 				activeTab: config.activeTab,
+				port: port
+			});
+
+			showDisplayFrame();
+			break;
+
+		case "showWebSocketMessage":
+			eventBus.$emit('showWebSocketMessageModal', {
+				title: I18n.t("websockets_message_title"),
+				msg: config,
 				port: port
 			});
 

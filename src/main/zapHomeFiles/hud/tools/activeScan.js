@@ -17,9 +17,13 @@ var ActiveScan = (function() {
 		ICONS.OFF = "flame-grey.png";
 		ICONS.ON = "flame.png";
 	var DIALOG = {};
-		DIALOG.START = I18n.t("ascan_start");
-		DIALOG.START_ADD_SCOPE = I18n.t("ascan_start_scope");
-		DIALOG.STOP = I18n.t("ascan_stop");
+		DIALOG.START_1 = I18n.t("ascan_start_1");
+		DIALOG.START_2 = I18n.t("ascan_start_2");
+		DIALOG.START_ADD_SCOPE_1 = I18n.t("ascan_start_scope_1");
+		DIALOG.START_ADD_SCOPE_2 = I18n.t("ascan_start_scope_2");
+		DIALOG.START_ADD_SCOPE_3 = I18n.t("ascan_start_scope_3");
+		DIALOG.STOP_1 = I18n.t("ascan_stop_1");
+		DIALOG.STOP_2 = I18n.t("ascan_stop_2");
 	var ACTIVE_SCAN_EVENT = "org.zaproxy.zap.extension.ascan.ActiveScanEventPublisher"; 
 
 	//todo: change this to a util function that reads in a config file (json/xml)
@@ -34,34 +38,35 @@ var ActiveScan = (function() {
 		tool.position = 0;
 		tool.isRunning = false;
 		tool.runningTabId = '';
+		tool.runningScope = [];
 		tool.scanid = -1;
 
 		utils.writeTool(tool);
-		registerForZapEvents(ACTIVE_SCAN_EVENT);
 	}
 
 	function showDialog(tabId, domain) {
 
-		Promise.all([checkIsRunning(tabId), self.tools.scope.isInScope(domain)])
+		Promise.all([checkIsRunning(), self.tools.scope.isInScope(domain), utils.loadTool(NAME)])
 			.then(results => {
 				var isRunning = results[0];
 				var isInScope = results[1];
+				var tool = results[2];
 
 				var config = {};
 				config.buttons = [{text: I18n.t("common_cancel"), id: "cancel"}];
 
 				if(!isRunning) {
 					if (!isInScope) {
-						config.text = DIALOG.START_ADD_SCOPE;
+						config.text = DIALOG.START_ADD_SCOPE_1 + domain + DIALOG.START_ADD_SCOPE_2 + domain + DIALOG.START_ADD_SCOPE_3;
 						config.buttons.unshift({text: I18n.t("common_start"), id: "start-add-to-scope"});
 					}
 					else {
-						config.text = DIALOG.START;
+						config.text = DIALOG.START_1 + domain + DIALOG.START_2;
 						config.buttons.unshift({text: I18n.t("common_start"), id: "start"});
 					}
 				}
 				else {
-					config.text = DIALOG.STOP;
+					config.text = DIALOG.STOP_1 + tool.runningScope[0] + DIALOG.STOP_2;
 					config.buttons.unshift({text: I18n.t("common_stop"), id: "stop"});
 				}
 
@@ -106,13 +111,13 @@ var ActiveScan = (function() {
 					.then(tool => {
 						tool.isRunning = true;
 						tool.runningTabId = tabId;
+						tool.runningScope = [uri];
 						tool.icon = ICONS.ON;
 						tool.data = "0%";
 						tool.scanid = data.scan;
 
 						utils.writeTool(tool);
-						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {notTabId: tabId}, tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.OFF}, isToolDisabled: true})
-						utils.messageFrame(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.ON}});
+						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: tool.data, icon: ICONS.ON}})
 					})
 					.catch(utils.errorHandler)
 			})
@@ -137,12 +142,13 @@ var ActiveScan = (function() {
 			.then(tool => {
 				tool.isRunning = false;
 				tool.runningTabId = '';
+				tool.runningScope = [];
 				tool.icon = ICONS.OFF;
 				tool.data = DATA.START;
 				tool.scanid = -1;
 
 				utils.writeTool(tool);
-				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.OFF}, isToolDisabled: false})
+				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: LABEL, data: DATA.START, icon: ICONS.OFF}})
 			})
 			.catch(utils.errorHandler);
 	}
@@ -170,7 +176,7 @@ var ActiveScan = (function() {
 						tool.data = progress;
 
 						utils.writeTool(tool);
-						utils.messageFrame(tool.runningTabId, tool.panel, {action: 'updateData', tool: tool})
+						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: tool})
 					}
 				})
 				.catch(utils.errorHandler);
@@ -197,14 +203,13 @@ var ActiveScan = (function() {
 			.catch(utils.errorHandler);
 	}
 	
-	function getTool(tabId, context, port) {
-		utils.loadTool(NAME)
-			.then(tool => {
-				if (tabId === tool.runningTabId) {
+	function getTool(context, port) {
+		Promise.all([utils.loadTool(NAME)])
+			.then(results => {
+				const tool = results[0];
+
+				if (tool.isRunning) {
 					port.postMessage({label: LABEL, data: tool.data, icon: ICONS.ON});
-				}
-				else if (tool.isRunning) {
-					port.postMessage({label: LABEL, data: DATA.START, icon: ICONS.OFF, isDisabled: true});
 				}
 				else {
 					port.postMessage({label: LABEL, data: DATA.START, icon: ICONS.OFF});
@@ -215,6 +220,7 @@ var ActiveScan = (function() {
 
 	self.addEventListener("activate", event => {
 		initializeStorage();
+		registerForZapEvents(ACTIVE_SCAN_EVENT);
 	});
 
 	self.addEventListener("message", event => {
@@ -242,7 +248,7 @@ var ActiveScan = (function() {
 					break;
 
 				case "getTool":
-					getTool(message.tabId, message.context, event.ports[0]);
+					getTool(message.context, event.ports[0]);
 					break;
 
 				case "ascanRequest":

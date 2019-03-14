@@ -27,7 +27,6 @@ var History = (function() {
         tool.messages = [];
 
         utils.writeTool(tool);
-        registerForZapEvents("org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher");
 	}
 
 	function showOptions(tabId) {
@@ -140,6 +139,7 @@ var History = (function() {
 
 	self.addEventListener("activate", event => {
 		initializeStorage();
+		registerForZapEvents("org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher");
 	});
 
 	function trimMessages(lastPageUnloadTime) {

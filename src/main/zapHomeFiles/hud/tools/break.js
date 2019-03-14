@@ -33,7 +33,6 @@ var Break = (function() {
 		tool.position = 0;
 
 		utils.writeTool(tool);
-		registerForZapEvents("org.zaproxy.zap.extension.brk.BreakEventPublisher");
 	}
 
 	function toggleBreak(tabId) {
@@ -222,6 +221,7 @@ var Break = (function() {
 
 	self.addEventListener("activate", event => {
 		initializeStorage();
+		registerForZapEvents("org.zaproxy.zap.extension.brk.BreakEventPublisher");
 	});
 
 	self.addEventListener("message", event => {

@@ -448,7 +448,18 @@ public class HudAPI extends ApiImplementor {
                         }
                     }
                     // The single quotes are to keep the JS linter happy
-                    contents = contents.replace("'<<ZAP_HUD_TOOLS>>'", sb.toString());
+                    contents =
+                            contents.replace("'<<ZAP_HUD_TOOLS>>'", sb.toString())
+                                    .replace(
+                                            "'<<ZAP_HUD_CONFIG_TOOLS_LEFT>>'",
+                                            extension
+                                                    .getHudParam()
+                                                    .getUiOption(HudParam.UI_OPTION_LEFT_PANEL))
+                                    .replace(
+                                            "'<<ZAP_HUD_CONFIG_TOOLS_RIGHT>>'",
+                                            extension
+                                                    .getHudParam()
+                                                    .getUiOption(HudParam.UI_OPTION_RIGHT_PANEL));
                 } else if (file.equals("i18n.js")) {
                     contents =
                             contents.replace(

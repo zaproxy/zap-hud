@@ -29,6 +29,14 @@ import org.zaproxy.zap.extension.api.ZapApiIgnore;
 
 public class HudParam extends VersionedAbstractParam {
 
+    public static final String UI_OPTION_LEFT_PANEL = "leftPanel";
+    public static final String UI_OPTION_RIGHT_PANEL = "rightPanel";
+
+    private static final String ZAP_HUD_CONFIG_TOOLS_LEFT =
+            "['scope', 'break', 'showEnable', 'page-alerts-high', 'page-alerts-medium', 'page-alerts-low', 'page-alerts-informational']";
+    private static final String ZAP_HUD_CONFIG_TOOLS_RIGHT =
+            "['site-tree', 'spider', 'active-scan', 'attack', 'site-alerts-high', 'site-alerts-medium', 'site-alerts-low', 'site-alerts-informational']";
+
     /** The base configuration key for all HUD configurations. */
     private static final String PARAM_BASE_KEY = "hud";
 
@@ -295,6 +303,18 @@ public class HudParam extends VersionedAbstractParam {
     }
 
     public String getUiOption(String key) {
-        return getConfig().getString(PARAM_UI_OPTION_PREFIX + key, "");
+        String value = getConfig().getString(PARAM_UI_OPTION_PREFIX + key, "");
+        if (value.length() == 0) {
+            // Set the relevant default values
+            switch (key) {
+                case UI_OPTION_LEFT_PANEL:
+                    value = ZAP_HUD_CONFIG_TOOLS_LEFT;
+                    break;
+                case UI_OPTION_RIGHT_PANEL:
+                    value = ZAP_HUD_CONFIG_TOOLS_RIGHT;
+                    break;
+            }
+        }
+        return value;
     }
 }

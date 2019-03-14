@@ -35,14 +35,6 @@ var utils = (function() {
 	var LOG_TO_CONSOLE = true;
 	var LOG_TO_ZAP = IS_DEV_MODE;
 
-	// default tools
-	var DEFAULT_TOOLS_LEFT = ["scope", "break", "showEnable", "page-alerts-high", "page-alerts-medium", "page-alerts-low", "page-alerts-informational"];
-	var DEFAULT_TOOLS_RIGHT = ["site-tree", "spider", "active-scan", "attack", "site-alerts-high", "site-alerts-medium", "site-alerts-low", "site-alerts-informational"];
-
-	if (IS_DEV_MODE) {
-		DEFAULT_TOOLS_LEFT.push("hudErrors");
-	}
-
 	/*
 	 * Given the text from an HTTP request header, returns a parsed object.
 	 */
@@ -172,7 +164,12 @@ var utils = (function() {
 	/*
 	 * Initialize all of the info that will be stored in indexeddb.
 	 */
-	function initializeHUD() {
+	function initializeHUD(leftTools, rightTools) {
+		if (IS_DEV_MODE && leftTools.indexOf("hudErrors") < 0) {
+			// Always add the error tool in dev mode
+			leftTools.push("hudErrors");
+		}
+		
 		let promises = [];
 	
 		promises.push(localforage.setItem(IS_HUD_INITIALIZED, true));
@@ -186,7 +183,7 @@ var utils = (function() {
 		let leftPanel = {
 			key: 'leftPanel',
 			orientation: 'left',
-			tools: DEFAULT_TOOLS_LEFT
+			tools: leftTools
 		};
 	
 		promises.push(saveFrame(leftPanel));
@@ -194,24 +191,24 @@ var utils = (function() {
 		let rightPanel = {
 			key: 'rightPanel',
 			orientation: 'right',
-			tools: DEFAULT_TOOLS_RIGHT
+			tools: rightTools
 		};
 	
 		promises.push(saveFrame(rightPanel));
 	
 		return Promise.all(promises)
-			.then(setDefaultTools)
+			.then(setDefaultTools(leftTools, rightTools))
 			.catch(errorHandler);
 	}
 	
 	/*
 	 * Add the default tools to the panels.
 	 */
-	function setDefaultTools() {
+	function setDefaultTools(leftTools, rightTools) {
 		var promises = [];
 
-		for (let i = 0; i < DEFAULT_TOOLS_LEFT.length; i++) {
-			loadTool(DEFAULT_TOOLS_LEFT[i])
+		for (let i = 0; i < leftTools.length; i++) {
+			loadTool(leftTools[i])
 				.then(tool => {
 					if (! tool) {
 						log(LOG_ERROR, 'utils.setDefaultTools', 'Failed to load tool.', tool.name);
@@ -227,8 +224,8 @@ var utils = (function() {
 				.catch(errorHandler)
 		};
 
-		for (let i = 0; i < DEFAULT_TOOLS_RIGHT.length; i++) {
-			loadTool(DEFAULT_TOOLS_RIGHT[i])
+		for (let i = 0; i < rightTools.length; i++) {
+			loadTool(rightTools[i])
 				.then(tool => {
 					if (! tool) {
 						log(LOG_ERROR, 'utils.setDefaultTools', 'Failed to load tool.', tool.name);
@@ -246,7 +243,20 @@ var utils = (function() {
 
 		return Promise.all(promises)
 	}
-	
+
+	/*
+	 * Backs up the frames tools to ZAP so they are persisted, eg when browser launch is used
+	 */
+	function backupFrame(frame) {
+		return new Promise((resolve, reject) => {
+			if(self.dispatchEvent(new CustomEvent("hud.backup", {detail: {key: frame.key, value: JSON.stringify(frame.tools)}}))) {
+				resolve('OK');
+			} else {
+				reject('Fail');
+			}
+		});
+	}
+
 	/*
 	 * Loads information about a frame as a blob from indexeddb.
 	 */
@@ -316,7 +326,6 @@ var utils = (function() {
 	
 				panel.tools.forEach(toolname => {
 					var p = loadTool(toolname);
-					log(LOG_DEBUG, 'utils.loadPanelTools', 'Tool ' + toolname, p);
 					toolPromises.push(p);
 				});
 	
@@ -371,7 +380,8 @@ var utils = (function() {
 			})
 			.then(results => {
 				let tool = results[0];
-	
+				var panel = results[1];
+
 				messageAllTabs(frameId, {action: 'addTool', tool: tool})
 					.catch(err => {
 						if (err instanceof NoClientIdError) {
@@ -383,6 +393,7 @@ var utils = (function() {
 							errorHandler(err);
 						}
 					})
+				backupFrame(panel);
 			})
 			.catch(errorHandler);
 	}
@@ -391,7 +402,6 @@ var utils = (function() {
 	 * Remove a tool from a panel using the tool key.
 	 */
 	function removeToolFromPanel(tabId, toolKey) {
-	
 		return loadTool(toolKey)
 			.then(tool => Promise.all([tool, loadFrame(tool.panel), loadPanelTools(tool.panel)]))
 			.then(results => {
@@ -412,6 +422,7 @@ var utils = (function() {
 				panel.tools.splice(panel.tools.indexOf(removedTool.name), 1);
 				
 				promises.push(saveFrame(panel));
+				promises.push(backupFrame(panel));
 	
 				// update all panel tool positions
 				panelTools.forEach(tool => {
@@ -421,7 +432,6 @@ var utils = (function() {
 						promises.push(writeTool(tool));
 					}
 				});
-	
 				return Promise.all(promises);
 			})
 			.catch(errorHandler);
@@ -715,7 +725,6 @@ return {
 		getParamater: getParamater,
 		isHUDInitialized: isHUDInitialized,
 		initializeHUD: initializeHUD,
-		setDefaultTools: setDefaultTools,
 		loadFrame: loadFrame,
 		saveFrame: saveFrame,
 		registerTool: registerTool,
