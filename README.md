@@ -66,6 +66,11 @@ docker run -u zap -p 9090:9090 --rm -i owasp/zap2docker-weekly zap.sh -daemon -h
 -config hud.enabledForDaemon=true
 ```
 
+### Docker Usage Considerations
+For more detailed instructions on configuring your browser to use CA certificates generated in a ephemeral Docker environment please see the official wiki entry:
+
+[Using the HUD with ZAP in Docker](https://github.com/zaproxy/zap-hud/wiki/Using-the-HUD-with-ZAP-in-Docker)
+
 ### Starting the HUD
 1. Quick Start: Select either `Firefox` or `Chrome` on the `Quick Start` tab and click on the `Launch Browser` button.
 
