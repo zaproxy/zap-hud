@@ -42,7 +42,7 @@
   "homepage": "https://github.com/zaproxy/zap-hud/wiki",
   "dependencies": {
     "localforage": "^1.5.0",
-    "vue": "^2.6.8",
+    "vue": "^2.6.9",
     "vue-i18n": "^8.9.0"
   },
   "devDependencies": {
@@ -53,7 +53,7 @@
     "posthtml-expressions": "^1.1.0",
     "vue-loader": "^15.7.0",
     "vue-style-loader": "^4.1.2",
-    "vue-template-compiler": "^2.6.8",
+    "vue-template-compiler": "^2.6.9",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3",
     "xo": "^0.24.0"
