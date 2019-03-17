@@ -33,3 +33,5 @@
 # JS
 node_modules/
 dist/
+.cache
+.env
