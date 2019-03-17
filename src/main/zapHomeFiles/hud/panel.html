@@ -1,12 +1,12 @@
 <html>
 <head>
-	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre.css"/>
-	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=panel.css&amp;orientation=ORIENTATION" />
+	<link rel="stylesheet" type="text/css" href="{{ ZAP_HUD_FILES }}?name=libraries/spectre.css"/>
+	<link rel="stylesheet" type="text/css" href="{{ ZAP_HUD_FILES }}?name=panel.css&amp;orientation=ORIENTATION" />
 
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js"></script>
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue.js"></script>
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=utils.js"></script>
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=panel.js"></script>
+	<script type="text/javascript" src="{{ ZAP_HUD_FILES }}?name=libraries/localforage.min.js"></script>
+	<script type="text/javascript" src="{{ ZAP_HUD_FILES }}?name=libraries/vue.js"></script>
+	<script type="text/javascript" src="{{ ZAP_HUD_FILES }}?name=utils.js"></script>
+	<script type="text/javascript" src="{{ ZAP_HUD_FILES }}?name=panel.js"></script>
 </head>
 <body>
 	<div id="app">
@@ -15,8 +15,8 @@
 
 	<template id="hud-buttons-template">
 		<div id="hud-buttons" :class="{'d-hide': !isVisible, 'd-visible': isVisible}">
-			<hud-button v-for="tool in tools" :key="tool.name" :label="tool.label" :icon="'<<ZAP_HUD_FILES>>?image=' + tool.icon" :data="tool.data" :name="tool.name"></hud-button>
-			<hud-button icon="<<ZAP_HUD_FILES>>?image=plus.png" name="add-tool"></hud-button>
+			<hud-button v-for="tool in tools" :key="tool.name" :label="tool.label" :icon="'{{ ZAP_HUD_FILES }}?image=' + tool.icon" :data="tool.data" :name="tool.name"></hud-button>
+			<hud-button icon="{{ ZAP_HUD_FILES }}?image=plus.png" name="add-tool"></hud-button>
 		</div>
 	</template>
 
