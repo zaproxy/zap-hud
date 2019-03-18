@@ -6,56 +6,65 @@
  */
 
 // temp time test
-var startTime = new Date().getTime();
+// var startTime = new Date().getTime();
 
-// Injected strings
+// // Injected strings
 var SHOW_WELCOME_SCREEN = '<<SHOW_WELCOME_SCREEN>>' === 'true' ? true : false ;
-var TUTORIAL_URL = '<<TUTORIAL_URL>>';
 var ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
 
-var app;
-var tabId = '';
-var frameId = '';
-var context = {
-	url: document.referrer,
-	domain: utils.parseDomainFromUrl(document.referrer)
-};
+// var app;
+// var tabId = '';
+// var frameId = '';
+// var context = {
+// 	url: document.referrer,
+// 	domain: utils.parseDomainFromUrl(document.referrer)
+// };
 
-Vue.component('welcome-screen', {
-	template: '#welcome-screen-template',
-	props: [],
-	methods: {
-		continueToTutorial: function() {
-			showTutorial();
-			this.closeWelcomeScreen();
-		},
-		closeWelcomeScreen: function() {
-			if (dontShowAgain.checked) {
-				navigator.serviceWorker.controller.postMessage({
-					action:"zapApiCall", component: "hud", type: "action", 
-					name: "setOptionShowWelcomeScreen",
-					params: { Boolean: 'false' }});
-			}
+// Vue.component('welcome-screen', {
+// 	template: '#welcome-screen-template',
+// 	props: [],
+// 	methods: {
+// 		continueToTutorial: function() {
+// 			showTutorial();
+// 			this.closeWelcomeScreen();
+// 		},
+// 		closeWelcomeScreen: function() {
+// 			if (dontShowAgain.checked) {
+// 				navigator.serviceWorker.controller.postMessage({
+// 					action:"zapApiCall", component: "hud", type: "action", 
+// 					name: "setOptionShowWelcomeScreen",
+// 					params: { Boolean: 'false' }});
+// 			}
 
-			app.showWelcomeScreen = false;
-			parent.postMessage( {action: 'contractManagement'} , document.referrer);
-		}
-	},
-	data() {
-		return {
-			dontShowAgain: false
-		}
-	}
-});
+// 			app.showWelcomeScreen = false;
+// 			parent.postMessage( {action: 'contractManagement'} , document.referrer);
+// 		}
+// 	},
+// 	data() {
+// 		return {
+// 			dontShowAgain: false
+// 		}
+// 	}
+// });
 
-function showTutorial() {
-	window.open(TUTORIAL_URL);
-}
+// function showTutorial() {
+// 	window.open(TUTORIAL_URL);
+// }
+
+import Vue from 'vue';
+import Management from './Management.vue';
 
 document.addEventListener('DOMContentLoaded', () => {
+
+	new Vue({
+		el: '#app',
+		template: '<Management/>',
+		components: { Management }
+	});
+
 	let params = new URL(document.location).searchParams;
 
-	frameId = params.get('frameId');
+	// frameId = params.get('frameId');
 	tabId = params.get('tabId');
 
 	app = new Vue({
