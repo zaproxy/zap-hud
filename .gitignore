@@ -33,3 +33,6 @@
 # JS
 node_modules/
 dist/
+
+# Docker/Docker Compose
+.env

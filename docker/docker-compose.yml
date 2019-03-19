@@ -1,0 +1,19 @@
+version: '3'
+services:
+  zap-hud:
+    image: owasp/zap2docker-weekly  
+    ports:
+      - 9090:9090
+    user: zap
+    env_file: 
+      - .env
+    command: >
+      sh -c "
+      zap.sh
+      -daemon
+      -host 0.0.0.0
+      -port 9090
+      -config api.addrs.addr.name=.*
+      -config api.addrs.addr.regex=true
+      -config api.key=${ZAP_API_KEY}
+      -config hud.enabledForDaemon=true"
