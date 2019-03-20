@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import localforage from "localforage";
 import HudButton from "./HudButton.vue";
 import { EventBus } from "../libs/event-bus.js";
 
