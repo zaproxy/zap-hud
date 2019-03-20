@@ -15,6 +15,7 @@ const SHOW_WELCOME_SCREEN = "<<SHOW_WELCOME_SCREEN>>" === "true" ? true : false;
 const ZAP_SHARED_SECRET = process.env.ZAP_SHARED_SECRET;
 
 import Vue from "vue";
+import localforage from "localforage";
 import Management from "./Management.vue";
 
 document.addEventListener("DOMContentLoaded", () => {
