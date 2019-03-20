@@ -18,7 +18,7 @@ import HudButton from "./HudButton.vue";
 import { EventBus } from "../libs/event-bus.js";
 
 //TODO: replace tabId, frameId w/ props
-//TODO: Convert searchParams to props
+//TODO: Convert searchParams to props from panel.js or Panel.vue
 let params = new URL(document.location).searchParams;
 const orientation = params.get("orientation");
 const frameId = params.get("frameId");
