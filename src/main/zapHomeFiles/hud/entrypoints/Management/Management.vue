@@ -34,7 +34,6 @@
   // TODO: Add this method to Vue methods
   function showTutorial() {
     window.open(TUTORIAL_URL);
-
   }
 
   export default {
