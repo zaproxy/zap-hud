@@ -1,15 +1,15 @@
 <html>
 <head>
-	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre.css"/>
-	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre-icons.css"/>
-    <link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=drawer.css"/>
+	<link rel="stylesheet" type="text/css" href="{{ ZAP_HUD_FILES }}?name=libraries/spectre.css"/>
+	<link rel="stylesheet" type="text/css" href="{{ ZAP_HUD_FILES }}?name=libraries/spectre-icons.css"/>
+    <link rel="stylesheet" type="text/css" href="{{ ZAP_HUD_FILES }}?name=drawer.css"/>
 
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js"></script>
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue.js"></script>
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue-i18n.js"></script>
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=i18n.js"></script>
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=utils.js"></script>
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=drawer.js"></script>
+	<script type="text/javascript" src="{{ ZAP_HUD_FILES }}?name=libraries/localforage.min.js"></script>
+	<script type="text/javascript" src="{{ ZAP_HUD_FILES }}?name=libraries/vue.js"></script>
+	<script type="text/javascript" src="{{ ZAP_HUD_FILES }}?name=libraries/vue-i18n.js"></script>
+	<script type="text/javascript" src="{{ ZAP_HUD_FILES }}?name=i18n.js"></script>
+	<script type="text/javascript" src="{{ ZAP_HUD_FILES }}?name=utils.js"></script>
+	<script type="text/javascript" src="{{ ZAP_HUD_FILES }}?name=drawer.js"></script>
 </head>
 <body>
     <div id="app">
@@ -161,7 +161,7 @@
     </template>
 
     <template id="drawer-button-settings-template">
-        <drawer-button-template icon="<<ZAP_HUD_FILES>>?image=gear.png" @click="showHudSettings"></drawer-button-template>
+        <drawer-button-template icon="{{ ZAP_HUD_FILES }}?image=gear.png" @click="showHudSettings"></drawer-button-template>
     </template>
 
     <template id="drawer-button-showhide-template">

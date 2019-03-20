@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ ZAP_HUD_FILES }}?name=libraries/spectre.css"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <welcome-screen v-show="showWelcomeScreen"></welcome-screen>
+    </div>
+
+    <script
+      type="text/javascript"
+      src="{{ ZAP_HUD_FILES }}?name=utils.js"
+    ></script>
+    <script src="./management.js"></script>
+  </body>
+</html>
