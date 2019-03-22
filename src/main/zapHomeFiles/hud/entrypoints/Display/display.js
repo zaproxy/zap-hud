@@ -1,7 +1,7 @@
 import Vue from "vue";
-import VueI18n from "vue-i18n";
 import Display from "./Display.vue";
-import { EventBus } from "../../libs/event-bus.js";
+import { EventBus } from "../../libs/event-bus";
+import { i18n } from "../../libs/i18n";
 
 //TODO: Refactor tabId and frameId as props
 let tabId = "";
@@ -14,9 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
   tabId = params.get("tabId");
 
   /* Vue app */
-  Vue.use(VueI18n);
   new Vue({
-    i18n: I18n.i18n,
+    i18n,
     el: "#app",
     template: "<Display/>",
     components: { Display },

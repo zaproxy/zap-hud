@@ -21,36 +21,36 @@
       :title="allAlertsModalTitle"
       @close="isAllAlertsModalShown = false"
     ></AllAlertsModal>
-    <!-- <AlertDetailsModal
+    <AlertDetailsModal
       :show="isAlertDetailsModalShown"
       :title="alertDetailsModalTitle"
       @close="isAlertDetailsModalShown = false"
-    ></AlertDetailsModal>-->
-    <!-- <SimpleMenuModal
+    ></AlertDetailsModal>
+    <SimpleMenuModal
       :show="isSimpleMenuModalShown"
       :title="simpleMenuModalTitle"
       @close="isSimpleMenuModalShown = false"
-    ></SimpleMenuModal>-->
-    <!-- <BreakMessageModal
+    ></SimpleMenuModal>
+    <BreakMessageModal
       :show="isBreakMessageModalShown"
       :title="breakMessageModalTitle"
       @close="isBreakMessageModalShown = false"
-    ></BreakMessageModal>-->
-    <!-- <HistoryMessageModal
+    ></BreakMessageModal>
+    <HistoryMessageModal
       :show="isHistoryMessageModalShown"
       :title="historyMessageModalTitle"
       @close="isHistoryMessageModalShown = false"
-    ></HistoryMessageModal>-->
-    <!-- <WebsocketMessageModal
+    ></HistoryMessageModal>
+    <WebsocketMessageModal
       :show="isWebsocketMessageModalShown"
       :title="websocketMessageModalTitle"
       @close="isWebsocketMessageModalShown = false"
-    ></WebsocketMessageModal>-->
-    <!-- <SiteTreeModal
+    ></WebsocketMessageModal>
+    <SiteTreeModal
       :show="isSiteTreeModalShown"
       :title="siteTreeModalTitle"
       @close="isSiteTreeModalShown = false"
-    ></SiteTreeModal>-->
+    ></SiteTreeModal>
   </div>
 </template>
 
@@ -59,12 +59,12 @@ import DialogModal from "../../components/DialogModal.vue";
 import SelectToolModal from "../../components/SelectToolModal.vue";
 import AlertListModal from "../../components/AlertListModal.vue";
 import AllAlertsModal from "../../components/AllAlertsModal.vue";
-// import AlertDetailsModal from "../../components/AlertDetailsModal.vue";
-// import SimpleMenuModal from "../../components/SimpleMenuModal.vue";
-// import BreakMessageModal from "../../components/BreakMessageModal.vue";
-// import HistoryMessageModal from "../../components/HistoryMessageModal.vue";
-// import WebsocketMessageModal from "../../components/WebsocketMessageModal.vue";
-// import SiteTreeModal from "../../components/SiteTreeModal.vue";
+import AlertDetailsModal from "../../components/AlertDetailsModal.vue";
+import SimpleMenuModal from "../../components/SimpleMenuModal.vue";
+import BreakMessageModal from "../../components/BreakMessageModal.vue";
+import HistoryMessageModal from "../../components/HistoryMessageModal.vue";
+import WebsocketMessageModal from "../../components/WebsocketMessageModal.vue";
+import SiteTreeModal from "../../components/SiteTreeModal.vue";
 
 export default {
   props: [],
@@ -72,13 +72,13 @@ export default {
     DialogModal,
     SelectToolModal,
     AlertListModal,
-    AllAlertsModal
-    // AlertDetailsModal,
-    // SimpleMenuModal,
-    // BreakMessageModal,
-    // HistoryMessageModal,
-    // WebsocketMessageModal,
-    // SiteTreeModal
+    AllAlertsModal,
+    AlertDetailsModal,
+    SimpleMenuModal,
+    BreakMessageModal,
+    HistoryMessageModal,
+    WebsocketMessageModal,
+    SiteTreeModal
   }
 };
 </script>

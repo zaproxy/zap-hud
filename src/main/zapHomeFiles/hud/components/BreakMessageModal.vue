@@ -10,12 +10,13 @@
     :active-tab="activeTab"
   >
     <div slot="footer">
-      <button class="btn btn-primary" @click="step">{{ $t("message.break_step") }}</button>
-      <button class="btn btn-primary" @click="continueOn">{{ $t("message.break_continue") }}</button>
+      <button class="btn btn-primary" @click="step" v-t="'message.break_step'"></button>
+      <button class="btn btn-primary" @click="continueOn" v-t="'message.break_continue'"></button>
       <button
         :class="{'btn': true, 'disabled': isDropDisabled}"
         @click="drop"
-      >{{ $t("message.break_drop") }}</button>
+        v-t="'message.break_drop'"
+      ></button>
     </div>
   </HttpMessageModal>
 </template>

@@ -1,6 +1,6 @@
 <template id="welcome-screen-template">
   <div class="welcome-div">
-    <img class="welcome-image" src='{{ ZAP_HUD_FILES }}?image=hud-welcome.png'>
+    <img class="welcome-image" src='{{{ ZAP_HUD_FILES }}}?image=hud-welcome.png'>
     <div class="tutorial-div">
       <button class="btn btn-primary" @click="continueToTutorial"> Take the HUD Tutorial </button>
     </div>

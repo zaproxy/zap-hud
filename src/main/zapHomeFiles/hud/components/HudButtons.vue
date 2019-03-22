@@ -4,7 +4,7 @@
       v-for="tool in tools"
       :key="tool.name"
       :label="tool.label"
-      :icon="'{{ ZAP_HUD_FILES }}?image=' + tool.icon"
+      :icon="'{{{ ZAP_HUD_FILES }}}?image=' + tool.icon"
       :data="tool.data"
       :name="tool.name"
     ></HudButton>

@@ -15,12 +15,12 @@
       </div>
       <div class="float-left">
         <button :class="{'btn': true, 'disabled': isAscanDisabled}" @click="ascanRequest">
-          {{ $t("message.history_ascan_request") }}
-          <img src="{{ ZAP_HUD_FILES }}?image=flame.png">
+          <span v-t="'message.history_ascan_request'"></span>
+          <img src="{{{ ZAP_HUD_FILES }}}?image=flame.png">
         </button>
       </div>
-      <button class="btn btn-primary" @click="replay">{{ $t("message.history_replay_console") }}</button>
-      <button class="btn" @click="replayInBrowser">{{ $t("message.history_replay_browser") }}</button>
+      <button class="btn btn-primary" @click="replay" v-t="'message.history_replay_console'"></button>
+      <button class="btn" @click="replayInBrowser" v-t="'message.history_replay_browser'"></button>
     </div>
   </HttpMessageModal>
 </template>

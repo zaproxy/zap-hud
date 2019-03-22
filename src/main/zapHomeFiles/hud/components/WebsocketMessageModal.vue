@@ -4,19 +4,19 @@
       <table class="table table-striped table-hover">
         <tbody>
           <tr>
-            <td>{{ $t("message.websockets_message_field_time") }}</td>
+            <td v-t="'message.websockets_message_field_time'"></td>
             <td>{{ time }}</td>
           </tr>
           <tr>
-            <td>{{ $t("message.websockets_message_field_direction") }}</td>
+            <td v-t="'message.websockets_message_field_direction'"></td>
             <td>{{ direction }}</td>
           </tr>
           <tr>
-            <td>{{ $t("message.websockets_message_field_opcode") }}</td>
+            <td v-t="'message.websockets_message_field_opcode'"></td>
             <td>{{ opcode }}</td>
           </tr>
           <tr>
-            <td>{{ $t("message.websockets_message_field_payload") }}</td>
+            <td v-t="'message.websockets_message_field_payload'"></td>
             <td></td>
           </tr>
         </tbody>
@@ -33,7 +33,8 @@
         class="btn btn-primary"
         @click="replay"
         :disabled="isReplayDisabled"
-      >{{ $t("message.websockets_replay") }}</button>
+        v-t="'message.websockets_replay'"
+      ></button>
     </div>
   </Modal>
 </template>

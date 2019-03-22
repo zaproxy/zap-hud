@@ -4,53 +4,53 @@
       <table class="table table-striped table-hover">
         <tbody>
           <tr>
-            <td>{{ $t('message.alerts_field_url') }}</td>
+            <td v-t="'message.alerts_field_url'"></td>
             <td @click="messageSelected(details.messageId)">
               <a href="#">{{ details['url'] }}</a>
             </td>
           </tr>
           <tr>
-            <td>{{ $t('message.alerts_field_description') }}</td>
+            <td v-t="'message.alerts_field_description'"></td>
             <td>{{ details['description'] }}</td>
           </tr>
           <tr>
-            <td>{{ $t('message.alerts_field_risk') }}</td>
+            <td v-t="'message.alerts_field_risk'"></td>
             <td>{{ details['risk'] }}</td>
           </tr>
           <tr>
-            <td>{{ $t('message.alerts_field_confidence') }}</td>
+            <td v-t="'message.alerts_field_confidence'"></td>
             <td>{{ details['confidence'] }}</td>
           </tr>
           <tr>
-            <td>{{ $t('message.alerts_field_parameter') }}</td>
+            <td v-t="'message.alerts_field_parameter'"></td>
             <td>{{ details['parameter'] }}</td>
           </tr>
           <tr>
-            <td>{{ $t('message.alerts_field_attack') }}</td>
+            <td v-t="'message.alerts_field_attack'"></td>
             <td>{{ details['attack'] }}</td>
           </tr>
           <tr>
-            <td>{{ $t('message.alerts_field_evidence') }}</td>
+            <td v-t="'message.alerts_field_evidence'"></td>
             <td>{{ details['evidence'] }}</td>
           </tr>
           <tr>
-            <td>{{ $t('message.alerts_field_cweid') }}</td>
+            <td v-t="'message.alerts_field_cweid'"></td>
             <td>{{ details['cweid'] }}</td>
           </tr>
           <tr>
-            <td>{{ $t('message.alerts_field_wascid') }}</td>
+            <td v-t="'message.alerts_field_wascid'"></td>
             <td>{{ details['wascid'] }}</td>
           </tr>
           <tr>
-            <td>{{ $t('message.alerts_field_other') }}</td>
+            <td v-t="'message.alerts_field_other'"></td>
             <td>{{ details['other'] }}</td>
           </tr>
           <tr>
-            <td>{{ $t('message.alerts_field_solution') }}</td>
+            <td v-t="'message.alerts_field_solution'"></td>
             <td>{{ details['solution'] }}</td>
           </tr>
           <tr>
-            <td>{{ $t('message.alerts_field_reference') }}</td>
+            <td v-t="'message.alerts_field_reference'"></td>
             <td v-if="details['reference']">
               <li v-for="link in details['reference'].split('\n')">
                 <a :href="link" target="_top">{{ link }}</a>
@@ -102,3 +102,7 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" scoped>
+</style>
+
