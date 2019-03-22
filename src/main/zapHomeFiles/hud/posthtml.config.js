@@ -8,7 +8,8 @@ module.exports = {
         ZAP_HUD_WS: process.env.ZAP_HUD_WS,
         ZAP_HUD_TOOLS: process.env.ZAP_HUD_TOOLS,
         ZAP_SHARED_SECRET: process.env.ZAP_SHARED_SECRET
-      }
+      },
+      delimiters: ["{{{", "}}}"]
     }
   }
 };
