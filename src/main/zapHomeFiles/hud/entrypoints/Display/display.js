@@ -46,9 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 navigator.serviceWorker.addEventListener("message", event => {
-  var action = event.data.action;
-  var config = event.data.config;
-  var port = event.ports[0];
+  const action = event.data.action;
+  const config = event.data.config;
+  const port = event.ports[0];
 
   switch (action) {
     case "showDialog":

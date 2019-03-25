@@ -19,18 +19,14 @@ import localforage from "localforage";
 import Management from "./Management.vue";
 
 document.addEventListener("DOMContentLoaded", () => {
-  new Vue({
-    el: "#app",
-    template: "<Management/>",
-    components: { Management }
-  });
-
   let params = new URL(document.location).searchParams;
 
   tabId = params.get("tabId");
 
-  app = new Vue({
+  new Vue({
     el: "#app",
+    template: "<Management/>",
+    components: { Management },
     data: {
       showWelcomeScreen: false
     }
