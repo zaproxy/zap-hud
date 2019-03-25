@@ -250,7 +250,7 @@ const messages = {
 
 Vue.use(VueI18n);
 export const i18n = new VueI18n({
-  locale: "en",
-  fallbackLocale: "en",
+  locale: "en_GB",
+  fallbackLocale: "en_GB",
   messages
 });
