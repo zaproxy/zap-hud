@@ -24,7 +24,9 @@ import java.util.List;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.Constant;
+import org.zaproxy.zap.ZAP;
 import org.zaproxy.zap.common.VersionedAbstractParam;
+import org.zaproxy.zap.eventBus.Event;
 import org.zaproxy.zap.extension.api.ZapApiIgnore;
 
 public class HudParam extends VersionedAbstractParam {
@@ -129,6 +131,16 @@ public class HudParam extends VersionedAbstractParam {
     public void setEnabledForDesktop(boolean enabledForDesktop) {
         this.enabledForDesktop = enabledForDesktop;
         getConfig().setProperty(PARAM_ENABLED_DESKTOP, enabledForDesktop);
+        String event;
+        if (enabledForDesktop) {
+            event = HudEventPublisher.EVENT_ENABLED_FOR_DESKTOP;
+        } else {
+            event = HudEventPublisher.EVENT_DISABLED_FOR_DESKTOP;
+        }
+        ZAP.getEventBus()
+                .publishSyncEvent(
+                        HudEventPublisher.getPublisher(),
+                        new Event(HudEventPublisher.getPublisher(), event, null));
     }
 
     public boolean isEnabledForDaemon() {
@@ -138,6 +150,16 @@ public class HudParam extends VersionedAbstractParam {
     public void setEnabledForDaemon(boolean enabledForDaemon) {
         this.enabledForDaemon = enabledForDaemon;
         getConfig().setProperty(PARAM_ENABLED_DAEMON, enabledForDaemon);
+        String event;
+        if (enabledForDaemon) {
+            event = HudEventPublisher.EVENT_ENABLED_FOR_DAEMON;
+        } else {
+            event = HudEventPublisher.EVENT_DISABLED_FOR_DAEMON;
+        }
+        ZAP.getEventBus()
+                .publishSyncEvent(
+                        HudEventPublisher.getPublisher(),
+                        new Event(HudEventPublisher.getPublisher(), event, null));
     }
 
     public boolean isInScopeOnly() {
