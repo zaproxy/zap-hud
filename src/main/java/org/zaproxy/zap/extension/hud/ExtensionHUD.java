@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -134,18 +135,12 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     /** */
     public ExtensionHUD() {
-        super();
-        initialize();
+        this(NAME);
     }
 
     /** @param name */
     public ExtensionHUD(String name) {
         super(name);
-    }
-
-    /** This method initializes this */
-    private void initialize() {
-        this.setName(NAME);
     }
 
     @Override
@@ -229,12 +224,20 @@ public class ExtensionHUD extends ExtensionAdaptor
         tutorialServer.start();
     }
 
-    protected boolean isHudEnabled() {
+    public boolean isHudEnabled() {
         if (View.isInitialised()) {
             return hudEnabledForDesktop;
         } else {
             return hudEnabledForDaemon || this.hudCmdlineOptionUsed;
         }
+    }
+
+    public void setHudEnabledForDesktop(Boolean enabled) {
+        if (hudButton != null) {
+            hudButton.setSelected(enabled);
+        }
+        this.hudEnabledForDesktop = enabled;
+        getHudParam().setEnabledForDesktop(hudEnabledForDesktop);
     }
 
     /**
@@ -596,5 +599,9 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     protected Set<String> getUpgradedHttpsDomains() {
         return upgradedHttpsDomains;
+    }
+
+    public List<String> getSupportedBrowserIds() {
+        return Arrays.asList("firefox", "chrome");
     }
 }
