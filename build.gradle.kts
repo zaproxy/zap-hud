@@ -73,10 +73,6 @@ zapAddOn {
             }
         }
     }
-
-    zapVersions {
-        downloadUrl.set("https://github.com/zaproxy/zap-hud/releases/download/v$version")
-    }
 }
 
 val generateI18nJsFile by tasks.creating(GenerateI18nJsFile::class) {
