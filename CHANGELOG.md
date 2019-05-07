@@ -5,7 +5,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- Add a beforeDestroy to all Vue components that register listeners on the custom eventBus.
 
 ### Added
  - Add css transitions to tool buttons so that they slide out when hovered over.
@@ -18,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
  - Offset the growl alerts so that they don't block access to the buttons on the lower tab
  - The UI configs are now persisted to ZAP [#321](https://github.com/zaproxy/zap-hud/issues/321)
+ - Add a beforeDestroy to all Vue components that register listeners on the custom eventBus. [#468](https://github.com/zaproxy/zap-hud/issues/468)
 
 ## [0.3.0] - 2019-02-11
  - Many thanks to Matt Austin (@mattaustin) for reporting security vulnerabilities with the HUD and working with us to fix them.
