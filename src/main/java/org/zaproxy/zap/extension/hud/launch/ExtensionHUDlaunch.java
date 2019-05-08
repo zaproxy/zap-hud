@@ -23,9 +23,13 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.log4j.Logger;
+import org.parosproxy.paros.CommandLine;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.control.Control;
 import org.parosproxy.paros.extension.CommandLineArgument;
@@ -46,8 +50,15 @@ public class ExtensionHUDlaunch extends ExtensionAdaptor implements CommandLineL
     private static final String SELENIUM_EXTENSION_CLASS_NAME =
             "org.zaproxy.zap.extension.selenium.ExtensionSelenium";
 
-    private CommandLineArgument[] arguments = new CommandLineArgument[1];
-    private static final int ARG_BROWSER_IDX = 0;
+    private CommandLineArgument[] arguments = new CommandLineArgument[3];
+    private static final int ARG_HUD_IDX = 0;
+    private static final int ARG_HUD_URL_IDX = 1;
+    private static final int ARG_HUD_BROWSER_IDX = 2;
+
+    private static final String FIREFOX = "Firefox";
+    private static final String CHROME = "Chrome";
+    private static final Set<String> SUPPORTED_BROWSERS =
+            new HashSet<String>(Arrays.asList(new String[] {FIREFOX, CHROME}));
 
     private static final Logger LOGGER = Logger.getLogger(ExtensionHUDlaunch.class);
 
@@ -112,7 +123,7 @@ public class ExtensionHUDlaunch extends ExtensionAdaptor implements CommandLineL
         return method.invoke(obj, args);
     }
 
-    private void launchBrowser() {
+    private void launchBrowser(String url, String browserName) {
         Runnable task =
                 () -> {
                     try {
@@ -121,11 +132,13 @@ public class ExtensionHUDlaunch extends ExtensionAdaptor implements CommandLineL
                             // which is a bit pointless
                             getExtHUD().setHudCmdlineOptionUsed(true);
                         }
-                        // Object wd =
-                        callMethodByReflection(
-                                getExtSelenium(), "getProxiedBrowserByName", "Firefox");
+                        Object wd =
+                                callMethodByReflection(
+                                        getExtSelenium(), "getProxiedBrowserByName", browserName);
 
-                        // callMethodByReflection(wd, "get", "https://zaproxy.org");
+                        if (url != null && url.length() > 0) {
+                            callMethodByReflection(wd, "get", url);
+                        }
                     } catch (Exception e1) {
                         LOGGER.error(e1.getMessage(), e1);
                     }
@@ -135,13 +148,30 @@ public class ExtensionHUDlaunch extends ExtensionAdaptor implements CommandLineL
 
     @Override
     public void execute(CommandLineArgument[] args) {
-        if (arguments[ARG_BROWSER_IDX].isEnabled()) {
-            this.launchBrowser();
+        String url = null;
+        String browser = FIREFOX;
+        if (arguments[ARG_HUD_URL_IDX].isEnabled()) {
+            url = arguments[ARG_HUD_URL_IDX].getArguments().firstElement();
+        }
+        if (arguments[ARG_HUD_BROWSER_IDX].isEnabled()) {
+            browser = arguments[ARG_HUD_BROWSER_IDX].getArguments().firstElement();
+            if (!SUPPORTED_BROWSERS.contains(browser)) {
+                CommandLine.error(
+                        Constant.messages.getString(
+                                "hud.cmdline.error.badbrowser",
+                                String.join(", ", SUPPORTED_BROWSERS)));
+                return;
+            }
+        }
+        if (arguments[ARG_HUD_IDX].isEnabled()
+                || arguments[ARG_HUD_URL_IDX].isEnabled()
+                || arguments[ARG_HUD_BROWSER_IDX].isEnabled()) {
+            this.launchBrowser(url, browser);
         }
     }
 
     private CommandLineArgument[] getCommandLineArguments() {
-        arguments[ARG_BROWSER_IDX] =
+        arguments[ARG_HUD_IDX] =
                 new CommandLineArgument(
                         "-hud",
                         0,
@@ -149,6 +179,24 @@ public class ExtensionHUDlaunch extends ExtensionAdaptor implements CommandLineL
                         "",
                         "-hud                     "
                                 + Constant.messages.getString("hud.cmdline.hud.help"));
+        arguments[ARG_HUD_URL_IDX] =
+                new CommandLineArgument(
+                        "-hudurl",
+                        1,
+                        null,
+                        "",
+                        "-hudurl <url>            "
+                                + Constant.messages.getString("hud.cmdline.hudurl.help"));
+        arguments[ARG_HUD_BROWSER_IDX] =
+                new CommandLineArgument(
+                        "-hudbrowser",
+                        1,
+                        null,
+                        "",
+                        "-hudbrowser <browser>    "
+                                + Constant.messages.getString(
+                                        "hud.cmdline.hudbrowser.help",
+                                        String.join(", ", SUPPORTED_BROWSERS)));
         return arguments;
     }
 

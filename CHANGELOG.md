@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Add the option to launch the tutorial again from the HUD configuration page
  - Add a tutorial page for the HUD Configuration options 
  - Add dialog which shows the full websocket message when selected in the table with the option to replay it
+ - Command line options '-hudurl <url>' and '-hudbrowser <browser>'
 
 ### Fixed
  - Offset the growl alerts so that they don't block access to the buttons on the lower tab
