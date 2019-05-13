@@ -1,4 +1,4 @@
-* text=lf
+* text=auto eol=lf
 
 *.java text
 *.properties text
@@ -10,7 +10,7 @@
 *.gradle text
 *.gradle.kts text
 
-*.bat text eol=crlf
+*.bat eol=crlf
 *.sh text
 gradlew text
 
