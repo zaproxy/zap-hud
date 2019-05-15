@@ -16,9 +16,6 @@ var Break = (function() {
 	var ICONS = {};
 		ICONS.OFF = "break-off.png";
 		ICONS.ON = "break-on.png";
-	var DIALOG = {};
-		DIALOG.START = "Start breaking?";
-		DIALOG.STOP = "Stop breaking?";
 
 	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -117,7 +114,7 @@ var Break = (function() {
 			});
 	}
 
-	function showBreakDisplay(data) {
+	function showBreakHttpDisplay(data) {
 		var config = {
 			request: {
 				header: '',
@@ -202,6 +199,76 @@ var Break = (function() {
 			.catch(utils.errorHandler);
 	}
 
+	function setWebSocketMessage(tabId, payload, outgoing) {
+		return apiCallWithResponse("websocket", "action", "setBreakTextMessage", { message: payload, outgoing: outgoing })
+		.catch(error => {
+			utils.zapApiErrorDialog(tabId, error);
+			throw error;
+		});
+	}
+
+
+	function showBreakWebSocketDisplay(data) {
+		utils.getAllClients('display')
+		.then(clients => {
+			let isFirefox = this.navigator.userAgent.indexOf("Firefox") > -1 ? true : false;
+			let r = false;
+
+			if (isFirefox) {
+				for(let i=0; i<clients.length; i++) {
+					if (clients[i].visibilityState == 'visible') {
+						r = true;
+					}
+				}
+			}
+			else {
+				if (clients.length > 0) {
+					r = true;
+				}
+			}
+
+			return r;
+		})
+		.then(isVisible => {
+			if (!isVisible) {
+				utils.log(LOG_DEBUG, 'break.showBreakDisplay', 'Target window not ready, stepping');
+				step();
+				utils.messageAllTabs('display', {action:'closeModals'})
+				return;
+			}
+		})
+		.catch(utils.errorHandler);
+
+	utils.messageAllTabs("display", {action:"showBreakWebSocketMessage", config:data})
+		.then(response => {
+			// Handle button choice
+			if (response.buttonSelected === "step") {
+				setWebSocketMessage(response.tabId, response.payload, response.outgoing)
+					.then(() => {
+						step(response.tabId);
+						utils.messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
+					})
+					.catch(utils.errorHandler);
+			}
+			else if (response.buttonSelected === "continue") {
+				setWebSocketMessage(response.tabId, response.payload, response.outgoing)
+					.then(() => {
+						stopBreaking(response.tabId);
+						utils.messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
+					})
+					.catch(utils.errorHandler);
+			}
+			else if (response.buttonSelected === "drop") {
+				drop(response.tabId);
+				utils.messageAllTabs('display', {action:'closeModals', config: {notTabId: response.tabId}})
+			}
+			else {
+				//cancel
+			}
+		})
+		.catch(utils.errorHandler);
+	}
+
 	function showOptions(tabId) {
 		var config = {};
 
@@ -255,8 +322,20 @@ var Break = (function() {
 	});
 
 	self.addEventListener("org.zaproxy.zap.extension.brk.BreakEventPublisher", event => {
-		if (event.detail['event.type'] === 'break.active' && event.detail['messageType'] === 'HTTP') {
-			showBreakDisplay(event.detail);
+		if (event.detail['event.type'] === 'break.active') {
+			if (event.detail['messageType'] === 'HTTP') {
+				showBreakHttpDisplay(event.detail);
+			} else if (event.detail['messageType'] === 'org.zaproxy.zap.extension.websocket.WebSocketMessageDTO') {
+				if (event.detail['opcodeString'] === 'TEXT') {
+					showBreakWebSocketDisplay(event.detail);
+				} else {
+					// Don't support non text payloads yet so step through them
+					apiCall("break", "action", "step");
+				}
+			} else {
+				// Don't support this type yet so step through
+				apiCall("break", "action", "step");
+			}
 		}
 	});
 
