@@ -25,6 +25,10 @@ import org.zaproxy.zap.eventBus.EventPublisher;
 public class HudEventPublisher implements EventPublisher {
 
     private static HudEventPublisher publisher = null;
+    public static final String EVENT_ENABLED_FOR_DESKTOP = "desktop.enabled";
+    public static final String EVENT_DISABLED_FOR_DESKTOP = "desktop.disabled";
+    public static final String EVENT_ENABLED_FOR_DAEMON = "daemon.enabled";
+    public static final String EVENT_DISABLED_FOR_DAEMON = "daemon.disabled";
     public static final String EVENT_DEV_MODE_ENABLED = "devMode.enabled";
     public static final String EVENT_DEV_MODE_DISABLED = "devMode.disabled";
     public static final String EVENT_DOMAIN_UPGRADED_TO_HTTPS = "domain.upgraded";
@@ -44,6 +48,10 @@ public class HudEventPublisher implements EventPublisher {
                     .registerPublisher(
                             publisher,
                             new String[] {
+                                EVENT_ENABLED_FOR_DESKTOP,
+                                EVENT_DISABLED_FOR_DESKTOP,
+                                EVENT_ENABLED_FOR_DAEMON,
+                                EVENT_DISABLED_FOR_DAEMON,
                                 EVENT_DEV_MODE_ENABLED,
                                 EVENT_DEV_MODE_DISABLED,
                                 EVENT_DOMAIN_UPGRADED_TO_HTTPS,

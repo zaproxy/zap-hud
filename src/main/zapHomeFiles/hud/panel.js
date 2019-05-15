@@ -120,6 +120,9 @@ Vue.component('hud-button', {
 				}
 			}
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('updateButton')
 	}
 });
 
@@ -190,8 +193,11 @@ Vue.component('hud-buttons', {
 		eventBus.$on('removeButton', data => {
 			self.tools = self.tools.filter(tool => tool.name !== data.name);
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('addButton')
+		eventBus.$off('removeButton')
 	}
-
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -210,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		data: {
 
 		}
-	}); 
+	});
 });
 
 function doesContextApply(toolContext) {
@@ -225,7 +231,7 @@ function doesContextApply(toolContext) {
 navigator.serviceWorker.addEventListener("message", event => {
 	var message = event.data;
 	let tool;
-	
+
 	switch(message.action) {
 		case "broadcastUpdate":
 			tool = message.tool;

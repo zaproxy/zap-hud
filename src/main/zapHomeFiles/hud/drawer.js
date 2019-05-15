@@ -52,7 +52,7 @@ Vue.component('history', {
                     return re.test(message.url);
                 }
                 else{
-                    return message.url.indexOf(self.filter)>=0; 
+                    return message.url.indexOf(self.filter)>=0;
                 }
             });
         }
@@ -88,7 +88,7 @@ Vue.component('history', {
             this.messages = data.messages;
         })
 
-		eventBus.$on('updateMessages', data => {
+        eventBus.$on('updateMessages', data => {
             this.messages = this.messages.concat(data.messages);
 
             let count = data.messages.length;
@@ -104,13 +104,17 @@ Vue.component('history', {
             if(lastIdElem){
                 lastIdElem.scrollIntoView({block:'end', behavior:'smooth'});
             }
-            
+
             //move horizontal scroll bar to the left
             let tabsDetailsElems = document.querySelectorAll('tabs-details');
             if (tabsDetailsElems.length > 0){
                 tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
             }
         }
+    },
+    beforeDestroy () {
+        eventBus.$off('setMessages')
+        eventBus.$off('updateMessages')
     }
 });
 
@@ -158,7 +162,7 @@ Vue.component('websockets', {
                     return re.test(message.messageSummary);
                 }
                 else{
-                    return message.messageSummary.indexOf(self.filter)>=0; 
+                    return message.messageSummary.indexOf(self.filter)>=0;
                 }
             });
         }
@@ -194,7 +198,7 @@ Vue.component('websockets', {
             this.messages = data.messages;
         })
 
-		eventBus.$on('updateWebSockets', data => {
+        eventBus.$on('updateWebSockets', data => {
             this.messages = this.messages.concat(data.messages);
 
             let count = data.messages.length;
@@ -209,14 +213,14 @@ Vue.component('websockets', {
             if(lastIdElem){
                 lastIdElem.scrollIntoView({block:'end', behavior:'smooth'});
             }
-            
+
             //move horizontal scroll bar to the left
             let tabsDetailsElems = document.querySelectorAll('tabs-details');
             if (tabsDetailsElems.length > 0){
                 tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
             }
         }
-    }
+    },
 });
 
 Vue.component('tabs', {
@@ -426,14 +430,14 @@ navigator.serviceWorker.addEventListener('message', event => {
                 messages: event.data.messages,
 				port: port
 			});
-			
+
             break;
         case 'updateWebSockets':
             eventBus.$emit('updateWebSockets', {
                 messages: event.data.messages,
 				port: port
 			});
-			
+
             break;
     }
 });

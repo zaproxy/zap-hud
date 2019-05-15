@@ -1,16 +1,14 @@
-import org.zaproxy.gradle.AddOnPlugin
-import org.zaproxy.gradle.tasks.CreateManifestChanges
+import org.zaproxy.gradle.addon.AddOnStatus
+import org.zaproxy.gradle.addon.manifest.tasks.ConvertChangelogToChanges
+import org.zaproxy.gradle.addon.misc.CopyAddOn
 import org.zaproxy.gradle.tasks.GenerateI18nJsFile
-import org.zaproxy.gradle.tasks.UpdateManifestFile
 import org.zaproxy.gradle.tasks.ZapDownloadWeekly
-import org.zaproxy.gradle.tasks.ZapInstallAddOn
 import org.zaproxy.gradle.tasks.ZapStart
 import org.zaproxy.gradle.tasks.ZapShutdown
-import org.zaproxy.gradle.tasks.ZapUninstallAddOn
 
 plugins {
     `java-library`
-    id("zap-add-on")
+    id("org.zaproxy.add-on") version "0.1.0"
     id("com.diffplug.gradle.spotless") version "3.15.0"
 }
 
@@ -22,11 +20,10 @@ repositories {
     mavenCentral()
 }
 
-status = "alpha"
 version = "0.4.0"
+description = "Display information from ZAP in browser."
 
-val genHudFilesDir = layout.buildDirectory.dir("genHudFiles").get()
-val generatedI18nJsFileDir = genHudFilesDir.dir("i18nJs")
+val generatedI18nJsFileDir = layout.buildDirectory.dir("zapAddOn/i18nJs")
 val zapHome = layout.buildDirectory.dir("zapHome").get()
 val testZapHome = layout.buildDirectory.dir("testZapHome").get()
 val zapDownloadDir = layout.buildDirectory.dir("testZapInstall").get()
@@ -36,36 +33,52 @@ val zapPort = 8999
 // Use a key just to make sure the HUD works with one
 val zapApiKey = "password123"
 val hudDevArgs = listOf("-config", "hud.enabledForDesktop=true", "-config", "hud.enabledForDaemon=true", "-config", "hud.devMode=true", "-config", "hud.unsafeEval=true")
-// Use specific TLS version to not break the tests in Java 11.
-val zapCmdlineOpts = listOf("-config", "proxy.securityProtocolsEnabled.protocol=TLSv1.2", "-config", "hud.tutorialPort=9998", "-config", "hud.tutorialTestMode=true", "-config", "hud.showWelcomeScreen=false", "-daemon", "-config", "start.addonDirs=$buildDir/zap/") + hudDevArgs
+val zapCmdlineOpts = listOf("-config", "hud.tutorialPort=9998", "-config", "hud.tutorialTestMode=true", "-config", "hud.showWelcomeScreen=false", "-daemon") + hudDevArgs
+
+val generateManifestChanges by tasks.registering(ConvertChangelogToChanges::class) {
+    changelog.set(file("CHANGELOG.md"))
+    manifestChanges.set(file("$buildDir/zapAddOn/manifest-changes.html"))
+}
 
 zapAddOn {
     addOnId.set("hud")
-    addOnStatus.set("$status")
-    zapHomeFiles.from(generatedI18nJsFileDir)
+    addOnName.set("HUD - Heads Up Display")
+    addOnStatus.set(AddOnStatus.ALPHA)
 
     zapVersion.set("2.8.0")
 
-    versions {
-        downloadUrl.set("https://github.com/zaproxy/zap-hud/releases/download/v$version")
+    manifest {
+        author.set("ZAP Dev Team")
+        changesFile.set(generateManifestChanges.flatMap { it.manifestChanges })
+        files.from(generatedI18nJsFileDir)
+
+        dependencies {
+            addOns {
+                register("websocket")
+            }
+        }
+
+        extensions {
+            register("org.zaproxy.zap.extension.hud.launch.ExtensionHUDlaunch") {
+                classnames {
+                    allowed.set(listOf("org.zaproxy.zap.extension.hud.launch"))
+                }
+                dependencies {
+                    addOns {
+                        register("selenium") {
+                            semVer.set("2.*")
+                        }
+                    }
+                }
+            }
+        }
     }
-}
-
-val createManifestChanges by tasks.registering(CreateManifestChanges::class) {
-    changelog.set(file("CHANGELOG.md"))
-    manifestChanges.set(layout.buildDirectory.file("manifest-changes.html"))
-}
-
-tasks.named<UpdateManifestFile>("updateManifestFile") {
-    baseManifest.set(file("src/other/resources/ZapAddOn.xml"))
-    changes.set(createManifestChanges.get().manifestChanges)
-    outputDir.set(genHudFilesDir.dir("manifest"))
 }
 
 val generateI18nJsFile by tasks.creating(GenerateI18nJsFile::class) {
     bundleName.set("UIMessages")
     srcDir.set(file("src/other/resources/UIMessages/"))
-    i18nJsFile.set(file(generatedI18nJsFileDir.file("hud/i18n.js")))
+    i18nJsFile.set(generatedI18nJsFileDir.map({ it.file("hud/i18n.js") }))
     // In review mode all i18n messages are upper case to easily spot untranslated messages.
     reviewMode.set(false)
 }
@@ -114,6 +127,10 @@ spotless {
     //     prettier().config(mapOf("parser" to "css"))
     // })
 }
+
+val addOnGroup = "ZAP Add-On"
+
+tasks.jarZapAddOn { mustRunAfter("zapDownload") }
 
 tasks {
     register<Exec>("npmLintStagedHud") {
@@ -173,7 +190,7 @@ tasks {
     }
 
     register<Copy>("copyHudClientFiles") {
-        group = AddOnPlugin.ADD_ON_GROUP
+        group = addOnGroup
         description = "Copies the HUD files to runZap's home directory for use with continuous mode."
 
         from(file("src/main/zapHomeFiles"))
@@ -181,49 +198,41 @@ tasks {
         into(zapHome)
     }
 
+    register<CopyAddOn>("copyAddOnLocalHome") {
+        into(zapHome.dir("plugin"))
+    }
+
     register<ZapStart>("runZap") {
-        group = AddOnPlugin.ADD_ON_GROUP
+        group = addOnGroup
         description = "Runs ZAP (weekly) with the HUD in dev mode."
 
-        dependsOn("zapDownload", "assembleZapAddOn", "copyHudClientFiles")
+        dependsOn("zapDownload", "copyAddOnLocalHome", "copyHudClientFiles")
 
         installDir.set(zapInstallDir.asFile)
         homeDir.set(zapHome.asFile)
 
-        args.set(listOf("-dev", "-config", "start.checkForUpdates=false", "-config", "start.addonDirs=$buildDir/zap/", "-config", "hud.dir=$zapHome/hud") + hudDevArgs)
+        args.set(listOf("-dev", "-config", "start.checkForUpdates=false", "-config", "hud.dir=$zapHome/hud") + hudDevArgs)
     }
 
-    val assembleZapAddOn = tasks.named<Jar>("assembleZapAddOn");
-    val uninstallAddOn by registering(ZapUninstallAddOn::class) {
-        group = AddOnPlugin.ADD_ON_GROUP
-        description = "Uninstalls the add-on from ZAP (started with \"runZap\")."
-        addOnId.set(zapAddOn.addOnId)
-    }
-    assembleZapAddOn.configure { mustRunAfter(uninstallAddOn, "zapDownload") }
+    register<CopyAddOn>("copyAddOnTestHome") {
+        into(testZapHome.dir("plugin"))
 
-    register<ZapInstallAddOn>("installAddOn") {
-        group = AddOnPlugin.ADD_ON_GROUP
-        description = "Installs the add-on into ZAP (started with \"runZap\")."
-
-        dependsOn(uninstallAddOn, assembleZapAddOn)
-        addOn.set(assembleZapAddOn.get().archivePath)
+        doFirst {
+            delete(testZapHome)
+        }
     }
 
     register<ZapStart>("zapStart") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Starts ZAP for the unit tests"
         
-        dependsOn("zapDownload", "assembleZapAddOn")
+        dependsOn("zapDownload", "copyAddOnTestHome")
 
         installDir.set(zapInstallDir.asFile)
         homeDir.set(testZapHome.asFile)
         port.set(zapPort)
         apiKey.set(zapApiKey)
         args.set(zapCmdlineOpts)
-
-        doFirst {
-            delete(testZapHome)
-        }
     }
     
     register<ZapShutdown>("zapStop") {
@@ -236,7 +245,7 @@ tasks {
         shouldRunAfter("test")
     }
     
-    tasks.create("zapRunTests") {
+    register("zapRunTests") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Starts ZAP, runs the tests and stops ZAP"
         
@@ -250,14 +259,14 @@ tasks {
 
 }
 
-tasks.named<Test>("test") { 
+tasks.test { 
     shouldRunAfter("zapStart")
     useJUnitPlatform { 
         excludeTags("remote", "tutorial") 
     }  
 }
 
-tasks.withType(Test::class).configureEach {
+tasks.withType<Test>().configureEach {
     systemProperties.putAll(mapOf(
             "wdm.chromeDriverVersion" to "2.46",
             "wdm.geckoDriverVersion" to "0.24.0",

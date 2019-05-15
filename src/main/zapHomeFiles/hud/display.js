@@ -81,6 +81,9 @@ Vue.component('dialog-modal', {
 			self.buttons = data.buttons;
 			self.port = data.port;
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showDialogModal')
 	}
 });
 
@@ -103,10 +106,13 @@ Vue.component('select-tool-modal', {
 
 		eventBus.$on('showSelectToolModal', data => {
 			app.isSelectToolModalShown = true;
-			
+
 			self.tools = data.tools;
 			self.port = data.port;
 		});
+	},
+	beforeDestroy () {
+		eventBus.$off('showSelectToolModal')
 	}
 })
 
@@ -141,7 +147,7 @@ Vue.component('all-alerts-modal', {
 	},
 	created: function() {
 		let self = this;
-		
+
 		eventBus.$on('showAllAlertsModal', data => {
 			app.isAllAlertsModalShown = true;
 			app.allAlertsModalTitle = data.title;
@@ -150,6 +156,9 @@ Vue.component('all-alerts-modal', {
 			self.port = data.port;
 			self.activeTab = data.risk;
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showAllAlertsModal')
 	}
 })
 
@@ -177,6 +186,9 @@ Vue.component('alert-list-modal', {
 			self.alerts = data.alerts;
 			self.port = data.port;
 		});
+	},
+	beforeDestroy () {
+		eventBus.$off('showAlertListModal')
 	}
 })
 
@@ -229,10 +241,13 @@ Vue.component('alert-details-modal', {
 		eventBus.$on('showAlertDetailsModal', data => {
 			app.isAlertDetailsModalShown = true;
 			app.alertDetailsModalTitle = data.title;
-			
+
 			self.details = data.details;
 			self.port = data.port;
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showAlertDetailsModal')
 	}
 })
 
@@ -244,7 +259,7 @@ Vue.component('simple-menu-modal', {
 			this.$emit('close');
 		},
 		itemSelect: function(itemId) {
-			this.port.postMessage({'action': 'itemSelected', 'id': itemId}); 
+			this.port.postMessage({'action': 'itemSelected', 'id': itemId});
 			this.close();
 		}
 	},
@@ -264,6 +279,9 @@ Vue.component('simple-menu-modal', {
 			self.items = data.items;
 			self.port = data.port;
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showSimpleMenuModal')
 	}
 })
 
@@ -341,7 +359,7 @@ Vue.component('break-message-modal', {
 			self.port = data.port;
 			self.isResponseDisabled = data.isResponseDisabled;
 			self.activeTab = data.activeTab;
-			
+
 			self.request.isReadonly = !data.isResponseDisabled;
 			self.response.isReadonly = data.isResponseDisabled;
 
@@ -367,6 +385,10 @@ Vue.component('break-message-modal', {
 		eventBus.$on('closeAllModals', () => {
 			this.$emit('close');
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showBreakMessageModal')
+		eventBus.$off('closeAllModals')
 	}
 })
 
@@ -395,15 +417,15 @@ Vue.component('history-message-modal', {
 				}
 			};
 			navigator.serviceWorker.controller.postMessage({
-				action:"zapApiCall", component: "hud", type: "action", 
-				name: "recordRequest", 
+				action:"zapApiCall", component: "hud", type: "action",
+				name: "recordRequest",
 				params: { header: message.header, body: message.body }}, [channel.port2]);
 		},
 		ascanRequest: function() {
 			let req = this.request;
 			this.$emit('close');
 			navigator.serviceWorker.controller.postMessage(
-				{tabId: tabId, frameId: frameId, action: "ascanRequest", tool: "active-scan", 
+				{tabId: tabId, frameId: frameId, action: "ascanRequest", tool: "active-scan",
 					uri: req.uri, method: req.method, body: req.body});
 		}
 	},
@@ -435,6 +457,9 @@ Vue.component('history-message-modal', {
 			app.isHistoryMessageModalShown = true;
 			app.HistoryMessageModalTitle = data.title;
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showHistoryMessageModal')
 	}
 })
 
@@ -500,6 +525,9 @@ Vue.component('websocket-message-modal', {
 			app.isWebsocketMessageModalShown = true;
 			app.websocketMessageModalTitle = data.title;
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showWebSocketMessageModal')
 	}
 })
 
@@ -591,17 +619,17 @@ Vue.component('site-tree-node', {
 	      this.addChild(I18n.t("sites_children_loading"), false);
 			var treeNode = this;
 			let channel = new MessageChannel();
-			
+
 			channel.port1.onmessage = function(event) {
 				// Remove the ..loading.. child
 				Vue.set(treeNode.model, 'children', [])
 				for(var i = 0; i < event.data.childNodes.length; i++) {
 					var child = event.data.childNodes[i];
 					treeNode.addChild(child.name, child.method, child.isLeaf, child.hrefId);
-				} 
+				}
 			};
 			navigator.serviceWorker.controller.postMessage({
-				action:"zapApiCall", component: "core", type: "view", 
+				action:"zapApiCall", component: "core", type: "view",
 				name: "childNodes", "params" : { url: this.model.url }}, [channel.port2]);
 	    },
 	    addChild: function (name, method, isLeaf, hrefId) {
@@ -668,6 +696,9 @@ Vue.component('site-tree-modal', {
 			app.isSiteTreeModalShown = true;
 			app.siteTreeModalTitle = data.title;
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showSiteTreeModal')
 	}
 })
 
@@ -675,8 +706,8 @@ Vue.component('tabs', {
 	template: '#tabs-template',
 	props: ['activetab'],
     data() {
-        return { 
-			tabs: [] 
+        return {
+			tabs: []
 		};
     },
     methods: {
@@ -770,11 +801,11 @@ navigator.serviceWorker.addEventListener("message", event => {
 	var action = event.data.action;
 	var config = event.data.config;
 	var port = event.ports[0];
-	
+
 	switch(action) {
 		case "showDialog":
 			eventBus.$emit('showDialogModal', {
-				title: config.title, 
+				title: config.title,
 				text: config.text,
 				buttons: config.buttons,
 				port: port
@@ -892,7 +923,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 
 		case "showSiteTree":
 			eventBus.$emit('showSiteTreeModal', {
-				title: I18n.t("sites_tool"), 
+				title: I18n.t("sites_tool"),
 				port: port
 			});
 
@@ -901,17 +932,17 @@ navigator.serviceWorker.addEventListener("message", event => {
 
 		case "showHtmlReport":
 			let channel = new MessageChannel();
-			
+
 			channel.port1.onmessage = function(event) {
 				// Open window and inject the HTML report
 				window.open('').document.body.innerHTML = event.data.response;
 			};
 			navigator.serviceWorker.controller.postMessage({
-				action:"zapApiCall", component: "core", type: "other", 
+				action:"zapApiCall", component: "core", type: "other",
 				name: "htmlreport"}, [channel.port2]);
 
 			break;
-			
+
 		case "closeModals":
 			if (config && config.notTabId != tabId) {
 				eventBus.$emit('closeAllModals', {
