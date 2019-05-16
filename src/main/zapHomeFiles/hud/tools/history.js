@@ -89,7 +89,6 @@ var History = (function() {
 						// Handle button choice
 						if (data.buttonSelected === "replay") {
 							sendRequest(data.header, data.body)
-							.then(response => response.json())
 							.then(json => {
 								let data = json.sendRequest[0];
 								data.activeTab = "Response"

@@ -19,6 +19,8 @@
  */
 package org.zaproxy.zap.extension.hud.tutorial.pages;
 
+import org.parosproxy.paros.network.HttpHeader;
+import org.parosproxy.paros.network.HttpMessage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialPage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialProxyServer;
 
@@ -32,6 +34,16 @@ public class ResendPage extends TutorialPage {
 
     public ResendPage(TutorialProxyServer tutorialProxyServer, TutorialPage prev) {
         super(tutorialProxyServer, prev);
+    }
+
+    @Override
+    public void handleGetRequest(HttpMessage msg) {
+        String ua = msg.getRequestHeader().getHeader(HttpHeader.USER_AGENT);
+        if (ua != null && ua.contains("ZAP")) {
+            this.setTaskCompleted(true);
+            this.setTaskJustCompleted(true);
+        }
+        super.handleGetRequest(msg);
     }
 
     @Override
