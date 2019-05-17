@@ -130,16 +130,6 @@ var utils = (function() {
 		return hostname;
 	}
 	
-	//todo change to be sw agnostic
-	/* parses the path from a uri string */
-	function parsePathFromUrl(url) {
-		var parser = document.createElement("a");
-	
-		parser.href = url;
-		// todo: correct
-		return parser.pathname;
-	}
-	
 	/*
 	 * Return a parameter value from a uri string
 	 */
@@ -652,6 +642,25 @@ var utils = (function() {
 	}
 	
 	/*
+	 * Adds the correct scheme to a url, handling the fact the ZAP could be upgrading an http url to https
+	 * Is only available in the serviceworker and Should always be used when supplying a url to the ZAP API.
+	 */
+	
+	function getUpgradedUrl(url) {
+		return localforage.getItem('upgradedDomains')
+			.then(upgradedDomains => {
+				var domain = parseDomainFromUrl(url);
+				let scheme = 'https';
+	
+				if (upgradedDomains && domain in upgradedDomains) {
+					scheme = "http";
+				}
+	
+				return scheme + "://" + domain + url.substring(url.indexOf(domain) + domain.length);
+			})
+			.catch(errorHandler)
+	}
+	/*
 	 * Log an error in a human readable way with a stack trace.
 	 */
 	function errorHandler(err) {
@@ -721,7 +730,6 @@ return {
 		parseResponseHeader: parseResponseHeader,
 		isFromTrustedOrigin: isFromTrustedOrigin,
 		parseDomainFromUrl: parseDomainFromUrl,
-		parsePathFromUrl: parsePathFromUrl,
 		getParamater: getParamater,
 		isHUDInitialized: isHUDInitialized,
 		initializeHUD: initializeHUD,
@@ -743,6 +751,7 @@ return {
 		sortToolsByPosition: sortToolsByPosition,
 		configureButtonHtml: configureButtonHtml,
 		getUpgradedDomain: getUpgradedDomain,
+		getUpgradedUrl: getUpgradedUrl,
 		errorHandler: errorHandler,
 		getZapFilePath: getZapFilePath,
 		getZapImagePath: getZapImagePath,
