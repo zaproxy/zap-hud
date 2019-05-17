@@ -130,7 +130,9 @@ public class BadSiteUnitTest extends FirefoxUnitTest {
         assertEquals("", ret.get(BAD_SITE_TEST_KEY));
 
         String script =
-                "document.getElementById('management').contentWindow.postMessage("
+                "document.getElementById('"
+                        + HUD.MANAGEMENT_PANEL_ID
+                        + "').contentWindow.postMessage("
                         + "{sharedSecret: '"
                         + HudAPI.SHARED_TEST_NON_SECRET
                         + "', tabId:'tabId', action: 'zapApiCall', component:'hud',type:'action',name:'setUiOption', "

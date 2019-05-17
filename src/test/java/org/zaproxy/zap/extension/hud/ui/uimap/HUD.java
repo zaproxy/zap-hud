@@ -46,12 +46,25 @@ public class HUD {
         this.webdriver = webdriver;
     }
 
-    public static By LEFT_PANEL_BY_ID = By.id("left-panel");
-    public static By RIGHT_PANEL_BY_ID = By.id("right-panel");
-    public static By BOTTOM_PANEL_BY_ID = By.id("bottom-drawer");
-    public static By DISPLAY_PANEL_BY_ID = By.id("main-display");
+    public static String LEFT_PANEL_ID = "zap-hud-left-panel";
+    public static String RIGHT_PANEL_ID = "zap-hud-right-panel";
+    public static String BOTTOM_PANEL_ID = "zap-hud-bottom-drawer";
+    public static String DISPLAY_PANEL_ID = "zap-hud-main-display";
+    public static String MANAGEMENT_PANEL_ID = "zap-hud-management";
+    public static String HISTORY_TABLE_ID = "history-messages";
+
+    public static By LEFT_PANEL_BY_ID = By.id(LEFT_PANEL_ID);
+    public static By RIGHT_PANEL_BY_ID = By.id(RIGHT_PANEL_ID);
+    public static By BOTTOM_PANEL_BY_ID = By.id(BOTTOM_PANEL_ID);
+    public static By DISPLAY_PANEL_BY_ID = By.id(DISPLAY_PANEL_ID);
+    public static By MANAGEMENT_PANEL_BY_ID = By.id(MANAGEMENT_PANEL_ID);
+
+    public static By HISTORY_TABLE_BY_ID = By.id(HISTORY_TABLE_ID);
+
     public static By HUD_BUTTON_BY_CLASSNAME = By.className("hud-button");
+
     public static int LEFT_PANEL_MIN_BUTTONS = 8;
+    public static String HISTORY_TAB_LABEL = "History";
 
     public WebElement getLeftPanel() {
         return webdriver.findElement(LEFT_PANEL_BY_ID);
@@ -97,6 +110,35 @@ public class HUD {
 
     public WebElement waitForDisplayPanel() {
         return waitForElement(DISPLAY_PANEL_BY_ID);
+    }
+
+    public WebElement waitForHistoryTab() {
+        return this.waitForHudTab(HUD.BOTTOM_PANEL_BY_ID, HISTORY_TAB_LABEL);
+    }
+
+    public WebElement waitForHudTab(By byPanel, String href) {
+        List<WebElement> links = null;
+        for (int i = 0; i < Constants.GENERIC_TESTS_RETRY_COUNT; i++) {
+            try {
+                webdriver.switchTo().frame(this.waitForElement(byPanel));
+                links = webdriver.findElements(By.partialLinkText(href));
+                if (links.size() > 0) {
+                    return links.get(0);
+                }
+                warning("HUD.waitForHudTab No links containing " + href);
+            } catch (WebDriverException e1) {
+                // Not unexpected
+                warning("Exception getting tab, retrying: " + e1.getMessage());
+                // Sometimes helps
+                webdriver.switchTo().defaultContent();
+            }
+            try {
+                Thread.sleep(Constants.GENERIC_TESTS_RETRY_SLEEP_MS);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
+        }
+        return null;
     }
 
     public List<WebElement> getHudButtons() {
