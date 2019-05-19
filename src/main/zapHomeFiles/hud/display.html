@@ -54,7 +54,7 @@
         <template id="nav-modal-template">
             <modal :title="title" :show="show" @close="close">
                 <div slot="header">
-                    <button v-if="isBackShowing" :class="{'btn': true, 'btn-action': true, 'btn-sm': true, 'float-left': true}"  @click="back">
+                    <button v-if="isBackShowing" class="btn btn-action btn-sm float-left"  @click="back">
                         <i class="icon icon-back"></i>
                     </button>
                 </div>

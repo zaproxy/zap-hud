@@ -52,10 +52,10 @@ Vue.component('nav-modal', {
 			this.$emit('back');
 			
 			app.keepShowing = true;
-
 			app.backStack.pop();
-			let toShow = app.backStack[app.backStack.length - 1]
-			toShow()
+
+			let showPrevious = app.backStack[app.backStack.length - 1]
+			showPrevious()
 		},
 	}
 })
@@ -220,7 +220,6 @@ Vue.component('alert-accordion', {
 			app.isAlertListModalShown = false;
 			app.isAllAlertsModalShown = false;
 
-			//this.port.postMessage({'action': 'alertSelected', 'alertId': alert.id})
 			navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "commonAlerts.showAlert", alertId:alert.id});
 		}
 	}
@@ -246,7 +245,6 @@ Vue.component('alert-details-modal', {
 		return {
 			port: null,
 			details: {},
-			stack: app.backStack,
 		}
 	},
 	created() {
@@ -308,11 +306,6 @@ Vue.component('http-message-modal', {
 		},
 		back: function() {
 			app.isHistoryMessageModalShown = false;
-		}
-	},
-	data() {
-		return {
-			hasBack: true,
 		}
 	},
 	computed:{
