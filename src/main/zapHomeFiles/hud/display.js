@@ -28,6 +28,7 @@ Vue.component('modal', {
 		},
 		afterLeave: function (el) {
 			if (!app.keepShowing) {
+				app.backStack = [];
 				hideDisplayFrame();
 			}
 			app.keepShowing = false;
@@ -37,13 +38,24 @@ Vue.component('modal', {
 
 Vue.component('nav-modal', {
 	template: '#nav-modal-template',
-	props: ['show', 'title', 'text'],
+	props: ['show', 'title', 'text', 'stack'],
+	computed: {
+		isBackShowing() {
+			return this.stack.length > 1
+		}
+	},
 	methods: {
 		close: function () {
 			this.$emit('close');
 		},
 		back() {
 			this.$emit('back');
+			
+			app.keepShowing = true;
+
+			app.backStack.pop();
+			let toShow = app.backStack[app.backStack.length - 1]
+			toShow()
 		},
 	}
 })
@@ -208,31 +220,33 @@ Vue.component('alert-accordion', {
 			app.isAlertListModalShown = false;
 			app.isAllAlertsModalShown = false;
 
-			this.port.postMessage({'action': 'alertSelected', 'alertId': alert.id})
+			//this.port.postMessage({'action': 'alertSelected', 'alertId': alert.id})
+			navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "commonAlerts.showAlert", alertId:alert.id});
 		}
 	}
 })
 
 Vue.component('alert-details-modal', {
 	template: '#alert-details-modal-template',
-	props: ['show', 'title'],
+	props: ['show', 'title', 'stack'],
 	methods: {
 		close: function() {
 			this.$emit('close');
 		},
 		messageSelected: function(id) {
+			app.keepShowing = true;
+			app.isAlertDetailsModalShown = false;
 			navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "showHttpMessageDetails", tool: "history", id:id});
 		},
 		back: function() {
-			app.keepShowing = true;
 			app.isAlertDetailsModalShown = false;
-			this.port.postMessage({'back': true});
 		}
 	},
 	data() {
 		return {
 			port: null,
-			details: {}
+			details: {},
+			stack: app.backStack,
 		}
 	},
 	created() {
@@ -287,11 +301,19 @@ Vue.component('simple-menu-modal', {
 
 Vue.component('http-message-modal', {
 	template: '#http-message-modal-template',
-	props: ['show', 'title', 'request', 'response', 'is-response-disabled', 'active-tab'],
+	props: ['show', 'title', 'request', 'response', 'is-response-disabled', 'active-tab', 'stack'],
 	methods: {
 		close: function() {
 			this.$emit('close');
 		},
+		back: function() {
+			app.isHistoryMessageModalShown = false;
+		}
+	},
+	data() {
+		return {
+			hasBack: true,
+		}
 	},
 	computed:{
 		currentMessage() {
@@ -394,7 +416,7 @@ Vue.component('break-message-modal', {
 
 Vue.component('history-message-modal', {
 	template: '#history-message-modal-template',
-	props: ['show', 'title'],
+	props: ['show', 'title', 'stack'],
 	methods: {
 		close: function() {
 			this.$emit('close');
@@ -793,6 +815,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			isSiteTreeModalShown: false,
 			siteTreeModalTitle: I18n.t("sites_tool"),
 			keepShowing: false,
+			backStack: [],
 		},
 	});
 });
@@ -801,81 +824,104 @@ navigator.serviceWorker.addEventListener("message", event => {
 	var action = event.data.action;
 	var config = event.data.config;
 	var port = event.ports[0];
+	let show;
 
 	switch(action) {
 		case "showDialog":
-			eventBus.$emit('showDialogModal', {
+			show = () => eventBus.$emit('showDialogModal', {
 				title: config.title,
 				text: config.text,
 				buttons: config.buttons,
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showAddToolList":
-			eventBus.$emit('showSelectToolModal', {
+			show = () => eventBus.$emit('showSelectToolModal', {
 				tools: config.tools,
 				port: port
 			});
+
+			app.backStack.push(show)
+			show()
+
 
 			showDisplayFrame();
 			break;
 
 		case "showAlerts":
-			eventBus.$emit('showAlertListModal', {
+			show = () => eventBus.$emit('showAlertListModal', {
 				title: config.title,
 				alerts: config.alerts,
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showAllAlerts":
-			eventBus.$emit('showAllAlertsModal', {
+			show = () => eventBus.$emit('showAllAlertsModal', {
 				title: config.title,
 				alerts: config.alerts,
 				port: port,
 				risk: config.risk
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showAlertDetails":
-			eventBus.$emit('showAlertDetailsModal', {
+			show = () => eventBus.$emit('showAlertDetailsModal', {
 				title: config.title,
 				details: config.details,
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showButtonOptions":
-			eventBus.$emit('showSimpleMenuModal', {
+			show = () => eventBus.$emit('showSimpleMenuModal', {
 				title: config.toolLabel,
 				items: config.options,
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showHudSettings":
-			eventBus.$emit('showSimpleMenuModal', {
+			show = () => eventBus.$emit('showSimpleMenuModal', {
 				title: I18n.t("settings_title"),
 				items: config.settings,
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showBreakMessage":
-			eventBus.$emit('showBreakMessageModal', {
+			show = () => eventBus.$emit('showBreakMessageModal', {
 				title: I18n.t("break_intercept_http_title"),
 				request: config.request,
 				response: config.response,
@@ -884,11 +930,14 @@ navigator.serviceWorker.addEventListener("message", event => {
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showHistoryMessage":
-			eventBus.$emit('showHistoryMessageModal', {
+			show = () => eventBus.$emit('showHistoryMessageModal', {
 				title: I18n.t("history_http_message_title"),
 				request: config.request,
 				response: config.response,
@@ -898,34 +947,46 @@ navigator.serviceWorker.addEventListener("message", event => {
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showWebSocketMessage":
-			eventBus.$emit('showWebSocketMessageModal', {
+			show = () => eventBus.$emit('showWebSocketMessageModal', {
 				title: I18n.t("websockets_message_title"),
 				msg: config,
 				port: port
 			});
 
+			app.nbackStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showBreakWebSocketMessage":
-			eventBus.$emit('showBreakWebSocketMessageModal', {
+			show = () => eventBus.$emit('showBreakWebSocketMessageModal', {
 				title: I18n.t("break_intercept_ws_title"),
 				msg: config,
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showSiteTree":
-			eventBus.$emit('showSiteTreeModal', {
+			show = () => eventBus.$emit('showSiteTreeModal', {
 				title: I18n.t("sites_tool"),
 				port: port
 			});
+
+			app.backStack.push(show)
+			show()
 
 			showDisplayFrame();
 			break;

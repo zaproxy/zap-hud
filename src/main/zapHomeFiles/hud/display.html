@@ -18,10 +18,10 @@
             <select-tool-modal :show="isSelectToolModalShown" :title="$t('message.hud_select_tool')" @close="isSelectToolModalShown = false"></select-tool-modal>
             <alert-list-modal :show="isAlertListModalShown" :title="alertListModalTitle" @close="isAlertListModalShown = false"></alert-list-modal>
             <all-alerts-modal :show="isAllAlertsModalShown" :title="allAlertsModalTitle" @close="isAllAlertsModalShown = false"></all-alerts-modal>
-            <alert-details-modal :show="isAlertDetailsModalShown" :title="alertDetailsModalTitle" @close="isAlertDetailsModalShown = false"></alert-details-modal>
+            <alert-details-modal :show="isAlertDetailsModalShown" :title="alertDetailsModalTitle" @close="isAlertDetailsModalShown = false" :stack="backStack"></alert-details-modal>
             <simple-menu-modal :show="isSimpleMenuModalShown" :title="simpleMenuModalTitle" @close="isSimpleMenuModalShown = false"></simple-menu-modal>
             <break-message-modal :show="isBreakMessageModalShown" :title="breakMessageModalTitle" @close="isBreakMessageModalShown = false"></break-message-modal>
-            <history-message-modal :show="isHistoryMessageModalShown" :title="historyMessageModalTitle" @close="isHistoryMessageModalShown = false"></history-message-modal>
+            <history-message-modal :show="isHistoryMessageModalShown" :title="historyMessageModalTitle" @close="isHistoryMessageModalShown = false" :stack="backStack"></history-message-modal>
             <websocket-message-modal :show="isWebsocketMessageModalShown" :title="websocketMessageModalTitle" @close="isWebsocketMessageModalShown = false"></websocket-message-modal>
             <break-websocket-message-modal :show="isBreakWebSocketMessageModalShown" :title="breakWebSocketMessageModalTitle" @close="isBreakWebSocketMessageModalShown = false"></break-websocket-message-modal>
             <site-tree-modal :show="isSiteTreeModalShown" :title="siteTreeModalTitle" @close="isSiteTreeModalShown = false"></site-tree-modal>
@@ -54,7 +54,7 @@
         <template id="nav-modal-template">
             <modal :title="title" :show="show" @close="close">
                 <div slot="header">
-                    <button class="btn btn-action btn-sm float-left"  @click="back">
+                    <button v-if="isBackShowing" :class="{'btn': true, 'btn-action': true, 'btn-sm': true, 'float-left': true}"  @click="back">
                         <i class="icon icon-back"></i>
                     </button>
                 </div>
@@ -160,7 +160,7 @@
 
         <!-- alert details component -->
         <template id="alert-details-modal-template">
-            <nav-modal :title="title" :show="show" @close="close" @back="back">
+            <nav-modal :title="title" :show="show" @close="close" @back="back" :stack="stack"> 
                 <div slot="body">
                     <table class="table table-striped table-hover">
                         <tbody>
@@ -237,7 +237,7 @@
 
         <!-- http message modal component -->
         <template id="http-message-modal-template">
-            <modal :title="title" :show="show" size="wide" @close="close">
+            <nav-modal :title="title" :show="show" size="wide" @close="close" @back="back" :stack="stack"> 
                 <div slot="body">
                     <tabs :activetab="activeTab">
                         <tab :name="$t('message.common_request')" selected="true">
@@ -254,7 +254,7 @@
                 <div slot="footer">
                     <slot name="footer"></slot>
                 </div>
-            </modal>
+            </nav-modal>
         </template>
 
         <template id="break-message-modal-template">
@@ -268,7 +268,7 @@
         </template>
 
         <template id="history-message-modal-template">
-            <http-message-modal ref="messageModal" :title="title" :show="show" @close="close" :request="request" :response="response" :is-response-disabled="isResponseDisabled" :active-tab="activeTab">
+            <http-message-modal ref="messageModal" :title="title" :show="show" @close="close" :request="request" :response="response" :is-response-disabled="isResponseDisabled" :active-tab="activeTab" :stack="stack">
                 <div slot="footer">
                 	<div><span class="errorMessages">{{errors}}</span></div>
                 	<div class="float-left">

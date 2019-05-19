@@ -11,3 +11,7 @@ body {
 span.errorMessages {
   color: red;
 }
+
+.hidden {
+  display: none
+}
