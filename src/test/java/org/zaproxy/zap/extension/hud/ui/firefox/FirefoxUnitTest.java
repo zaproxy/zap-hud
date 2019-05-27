@@ -49,6 +49,7 @@ public abstract class FirefoxUnitTest {
         this.firefoxOptions.addPreference("network.proxy.ssl_port", Constants.ZAP_PORT);
         this.firefoxOptions.addPreference("network.proxy.share_proxy_settings", true);
         this.firefoxOptions.addPreference("network.proxy.no_proxies_on", "");
+        this.firefoxOptions.addPreference("network.proxy.allow_hijacking_localhost", true);
         firefoxOptions.setCapability(CapabilityType.PROXY, (Object) null);
         firefoxOptions.setHeadless(true);
     }
