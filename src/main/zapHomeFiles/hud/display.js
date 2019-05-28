@@ -41,7 +41,7 @@ Vue.component('nav-modal', {
 	props: ['show', 'title', 'text', 'stack'],
 	computed: {
 		isBackShowing() {
-			return this.stack.length > 1
+			return this.stack && this.stack.length > 1
 		}
 	},
 	methods: {
@@ -953,7 +953,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 				port: port
 			});
 
-			app.nbackStack.push(show)
+			app.backStack.push(show)
 			show()
 
 			showDisplayFrame();
