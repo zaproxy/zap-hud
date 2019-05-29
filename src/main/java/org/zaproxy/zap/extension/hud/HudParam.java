@@ -120,8 +120,10 @@ public class HudParam extends VersionedAbstractParam {
 
     @ZapApiIgnore // Feels too dangerous to allow this
     public void setAllowUnsafeEval(boolean allowUnsafeEval) {
+        /* TODO uncomment when the HUD can run without this
         this.allowUnsafeEval = allowUnsafeEval;
         getConfig().setProperty(PARAM_ALLOW_UNSAFE_EVAL, allowUnsafeEval);
+        */
     }
 
     public boolean isEnabledForDesktop() {
@@ -238,6 +240,8 @@ public class HudParam extends VersionedAbstractParam {
         developmentMode = getConfig().getBoolean(PARAM_DEV_MODE, false);
         // TODO default allowUnsafeEval to false once the HUD works without it set
         allowUnsafeEval = getConfig().getBoolean(PARAM_ALLOW_UNSAFE_EVAL, true);
+        // Remove the next line when the HUD can run without this
+        allowUnsafeEval = true;
         inScopeOnly = getConfig().getBoolean(PARAM_IN_SCOPE_ONLY, false);
         removeCSP = getConfig().getBoolean(PARAM_REMOVE_CSP, true);
         tutorialPort = getConfig().getInt(PARAM_TUTORIAL_PORT, 0);
