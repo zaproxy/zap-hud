@@ -100,8 +100,9 @@ Vue.component('history', {
         if (this.messages.length > 0) {
             let lastMessage = this.messages[this.messages.length - 1]
             let lastid = 'message-tr-' + lastMessage.id
-            let lastIdElem = document.querySelector(lastid);
-            if(lastIdElem){
+            let lastIdElem = document.getElementById(lastid);
+
+            if(lastIdElem) {
                 lastIdElem.scrollIntoView({block:'end', behavior:'smooth'});
             }
 
