@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Add a tutorial page for the HUD Configuration options 
  - Command line options '-hudurl <url>' and '-hudbrowser <browser>'
 
+### Changed
+ - Depend on newer version of Selenium add-on.
+
 ### Fixed
  - Offset the growl alerts so that they don't block access to the buttons on the lower tab
  - The UI configs are now persisted to ZAP [#321](https://github.com/zaproxy/zap-hud/issues/321)
