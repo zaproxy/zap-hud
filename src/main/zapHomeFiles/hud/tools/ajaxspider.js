@@ -51,8 +51,10 @@ var AjaxSpider = (function() {
 
 				var config = {};
 				config.buttons = [{text: I18n.t("common_cancel"), id: "cancel"}];
+				config.status = '';
 
 				if(!isRunning) {
+					config.status = 'stopped';
 					if (!isInScope) {
 						config.text = DIALOG.START_ADD_SCOPE_1 + domain + DIALOG.START_ADD_SCOPE_2 + domain + DIALOG.START_ADD_SCOPE_3;
 						config.buttons.unshift({text: I18n.t("common_start"), id: "start-add-to-scope"});
@@ -63,22 +65,23 @@ var AjaxSpider = (function() {
 					}
 				}
 				else {
+					config.status = 'running';
 					config.text = DIALOG.STOP_1 + tool.runningScope[0] + DIALOG.STOP_2;
 					config.buttons.unshift({text: I18n.t("common_stop"), id: "stop"});
 				}
 
 				return config;
 			})
-			.then(config => utils.messageFrame(tabId, "display", {action:"showDialog", config:config}))
+			.then(config => utils.messageFrame(tabId, "display", {action:"showAjaxDialog", config:config}))
 			.then(response => {
 				// Handle button choice
 				if (response.id === "start") {
-					return startSpider(tabId, url);
+					return startSpider(tabId, url, response.browserId);
 				}
 				else if (response.id === "start-add-to-scope") {
 					self.tools.scope.addToScope(tabId, domain)
 						.then(() => {
-							return startSpider(tabId, url)
+							return startSpider(tabId, url, response.browserId)
 						});
 				}
 				else if (response.id === "stop") {
@@ -88,9 +91,10 @@ var AjaxSpider = (function() {
 			.catch(utils.errorHandler);
 	}
 
-	function startSpider(tabId, url) {
+	function startSpider(tabId, url, browserId) {
 		utils.getUpgradedUrl(url)
 			.then(upgradedUrl => {
+				apiCallWithResponse("ajaxSpider", "action", "setOptionBrowserId", { String: browserId });
 				apiCallWithResponse("ajaxSpider", "action", "scan", { url: upgradedUrl }).then (response => {
 					spiderStarted(tabId, upgradedUrl);
 				})
@@ -146,23 +150,6 @@ var AjaxSpider = (function() {
 		});
 	}
 
-	/*
-	function updateProgress(progress) {
-		if (progress !== "-1") {
-			utils.loadTool(NAME)
-				.then(tool => {
-					if (tool.isRunning) {
-						tool.data = progress;
-
-						utils.writeTool(tool);
-						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: tool})
-					}
-				})
-				.catch(utils.errorHandler);
-		}
-	}
-	*/
-
 	function getTool(context, port) {
 		Promise.all([utils.loadTool(NAME)])
 			.then(results => {
@@ -200,7 +187,7 @@ var AjaxSpider = (function() {
 
 	self.addEventListener("activate", event => {
 		initializeStorage();
-		//registerForZapEvents("org.zaproxy.zap.extension.spider.SpiderEventPublisher");
+		registerForZapEvents("org.zaproxy.zap.extension.spiderAjax.SpiderEventPublisher");
 	});
 
 	self.addEventListener("message", event => {
@@ -237,19 +224,13 @@ var AjaxSpider = (function() {
 		}
 	});
 
-	/*
-	self.addEventListener("org.zaproxy.zap.extension.spider.SpiderEventPublisher", event => {
+	self.addEventListener("org.zaproxy.zap.extension.spiderAjax.SpiderEventPublisher", event => {
 		var eventType = event.detail['event.type'];
 		utils.log (LOG_DEBUG, 'SpiderEventPublisher eventListener', 'Received ' + eventType + ' event');
-		if (eventType === 'scan.started') {
-			updateProgress("0%");
-		} else if (eventType === 'scan.progress') {
-			updateProgress(event.detail['scanProgress'] + '%');
-		} else  if (eventType === 'scan.stopped' || eventType === 'scan.completed') {
+		if (eventType === 'scan.stopped' || eventType === 'scan.completed') {
 			spiderStopped();
 		}
 	});
-	*/
 
 	return {
 		name: NAME,

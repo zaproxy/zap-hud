@@ -37,7 +37,7 @@ public class HudParam extends VersionedAbstractParam {
     private static final String ZAP_HUD_CONFIG_TOOLS_LEFT =
             "['scope', 'break', 'showEnable', 'page-alerts-high', 'page-alerts-medium', 'page-alerts-low', 'page-alerts-informational']";
     private static final String ZAP_HUD_CONFIG_TOOLS_RIGHT =
-            "['site-tree', 'spider', 'ajax-spider', 'active-scan', 'attack', 'site-alerts-high', 'site-alerts-medium', 'site-alerts-low', 'site-alerts-informational']";
+            "['site-tree', 'spider', 'ajaxspider', 'active-scan', 'attack', 'site-alerts-high', 'site-alerts-medium', 'site-alerts-low', 'site-alerts-informational']";
 
     /** The base configuration key for all HUD configurations. */
     private static final String PARAM_BASE_KEY = "hud";

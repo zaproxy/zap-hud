@@ -99,6 +99,48 @@ Vue.component('dialog-modal', {
 	}
 });
 
+
+Vue.component('ajax-dialog-modal', {
+	template: '#ajax-dialog-modal-template',
+	props: ['show', 'title', 'text'],
+	methods: {
+		close: function() {
+			this.$emit('close');
+		},
+		buttonClick: function(id) {
+			this.port.postMessage({'action': 'dialogSelected', id: id, 'browserId': this.browser});
+			this.close();
+		}
+	},
+	data() {
+		return {
+			port: null,
+			browser: 'firefox-headless',
+			status: '',
+			buttons: [
+				{text: I18n.t("common_ok"), id:"okay"},
+				{text: I18n.t("common_cancel"), id:"cancel"}
+			]
+		}
+	},
+	created: function() {
+		let self = this;
+
+		eventBus.$on('showAjaxDialogModal', data => {
+			app.isAjaxDialogModalShown = true;
+			app.dialogModalTitle = data.title;
+			app.dialogModalText = data.text;
+
+			self.buttons = data.buttons;
+			self.port = data.port;
+			self.status = data.status;
+		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showAjaxDialogModal')
+	}
+});
+
 Vue.component('select-tool-modal', {
 	template: '#select-tool-modal-template',
 	props:['show', 'title'],
@@ -786,6 +828,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		el: '#app',
 		data: {
 			isDialogModalShown: false,
+			isAjaxDialogModalShown: false,
 			dialogModalTitle: "",
 			dialogModalText: "text",
 			isSelectToolModalShown: false,
@@ -825,6 +868,21 @@ navigator.serviceWorker.addEventListener("message", event => {
 				title: config.title,
 				text: config.text,
 				buttons: config.buttons,
+				port: port
+			});
+
+			app.backStack.push(show)
+			show()
+
+			showDisplayFrame();
+			break;
+
+		case "showAjaxDialog":
+			show = () => eventBus.$emit('showAjaxDialogModal', {
+				title: config.title,
+				text: config.text,
+				buttons: config.buttons,
+				status: config.status,
 				port: port
 			});
 
