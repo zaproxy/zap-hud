@@ -193,6 +193,8 @@ public class OptionsHudPanel extends AbstractParamPanel {
             allowUnsafeEval =
                     new JCheckBox(
                             Constant.messages.getString("hud.optionspanel.label.allowUnsafeEval"));
+            // TODO remove as soon as the HUD works without this
+            allowUnsafeEval.setEnabled(false);
         }
         return allowUnsafeEval;
     }

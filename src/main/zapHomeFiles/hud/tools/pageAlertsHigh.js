@@ -10,6 +10,7 @@ var PageAlertsHigh = (function() {
 	// todo: could probably switch this to a config file?
 	var NAME = "page-alerts-high";
 	var LABEL = I18n.t("alerts_page_high_tool");
+	var DIALOG = I18n.t("alerts_page_title");
 	var DATA = {};
 		DATA.NONE = "0";
 	var ICONS = {};
@@ -36,7 +37,7 @@ var PageAlertsHigh = (function() {
 	}
 
 	function showAlerts(tabId, url) {
-		alertUtils.showPageAlerts(tabId, LABEL, url, ALERT_RISK);
+		alertUtils.showPageAlerts(tabId, DIALOG, url, ALERT_RISK);
 	}
 
 	function showOptions(tabId) {

@@ -3,7 +3,7 @@
  *
  * ZAP is an HTTP/HTTPS proxy for assessing web application security.
  *
- * Copyright 2018 The ZAP Development Team
+ * Copyright 2019 The ZAP Development Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zaproxy.gradle.jh.tasks;
+package org.zaproxy.zap.extension.hud.tutorial.pages;
 
-public class JavaHelpIndexerException extends RuntimeException {
+import org.zaproxy.zap.extension.hud.tutorial.TutorialPage;
+import org.zaproxy.zap.extension.hud.tutorial.TutorialProxyServer;
 
-    private static final long serialVersionUID = 1L;
+public class WebSocketsPage extends TutorialPage {
 
-    public JavaHelpIndexerException(String message) {
-        super(message);
+    public static final String NAME = "WebSockets";
+
+    public WebSocketsPage(TutorialProxyServer tutorialProxyServer) {
+        this(tutorialProxyServer, null);
     }
 
-    public JavaHelpIndexerException(String message, Throwable cause) {
-        super(message, cause);
+    public WebSocketsPage(TutorialProxyServer tutorialProxyServer, TutorialPage prev) {
+        super(tutorialProxyServer, prev);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 }

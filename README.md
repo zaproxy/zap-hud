@@ -19,16 +19,22 @@ Learn more:
 ## Using the HUD
 
 ### Downloading
-You can download ZAP enabled with the HUD from any of: 
+You can try out ZAP enabled with the HUD via any of: 
 
-1. Download and run the latest [ZAP Weekly Release](https://github.com/zaproxy/zaproxy/wiki/Downloads#zap-weekly)
-2. Run it from this repo using:
+* Download and run the latest [ZAP Weekly Release](https://github.com/zaproxy/zaproxy/wiki/Downloads#zap-weekly)
+
+or
+
+* Run it from this repo using:
     ```
     git clone https://github.com/zaproxy/zap-hud.git
     cd zap-hud
     ./gradlew runZap
     ```
-3. Those of you building ZAP directly from the source code will also be able to install it from the [ZAP Marketplace](https://github.com/zaproxy/zap-extensions/wiki). 
+
+or
+
+* Those of you building ZAP directly from the source code will also be able to install it from the [ZAP Marketplace](https://github.com/zaproxy/zap-extensions/wiki). 
 
 In all cases you will need Java 8+ installed.
 
@@ -51,15 +57,15 @@ ZAP is a community project and so we are always very keen to hear from anyone wh
 
 We'd also love to hear some feedback, which you can also give via that group.
 
-## Alpha Limitations
+## Limitations
 
-This is definitely still Alpha quality and there are some known issues and limitations with the current release. Development on the HUD is very active and we recommend you check in often for new features and improvements. :)
+This is still early days and there are some known issues and limitations with the current release. Development on the HUD is very active and we recommend you check in often for new features and improvements. :)
 
 You should **NOT** use it on sites you do not trust!
 However it **is** in scope for the ZAP bug bounty on [BugCrowd](https://bugcrowd.com/owaspzap)
 
 Limitations while running:
-* It's early days, so only a limited amount of ZAP functionality is available
+* Only a limited amount of ZAP functionality is available
 * Firefox has been tested more than Chrome, but both should work (JxBrowser, doesn't currently work)
 * The code to support the HUD in multiple browser tabs is _very_ new so might be buggy
     * In particular don't close the first tab on Firefox or the HUD _will_ stop working (weird, we know. See [#199](https://github.com/zaproxy/zap-hud/issues/199) for details)

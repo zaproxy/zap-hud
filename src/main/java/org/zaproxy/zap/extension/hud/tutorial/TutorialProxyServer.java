@@ -49,6 +49,7 @@ import org.zaproxy.zap.extension.hud.tutorial.pages.FramesPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.HistoryJsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.HistoryPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.HtmlReportPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.HudConfigPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IndexPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.PageAlertsPage;
@@ -62,6 +63,7 @@ import org.zaproxy.zap.extension.hud.tutorial.pages.SpiderPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.ToolConfigPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.TutorialJsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.WebSocketsPage;
 
 public class TutorialProxyServer extends ProxyServer {
 
@@ -90,6 +92,7 @@ public class TutorialProxyServer extends ProxyServer {
         prev = addPage(new PageAlertsPage(this, prev));
         prev = addPage(new SiteAlertsPage(this, prev));
         prev = addPage(new HistoryPage(this, prev));
+        prev = addPage(new WebSocketsPage(this, prev));
         prev = addPage(new SitesPage(this, prev));
         prev = addPage(new ScopePage(this, prev));
         prev = addPage(new EnablePage(this, prev));
@@ -101,6 +104,7 @@ public class TutorialProxyServer extends ProxyServer {
         prev = addPage(new AttackModePage(this, prev));
         prev = addPage(new ToolConfigPage(this, prev));
         prev = addPage(new HtmlReportPage(this, prev));
+        prev = addPage(new HudConfigPage(this, prev));
         prev = addPage(new CompletePage(this, prev));
 
         // Tutorial pages that are not part of the standard flow

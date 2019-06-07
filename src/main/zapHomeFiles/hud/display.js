@@ -28,6 +28,7 @@ Vue.component('modal', {
 		},
 		afterLeave: function (el) {
 			if (!app.keepShowing) {
+				app.backStack = [];
 				hideDisplayFrame();
 			}
 			app.keepShowing = false;
@@ -37,13 +38,24 @@ Vue.component('modal', {
 
 Vue.component('nav-modal', {
 	template: '#nav-modal-template',
-	props: ['show', 'title', 'text'],
+	props: ['show', 'title', 'text', 'stack'],
+	computed: {
+		isBackShowing() {
+			return this.stack && this.stack.length > 1
+		}
+	},
 	methods: {
 		close: function () {
 			this.$emit('close');
 		},
 		back() {
 			this.$emit('back');
+			
+			app.keepShowing = true;
+			app.backStack.pop();
+
+			let showPrevious = app.backStack[app.backStack.length - 1]
+			showPrevious()
 		},
 	}
 })
@@ -81,6 +93,9 @@ Vue.component('dialog-modal', {
 			self.buttons = data.buttons;
 			self.port = data.port;
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showDialogModal')
 	}
 });
 
@@ -103,10 +118,13 @@ Vue.component('select-tool-modal', {
 
 		eventBus.$on('showSelectToolModal', data => {
 			app.isSelectToolModalShown = true;
-			
+
 			self.tools = data.tools;
 			self.port = data.port;
 		});
+	},
+	beforeDestroy () {
+		eventBus.$off('showSelectToolModal')
 	}
 })
 
@@ -141,7 +159,7 @@ Vue.component('all-alerts-modal', {
 	},
 	created: function() {
 		let self = this;
-		
+
 		eventBus.$on('showAllAlertsModal', data => {
 			app.isAllAlertsModalShown = true;
 			app.allAlertsModalTitle = data.title;
@@ -150,6 +168,9 @@ Vue.component('all-alerts-modal', {
 			self.port = data.port;
 			self.activeTab = data.risk;
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showAllAlertsModal')
 	}
 })
 
@@ -177,6 +198,9 @@ Vue.component('alert-list-modal', {
 			self.alerts = data.alerts;
 			self.port = data.port;
 		});
+	},
+	beforeDestroy () {
+		eventBus.$off('showAlertListModal')
 	}
 })
 
@@ -196,31 +220,31 @@ Vue.component('alert-accordion', {
 			app.isAlertListModalShown = false;
 			app.isAllAlertsModalShown = false;
 
-			this.port.postMessage({'action': 'alertSelected', 'alertId': alert.id})
+			navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "commonAlerts.showAlert", alertId:alert.id});
 		}
 	}
 })
 
 Vue.component('alert-details-modal', {
 	template: '#alert-details-modal-template',
-	props: ['show', 'title'],
+	props: ['show', 'title', 'stack'],
 	methods: {
 		close: function() {
 			this.$emit('close');
 		},
 		messageSelected: function(id) {
+			app.keepShowing = true;
+			app.isAlertDetailsModalShown = false;
 			navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action: "showHttpMessageDetails", tool: "history", id:id});
 		},
 		back: function() {
-			app.keepShowing = true;
 			app.isAlertDetailsModalShown = false;
-			this.port.postMessage({'back': true});
 		}
 	},
 	data() {
 		return {
 			port: null,
-			details: {}
+			details: {},
 		}
 	},
 	created() {
@@ -229,10 +253,13 @@ Vue.component('alert-details-modal', {
 		eventBus.$on('showAlertDetailsModal', data => {
 			app.isAlertDetailsModalShown = true;
 			app.alertDetailsModalTitle = data.title;
-			
+
 			self.details = data.details;
 			self.port = data.port;
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showAlertDetailsModal')
 	}
 })
 
@@ -244,7 +271,7 @@ Vue.component('simple-menu-modal', {
 			this.$emit('close');
 		},
 		itemSelect: function(itemId) {
-			this.port.postMessage({'action': 'itemSelected', 'id': itemId}); 
+			this.port.postMessage({'action': 'itemSelected', 'id': itemId});
 			this.close();
 		}
 	},
@@ -264,16 +291,22 @@ Vue.component('simple-menu-modal', {
 			self.items = data.items;
 			self.port = data.port;
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showSimpleMenuModal')
 	}
 })
 
 Vue.component('http-message-modal', {
 	template: '#http-message-modal-template',
-	props: ['show', 'title', 'request', 'response', 'is-response-disabled', 'active-tab'],
+	props: ['show', 'title', 'request', 'response', 'is-response-disabled', 'active-tab', 'stack'],
 	methods: {
 		close: function() {
 			this.$emit('close');
 		},
+		back: function() {
+			app.isHistoryMessageModalShown = false;
+		}
 	},
 	computed:{
 		currentMessage() {
@@ -341,7 +374,7 @@ Vue.component('break-message-modal', {
 			self.port = data.port;
 			self.isResponseDisabled = data.isResponseDisabled;
 			self.activeTab = data.activeTab;
-			
+
 			self.request.isReadonly = !data.isResponseDisabled;
 			self.response.isReadonly = data.isResponseDisabled;
 
@@ -367,12 +400,16 @@ Vue.component('break-message-modal', {
 		eventBus.$on('closeAllModals', () => {
 			this.$emit('close');
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showBreakMessageModal')
+		eventBus.$off('closeAllModals')
 	}
 })
 
 Vue.component('history-message-modal', {
 	template: '#history-message-modal-template',
-	props: ['show', 'title'],
+	props: ['show', 'title', 'stack'],
 	methods: {
 		close: function() {
 			this.$emit('close');
@@ -395,15 +432,15 @@ Vue.component('history-message-modal', {
 				}
 			};
 			navigator.serviceWorker.controller.postMessage({
-				action:"zapApiCall", component: "hud", type: "action", 
-				name: "recordRequest", 
+				action:"zapApiCall", component: "hud", type: "action",
+				name: "recordRequest",
 				params: { header: message.header, body: message.body }}, [channel.port2]);
 		},
 		ascanRequest: function() {
 			let req = this.request;
 			this.$emit('close');
 			navigator.serviceWorker.controller.postMessage(
-				{tabId: tabId, frameId: frameId, action: "ascanRequest", tool: "active-scan", 
+				{tabId: tabId, frameId: frameId, action: "ascanRequest", tool: "active-scan",
 					uri: req.uri, method: req.method, body: req.body});
 		}
 	},
@@ -435,6 +472,140 @@ Vue.component('history-message-modal', {
 			app.isHistoryMessageModalShown = true;
 			app.HistoryMessageModalTitle = data.title;
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showHistoryMessageModal')
+	}
+})
+
+Vue.component('ws-message-modal', {
+	template: '#ws-message-modal-template',
+	props: ['show', 'title', 'time', 'direction', 'opcode', 'payload'],
+	methods: {
+		close: function() {
+			this.$emit('close');
+		},
+	},
+	computed:{
+		currentMessage() {
+			let payload = this.payload;
+			return {'payload': payload};
+		}
+	}
+})
+
+Vue.component('websocket-message-modal', {
+	template: '#websocket-message-modal-template',
+	props: ['show', 'title'],
+	methods: {
+		close: function() {
+			this.$emit('close');
+		},
+		replay: function() {
+			this.port.postMessage({buttonSelected: 'replay', channelId: this.channelId, outgoing: this.outgoing, message: this.$refs.messageModal.currentMessage.payload});
+			this.$emit('close');
+		}
+	},
+	data() {
+		return {
+			port: null,
+			time: null,
+			direction: null,
+			outgoing: null,
+			opcode: null,
+			channelId: null,
+			payload: null,
+			isReplayDisabled: false,
+		}
+	},
+	created() {
+		let self = this;
+
+		eventBus.$on('showWebSocketMessageModal', data => {
+			let date = new Date(Number(data.msg.timestamp));
+			self.time = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
+			self.payload = data.msg.payload;
+			self.channelId = data.msg.channelId;
+			self.outgoing = data.msg.outgoing;
+			// The outgoing field is actually a string not a boolean
+			if (data.msg.outgoing === "true") {
+				self.direction = I18n.t("websockets_direction_outgoing");
+			} else {
+				self.direction = I18n.t("websockets_direction_incoming");
+			}
+			self.opcode = data.msg.opcodeString;
+			self.isReplayDisabled = data.msg.opcodeString != 'TEXT';
+			self.port = data.port;
+
+			app.isWebsocketMessageModalShown = true;
+			app.websocketMessageModalTitle = data.title;
+		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showWebSocketMessageModal')
+	}
+})
+
+
+Vue.component('break-websocket-message-modal', {
+	template: '#break-websocket-message-modal-template',
+	props: ['show', 'title'],
+	methods: {
+		close: function() {
+			this.step();
+			this.$emit('close');
+		},
+		step: function() {
+			let message = this.$refs.messageModal.currentMessage;
+			this.$emit('close');
+			this.port.postMessage({buttonSelected: 'step', tabId: tabId, payload: message.payload, outgoing: this.outgoing});
+		},
+		continueOn: function() {
+			let message = this.$refs.messageModal.currentMessage;
+			this.$emit('close');
+			this.port.postMessage({buttonSelected: 'continue', tabId: tabId, payload: message.payload, outgoing: this.outgoing});
+		},
+		drop: function() {
+			this.port.postMessage({buttonSelected: 'drop', frameId: frameId});
+			this.$emit('close');
+		}
+	},
+	data() {
+		return {
+			port: null,
+			time: null,
+			direction: null,
+			outgoing: null,
+			opcode: null,
+			channelId: null,
+			payload: null
+		}
+	},
+	created() {
+		let self = this;
+
+		eventBus.$on('showBreakWebSocketMessageModal', data => {
+			let date = new Date(Number(data.msg.timestamp));
+			self.time = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
+			self.payload = data.msg.payload;
+			self.channelId = data.msg.channelId;
+			self.outgoing = data.msg.outgoing;
+			// The outgoing field is actually a string not a boolean
+			if (data.msg.outgoing === "true") {
+				self.direction = I18n.t("websockets_direction_outgoing");
+			} else {
+				self.direction = I18n.t("websockets_direction_incoming");
+			}
+			self.opcode = data.msg.opcodeString;
+			self.port = data.port;
+
+			app.isBreakWebSocketMessageModalShown = true;
+			app.BreakWebSocketMessageModalTitle = data.title;
+		})
+
+		eventBus.$on('closeAllModals', () => {
+			this.$emit('close');
+		})
 	}
 })
 
@@ -463,17 +634,17 @@ Vue.component('site-tree-node', {
 	      this.addChild(I18n.t("sites_children_loading"), false);
 			var treeNode = this;
 			let channel = new MessageChannel();
-			
+
 			channel.port1.onmessage = function(event) {
 				// Remove the ..loading.. child
 				Vue.set(treeNode.model, 'children', [])
 				for(var i = 0; i < event.data.childNodes.length; i++) {
 					var child = event.data.childNodes[i];
 					treeNode.addChild(child.name, child.method, child.isLeaf, child.hrefId);
-				} 
+				}
 			};
 			navigator.serviceWorker.controller.postMessage({
-				action:"zapApiCall", component: "core", type: "view", 
+				action:"zapApiCall", component: "core", type: "view",
 				name: "childNodes", "params" : { url: this.model.url }}, [channel.port2]);
 	    },
 	    addChild: function (name, method, isLeaf, hrefId) {
@@ -540,6 +711,9 @@ Vue.component('site-tree-modal', {
 			app.isSiteTreeModalShown = true;
 			app.siteTreeModalTitle = data.title;
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('showSiteTreeModal')
 	}
 })
 
@@ -547,8 +721,8 @@ Vue.component('tabs', {
 	template: '#tabs-template',
 	props: ['activetab'],
     data() {
-        return { 
-			tabs: [] 
+        return {
+			tabs: []
 		};
     },
     methods: {
@@ -627,9 +801,14 @@ document.addEventListener("DOMContentLoaded", () => {
 			breakMessageModalTitle: I18n.t("break_http_message_title"),
 			isHistoryMessageModalShown: false,
 			historyMessageModalTitle: I18n.t("history_http_message_title"),
+			isWebsocketMessageModalShown: false,
+			websocketMessageModalTitle: I18n.t("websockets_message_title"),
+			isBreakWebSocketMessageModalShown: false,
+			breakWebSocketMessageModalTitle: I18n.t("break_intercept_ws_title"),
 			isSiteTreeModalShown: false,
 			siteTreeModalTitle: I18n.t("sites_tool"),
 			keepShowing: false,
+			backStack: [],
 		},
 	});
 });
@@ -638,82 +817,105 @@ navigator.serviceWorker.addEventListener("message", event => {
 	var action = event.data.action;
 	var config = event.data.config;
 	var port = event.ports[0];
-	
+	let show;
+
 	switch(action) {
 		case "showDialog":
-			eventBus.$emit('showDialogModal', {
-				title: config.title, 
+			show = () => eventBus.$emit('showDialogModal', {
+				title: config.title,
 				text: config.text,
 				buttons: config.buttons,
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showAddToolList":
-			eventBus.$emit('showSelectToolModal', {
+			show = () => eventBus.$emit('showSelectToolModal', {
 				tools: config.tools,
 				port: port
 			});
+
+			app.backStack.push(show)
+			show()
+
 
 			showDisplayFrame();
 			break;
 
 		case "showAlerts":
-			eventBus.$emit('showAlertListModal', {
+			show = () => eventBus.$emit('showAlertListModal', {
 				title: config.title,
 				alerts: config.alerts,
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showAllAlerts":
-			eventBus.$emit('showAllAlertsModal', {
+			show = () => eventBus.$emit('showAllAlertsModal', {
 				title: config.title,
 				alerts: config.alerts,
 				port: port,
 				risk: config.risk
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showAlertDetails":
-			eventBus.$emit('showAlertDetailsModal', {
+			show = () => eventBus.$emit('showAlertDetailsModal', {
 				title: config.title,
 				details: config.details,
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showButtonOptions":
-			eventBus.$emit('showSimpleMenuModal', {
+			show = () => eventBus.$emit('showSimpleMenuModal', {
 				title: config.toolLabel,
 				items: config.options,
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showHudSettings":
-			eventBus.$emit('showSimpleMenuModal', {
+			show = () => eventBus.$emit('showSimpleMenuModal', {
 				title: I18n.t("settings_title"),
 				items: config.settings,
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showBreakMessage":
-			eventBus.$emit('showBreakMessageModal', {
-				title: I18n.t("break_intercept_title"),
+			show = () => eventBus.$emit('showBreakMessageModal', {
+				title: I18n.t("break_intercept_http_title"),
 				request: config.request,
 				response: config.response,
 				isResponseDisabled: config.isResponseDisabled,
@@ -721,11 +923,14 @@ navigator.serviceWorker.addEventListener("message", event => {
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showHistoryMessage":
-			eventBus.$emit('showHistoryMessageModal', {
+			show = () => eventBus.$emit('showHistoryMessageModal', {
 				title: I18n.t("history_http_message_title"),
 				request: config.request,
 				response: config.response,
@@ -735,31 +940,63 @@ navigator.serviceWorker.addEventListener("message", event => {
 				port: port
 			});
 
+			app.backStack.push(show)
+			show()
+
+			showDisplayFrame();
+			break;
+
+		case "showWebSocketMessage":
+			show = () => eventBus.$emit('showWebSocketMessageModal', {
+				title: I18n.t("websockets_message_title"),
+				msg: config,
+				port: port
+			});
+
+			app.backStack.push(show)
+			show()
+
+			showDisplayFrame();
+			break;
+
+		case "showBreakWebSocketMessage":
+			show = () => eventBus.$emit('showBreakWebSocketMessageModal', {
+				title: I18n.t("break_intercept_ws_title"),
+				msg: config,
+				port: port
+			});
+
+			app.backStack.push(show)
+			show()
+
 			showDisplayFrame();
 			break;
 
 		case "showSiteTree":
-			eventBus.$emit('showSiteTreeModal', {
-				title: I18n.t("sites_tool"), 
+			show = () => eventBus.$emit('showSiteTreeModal', {
+				title: I18n.t("sites_tool"),
 				port: port
 			});
+
+			app.backStack.push(show)
+			show()
 
 			showDisplayFrame();
 			break;
 
 		case "showHtmlReport":
 			let channel = new MessageChannel();
-			
+
 			channel.port1.onmessage = function(event) {
 				// Open window and inject the HTML report
 				window.open('').document.body.innerHTML = event.data.response;
 			};
 			navigator.serviceWorker.controller.postMessage({
-				action:"zapApiCall", component: "core", type: "other", 
+				action:"zapApiCall", component: "core", type: "other",
 				name: "htmlreport"}, [channel.port2]);
 
 			break;
-			
+
 		case "closeModals":
 			if (config && config.notTabId != tabId) {
 				eventBus.$emit('closeAllModals', {

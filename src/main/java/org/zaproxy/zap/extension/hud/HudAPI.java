@@ -143,28 +143,6 @@ public class HudAPI extends ApiImplementor {
 
         hudFileProxy = new HudFileProxy(this);
         hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S);
-
-        // Temporary hack to make it easier to find the websocket test page
-        // We could launch a browser, but then we'd need to depend on selenium
-        // and work out which browser to choose...
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    // Ignore
-                }
-                if (View.isInitialised()) {
-                    View.getSingleton()
-                            .getOutputPanel()
-                            .append(
-                                    "The websocket testing page is: "
-                                            + hudFileUrl
-                                            + "?name=websockettest.html\n");
-                }
-            }
-        }.start();
     }
 
     @Override
@@ -448,7 +426,18 @@ public class HudAPI extends ApiImplementor {
                         }
                     }
                     // The single quotes are to keep the JS linter happy
-                    contents = contents.replace("'<<ZAP_HUD_TOOLS>>'", sb.toString());
+                    contents =
+                            contents.replace("'<<ZAP_HUD_TOOLS>>'", sb.toString())
+                                    .replace(
+                                            "'<<ZAP_HUD_CONFIG_TOOLS_LEFT>>'",
+                                            extension
+                                                    .getHudParam()
+                                                    .getUiOption(HudParam.UI_OPTION_LEFT_PANEL))
+                                    .replace(
+                                            "'<<ZAP_HUD_CONFIG_TOOLS_RIGHT>>'",
+                                            extension
+                                                    .getHudParam()
+                                                    .getUiOption(HudParam.UI_OPTION_RIGHT_PANEL));
                 } else if (file.equals("i18n.js")) {
                     contents =
                             contents.replace(
@@ -461,8 +450,6 @@ public class HudAPI extends ApiImplementor {
                                     Boolean.toString(
                                             this.extension.getHudParam().isDevelopmentMode()));
                 } else if (file.equals("serviceworker.js")) {
-                    contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
-                } else if (file.equals("websockettest.js")) {
                     contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
                 } else if (file.equals("management.html")) {
                     // TODO move into js

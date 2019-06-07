@@ -28,12 +28,15 @@ Vue.component('hud-button', {
 			currentData: this.data,
 			currentIcon: this.icon,
 			showData: true,
-			showLabel: false,
 			orientation: orientation,
 			marginleft: '0rem',
 			marginright: '0rem',
+			labelmarginleft: '0rem',
+			labelmarginright: '0rem',
 			isActive: false,
-			isDisabled: false
+			isDisabled: false,
+			isClosed: true,
+			direction: 'ltr'
 		}
 	},
 	computed: {
@@ -58,14 +61,33 @@ Vue.component('hud-button', {
 			navigator.serviceWorker.controller.postMessage({action: "buttonMenuClicked", tool: this.name, frameId: frameId, tabId: tabId});
 		},
 		mouseOver() {
-			this.showLabel = true;
+			this.labelmarginleft = this.marginleft;
+			this.labelmarginright = this.marginright;
 			this.isActive = true;
+			this.isClosed = false;
 			expandPanel();
 		},
 		mouseLeave() {
-			this.showLabel = false;
+			this.labelmarginleft = '0rem';
+			this.labelmarginright = '0rem';
 			this.isActive = false;
-			contractPanel();
+		},
+		transitionEnd() {
+			let areAllButtonsClosed = true;
+
+			if (!this.isActive) {
+				this.isClosed = true;
+			}
+
+			this.$parent.$children.forEach(child => {
+				if (!child.isClosed) {
+					areAllButtonsClosed = false;
+				}
+			})
+
+			if (areAllButtonsClosed) {
+				contractPanel();
+			}
 		}
 	},
 	created() {
@@ -74,9 +96,11 @@ Vue.component('hud-button', {
 		// set the margins depending on the orientation
 		if (orientation === 'left') {
 			self.marginleft = '.5rem';
+			self.direction = "ltr"
 		}
 		else {
 			self.marginright = '.5rem'
+			self.direction = "rtl"
 		}
 
 		eventBus.$on('updateButton', data => {
@@ -96,6 +120,9 @@ Vue.component('hud-button', {
 				}
 			}
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('updateButton')
 	}
 });
 
@@ -166,8 +193,11 @@ Vue.component('hud-buttons', {
 		eventBus.$on('removeButton', data => {
 			self.tools = self.tools.filter(tool => tool.name !== data.name);
 		})
+	},
+	beforeDestroy () {
+		eventBus.$off('addButton')
+		eventBus.$off('removeButton')
 	}
-
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -186,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		data: {
 
 		}
-	}); 
+	});
 });
 
 function doesContextApply(toolContext) {
@@ -194,13 +224,14 @@ function doesContextApply(toolContext) {
 		toolContext.url === context.url ||
 		toolContext.tabId === tabId ||
 		('notTabId' in toolContext && toolContext.notTabId != tabId) ||
-		('notDomain' in toolContext && toolContext.notDomain != context.domain);
+		('notDomain' in toolContext && toolContext.notDomain != context.domain) ||
+		('scope' in toolContext && toolContext.scope.includes(context.domain));
 }
 
 navigator.serviceWorker.addEventListener("message", event => {
 	var message = event.data;
 	let tool;
-	
+
 	switch(message.action) {
 		case "broadcastUpdate":
 			tool = message.tool;

@@ -21,11 +21,16 @@ For more details see:
 <H2>Command Line Options</H2>
 The HUD works equally well with ZAP in desktop and daemon modes.<br>
 As many people use ZAP in daemon mode for automated testing the HUD is disabled by default in this mode.<br>
-The HUD add-on adds a new ZAP command line option which enables the HUD in daemon mode and launches Firefox
+The HUD add-on adds new ZAP command line options which enable the HUD in daemon mode and launch a browser 
 preconfigured to proxy through ZAP and ignore certificate errors:
-<pre>-hud</pre>
+<ul>
+<li>-hud : launch a browser with the HUD enabled, only needed if you dont want to specify a browser or url</li>
+<li>-hudbrowser &lt;browser&gt; : the browser ZAP will use, either Firefox (the default) or Chrome</li>
+<li>-hudurl &lt;url&gt; : the URL that will be opened in the browser, by default none</li>
+</ul>
+Any combination of these parameters will launch a browser with the HUD enabled.<br><br>
 
-You can also enable the HUD in daemon mode without launching Firefox using the ZAP command line option:
+You can also enable the HUD in daemon mode without launching a browser using the ZAP command line option:
 <pre>-config hud.enabledForDaemon=true</pre>
 
 <H2>Getting Involved</H2>
@@ -35,12 +40,12 @@ just post to the <a href="https://groups.google.com/group/zaproxy-hud">ZAP HUD G
 
 <H2>Caveats</H2>
 
-This is definitely alpha quality :)
+This is still early days for this add-on :)
 
 Some known issues include:
 
 <ul>
-<li>It's early days, so only a limited amount of ZAP functionality is available</li>
+<li>Only a limited amount of ZAP functionality is available</li>
 <li>We're still using Vue.js in dev mode so can't apply a suitably strong CSP</li>
 <li>The JavaScript code needs to be properly formatted and linted</li>
 <li>Firefox has been tested more than Chrome, but both should work</li>

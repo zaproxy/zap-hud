@@ -3,7 +3,7 @@
  *
  * ZAP is an HTTP/HTTPS proxy for assessing web application security.
  *
- * Copyright 2018 The ZAP Development Team
+ * Copyright 2019 The ZAP Development Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zaproxy.gradle.tasks;
+package org.zaproxy.zap.extension.hud.tutorial.pages;
 
-import org.gradle.api.tasks.Copy;
-import org.gradle.api.tasks.options.Option;
+import org.zaproxy.zap.extension.hud.tutorial.TutorialPage;
+import org.zaproxy.zap.extension.hud.tutorial.TutorialProxyServer;
 
-/**
- * A task to copy the add-on to a directory.
- *
- * <p>Defaults to {@code ../zaproxy/src/plugin/}.
- */
-public class CopyAddOn extends Copy {
+public class HudConfigPage extends TutorialPage {
 
-    private static final String DEFAULT_DIR = "../zaproxy/src/plugin/";
+    public static final String NAME = "HudConfig";
 
-    public CopyAddOn() {
-        into(DEFAULT_DIR);
+    public HudConfigPage(TutorialProxyServer tutorialProxyServer) {
+        super(tutorialProxyServer);
     }
 
-    @Option(option = "into", description = "The file system path to the directory.")
-    public void optionInto(String dir) {
-        into(getProject().file(dir));
+    public HudConfigPage(TutorialProxyServer tutorialProxyServer, TutorialPage prev) {
+        super(tutorialProxyServer, prev);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 }

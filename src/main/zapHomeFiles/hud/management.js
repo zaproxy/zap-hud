@@ -26,8 +26,7 @@ Vue.component('welcome-screen', {
 	props: [],
 	methods: {
 		continueToTutorial: function() {
-			window.open(TUTORIAL_URL);
-
+			showTutorial();
 			this.closeWelcomeScreen();
 		},
 		closeWelcomeScreen: function() {
@@ -47,7 +46,11 @@ Vue.component('welcome-screen', {
 			dontShowAgain: false
 		}
 	}
-})
+});
+
+function showTutorial() {
+	window.open(TUTORIAL_URL);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
 	let params = new URL(document.location).searchParams;
@@ -119,7 +122,7 @@ function windowMessageListener(event) {
 		utils.log(LOG_DEBUG, 'management.receiveMessage', 'Message from target domain ignored as on-domain messaging has been switched off');
 	} else if (message.sharedSecret === ZAP_SHARED_SECRET) {
 		// These are the only messages we allow from the target site, validate and filter out just the info we are expecting
-		var limitedData = {}
+		var limitedData = {};
 		limitedData.action = message.action;
 		limitedData.tabId = message.tabId;
 		switch(message.action) {
@@ -168,6 +171,10 @@ function serviceWorkerMessageListener(event) {
 
 		case 'commonAlerts.alert':
 			parent.postMessage(message, document.referrer);
+			break;
+
+		case 'showTutorial':
+			showTutorial();
 			break;
 
 		default:

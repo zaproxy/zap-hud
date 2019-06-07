@@ -24,10 +24,20 @@ import java.util.List;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.Constant;
+import org.zaproxy.zap.ZAP;
 import org.zaproxy.zap.common.VersionedAbstractParam;
+import org.zaproxy.zap.eventBus.Event;
 import org.zaproxy.zap.extension.api.ZapApiIgnore;
 
 public class HudParam extends VersionedAbstractParam {
+
+    public static final String UI_OPTION_LEFT_PANEL = "leftPanel";
+    public static final String UI_OPTION_RIGHT_PANEL = "rightPanel";
+
+    private static final String ZAP_HUD_CONFIG_TOOLS_LEFT =
+            "['scope', 'break', 'showEnable', 'page-alerts-high', 'page-alerts-medium', 'page-alerts-low', 'page-alerts-informational']";
+    private static final String ZAP_HUD_CONFIG_TOOLS_RIGHT =
+            "['site-tree', 'spider', 'active-scan', 'attack', 'site-alerts-high', 'site-alerts-medium', 'site-alerts-low', 'site-alerts-informational']";
 
     /** The base configuration key for all HUD configurations. */
     private static final String PARAM_BASE_KEY = "hud";
@@ -110,8 +120,10 @@ public class HudParam extends VersionedAbstractParam {
 
     @ZapApiIgnore // Feels too dangerous to allow this
     public void setAllowUnsafeEval(boolean allowUnsafeEval) {
+        /* TODO uncomment when the HUD can run without this
         this.allowUnsafeEval = allowUnsafeEval;
         getConfig().setProperty(PARAM_ALLOW_UNSAFE_EVAL, allowUnsafeEval);
+        */
     }
 
     public boolean isEnabledForDesktop() {
@@ -121,6 +133,16 @@ public class HudParam extends VersionedAbstractParam {
     public void setEnabledForDesktop(boolean enabledForDesktop) {
         this.enabledForDesktop = enabledForDesktop;
         getConfig().setProperty(PARAM_ENABLED_DESKTOP, enabledForDesktop);
+        String event;
+        if (enabledForDesktop) {
+            event = HudEventPublisher.EVENT_ENABLED_FOR_DESKTOP;
+        } else {
+            event = HudEventPublisher.EVENT_DISABLED_FOR_DESKTOP;
+        }
+        ZAP.getEventBus()
+                .publishSyncEvent(
+                        HudEventPublisher.getPublisher(),
+                        new Event(HudEventPublisher.getPublisher(), event, null));
     }
 
     public boolean isEnabledForDaemon() {
@@ -130,6 +152,16 @@ public class HudParam extends VersionedAbstractParam {
     public void setEnabledForDaemon(boolean enabledForDaemon) {
         this.enabledForDaemon = enabledForDaemon;
         getConfig().setProperty(PARAM_ENABLED_DAEMON, enabledForDaemon);
+        String event;
+        if (enabledForDaemon) {
+            event = HudEventPublisher.EVENT_ENABLED_FOR_DAEMON;
+        } else {
+            event = HudEventPublisher.EVENT_DISABLED_FOR_DAEMON;
+        }
+        ZAP.getEventBus()
+                .publishSyncEvent(
+                        HudEventPublisher.getPublisher(),
+                        new Event(HudEventPublisher.getPublisher(), event, null));
     }
 
     public boolean isInScopeOnly() {
@@ -208,6 +240,8 @@ public class HudParam extends VersionedAbstractParam {
         developmentMode = getConfig().getBoolean(PARAM_DEV_MODE, false);
         // TODO default allowUnsafeEval to false once the HUD works without it set
         allowUnsafeEval = getConfig().getBoolean(PARAM_ALLOW_UNSAFE_EVAL, true);
+        // Remove the next line when the HUD can run without this
+        allowUnsafeEval = true;
         inScopeOnly = getConfig().getBoolean(PARAM_IN_SCOPE_ONLY, false);
         removeCSP = getConfig().getBoolean(PARAM_REMOVE_CSP, true);
         tutorialPort = getConfig().getInt(PARAM_TUTORIAL_PORT, 0);
@@ -295,6 +329,18 @@ public class HudParam extends VersionedAbstractParam {
     }
 
     public String getUiOption(String key) {
-        return getConfig().getString(PARAM_UI_OPTION_PREFIX + key, "");
+        String value = getConfig().getString(PARAM_UI_OPTION_PREFIX + key, "");
+        if (value.length() == 0) {
+            // Set the relevant default values
+            switch (key) {
+                case UI_OPTION_LEFT_PANEL:
+                    value = ZAP_HUD_CONFIG_TOOLS_LEFT;
+                    break;
+                case UI_OPTION_RIGHT_PANEL:
+                    value = ZAP_HUD_CONFIG_TOOLS_RIGHT;
+                    break;
+            }
+        }
+        return value;
     }
 }

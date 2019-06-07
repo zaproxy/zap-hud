@@ -17,12 +17,15 @@
             <tab :name="$t('message.history_tool')">
                 <history></history>
             </tab>
+            <tab :name="$t('message.websockets_tool')">
+                <websockets></websockets>
+            </tab>
         </tabs>
     </div>
 
     <template id="history-template">
         <div>
-            <table id="history-header" class="table">
+            <table class="table drawer-header">
                 <thead>
                     <tr>
                         <th class="title time"> 
@@ -39,7 +42,7 @@
                         </th>
                         <th class="title filter"> 
                             <span>
-                                <input id="history-filter" v-model="filter" type="text" v-bind:class="{ 'error': isRegExError }" placeholder="Filter" />
+                                <input id="history-filter" class="drawer-filter" v-model="filter" type="text" v-bind:class="{ 'error': isRegExError }" placeholder="Filter" />
                             </span>
                             <span>
                                 <input v-model="regexEnabled" type="checkbox" />
@@ -54,13 +57,65 @@
                     </tr>
                 </thead>
             </table>
-            <table id="history-messages" class="table table-striped table-hover table-scroll table-history" style="min-width: fit-content;">
+            <table id="history-messages" class="table table-striped table-hover table-scroll table-history drawer-messages" style="min-width: fit-content;">
                 <tbody>
                     <tr v-for="message in filteredMessages" @click="messageSelected(message.id)" :id="'message-tr-'+message.id" class="message-tr">
                         <td class="field time"> {{ message.time }} </td>
                         <td class="field code"> {{ message.code }} </td>
                         <td class="field method"> {{ message.method }} </td>
                         <td class="field url"> {{ message.url }} </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </template>
+
+
+    <template id="websockets-template">
+        <div>
+            <table class="table drawer-header">
+                <thead>
+                    <tr>
+                        <th class="title time"> 
+                            {{ $t('message.websockets_message_field_time') }}
+                        </th>
+                        <th class="title direction"> 
+                            {{ $t('message.websockets_message_field_direction') }}
+                        </th>
+                        <th class="title opcode"> 
+                            {{ $t('message.websockets_message_field_opcode') }}
+                        </th>
+                        <th class="title length"> 
+                            {{ $t('message.websockets_message_field_bytes') }}
+                        </th>
+                        <th class="title payload"> 
+                            {{ $t('message.websockets_message_field_payload') }}
+                        </th>
+                        <th class="title filter"> 
+                            <span>
+                                <input id="websockets-filter" class="drawer-filter" v-model="filter" type="text" v-bind:class="{ 'error': isRegExError }" placeholder="Filter" />
+                            </span>
+                            <span>
+                                <input v-model="regexEnabled" type="checkbox" />
+                            </span>
+                            <span>
+                                {{ enableRegExText }}
+                            </span>
+                        </th>
+                        <th class="title hidden">
+                            <span>{{ websocketsItemsFilteredMessage }}</span>
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+            <table id="websockets-messages" class="table table-striped table-hover table-scroll table-history drawer-messages" style="min-width: fit-content;">
+                <tbody>
+                    <tr v-for="message in filteredMessages" @click="messageSelected(message.channelId, message.messageId)" :id="'message-tr-'+message.messageId" class="message-tr">
+                        <td class="field time"> {{ message.time }} </td>
+                        <td class="field direction"> {{ $t('message.websockets_direction_' + message.direction.toLowerCase()) }} </td>
+                        <td class="field opcode"> {{ message.opCode }} </td>
+                        <td class="field length"> {{ message.length }} </td>
+                        <td class="field payload"> {{ message.messageSummary }} </td>
                     </tr>
                 </tbody>
             </table>

@@ -4,7 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.0] - 2019-01-11
+## [0.4.0] - 2019-06-07
+
+### Added
+ - Add css transitions to tool buttons so that they slide out when hovered over.
+ - Support for WebSockets
+   - Add a lower tab that shows all of the WebSocket messages proxied through ZAP
+   - Add dialog which shows the full WebSocket message when selected in the table with the option to replay it
+   - Support breaking on WebSocket messages with the option to change or drop them
+ - Added 'Info / Low / Medium / High' qualifications to the buttons of the Page and Site tools. 
+ - Add the option to launch the tutorial again from the HUD configuration page
+ - Add a tutorial page for the HUD Configuration options 
+ - Command line options '-hudurl <url>' and '-hudbrowser <browser>'
+
+### Changed
+ - Depend on newer version of Selenium add-on.
+
+### Fixed
+ - Offset the growl alerts so that they don't block access to the buttons on the lower tab
+ - The UI configs are now persisted to ZAP [#321](https://github.com/zaproxy/zap-hud/issues/321)
+ - Add a beforeDestroy to all Vue components that register listeners on the custom eventBus. [#468](https://github.com/zaproxy/zap-hud/issues/468)
+ - Replay in Console was broken [#487](https://github.com/zaproxy/zap-hud/issues/487)
+
+## [0.3.0] - 2019-02-11
  - Many thanks to Matt Austin (@mattaustin) for reporting security vulnerabilities with the HUD and working with us to fix them.
 
 ### Added
@@ -31,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Add option to control on-domain messages. [#294](https://github.com/zaproxy/zap-hud/issues/294)
  - Add HTML report tool. [#312](https://github.com/zaproxy/zap-hud/issues/312)
  - Require cookie on all API calls
+ - Promoted to beta
 
 ### Changed
 
@@ -49,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2018-12-03
 First alpha release.
 
+[0.4.0]: https://github.com/zaproxy/zap-hud/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/zaproxy/zap-hud/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/zaproxy/zap-hud/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/zaproxy/zap-hud/compare/v0.1.1...v0.1.2
