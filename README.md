@@ -57,15 +57,15 @@ ZAP is a community project and so we are always very keen to hear from anyone wh
 
 We'd also love to hear some feedback, which you can also give via that group.
 
-## Alpha Limitations
+## Limitations
 
-This is definitely still Alpha quality and there are some known issues and limitations with the current release. Development on the HUD is very active and we recommend you check in often for new features and improvements. :)
+This is still early days and there are some known issues and limitations with the current release. Development on the HUD is very active and we recommend you check in often for new features and improvements. :)
 
 You should **NOT** use it on sites you do not trust!
 However it **is** in scope for the ZAP bug bounty on [BugCrowd](https://bugcrowd.com/owaspzap)
 
 Limitations while running:
-* It's early days, so only a limited amount of ZAP functionality is available
+* Only a limited amount of ZAP functionality is available
 * Firefox has been tested more than Chrome, but both should work (JxBrowser, doesn't currently work)
 * The code to support the HUD in multiple browser tabs is _very_ new so might be buggy
     * In particular don't close the first tab on Firefox or the HUD _will_ stop working (weird, we know. See [#199](https://github.com/zaproxy/zap-hud/issues/199) for details)
