@@ -21,7 +21,7 @@ Learn more:
 ### Downloading
 You can try out ZAP enabled with the HUD via any of: 
 
-* Download and run the latest [ZAP Weekly Release](https://github.com/zaproxy/zaproxy/wiki/Downloads#zap-weekly)
+* Download and run the latest [ZAP Release](https://github.com/zaproxy/zaproxy/wiki/Downloads#zap-280-standard)
 
 or
 
@@ -31,10 +31,6 @@ or
     cd zap-hud
     ./gradlew runZap
     ```
-
-or
-
-* Those of you building ZAP directly from the source code will also be able to install it from the [ZAP Marketplace](https://github.com/zaproxy/zap-extensions/wiki). 
 
 In all cases you will need Java 8+ installed.
 
