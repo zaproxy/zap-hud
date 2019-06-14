@@ -45,14 +45,14 @@
     "vue-i18n": "^8.11.2"
   },
   "devDependencies": {
-    "ava": "^1.4.1",
+    "ava": "^2.1.0",
     "css-loader": "^2.1.1",
-    "lint-staged": "^8.1.7",
+    "lint-staged": "^8.2.0",
     "vue-loader": "^15.7.0",
     "vue-style-loader": "^4.1.2",
     "vue-template-compiler": "^2.6.10",
-    "webpack": "^4.32.0",
-    "webpack-cli": "^3.3.2",
+    "webpack": "^4.33.0",
+    "webpack-cli": "^3.3.4",
     "xo": "^0.24.0"
   }
 }

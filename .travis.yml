@@ -3,7 +3,7 @@ language: java
 sudo: required
 
 jdk:
-  - oraclejdk8
+  - openjdk8
   - openjdk11
 
 addons:

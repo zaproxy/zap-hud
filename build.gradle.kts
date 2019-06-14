@@ -23,7 +23,7 @@ repositories {
     mavenCentral()
 }
 
-version = "0.4.0"
+version = "0.5.0"
 description = "Display information from ZAP in browser."
 
 val generatedI18nJsFileDir = layout.buildDirectory.dir("zapAddOn/i18nJs")
@@ -41,7 +41,7 @@ val zapCmdlineOpts = listOf("-config", "hud.tutorialPort=9998", "-config", "hud.
 zapAddOn {
     addOnId.set("hud")
     addOnName.set("HUD - Heads Up Display")
-    addOnStatus.set(AddOnStatus.ALPHA)
+    addOnStatus.set(AddOnStatus.BETA)
 
     zapVersion.set("2.8.0")
 
