@@ -94,8 +94,6 @@ java {
 val jupiterVersion = "5.3.1"
 
 dependencies {
-    zap("org.zaproxy:zap:2.7.0")
-
     compileOnly(files(fileTree("lib").files))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
