@@ -36,7 +36,7 @@ val zapPort = 8999
 // Use a key just to make sure the HUD works with one
 val zapApiKey = "password123"
 val hudDevArgs = listOf("-config", "hud.enabledForDesktop=true", "-config", "hud.enabledForDaemon=true", "-config", "hud.devMode=true", "-config", "hud.unsafeEval=true")
-val zapCmdlineOpts = listOf("-config", "hud.tutorialPort=9998", "-config", "hud.tutorialTestMode=true", "-config", "hud.showWelcomeScreen=false", "-daemon") + hudDevArgs
+val zapCmdlineOpts = listOf("-silent", "-config", "hud.tutorialPort=9998", "-config", "hud.tutorialTestMode=true", "-config", "hud.showWelcomeScreen=false", "-daemon") + hudDevArgs
 
 zapAddOn {
     addOnId.set("hud")
