@@ -112,6 +112,16 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
                                                 map));
                     }
                 }
+                if (msg.getResponseHeader().isText() && this.extHud.isUpgradedHttpsDomain(url)) {
+                    String domain = ExtensionHUD.getNormalisedDomain(url);
+                    String respBody = msg.getResponseBody().toString();
+                    if (respBody.contains("http://" + domain)) {
+                        // Need to replace hardcoded http URLs with https ones
+                        msg.getResponseBody()
+                                .setBody(respBody.replace("http://" + domain, "https://" + domain));
+                        msg.getResponseHeader().setContentLength(msg.getRequestBody().length());
+                    }
+                }
             } catch (URIException e) {
                 LOG.error(e.getMessage(), e);
             }

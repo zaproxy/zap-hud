@@ -101,6 +101,9 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
 
     testImplementation("io.github.bonigarcia:selenium-jupiter:2.2.0")
+    testImplementation("org.hamcrest:hamcrest-all:1.3")
+    testImplementation("org.mockito:mockito-all:1.10.8")
+    testImplementation(files(fileTree("lib").files))
 }
 
 tasks.withType<Test>().configureEach {
