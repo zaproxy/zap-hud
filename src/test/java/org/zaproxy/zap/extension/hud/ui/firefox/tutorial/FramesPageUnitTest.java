@@ -37,7 +37,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.FramesPage;
-import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.UpgradePage;
 import org.zaproxy.zap.extension.hud.ui.Constants;
 import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
@@ -60,7 +60,7 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
         WebElement previousButton = TutorialStatics.getPreviousButton(driver);
         assertNotNull(previousButton);
         previousButton.click();
-        assertEquals(TutorialStatics.getTutorialHudUrl(WarningPage.NAME), driver.getCurrentUrl());
+        assertEquals(TutorialStatics.getTutorialHudUrl(UpgradePage.NAME), driver.getCurrentUrl());
     }
 
     @Test
