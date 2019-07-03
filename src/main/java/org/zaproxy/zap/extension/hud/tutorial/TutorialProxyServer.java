@@ -63,6 +63,7 @@ import org.zaproxy.zap.extension.hud.tutorial.pages.SitesPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.SpiderPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.ToolConfigPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.TutorialJsPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.UpgradePage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WebSocketsPage;
 
@@ -87,6 +88,7 @@ public class TutorialProxyServer extends ProxyServer {
         // New pages must be added here
         TutorialPage prev = addPage(new IntroPage(this));
         prev = addPage(new WarningPage(this, prev));
+        prev = addPage(new UpgradePage(this, prev));
         prev = addPage(new FramesPage(this, prev));
         prev = addPage(new AlertsPage(this, prev));
         prev = addPage(new AlertNotificationsPage(this, prev));

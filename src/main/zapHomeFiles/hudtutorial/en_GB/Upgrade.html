@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>HTTPS Upgrade</title>
+	<link href="tutorial.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div class="roundContainer">
+	<h1>HTTPS Upgrade</H1>
+	The HUD uses a service worker running on a custom 'zap' domain to communicate with ZAP.
+	This will only work on target domains that support HTTPS. <br>
+	When the HUD is enabled ZAP will redirect HTTP sites to HTTPS.
+	If they do not support HTTPS then ZAP will handle the HTTP upgrade internally so that the browser communicates
+	with ZAP via HTTPS while ZAP forwards the requests to the target over HTTP.
+	<p>
+	Most applications should be unaffected by the HTTPS upgrade, but if your application is broken by it then please report this as an issue
+	supplying as many details as you can. 
+	<p>
+	You can configure ZAP to only enable the HUD for domains that are in scope. 
+	This is only available via the ZAP desktop as by default no domains are in scope and therefore the HUD will not be available until the first domain is added.
+	
+	<!-- TASK -->
+	<!-- BUTTONS -->
+
+</div>
+
+</body>
+</html>

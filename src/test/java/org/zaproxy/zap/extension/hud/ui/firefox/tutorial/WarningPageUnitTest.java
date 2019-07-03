@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.zaproxy.zap.extension.hud.tutorial.pages.FramesPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.UpgradePage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
 import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
@@ -61,6 +61,6 @@ public class WarningPageUnitTest extends FirefoxUnitTest {
         assertNotNull(nextButton);
         nextButton.click();
         hud.waitForPageLoad();
-        assertEquals(TutorialStatics.getTutorialHudUrl(FramesPage.NAME), driver.getCurrentUrl());
+        assertEquals(TutorialStatics.getTutorialHudUrl(UpgradePage.NAME), driver.getCurrentUrl());
     }
 }
