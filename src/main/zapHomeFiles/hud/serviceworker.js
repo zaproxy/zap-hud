@@ -296,6 +296,7 @@ function showHudSettings(tabId) {
 	config.settings = {
 		initialize: I18n.t("settings_resets"),
 		tutorial: I18n.t("settings_tutorial"),
+		changelog: I18n.t("settings_changelog"),
 	};
 
 	utils.messageFrame(tabId, "display", {action: "showHudSettings", config: config})
@@ -304,6 +305,16 @@ function showHudSettings(tabId) {
 				resetToDefault();
 			} else if (response.id === "tutorial") {
 				utils.messageAllTabs("management", {action: "showTutorial"});
+			} else if (response.id === "changelog") {
+				apiCallWithResponse("hud", "other", "changesInHtml")
+				.then(response => {
+					var config = {};
+					config.buttons = [{text: I18n.t("common_cancel"), id: "cancel"}];
+					config.title = I18n.t("changelog_title");
+					// Open links in a new window to prevent framing issues
+					config.text = response.response.replace(/href=/g, "target=\"_blank\" href=").replace(/\\n/g, "");
+					utils.messageFrame(tabId, "display", {action:"showDialog", config:config});
+				})
 			}
 		})
 		.catch(utils.errorHandler);

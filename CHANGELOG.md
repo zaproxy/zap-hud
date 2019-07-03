@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
- - Support for the Ajax Spider
+ - Support for the Ajax Spider, including new tutorial page
  - Tutorial page explaining the HTTPS upgrade [#439](https://github.com/zaproxy/zap-hud/issues/439)
+ - A config page option for showing the changelog [#535](https://github.com/zaproxy/zap-hud/issues/535)
 
 ### Fixed
  - Direct AJAX calls not getting upgraded to https [#530](https://github.com/zaproxy/zap-hud/issues/530)
