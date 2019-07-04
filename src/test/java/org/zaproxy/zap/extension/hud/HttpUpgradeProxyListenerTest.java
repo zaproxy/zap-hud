@@ -20,7 +20,9 @@
 package org.zaproxy.zap.extension.hud;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.junit.jupiter.api.Test;
@@ -126,5 +128,39 @@ public class HttpUpgradeProxyListenerTest {
 
         // Then
         assertEquals(body, msg.getResponseBody().toString());
+    }
+
+    @Test
+    public void extractValidWssUrls() throws URIException, NullPointerException {
+        // Given
+        URI wssUri1 = new URI("wss://www.example.com", true);
+        URI wssUri2 = new URI("wss://www.example2.com", true);
+
+        String str = "  " + wssUri1 + " http://example.com  " + wssUri2;
+
+        // When
+        List<URI> list = HttpUpgradeProxyListener.extractWssUrls(str);
+
+        // Then
+        assertEquals(2, list.size());
+        assertTrue(list.contains(wssUri1));
+        assertTrue(list.contains(wssUri2));
+    }
+
+    @Test
+    public void extractValidWssUrlsWithPorts() throws URIException, NullPointerException {
+        // Given
+        URI wssUri1 = new URI("wss://www.example.com:80", true);
+        URI wssUri2 = new URI("wss://www.example2.com:9070/", true);
+
+        String str = "  " + wssUri1 + " ws://example.com  " + wssUri2;
+
+        // When
+        List<URI> list = HttpUpgradeProxyListener.extractWssUrls(str);
+
+        // Then
+        assertEquals(2, list.size());
+        assertTrue(list.contains(wssUri1));
+        assertTrue(list.contains(wssUri2));
     }
 }
