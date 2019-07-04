@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
  - Direct AJAX calls not getting upgraded to https [#530](https://github.com/zaproxy/zap-hud/issues/530)
+ - Fail to handle ws calls from an upgraded http domain [#525](https://github.com/zaproxy/zap-hud/issues/525) 
 
 ## [0.4.0] - 2019-06-07
 
