@@ -63,6 +63,23 @@ Vue.component('history', {
         },
         historyItemsFiltered() {
             this.historyItemsFilteredMessage = I18n.t("common_items_filtered", [this.hiddenMessageCount, this.messageCount]);
+        },
+        scrollToBottom() {
+            if (this.messages.length > 0) {
+                let lastMessage = this.messages[this.messages.length - 1]
+                let lastid = 'message-tr-' + lastMessage.id
+                let lastIdElem = document.getElementById(lastid);
+    
+                if(lastIdElem) {
+                    lastIdElem.scrollIntoView(false)
+                }
+    
+                //move horizontal scroll bar to the left
+                let tabsDetailsElems = document.querySelectorAll('tabs-details');
+                if (tabsDetailsElems.length > 0){
+                    tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
+                }
+            }
         }
     },
     watch: {
@@ -82,6 +99,9 @@ Vue.component('history', {
             .then(tool => {
                 this.messages = tool.messages
             })
+            .then(() => {
+                this.scrollToBottom()
+            })
             .catch(utils.errorHandler)
 
         eventBus.$on('setMessages', data => {
@@ -97,21 +117,7 @@ Vue.component('history', {
 
     },
     updated() {
-        if (this.messages.length > 0) {
-            let lastMessage = this.messages[this.messages.length - 1]
-            let lastid = 'message-tr-' + lastMessage.id
-            let lastIdElem = document.getElementById(lastid);
-
-            if(lastIdElem) {
-                lastIdElem.scrollIntoView({block:'end', behavior:'smooth'});
-            }
-
-            //move horizontal scroll bar to the left
-            let tabsDetailsElems = document.querySelectorAll('tabs-details');
-            if (tabsDetailsElems.length > 0){
-                tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
-            }
-        }
+        this.scrollToBottom()
     },
     beforeDestroy () {
         eventBus.$off('setMessages')
@@ -174,6 +180,23 @@ Vue.component('websockets', {
         },
         websocketsItemsFiltered() {
             this.websocketsItemsFilteredMessage = I18n.t("common_items_filtered", [this.hiddenMessageCount, this.messageCount]);
+        },
+        scrollToBottom() {
+            if (this.messages.length > 0) {
+                let lastMessage = this.messages[this.messages.length - 1]
+                let lastid = 'ws-message-tr-' + lastMessage.messageId
+                let lastIdElem = document.getElementById(lastid);
+    
+                if(lastIdElem) {
+                    lastIdElem.scrollIntoView(false)
+                }
+    
+                //move horizontal scroll bar to the left
+                let tabsDetailsElems = document.querySelectorAll('tabs-details');
+                if (tabsDetailsElems.length > 0){
+                    tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
+                }
+            }
         }
     },
     watch: {
@@ -193,6 +216,9 @@ Vue.component('websockets', {
             .then(tool => {
                 this.messages = tool.messages
             })
+            .then(() => {
+                this.scrollToBottom()
+            })
             .catch(utils.errorHandler)
 
         eventBus.$on('setMessages', data => {
@@ -201,26 +227,14 @@ Vue.component('websockets', {
 
         eventBus.$on('updateWebSockets', data => {
             this.messages = this.messages.concat(data.messages);
+            this.scrollToBottom()
 
             let count = data.messages.length;
             this.$parent.$emit('badgeDataEvent', {data: count})
         });
     },
     updated() {
-        if (this.messages.length > 0) {
-            let lastMessage = this.messages[this.messages.length - 1]
-            let lastid = 'message-tr-' + lastMessage.messageId
-            let lastIdElem = document.querySelector(lastid);
-            if(lastIdElem){
-                lastIdElem.scrollIntoView({block:'end', behavior:'smooth'});
-            }
-
-            //move horizontal scroll bar to the left
-            let tabsDetailsElems = document.querySelectorAll('tabs-details');
-            if (tabsDetailsElems.length > 0){
-                tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
-            }
-        }
+        this.scrollToBottom()
     },
 });
 
