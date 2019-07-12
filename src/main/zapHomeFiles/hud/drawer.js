@@ -99,9 +99,6 @@ Vue.component('history', {
             .then(tool => {
                 this.messages = tool.messages
             })
-            .then(() => {
-                this.scrollToBottom()
-            })
             .catch(utils.errorHandler)
 
         eventBus.$on('setMessages', data => {
@@ -117,7 +114,9 @@ Vue.component('history', {
 
     },
     updated() {
-        this.scrollToBottom()
+        this.$nextTick(function () {
+            this.scrollToBottom()
+        })
     },
     beforeDestroy () {
         eventBus.$off('setMessages')
@@ -184,7 +183,7 @@ Vue.component('websockets', {
         scrollToBottom() {
             if (this.messages.length > 0) {
                 let lastMessage = this.messages[this.messages.length - 1]
-                let lastid = 'ws-message-tr-' + lastMessage.messageId
+                let lastid = 'ws-message-tr-' + lastMessage.uniqId
                 let lastIdElem = document.getElementById(lastid);
     
                 if(lastIdElem) {
@@ -216,9 +215,6 @@ Vue.component('websockets', {
             .then(tool => {
                 this.messages = tool.messages
             })
-            .then(() => {
-                this.scrollToBottom()
-            })
             .catch(utils.errorHandler)
 
         eventBus.$on('setMessages', data => {
@@ -227,14 +223,15 @@ Vue.component('websockets', {
 
         eventBus.$on('updateWebSockets', data => {
             this.messages = this.messages.concat(data.messages);
-            this.scrollToBottom()
 
             let count = data.messages.length;
             this.$parent.$emit('badgeDataEvent', {data: count})
         });
     },
     updated() {
-        this.scrollToBottom()
+        this.$nextTick(function () {
+            this.scrollToBottom()
+        });
     },
 });
 
