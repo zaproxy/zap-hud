@@ -214,7 +214,7 @@ public class TutorialProxyServer extends ProxyServer {
         return sb.toString();
     }
 
-    protected HudParam getHudParam() {
+    public HudParam getHudParam() {
         return extension.getHudParam();
     }
 
@@ -270,6 +270,10 @@ public class TutorialProxyServer extends ProxyServer {
                         } else if (msg.getRequestHeader().getMethod().equals("GET")) {
                             page.handleGetRequest(msg);
                         }
+
+                        // Clear update (if any) before the page is rendered
+                        // so the icon on the index is set correctly
+                        extension.getHudParam().clearTutorialUpdate(page.getName());
 
                         String body = page.getHtml();
                         msg.setResponseBody(body);

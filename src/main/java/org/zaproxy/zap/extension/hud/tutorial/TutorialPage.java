@@ -256,6 +256,11 @@ public abstract class TutorialPage {
         sb.append(IndexPage.NAME);
         sb.append("\"><button id=\"index-button\">");
         sb.append(Constant.messages.getString("hud.tutorial.button.index"));
+        if (this.getTutorialProxyServer().getHudParam().getTutorialUpdates().size() > 0) {
+            sb.append(" <img src=\"exclamation-red.png\" title=\"");
+            sb.append(Constant.messages.getString("hud.tutorial.hover.new"));
+            sb.append("\">");
+        }
         sb.append("</button></a>\n");
 
         sb.append("</div>\n");
