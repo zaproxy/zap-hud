@@ -154,7 +154,7 @@ var utils = (function() {
 	/*
 	 * Initialize all of the info that will be stored in indexeddb.
 	 */
-	function initializeHUD(leftTools, rightTools) {
+	function initializeHUD(leftTools, rightTools, drawer) {
 		if (IS_DEV_MODE && leftTools.indexOf("hudErrors") < 0) {
 			// Always add the error tool in dev mode
 			leftTools.push("hudErrors");
@@ -169,6 +169,7 @@ var utils = (function() {
 		promises.push(localforage.setItem('drawer.isDrawerOpen', false));
 		// Note: in the below, "activeTab" is to be set to href, not name
 		promises.push(localforage.setItem('drawer.activeTab', '#history'));
+		promises.push(localforage.setItem('drawer', drawer));
 
 		let leftPanel = {
 			key: 'leftPanel',

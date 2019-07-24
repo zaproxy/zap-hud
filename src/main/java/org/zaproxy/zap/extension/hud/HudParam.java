@@ -21,6 +21,8 @@ package org.zaproxy.zap.extension.hud;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.Constant;
@@ -28,11 +30,14 @@ import org.zaproxy.zap.ZAP;
 import org.zaproxy.zap.common.VersionedAbstractParam;
 import org.zaproxy.zap.eventBus.Event;
 import org.zaproxy.zap.extension.api.ZapApiIgnore;
+import org.zaproxy.zap.extension.hud.tutorial.pages.AjaxSpiderPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.HudConfigPage;
 
 public class HudParam extends VersionedAbstractParam {
 
     public static final String UI_OPTION_LEFT_PANEL = "leftPanel";
     public static final String UI_OPTION_RIGHT_PANEL = "rightPanel";
+    public static final String UI_OPTION_DRAWER = "drawer";
 
     private static final String ZAP_HUD_CONFIG_TOOLS_LEFT =
             "['scope', 'break', 'showEnable', 'page-alerts-high', 'page-alerts-medium', 'page-alerts-low', 'page-alerts-informational']";
@@ -54,7 +59,9 @@ public class HudParam extends VersionedAbstractParam {
     private static final String PARAM_TUTORIAL_SKIP_TASKS = PARAM_BASE_KEY + ".tutorialSkipTasks";
     private static final String PARAM_TUTORIAL_TEST_MODE = PARAM_BASE_KEY + ".tutorialTestMode";
     private static final String PARAM_TUTORIAL_TASKS = PARAM_BASE_KEY + ".tutorialTasks";
+    private static final String PARAM_TUTORIAL_UPDATES = PARAM_BASE_KEY + ".tutorialUpdates";
     private static final String PARAM_SHOW_WELCOME_SCREEN = PARAM_BASE_KEY + ".showWelcomeScreen";
+    private static final String PARAM_NEW_CHANGELOG = PARAM_BASE_KEY + ".newChangelog";
     private static final String PARAM_ENABLE_ON_DOMAIN_MSGS =
             PARAM_BASE_KEY + ".enableOnDomainMsgs";
     private static final String PARAM_UI_OPTION_PREFIX = PARAM_BASE_KEY + ".uiOption.";
@@ -64,8 +71,10 @@ public class HudParam extends VersionedAbstractParam {
      * releases, if updates are needed.
      *
      * <p>It only needs to be updated for configurations changes (not releases of the add-on).
+     * However for the HUD we do use it to flag new features, so it will typically be updated for
+     * each new version of the HUD.
      */
-    private static final int PARAM_CURRENT_VERSION = 1;
+    private static final int PARAM_CURRENT_VERSION = 2;
 
     private String baseDirectory;
 
@@ -93,6 +102,10 @@ public class HudParam extends VersionedAbstractParam {
     private boolean enableOnDomainMsgs;
 
     private List<String> tutorialTasks;
+
+    private List<String> tutorialUpdates = new ArrayList<String>();
+
+    private boolean newChangelog;
 
     private Logger log = Logger.getLogger(this.getClass());
 
@@ -249,7 +262,9 @@ public class HudParam extends VersionedAbstractParam {
         isSkipTutorialTasks = getConfig().getBoolean(PARAM_TUTORIAL_SKIP_TASKS, false);
         isTutorialTestMode = getConfig().getBoolean(PARAM_TUTORIAL_TEST_MODE, false);
         tutorialTasks = convert(getConfig().getList(PARAM_TUTORIAL_TASKS));
+        tutorialUpdates = convert(getConfig().getList(PARAM_TUTORIAL_UPDATES));
         showWelcomeScreen = getConfig().getBoolean(PARAM_SHOW_WELCOME_SCREEN, true);
+        newChangelog = getConfig().getBoolean(PARAM_NEW_CHANGELOG, false);
         enableOnDomainMsgs = getConfig().getBoolean(PARAM_ENABLE_ON_DOMAIN_MSGS, true);
     }
 
@@ -261,10 +276,32 @@ public class HudParam extends VersionedAbstractParam {
         return strs;
     }
 
-    @Override
-    protected void updateConfigsImpl(int arg0) {
-        // Currently nothing to do
+    private void saveConfig() {
+        try {
+            this.getConfig().save();
+        } catch (ConfigurationException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 
+    @Override
+    protected void updateConfigsImpl(int fileVersion) {
+        newChangelog = true;
+        getConfig().setProperty(PARAM_NEW_CHANGELOG, newChangelog);
+
+        if (fileVersion == 1) {
+            addTutorialUpdate(AjaxSpiderPage.NAME);
+            addTutorialUpdate(HudConfigPage.NAME);
+        }
+        getConfig().setProperty(PARAM_TUTORIAL_UPDATES, tutorialUpdates);
+
+        saveConfig();
+    }
+
+    private void addTutorialUpdate(String page) {
+        if (!tutorialUpdates.contains(page)) {
+            tutorialUpdates.add(page);
+        }
     }
 
     /**
@@ -293,11 +330,7 @@ public class HudParam extends VersionedAbstractParam {
         if (!isTutorialTaskDone(task)) {
             this.tutorialTasks.add(task);
             getConfig().setProperty(PARAM_TUTORIAL_TASKS, tutorialTasks);
-            try {
-                this.getConfig().save();
-            } catch (ConfigurationException e) {
-                log.error(e.getMessage(), e);
-            }
+            saveConfig();
         }
     }
 
@@ -312,20 +345,29 @@ public class HudParam extends VersionedAbstractParam {
     public void resetTutorialTasks() {
         tutorialTasks.clear();
         getConfig().setProperty(PARAM_TUTORIAL_TASKS, tutorialTasks);
-        try {
-            this.getConfig().save();
-        } catch (ConfigurationException e) {
-            log.error(e.getMessage(), e);
+        saveConfig();
+    }
+
+    public List<String> getTutorialUpdates() {
+        return this.tutorialUpdates;
+    }
+
+    public void clearTutorialUpdate(String page) {
+        if (this.tutorialUpdates.remove(page)) {
+            getConfig().setProperty(PARAM_TUTORIAL_UPDATES, tutorialUpdates);
+            saveConfig();
         }
     }
 
     public void setUiOption(String key, String value) {
         getConfig().setProperty(PARAM_UI_OPTION_PREFIX + key, value);
-        try {
-            this.getConfig().save();
-        } catch (ConfigurationException e) {
-            log.error(e.getMessage(), e);
-        }
+        saveConfig();
+    }
+
+    public void clearNewChangelog() {
+        this.newChangelog = false;
+        getConfig().setProperty(PARAM_NEW_CHANGELOG, newChangelog);
+        saveConfig();
     }
 
     public String getUiOption(String key) {
@@ -338,6 +380,14 @@ public class HudParam extends VersionedAbstractParam {
                     break;
                 case UI_OPTION_RIGHT_PANEL:
                     value = ZAP_HUD_CONFIG_TOOLS_RIGHT;
+                    break;
+                case UI_OPTION_DRAWER:
+                    JSONObject obj = new JSONObject();
+                    JSONArray upds = new JSONArray();
+                    upds.addAll(this.getTutorialUpdates());
+                    obj.put("tutorialUpdates", upds);
+                    obj.put("newChangelog", newChangelog);
+                    value = obj.toString();
                     break;
             }
         }

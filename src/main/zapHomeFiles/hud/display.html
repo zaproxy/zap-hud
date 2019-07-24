@@ -21,6 +21,7 @@
             <all-alerts-modal :show="isAllAlertsModalShown" :title="allAlertsModalTitle" @close="isAllAlertsModalShown = false"></all-alerts-modal>
             <alert-details-modal :show="isAlertDetailsModalShown" :title="alertDetailsModalTitle" @close="isAlertDetailsModalShown = false" :stack="backStack"></alert-details-modal>
             <simple-menu-modal :show="isSimpleMenuModalShown" :title="simpleMenuModalTitle" @close="isSimpleMenuModalShown = false"></simple-menu-modal>
+            <adv-menu-modal :show="isAdvMenuModalShown" :title="advMenuModalTitle" @close="isAdvMenuModalShown = false"></adv-menu-modal>
             <break-message-modal :show="isBreakMessageModalShown" :title="breakMessageModalTitle" @close="isBreakMessageModalShown = false"></break-message-modal>
             <history-message-modal :show="isHistoryMessageModalShown" :title="historyMessageModalTitle" @close="isHistoryMessageModalShown = false" :stack="backStack"></history-message-modal>
             <websocket-message-modal :show="isWebsocketMessageModalShown" :title="websocketMessageModalTitle" @close="isWebsocketMessageModalShown = false"></websocket-message-modal>
@@ -254,6 +255,21 @@
                 <div slot="body">
                     <ul class="menu">
                         <li v-for="(label, id) in items" class="menu-item" @click="itemSelect(id)"> {{ label }} </li>
+                    </ul>
+                </div>
+            </modal>
+        </template>
+
+        <!-- advanced menu modal component: supports images and potentially other attributes (feel free to add;) -->
+        <template id="adv-menu-modal-template">
+            <modal :title="title" :show="show" @close="close">
+                <div slot="body">
+                    <ul class="menu">
+                        <li v-for="(conf, id) in items" class="menu-item" @click="itemSelect(id)">
+                            <img v-if="conf.startimage"  :src="'<<ZAP_HUD_FILES>>?image=' + conf.startimage" />
+                            {{ conf.label }}
+                            <img v-if="conf.endimage"  :src="'<<ZAP_HUD_FILES>>?image=' + conf.endimage" />
+                        </li>
                     </ul>
                 </div>
             </modal>

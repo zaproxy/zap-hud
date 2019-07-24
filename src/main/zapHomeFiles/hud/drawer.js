@@ -358,10 +358,33 @@ Vue.component('drawer-button-template', {
 Vue.component('drawer-button-settings', {
     template: '#drawer-button-settings-template',
     props: [],
+    data() {
+        return {
+            icon: utils.getZapImagePath('gear.png')
+        }
+    },
     methods: {
         showHudSettings() {
-            navigator.serviceWorker.controller.postMessage({tabId: tabId, frameId: frameId, action:'showHudSettings'});
+            localforage.getItem('drawer')
+                .then(drawer => {
+                    navigator.serviceWorker.controller.postMessage(
+                        {tabId: tabId, frameId: frameId, action:'showHudSettings', 
+                            tutorialUpdates: drawer.tutorialUpdates.length > 0, newChangelog: drawer.newChangelog});
+                })
+                .catch(utils.errorHandler);
         }
+    },
+    created() {
+        utils.log(LOG_DEBUG, 'drawer', "created");
+        localforage.getItem('drawer')
+            .then(drawer => {
+                if (drawer.newChangelog || drawer.tutorialUpdates.length > 0) {
+                    this.icon = utils.getZapImagePath('gear-exclamation.png');
+                } else {
+                    this.icon = utils.getZapImagePath('gear.png');
+                }
+            })
+            .catch(utils.errorHandler);
     }
 });
 
@@ -396,6 +419,7 @@ Vue.component('drawer-button-showhide', {
     created() {
         localforage.getItem('settings.isHudVisible')
             .then(isHudVisible => {
+                utils.log(LOG_DEBUG, 'drawer', "hudVisible?", isHudVisible);
                 this.isHudVisible = isHudVisible;
                 if (!this.isHudVisible) {
                     this.icon = utils.getZapImagePath('radar-grey.png');

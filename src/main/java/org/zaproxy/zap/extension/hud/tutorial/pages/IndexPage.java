@@ -19,6 +19,7 @@
  */
 package org.zaproxy.zap.extension.hud.tutorial.pages;
 
+import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.control.Control;
 import org.zaproxy.zap.extension.hud.ExtensionHUD;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialPage;
@@ -65,9 +66,25 @@ public class IndexPage extends TutorialPage {
                 sb.append(page.getName());
                 sb.append("\">");
                 sb.append(page.getI18nName());
+                if (this.getTutorialProxyServer()
+                        .getHudParam()
+                        .getTutorialUpdates()
+                        .contains(page.getName())) {
+                    sb.append(" <img src=\"exclamation-red.png\" title=\"");
+                    sb.append(Constant.messages.getString("hud.tutorial.hover.new"));
+                    sb.append("\">");
+                }
                 sb.append("</a>");
             } else {
                 sb.append(page.getI18nName());
+                if (this.getTutorialProxyServer()
+                        .getHudParam()
+                        .getTutorialUpdates()
+                        .contains(page.getName())) {
+                    sb.append(" <img src=\"exclamation-red.png\" title=\"");
+                    sb.append(Constant.messages.getString("hud.tutorial.hover.new"));
+                    sb.append("\">");
+                }
             }
             if (!page.isTaskCompleted()) {
                 tasksCompletedSoFar = false;
