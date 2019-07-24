@@ -348,7 +348,6 @@ Vue.component('adv-menu-modal', {
 		},
 		itemSelect: function(itemId) {
 			this.port.postMessage({'action': 'itemSelected', 'id': itemId});
-			app.keepShowing = true;
 			app.isAdvMenuModalShown = false;
 			this.close();
 		}
