@@ -363,7 +363,10 @@ function resetToDefault() {
 			return Promise.all(promises);
 		})
 		.then(responses => {
-			return utils.initializeHUD(responses[0].leftPanel, responses[1].rightPanel, responses[2]);
+			return utils.initializeHUD(
+				JSON.parse(responses[0].leftPanel), 
+				JSON.parse(responses[1].rightPanel), 
+				JSON.parse(responses[2].drawer));
 		})
 		.then(utils.messageAllTabs("management", {action: "refreshTarget"}))
 		.catch(utils.errorHandler);
