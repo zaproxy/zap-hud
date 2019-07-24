@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2019-07-24
+
+### Added
+ - Support for the Ajax Spider, including new tutorial page
+ - Tutorial page explaining the HTTPS upgrade [#439](https://github.com/zaproxy/zap-hud/issues/439)
+ - A config page option for showing the changelog [#535](https://github.com/zaproxy/zap-hud/issues/535)
+ - Icons to indicate changes to the tutorial or changelog [#553](https://github.com/zaproxy/zap-hud/issues/553) 
+
+### Fixed
+ - Direct AJAX calls not getting upgraded to https [#530](https://github.com/zaproxy/zap-hud/issues/530)
+ - Fail to handle ws calls from an upgraded http domain [#525](https://github.com/zaproxy/zap-hud/issues/525) 
+
 ## [0.4.0] - 2019-06-07
 
 ### Added
@@ -72,6 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2018-12-03
 First alpha release.
 
+[0.5.0]: https://github.com/zaproxy/zap-hud/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/zaproxy/zap-hud/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/zaproxy/zap-hud/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/zaproxy/zap-hud/compare/v0.1.2...v0.2.0

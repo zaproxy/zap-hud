@@ -15,11 +15,13 @@
         <!-- the body of the app -->
         <div id="app">
             <dialog-modal :show="isDialogModalShown" :title="dialogModalTitle" :text="dialogModalText" @close="isDialogModalShown = false"></dialog-modal>
+            <ajax-dialog-modal :show="isAjaxDialogModalShown" :title="dialogModalTitle" :text="dialogModalText" @close="isAjaxDialogModalShown = false"></ajax-dialog-modal>
             <select-tool-modal :show="isSelectToolModalShown" :title="$t('message.hud_select_tool')" @close="isSelectToolModalShown = false"></select-tool-modal>
             <alert-list-modal :show="isAlertListModalShown" :title="alertListModalTitle" @close="isAlertListModalShown = false"></alert-list-modal>
             <all-alerts-modal :show="isAllAlertsModalShown" :title="allAlertsModalTitle" @close="isAllAlertsModalShown = false"></all-alerts-modal>
             <alert-details-modal :show="isAlertDetailsModalShown" :title="alertDetailsModalTitle" @close="isAlertDetailsModalShown = false" :stack="backStack"></alert-details-modal>
             <simple-menu-modal :show="isSimpleMenuModalShown" :title="simpleMenuModalTitle" @close="isSimpleMenuModalShown = false"></simple-menu-modal>
+            <adv-menu-modal :show="isAdvMenuModalShown" :title="advMenuModalTitle" @close="isAdvMenuModalShown = false"></adv-menu-modal>
             <break-message-modal :show="isBreakMessageModalShown" :title="breakMessageModalTitle" @close="isBreakMessageModalShown = false"></break-message-modal>
             <history-message-modal :show="isHistoryMessageModalShown" :title="historyMessageModalTitle" @close="isHistoryMessageModalShown = false" :stack="backStack"></history-message-modal>
             <websocket-message-modal :show="isWebsocketMessageModalShown" :title="websocketMessageModalTitle" @close="isWebsocketMessageModalShown = false"></websocket-message-modal>
@@ -73,6 +75,29 @@
                 <div slot="body">
                     <div class="content">
                         <span v-html="text">
+                    </div>
+                </div>
+                <div slot="footer">
+                    <button v-for="button in buttons" class="btn" v-text="button.text" @click="buttonClick(button.id)"></button>
+                </div>
+            </modal>
+        </template>
+
+        <!-- ajax dialog modal component -->
+        <template id="ajax-dialog-modal-template">
+            <modal :title="title" :show="show" @close="close">
+                <div slot="body">
+                    <div class="content">
+                        <p v-html="text"></p>
+                        <div v-if="status === 'stopped'">
+                          {{ $t('message.ajax_spider_browser_label') }}
+                          <select v-model="browser">
+                            <option value="firefox-headless">{{ $t('message.selenium_browser_firefox_headless') }}</option>
+                            <option value="chrome-headless">{{ $t('message.selenium_browser_chrome_headless') }}</option>
+                            <option value="firefox">{{ $t('message.selenium_browser_firefox') }}</option>
+                            <option value="chrome">{{ $t('message.selenium_browser_chrome') }}</option>
+                          </select>
+                        </div>
                     </div>
                 </div>
                 <div slot="footer">
@@ -230,6 +255,21 @@
                 <div slot="body">
                     <ul class="menu">
                         <li v-for="(label, id) in items" class="menu-item" @click="itemSelect(id)"> {{ label }} </li>
+                    </ul>
+                </div>
+            </modal>
+        </template>
+
+        <!-- advanced menu modal component: supports images and potentially other attributes (feel free to add;) -->
+        <template id="adv-menu-modal-template">
+            <modal :title="title" :show="show" @close="close">
+                <div slot="body">
+                    <ul class="menu">
+                        <li v-for="(conf, id) in items" class="menu-item" @click="itemSelect(id)">
+                            <img v-if="conf.startimage"  :src="'<<ZAP_HUD_FILES>>?image=' + conf.startimage" />
+                            {{ conf.label }}
+                            <img v-if="conf.endimage"  :src="'<<ZAP_HUD_FILES>>?image=' + conf.endimage" />
+                        </li>
                     </ul>
                 </div>
             </modal>

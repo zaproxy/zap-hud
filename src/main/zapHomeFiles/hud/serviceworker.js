@@ -6,6 +6,7 @@ var toolScripts = [
 // The configured tools
 var CONFIG_TOOLS_LEFT = '<<ZAP_HUD_CONFIG_TOOLS_LEFT>>';
 var CONFIG_TOOLS_RIGHT = '<<ZAP_HUD_CONFIG_TOOLS_RIGHT>>';
+var CONFIG_DRAWER = '<<ZAP_HUD_CONFIG_DRAWER>>';
 
 importScripts(ZAP_HUD_FILES + "?name=libraries/localforage.min.js"); 
 importScripts(ZAP_HUD_FILES + "?name=libraries/vue.js"); 
@@ -131,7 +132,7 @@ const onActivate = event => {
 		utils.isHUDInitialized()
 			.then(isInitialized => {
 				if (!isInitialized) {
-					return utils.initializeHUD(CONFIG_TOOLS_LEFT, CONFIG_TOOLS_RIGHT);
+					return utils.initializeHUD(CONFIG_TOOLS_LEFT, CONFIG_TOOLS_RIGHT, CONFIG_DRAWER);
 				}
 			})
 			.catch(utils.errorHandler)
@@ -170,7 +171,7 @@ const onMessage = event => {
 			break;
 
 		case "showHudSettings":
-			showHudSettings(message.tabId);
+			showHudSettings(message.tabId, message.tutorialUpdates, message.newChangelog);
 			break;
 
 		case 'targetload':
@@ -216,7 +217,7 @@ const backupHandler = event => {
 
 function backup(key, value) {
 	apiCall("hud", "action", "setUiOption", { key: key, value: value });
-}
+};
 
 self.addEventListener("install", onInstall); 
 self.addEventListener("activate", onActivate);
@@ -291,12 +292,19 @@ function showAddToolDialog(tabId, frameId) {
 		.catch(utils.errorHandler);
 };
 
-function showHudSettings(tabId) {
+function showHudSettings(tabId, tutorialUpdates, newChangelog) {
 	var config = {};
 	config.settings = {
-		initialize: I18n.t("settings_resets"),
-		tutorial: I18n.t("settings_tutorial"),
+		initialize: {label: I18n.t("settings_resets")},
+		tutorial: {label: I18n.t("settings_tutorial")},
+		changelog: {label: I18n.t("settings_changelog")},
 	};
+	if (tutorialUpdates) {
+		config.settings.tutorial.endimage = "exclamation-red.png";
+	}
+	if (newChangelog) {
+		config.settings.changelog.endimage = "exclamation-red.png";
+	}
 
 	utils.messageFrame(tabId, "display", {action: "showHudSettings", config: config})
 		.then(response => {
@@ -304,6 +312,30 @@ function showHudSettings(tabId) {
 				resetToDefault();
 			} else if (response.id === "tutorial") {
 				utils.messageAllTabs("management", {action: "showTutorial"});
+				// Clear the localforage configs - will be picked up in the drawer on the next page load
+				localforage.getItem('drawer')
+					.then(drawer => {
+						drawer.tutorialUpdates = [];
+						return localforage.setItem('drawer', drawer)
+					})
+					.catch(utils.errorHandler);
+			} else if (response.id === "changelog") {
+				apiCallWithResponse("hud", "other", "changesInHtml")
+				.then(response => {
+					var config = {};
+					config.buttons = [{text: I18n.t("common_close"), id: "close"}];
+					config.title = I18n.t("changelog_title");
+					// Open links in a new window to prevent framing issues
+					config.text = response.response.replace(/href=/g, "target=\"_blank\" href=").replace(/\\n/g, "");
+					utils.messageFrame(tabId, "display", {action:"showDialog", config:config});
+					// Clear the localforage configs - will be picked up in the drawer on the next page load
+					localforage.getItem('drawer')
+						.then(drawer => {
+							drawer.newChangelog = false;
+							return localforage.setItem('drawer', drawer)
+						})
+						.catch(utils.errorHandler);
+				})
 			}
 		})
 		.catch(utils.errorHandler);
@@ -327,10 +359,11 @@ function resetToDefault() {
 			var promises = [];
 			promises.push(apiCallWithResponse("hud", "view", "getUiOption",  { key: 'leftPanel' }));
 			promises.push(apiCallWithResponse("hud", "view", "getUiOption",  { key: 'rightPanel' }));
+			promises.push(apiCallWithResponse("hud", "view", "getUiOption",  { key: 'drawer' }));
 			return Promise.all(promises);
 		})
 		.then(responses => {
-			return utils.initializeHUD(responses[0].leftPanel, responses[1].rightPanel);
+			return utils.initializeHUD(responses[0].leftPanel, responses[1].rightPanel, responses[2]);
 		})
 		.then(utils.messageAllTabs("management", {action: "refreshTarget"}))
 		.catch(utils.errorHandler);

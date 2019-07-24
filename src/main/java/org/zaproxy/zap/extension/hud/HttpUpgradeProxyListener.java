@@ -19,8 +19,12 @@
  */
 package org.zaproxy.zap.extension.hud;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.log4j.Logger;
@@ -32,6 +36,11 @@ import org.zaproxy.zap.ZAP;
 import org.zaproxy.zap.eventBus.Event;
 
 public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
+
+    // Based on an example on
+    // https://stackoverflow.com/questions/24924072/website-url-validation-regex-in-java/37864510
+    private static final Pattern WSS_REGEX_PATTERN =
+            Pattern.compile("wss:\\/\\/(www\\.)?([\\w]+\\.)+[‌​\\w]{2,63}(:[0-9]+)?\\/?");
 
     private ExtensionHUD extHud;
 
@@ -112,10 +121,45 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
                                                 map));
                     }
                 }
+                if (msg.getResponseHeader().isText() && this.extHud.isUpgradedHttpsDomain(url)) {
+                    String domain = ExtensionHUD.getNormalisedDomain(url);
+                    String respBody = msg.getResponseBody().toString();
+                    if (respBody.contains("http://" + domain)) {
+                        // Need to replace hardcoded http URLs with https ones
+                        msg.getResponseBody()
+                                .setBody(respBody.replace("http://" + domain, "https://" + domain));
+                        msg.getResponseHeader().setContentLength(msg.getRequestBody().length());
+                    }
+                    if (respBody.contains("ws://")) {
+                        // Need to replace hardcoded ws URLs with wss ones
+                        String body = respBody.replace("ws://", "wss://");
+                        // Now extract all of the wss urls to flag them as upgraded
+                        for (URI uri : extractWssUrls(body)) {
+                            LOG.debug("Adding upgraded ws URL: " + uri);
+                            extHud.addUpgradedHttpsDomain(uri);
+                        }
+                        msg.getResponseBody().setBody(body);
+                        msg.getResponseHeader().setContentLength(msg.getRequestBody().length());
+                    }
+                }
             } catch (URIException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
         return false;
+    }
+
+    protected static List<URI> extractWssUrls(String str) {
+        List<URI> list = new ArrayList<URI>();
+        Matcher m = WSS_REGEX_PATTERN.matcher(str);
+        while (m.find()) {
+            String wsUrl = m.group();
+            try {
+                list.add(new URI(wsUrl, false));
+            } catch (URIException e) {
+                // Not a valid url, ignore it
+            }
+        }
+        return list;
     }
 }

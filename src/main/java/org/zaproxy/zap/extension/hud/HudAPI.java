@@ -53,6 +53,7 @@ import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.api.ApiAction;
 import org.zaproxy.zap.extension.api.ApiException;
 import org.zaproxy.zap.extension.api.ApiImplementor;
+import org.zaproxy.zap.extension.api.ApiOther;
 import org.zaproxy.zap.extension.api.ApiResponse;
 import org.zaproxy.zap.extension.api.ApiResponseElement;
 import org.zaproxy.zap.extension.api.ApiResponseList;
@@ -89,7 +90,10 @@ public class HudAPI extends ApiImplementor {
     private static final String VIEW_GET_UI_OPTION = "getUiOption";
     private static final String VIEW_HUD_ALERT_DATA = "hudAlertData";
     private static final String VIEW_HEARTBEAT = "heartbeat";
+    private static final String VIEW_TUTORIAL_UPDATES = "tutorialUpdates";
     private static final String VIEW_UPGRADED_DOMAINS = "upgradedDomains";
+
+    private static final String OTHER_CHANGES_IN_HTML = "changesInHtml";
 
     private static final String PARAM_RECORD = "record";
     private static final String PARAM_HEADER = "header";
@@ -139,7 +143,10 @@ public class HudAPI extends ApiImplementor {
         this.addApiView(new ApiView(VIEW_HUD_ALERT_DATA, new String[] {PARAM_URL}));
         this.addApiView(new ApiView(VIEW_HEARTBEAT));
         this.addApiView(new ApiView(VIEW_GET_UI_OPTION, new String[] {PARAM_KEY}));
+        this.addApiView(new ApiView(VIEW_TUTORIAL_UPDATES));
         this.addApiView(new ApiView(VIEW_UPGRADED_DOMAINS));
+
+        this.addApiOthers(new ApiOther(OTHER_CHANGES_IN_HTML));
 
         hudFileProxy = new HudFileProxy(this);
         hudFileUrl = API.getInstance().getCallBackUrl(hudFileProxy, API.API_URL_S);
@@ -256,6 +263,28 @@ public class HudAPI extends ApiImplementor {
     }
 
     @Override
+    public HttpMessage handleApiOther(HttpMessage msg, String name, JSONObject params)
+            throws ApiException {
+        switch (name) {
+            case OTHER_CHANGES_IN_HTML:
+                String changes = this.extension.getAddOn().getChanges();
+                try {
+                    msg.setResponseHeader(API.getDefaultResponseHeader("text/html; charset=UTF-8"));
+                } catch (HttpMalformedHeaderException e) {
+                    throw new ApiException(ApiException.Type.INTERNAL_ERROR, name, e);
+                }
+                msg.setResponseBody(changes);
+                msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
+                this.extension.getHudParam().clearNewChangelog();
+                break;
+
+            default:
+                throw new ApiException(ApiException.Type.BAD_VIEW);
+        }
+        return msg;
+    }
+
+    @Override
     public ApiResponse handleApiView(String name, JSONObject params) throws ApiException {
 
         switch (name) {
@@ -272,6 +301,15 @@ public class HudAPI extends ApiImplementor {
                 String key = params.getString(PARAM_KEY);
                 validateKey(key);
                 return new ApiResponseElement(key, this.extension.getHudParam().getUiOption(key));
+            case VIEW_TUTORIAL_UPDATES:
+                ApiResponseList updates = new ApiResponseList(name);
+                extension
+                        .getHudParam()
+                        .getTutorialUpdates()
+                        .forEach(
+                                update ->
+                                        updates.addItem(new ApiResponseElement("update", update)));
+                return updates;
             case VIEW_UPGRADED_DOMAINS:
                 ApiResponseList domains = new ApiResponseList(name);
                 extension
@@ -437,7 +475,12 @@ public class HudAPI extends ApiImplementor {
                                             "'<<ZAP_HUD_CONFIG_TOOLS_RIGHT>>'",
                                             extension
                                                     .getHudParam()
-                                                    .getUiOption(HudParam.UI_OPTION_RIGHT_PANEL));
+                                                    .getUiOption(HudParam.UI_OPTION_RIGHT_PANEL))
+                                    .replace(
+                                            "'<<ZAP_HUD_CONFIG_DRAWER>>'",
+                                            extension
+                                                    .getHudParam()
+                                                    .getUiOption(HudParam.UI_OPTION_DRAWER));
                 } else if (file.equals("i18n.js")) {
                     contents =
                             contents.replace(

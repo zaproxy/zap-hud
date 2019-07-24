@@ -38,6 +38,7 @@ import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.hud.ExtensionHUD;
 import org.zaproxy.zap.extension.hud.HudParam;
 import org.zaproxy.zap.extension.hud.tutorial.pages.ActiveScanPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.AjaxSpiderPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertNotificationsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AttackModePage;
@@ -62,6 +63,7 @@ import org.zaproxy.zap.extension.hud.tutorial.pages.SitesPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.SpiderPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.ToolConfigPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.TutorialJsPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.UpgradePage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WebSocketsPage;
 
@@ -86,6 +88,7 @@ public class TutorialProxyServer extends ProxyServer {
         // New pages must be added here
         TutorialPage prev = addPage(new IntroPage(this));
         prev = addPage(new WarningPage(this, prev));
+        prev = addPage(new UpgradePage(this, prev));
         prev = addPage(new FramesPage(this, prev));
         prev = addPage(new AlertsPage(this, prev));
         prev = addPage(new AlertNotificationsPage(this, prev));
@@ -100,6 +103,7 @@ public class TutorialProxyServer extends ProxyServer {
         prev = addPage(new BreakPage(this, prev));
         prev = addPage(new ResendPage(this, prev));
         prev = addPage(new SpiderPage(this, prev));
+        prev = addPage(new AjaxSpiderPage(this, prev));
         prev = addPage(new ActiveScanPage(this, prev));
         prev = addPage(new AttackModePage(this, prev));
         prev = addPage(new ToolConfigPage(this, prev));
@@ -210,7 +214,7 @@ public class TutorialProxyServer extends ProxyServer {
         return sb.toString();
     }
 
-    protected HudParam getHudParam() {
+    public HudParam getHudParam() {
         return extension.getHudParam();
     }
 
@@ -266,6 +270,10 @@ public class TutorialProxyServer extends ProxyServer {
                         } else if (msg.getRequestHeader().getMethod().equals("GET")) {
                             page.handleGetRequest(msg);
                         }
+
+                        // Clear update (if any) before the page is rendered
+                        // so the icon on the index is set correctly
+                        extension.getHudParam().clearTutorialUpdate(page.getName());
 
                         String body = page.getHtml();
                         msg.setResponseBody(body);

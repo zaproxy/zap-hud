@@ -23,7 +23,7 @@ repositories {
     mavenCentral()
 }
 
-version = "0.4.0"
+version = "0.5.0"
 description = "Display information from ZAP in browser."
 
 val generatedI18nJsFileDir = layout.buildDirectory.dir("zapAddOn/i18nJs")
@@ -36,7 +36,7 @@ val zapPort = 8999
 // Use a key just to make sure the HUD works with one
 val zapApiKey = "password123"
 val hudDevArgs = listOf("-config", "hud.enabledForDesktop=true", "-config", "hud.enabledForDaemon=true", "-config", "hud.devMode=true", "-config", "hud.unsafeEval=true")
-val zapCmdlineOpts = listOf("-config", "hud.tutorialPort=9998", "-config", "hud.tutorialTestMode=true", "-config", "hud.showWelcomeScreen=false", "-daemon") + hudDevArgs
+val zapCmdlineOpts = listOf("-silent", "-config", "hud.tutorialPort=9998", "-config", "hud.tutorialTestMode=true", "-config", "hud.showWelcomeScreen=false", "-daemon") + hudDevArgs
 
 zapAddOn {
     addOnId.set("hud")
@@ -94,8 +94,6 @@ java {
 val jupiterVersion = "5.3.1"
 
 dependencies {
-    zap("org.zaproxy:zap:2.7.0")
-
     compileOnly(files(fileTree("lib").files))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
@@ -103,6 +101,9 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
 
     testImplementation("io.github.bonigarcia:selenium-jupiter:2.2.0")
+    testImplementation("org.hamcrest:hamcrest-all:1.3")
+    testImplementation("org.mockito:mockito-all:1.10.8")
+    testImplementation(files(fileTree("lib").files))
 }
 
 tasks.withType<Test>().configureEach {
