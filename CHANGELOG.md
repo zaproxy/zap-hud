@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+ - Hide drawer at the same time as the side panels [#552](https://github.com/zaproxy/zap-hud/issues/552)
 
 ## [0.5.0] - 2019-07-24
 

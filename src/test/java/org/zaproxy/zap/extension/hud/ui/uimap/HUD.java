@@ -19,11 +19,17 @@
  */
 package org.zaproxy.zap.extension.hud.ui.uimap;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
+import net.sf.json.JSONObject;
+import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -32,6 +38,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.hud.ui.Constants;
 
 /**
@@ -52,6 +59,8 @@ public class HUD {
     public static String DISPLAY_PANEL_ID = "zap-hud-main-display";
     public static String MANAGEMENT_PANEL_ID = "zap-hud-management";
     public static String HISTORY_TABLE_ID = "history-messages";
+    public static String BOTTOM_TAB_HISTORY_ID = "tab.history";
+    public static String BOTTOM_TAB_WEBSOCKETS_ID = "tab.websockets";
 
     public static By LEFT_PANEL_BY_ID = By.id(LEFT_PANEL_ID);
     public static By RIGHT_PANEL_BY_ID = By.id(RIGHT_PANEL_ID);
@@ -218,6 +227,31 @@ public class HUD {
                                 .equals("complete");
                     }
                 });
+    }
+
+    public static JSONObject callZapApi(String apiCall) throws MalformedURLException, IOException {
+        String apiUrl =
+                "http://"
+                        + Constants.ZAP_HOST_PORT
+                        + apiCall
+                        + API.API_KEY_PARAM
+                        + "="
+                        + Constants.ZAP_TEST_API_KEY;
+
+        try (InputStream in = new URL(apiUrl).openStream()) {
+            String str = IOUtils.toString(in, "UTF-8");
+            return JSONObject.fromObject(str);
+        }
+    }
+
+    /**
+     * Resets all of the tutorial tasks - can be used where multiple tests can clear the same task.
+     *
+     * @throws MalformedURLException
+     * @throws IOException
+     */
+    public static void callZapApiResetTasks() throws MalformedURLException, IOException {
+        HUD.callZapApi("/JSON/hud/action/resetTutorialTasks?");
     }
 
     public WebDriver getWebDriver() {

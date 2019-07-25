@@ -230,7 +230,8 @@ Vue.component('tabs', {
         return {
             tabs: [],
             isOpen: false,
-            isArrowUp: true
+            isArrowUp: true,
+            tabsVisible: true
 		};
     },
     methods: {
@@ -299,12 +300,27 @@ Vue.component('tabs', {
                 }
             })
             .catch(utils.errorHandler);
+
+        eventBus.$on('showTabs', data => {
+            this.tabsVisible = true;
+        })
+        eventBus.$on('hideTabs', data => {
+            this.tabsVisible = false;
+            if (this.isOpen) {
+                this.closeDrawer();
+            }
+        })
+    },
+    beforeDestroy () {
+        eventBus.$off('hideTabs')
+        eventBus.$off('showTabs')
     }
 });
 
 Vue.component('tab', {
     template: '#tab-template',
     props: {
+        id: { required: true },
         name: { required: true },
         selected: { default: false }
     },
@@ -400,17 +416,24 @@ Vue.component('drawer-button-showhide', {
     methods: {
         showHud() {
             this.isHudVisible = true;
-            this.icon = utils.getZapImagePath('radar.png');
             localforage.setItem('settings.isHudVisible', true)
+                .then(function(value){
+                    this.icon = utils.getZapImagePath('radar.png');
+                    parent.postMessage({tabId: tabId, frameId: frameId, action:'showHudPanels'}, document.referrer);
+                    eventBus.$emit('showTabs', {});
+                })
                 .catch(utils.errorHandler);
-			parent.postMessage({tabId: tabId, frameId: frameId, action:'showSidePanels'}, document.referrer);
+
         },
         hideHud() {
             this.isHudVisible = false;
-            this.icon = utils.getZapImagePath('radar-grey.png');
             localforage.setItem('settings.isHudVisible', false)
+                .then(function(value){
+                    this.icon = utils.getZapImagePath('radar-grey.png');
+                    parent.postMessage({tabId: tabId, frameId: frameId, action:'hideHudPanels'}, document.referrer);
+                    eventBus.$emit('hideTabs', {});
+                })
                 .catch(utils.errorHandler);
-			parent.postMessage({tabId: tabId, frameId: frameId, action:'hideSidePanels'}, document.referrer);
         },
 		toggleIsVisible() {
             this.isHudVisible ? this.hideHud() : this.showHud();
@@ -423,6 +446,7 @@ Vue.component('drawer-button-showhide', {
                 this.isHudVisible = isHudVisible;
                 if (!this.isHudVisible) {
                     this.icon = utils.getZapImagePath('radar-grey.png');
+                    eventBus.$emit('hideTabs', {});
                 }
             })
             .catch(utils.errorHandler);

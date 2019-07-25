@@ -64,7 +64,8 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
     }
 
     @Test
-    public void testTaskAndNextButton(FirefoxDriver driver) {
+    public void testTaskAndNextButton(FirefoxDriver driver) throws Exception {
+        HUD.callZapApiResetTasks();
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
 
@@ -98,7 +99,8 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
     }
 
     @Test
-    public void testSidePanelsHiddenAndRevealed(FirefoxDriver driver) throws URISyntaxException {
+    public void testSidePanelsHiddenAndRevealed(FirefoxDriver driver) throws Exception {
+        HUD.callZapApiResetTasks();
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
 
@@ -106,7 +108,7 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
         testSidePanesVisible(hud);
 
         // Check they are hidden after button clicked
-        testClickHudButton(driver);
+        testClickHudButton(driver, false);
         testSidePanesHidden(hud);
 
         // Check they stay hidden when the page is refreshed
@@ -115,8 +117,31 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
         testSidePanesHidden(hud);
 
         // Check they are revealed when the button is clicked again
-        testClickHudButton(driver);
+        testClickHudButton(driver, true);
         testSidePanesVisible(hud);
+    }
+
+    @Test
+    public void testBottonDrawerTabsHiddenAndRevealed(FirefoxDriver driver)
+            throws URISyntaxException {
+        HUD hud = new HUD(driver);
+        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
+
+        // check they visible to start with
+        testDrawerTabsVisible(hud);
+
+        // Check they are hidden after button clicked
+        testClickHudButton(driver, false);
+        testDrawerTabsHidden(hud);
+
+        // Check they stay hidden when the page is refreshed
+        hud.openRelativePage(FramesPage.NAME);
+
+        testDrawerTabsHidden(hud);
+
+        // Check they are revealed when the button is clicked again
+        testClickHudButton(driver, true);
+        testDrawerTabsVisible(hud);
     }
 
     private static void checkPanelVisible(WebDriver wd, WebElement panel) {
@@ -136,10 +161,11 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
         checkPanelVisible(wd, hud.waitForBottomPanel());
     }
 
-    private static void testClickHudButton(WebDriver wd) {
+    private static void testClickHudButton(WebDriver wd, boolean hidden) {
         HUD hud = new HUD(wd);
-        List<WebElement> buttons = hud.waitForHudButtons(HUD.BOTTOM_PANEL_BY_ID, 2);
-        Assertions.assertEquals(2, buttons.size());
+        int expectedButtons = hidden ? 1 : 2;
+        List<WebElement> buttons = hud.waitForHudButtons(HUD.BOTTOM_PANEL_BY_ID, expectedButtons);
+        Assertions.assertEquals(expectedButtons, buttons.size());
 
         buttons.get(0).click();
         wd.switchTo().defaultContent();
@@ -155,5 +181,31 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
         checkPanelHidden(wd, hud.waitForLeftPanel());
         checkPanelHidden(wd, hud.waitForRightPanel());
         checkPanelVisible(wd, hud.waitForBottomPanel());
+    }
+
+    private void testDrawerTabsVisible(HUD hud) {
+        WebDriver wd = hud.getWebDriver();
+        hud.waitForHudButtons(HUD.BOTTOM_PANEL_BY_ID, 2);
+        Assertions.assertNotNull(wd.findElement(By.id(HUD.BOTTOM_TAB_HISTORY_ID)));
+        Assertions.assertNotNull(wd.findElement(By.id(HUD.BOTTOM_TAB_WEBSOCKETS_ID)));
+        wd.switchTo().parentFrame();
+    }
+
+    private void testDrawerTabsHidden(HUD hud) {
+        WebDriver wd = hud.getWebDriver();
+        hud.waitForHudButtons(HUD.BOTTOM_PANEL_BY_ID, 1);
+        try {
+            wd.findElement(By.id(HUD.BOTTOM_TAB_HISTORY_ID));
+            fail("History tab should have been hidden");
+        } catch (NoSuchElementException e) {
+            // Expected
+        }
+        try {
+            wd.findElement(By.id(HUD.BOTTOM_TAB_WEBSOCKETS_ID));
+            fail("Websockets tab should have been hidden");
+        } catch (NoSuchElementException e) {
+            // Expected
+        }
+        wd.switchTo().parentFrame();
     }
 }

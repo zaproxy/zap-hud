@@ -14,10 +14,10 @@
 <body>
     <div id="app">
         <tabs>
-            <tab :name="$t('message.history_tool')">
+            <tab :name="$t('message.history_tool')" :id="'tab.history'">
                 <history></history>
             </tab>
-            <tab :name="$t('message.websockets_tool')">
+            <tab :name="$t('message.websockets_tool')" :id="'tab.websockets'">
                 <websockets></websockets>
             </tab>
         </tabs>
@@ -127,19 +127,19 @@
         <div style="height: 100%;">
             <div class="tabs">
                 <ul class="tab">
-                    <li v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true }">
-                        <a :href="tab.href" @click="selectTab(tab)" :class="{ 'badge': tab.isBadgeData}" :data-badge="tab.badgeData">{{ tab.name }}</a>
+                    <li v-if="tabsVisible" v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true }">
+                        <a :id="tab.id" :href="tab.href" @click="selectTab(tab)" :class="{ 'badge': tab.isBadgeData}" :data-badge="tab.badgeData">{{ tab.name }}</a>
                     </li>
                     <!-- invisible tab-item to push tab-action buttons right -->
-                    <li class="tab-item tab-action-spacer">
+                    <li v-if="tabsVisible" class="tab-item tab-action-spacer">
                     </li>
                     <li class="tab-item tab-action">
                         <drawer-button-showhide></drawer-button-showhide>
                     </li>
-                    <li class="tab-item tab-action">
+                    <li v-if="tabsVisible" class="tab-item tab-action">
                         <drawer-button-settings></drawer-button-settings>
                     </li>
-                    <li class="tab-item tab-action">
+                    <li v-if="tabsVisible" class="tab-item tab-action">
                         <button class="btn btn-action btn-sm"  @click="toggleOpenClose">
                             <i :class="{ 'icon': true, 'icon-arrow-up': isArrowUp, 'icon-arrow-down': !isArrowUp }"></i>
                         </button>

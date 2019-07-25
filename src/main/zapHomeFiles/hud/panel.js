@@ -143,7 +143,7 @@ Vue.component('hud-buttons', {
 		localforage.getItem('settings.isHudVisible')
 			.then(isHudVisible => {
 				if (isHudVisible !== null && !isHudVisible) {
-					return parent.postMessage({action:'hideSidePanels'}, document.referrer);
+					return parent.postMessage({action:'hideHudPanels'}, document.referrer);
 				}
 			})
 			.then( () => {
