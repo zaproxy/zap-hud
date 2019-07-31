@@ -27,6 +27,7 @@ version = "0.6.0"
 description = "Display information from ZAP in browser."
 
 val generatedI18nJsFileDir = layout.buildDirectory.dir("zapAddOn/i18nJs")
+val npmDepsDir = layout.buildDirectory.dir("zapAddOn/npmDeps")
 val zapHome = layout.buildDirectory.dir("zapHome").get()
 val testZapHome = layout.buildDirectory.dir("testZapHome").get()
 val zapDownloadDir = layout.buildDirectory.dir("testZapInstall").get()
@@ -52,6 +53,7 @@ zapAddOn {
         author.set("ZAP Dev Team")
         changesFile.set(tasks.named<ConvertMarkdownToHtml>("generateManifestChanges").flatMap { it.html })
         files.from(generatedI18nJsFileDir)
+        files.from(npmDepsDir)
 
         dependencies {
             addOns {
@@ -75,6 +77,29 @@ zapAddOn {
         }
     }
 }
+
+val installNpmDeps by tasks.registering(Exec::class) {
+    group = LifecycleBasePlugin.BUILD_GROUP
+    description = "Installs the npm dependencies, to later include in the add-on."
+    inputs.files("package.json", "package-lock.json")
+    outputs.dir("node_modules")
+
+    commandLine("npm", "install")
+}
+
+val copyNpmDeps by tasks.registering(Copy::class) {
+    group = LifecycleBasePlugin.BUILD_GROUP
+    description = "Copies the (required) npm dependencies for the add-on."
+    dependsOn(installNpmDeps)
+
+    from("node_modules/vue/dist/vue.js")
+    from("node_modules/vue-i18n/dist/vue-i18n.js")
+    from("node_modules/localforage/dist/localforage.min.js")
+
+    into(npmDepsDir.map({ it.file("hud/libraries/") }))
+}
+
+sourceSets["main"].output.dir(npmDepsDir, "builtBy" to copyNpmDeps)
 
 val generateI18nJsFile by tasks.creating(GenerateI18nJsFile::class) {
     bundleName.set("UIMessages")
