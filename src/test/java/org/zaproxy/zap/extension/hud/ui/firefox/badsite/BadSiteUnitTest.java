@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
@@ -33,7 +32,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import net.sf.json.JSONObject;
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -43,10 +41,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.hud.HudAPI;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
-import org.zaproxy.zap.extension.hud.ui.Constants;
 import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
 import org.zaproxy.zap.extension.hud.ui.firefox.tutorial.TutorialStatics;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
@@ -126,7 +122,8 @@ public class BadSiteUnitTest extends FirefoxUnitTest {
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
 
         // Test the value is empty to start
-        JSONObject ret = callApi("/JSON/hud/view/getUiOption/?key=" + BAD_SITE_TEST_KEY + "&");
+        JSONObject ret =
+                HUD.callZapApi("/JSON/hud/view/getUiOption/?key=" + BAD_SITE_TEST_KEY + "&");
         assertEquals("", ret.get(BAD_SITE_TEST_KEY));
 
         String script =
@@ -146,23 +143,8 @@ public class BadSiteUnitTest extends FirefoxUnitTest {
         Thread.sleep(5000); // Just to make sure
 
         // And check its still empty
-        ret = callApi("/JSON/hud/view/getUiOption/?key=" + BAD_SITE_TEST_KEY + "&");
+        ret = HUD.callZapApi("/JSON/hud/view/getUiOption/?key=" + BAD_SITE_TEST_KEY + "&");
         assertEquals("", ret.get(BAD_SITE_TEST_KEY));
-    }
-
-    private static JSONObject callApi(String apiCall) throws MalformedURLException, IOException {
-        String apiUrl =
-                "http://"
-                        + Constants.ZAP_HOST_PORT
-                        + apiCall
-                        + API.API_KEY_PARAM
-                        + "="
-                        + Constants.ZAP_TEST_API_KEY;
-
-        try (InputStream in = new URL(apiUrl).openStream()) {
-            String str = IOUtils.toString(in, "UTF-8");
-            return JSONObject.fromObject(str);
-        }
     }
 
     private static Object executeScriptWithRetry(WebDriver driver, String script) {

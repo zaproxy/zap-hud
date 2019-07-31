@@ -85,14 +85,22 @@
 		panel.style.height = (panel.offsetHeight - 33) + "px";
 	}
 
-	function showSidePanels() {
+	function showHudPanels() {
 		document.getElementById(LEFT_PANEL).style.display = "";
 		document.getElementById(RIGHT_PANEL).style.display = "";
+		var panel = document.getElementById(BOTTOM_DRAWER);
+		panel.style.width = "100%";
+		panel.style.left = "0px";
+		panel.style.right = "";
 	}
 
-	function hideSidePanels() {
+	function hideHudPanels() {
 		document.getElementById(LEFT_PANEL).style.display = "none";
 		document.getElementById(RIGHT_PANEL).style.display = "none";
+		var panel = document.getElementById(BOTTOM_DRAWER);
+		panel.style.width = "90px";
+		panel.style.left = "";
+		panel.style.right = "0px";
 	}
 
 	function hideAllDisplayFrames() {
@@ -319,12 +327,12 @@
 				showPanel(message.orientation);
 				break;
 
-			case "showSidePanels":
-				showSidePanels();
+			case "showHudPanels":
+				showHudPanels();
 				break;
 
-			case "hideSidePanels":
-				hideSidePanels();
+			case "hideHudPanels":
+				hideHudPanels();
 				break;
 
 			case "showMainDisplay":
