@@ -1,3 +1,4 @@
+import org.ysb33r.gradle.nodejs.tasks.NpmTask
 import org.zaproxy.gradle.addon.AddOnPlugin
 import org.zaproxy.gradle.addon.AddOnStatus
 import org.zaproxy.gradle.addon.misc.ConvertMarkdownToHtml
@@ -13,6 +14,7 @@ plugins {
     `java-library`
     id("org.zaproxy.add-on") version "0.2.0"
     id("com.diffplug.gradle.spotless") version "3.15.0"
+    id("org.ysb33r.nodejs.npm") version "0.6.2"
 }
 
 apply(from = "$rootDir/gradle/compile.gradle.kts")
@@ -78,13 +80,17 @@ zapAddOn {
     }
 }
 
-val installNpmDeps by tasks.registering(Exec::class) {
+nodejs {
+    executable(mapOf("version" to "10.16.1"))
+}
+
+val installNpmDeps by tasks.registering(NpmTask::class) {
     group = LifecycleBasePlugin.BUILD_GROUP
     description = "Installs the npm dependencies, to later include in the add-on."
     inputs.files("package.json", "package-lock.json")
     outputs.dir("node_modules")
 
-    commandLine("npm", "install")
+    command("install")
 }
 
 val copyNpmDeps by tasks.registering(Copy::class) {
