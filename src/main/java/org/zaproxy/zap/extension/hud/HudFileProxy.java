@@ -94,55 +94,58 @@ public class HudFileProxy extends ApiImplementor {
     @Override
     public String handleCallBack(HttpMessage msg) throws ApiException {
         try {
-            String query = msg.getRequestHeader().getURI().getPathQuery();
-            LOG.debug("callback query = " + query);
-            if (query != null) {
-                if (query.contains("..")) {
-                    // Looks like an injection attack
-                    LOG.warn("Attempted injection attack? " + msg.getRequestHeader().getURI());
-                    throw new ApiException(
-                            ApiException.Type.ILLEGAL_PARAMETER,
-                            msg.getRequestHeader().getURI().toString());
-                }
-                if (query.indexOf("name=") > 0) {
-                    String file = query.substring(query.indexOf("name=") + 5);
-                    if (file.indexOf("&") > 0) {
-                        file = file.substring(0, file.indexOf("&"));
-                    }
-                    msg.setResponseBody(api.getFile(msg, file));
-                    msg.setResponseHeader(getResponseHeader(file, msg.getResponseBody().length()));
+            String path = msg.getRequestHeader().getURI().getPath();
+            if (path.contains("..")) {
+                // Looks like an injection attack
+                LOG.warn("Attempted injection attack? " + msg.getRequestHeader().getURI());
+                throw new ApiException(
+                        ApiException.Type.ILLEGAL_PARAMETER,
+                        msg.getRequestHeader().getURI().toString());
+            }
+            String[] pathElements = path.split("/");
+            if (pathElements.length < 5) {
+                throw new ApiException(
+                        ApiException.Type.ILLEGAL_PARAMETER,
+                        msg.getRequestHeader().getURI().toString());
+            }
+            String type = pathElements[4];
+            LOG.debug("callback type = " + type);
+            if (type.equals("file")) {
+                String file = path.substring(path.indexOf("file") + 5);
+                LOG.debug("callback file = " + file);
+                msg.setResponseBody(api.getFile(msg, file));
+                msg.setResponseHeader(getResponseHeader(file, msg.getResponseBody().length()));
 
-                    if (msg.getRequestHeader().getURI().toString().startsWith(API.API_URL_S)) {
-                        if (api.allowUnsafeEval()) {
-                            msg.getResponseHeader()
-                                    .setHeader(
-                                            "Content-Security-Policy",
-                                            HudAPI.CSP_POLICY_UNSAFE_EVAL);
-                        } else {
-                            msg.getResponseHeader()
-                                    .setHeader("Content-Security-Policy", HudAPI.CSP_POLICY);
-                        }
-                    }
-                    if (api.getRequestCookieValue(msg, HudAPI.ZAP_HUD_COOKIE) == null) {
-                        // The ZAP-HUD cookie has not been set, so set it or we'll block access to
-                        // key resources
+                if (msg.getRequestHeader().getURI().toString().startsWith(API.API_URL_S)) {
+                    if (api.allowUnsafeEval()) {
                         msg.getResponseHeader()
                                 .setHeader(
-                                        HttpHeader.SET_COOKIE,
-                                        HudAPI.ZAP_HUD_COOKIE
-                                                + "="
-                                                + api.getZapHudCookieValue()
-                                                + "; Secure; HttpOnly; SameSite=Strict");
+                                        "Content-Security-Policy", HudAPI.CSP_POLICY_UNSAFE_EVAL);
+                    } else {
+                        msg.getResponseHeader()
+                                .setHeader("Content-Security-Policy", HudAPI.CSP_POLICY);
                     }
-
-                    return msg.getResponseBody().toString();
-                } else if (query.indexOf("image=") > 0) {
-                    String file = query.substring(query.indexOf("image=") + 6);
-
-                    msg.setResponseBody(api.getImage(file));
-                    msg.setResponseHeader(getResponseHeader(file, msg.getResponseBody().length()));
-                    return msg.getResponseBody().toString();
                 }
+                if (api.getRequestCookieValue(msg, HudAPI.ZAP_HUD_COOKIE) == null) {
+                    // The ZAP-HUD cookie has not been set, so set it or we'll block access to
+                    // key resources
+                    msg.getResponseHeader()
+                            .setHeader(
+                                    HttpHeader.SET_COOKIE,
+                                    HudAPI.ZAP_HUD_COOKIE
+                                            + "="
+                                            + api.getZapHudCookieValue()
+                                            + "; Secure; HttpOnly; SameSite=Strict");
+                }
+
+                return msg.getResponseBody().toString();
+            } else if (type.equals("image")) {
+                String file = path.substring(path.indexOf("image") + 6);
+                LOG.debug("callback image = " + file);
+
+                msg.setResponseBody(api.getImage(file));
+                msg.setResponseHeader(getResponseHeader(file, msg.getResponseBody().length()));
+                return msg.getResponseBody().toString();
             }
         } catch (ApiException e) {
             throw e;

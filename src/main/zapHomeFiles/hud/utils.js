@@ -24,7 +24,7 @@ var utils = (function() {
 	var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
 	var IS_DEV_MODE = '<<DEV_MODE>>' === 'true' ? true : false ;
 
-	var BUTTON_HTML = '<div class="button" id="BUTTON_NAME-button">\n<div class="button-icon" id="BUTTON_NAME-button-icon"><img src="' + ZAP_HUD_FILES + '?image=IMAGE_NAME" alt="IMAGE_NAME" height="16" width="16"></div>\n<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA</div>\n<div class="button-label" id="BUTTON_NAME-button-label">BUTTON_LABEL</div>\n</div>\n';
+	var BUTTON_HTML = '<div class="button" id="BUTTON_NAME-button">\n<div class="button-icon" id="BUTTON_NAME-button-icon"><img src="' + ZAP_HUD_FILES + '/image/IMAGE_NAME" alt="IMAGE_NAME" height="16" width="16"></div>\n<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA</div>\n<div class="button-label" id="BUTTON_NAME-button-label">BUTTON_LABEL</div>\n</div>\n';
 	var BUTTON_NAME = /BUTTON_NAME/g;
 	var BUTTON_DATA_DIV  = /<div class="button-data" id="BUTTON_NAME-button-data">BUTTON_DATA<\/div>/g;
 	var BUTTON_DATA = /BUTTON_DATA/g;
@@ -692,11 +692,11 @@ var utils = (function() {
 	
 	
 	function getZapFilePath(file) {
-		return ZAP_HUD_FILES + '?name=' + file;
+		return ZAP_HUD_FILES + '/file/' + file;
 	}
 	
 	function getZapImagePath(file) {
-		return ZAP_HUD_FILES + '?image=' + file;
+		return ZAP_HUD_FILES + '/image/' + file;
 	}
 	
 	function log(level, method, message, object) {
