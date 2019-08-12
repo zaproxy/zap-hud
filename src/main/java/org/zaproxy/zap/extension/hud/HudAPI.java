@@ -185,22 +185,22 @@ public class HudAPI extends ApiImplementor {
     public String handleCallBack(HttpMessage msg) throws ApiException {
         // Just used to handle files which need to be on the target domain
         try {
-            String query = msg.getRequestHeader().getURI().getPathQuery();
-            logger.debug("callback query = " + query);
-            if (query != null) {
-                if (query.indexOf("zapfile=") > 0) {
-                    String fileName = query.substring(query.indexOf("zapfile=") + 8);
-                    if (DOMAIN_FILE_WHITELIST.contains(fileName)) {
-                        msg.setResponseBody(
-                                this.getFile(msg, ExtensionHUD.TARGET_DIRECTORY + "/" + fileName));
-                        // Currently only javascript files are returned
-                        msg.setResponseHeader(
-                                API.getDefaultResponseHeader(
-                                        "application/javascript; charset=UTF-8",
-                                        msg.getResponseBody().length(),
-                                        false));
-                        return msg.getResponseBody().toString();
-                    }
+            String path = msg.getRequestHeader().getURI().getEscapedPath();
+            int lastSlash = path.lastIndexOf("/");
+            String fileName = path.substring(lastSlash + 1);
+
+            logger.debug("callback fileName = " + fileName);
+            if (fileName != null) {
+                if (DOMAIN_FILE_WHITELIST.contains(fileName)) {
+                    msg.setResponseBody(
+                            this.getFile(msg, ExtensionHUD.TARGET_DIRECTORY + "/" + fileName));
+                    // Currently only javascript files are returned
+                    msg.setResponseHeader(
+                            API.getDefaultResponseHeader(
+                                    "application/javascript; charset=UTF-8",
+                                    msg.getResponseBody().length(),
+                                    false));
+                    return msg.getResponseBody().toString();
                 }
             }
         } catch (Exception e) {
@@ -458,7 +458,7 @@ public class HudAPI extends ApiImplementor {
                         if (tool.toLowerCase(Locale.ROOT).endsWith(".js")) {
                             sb.append("\t\"");
                             sb.append(this.hudFileUrl);
-                            sb.append("?name=tools/");
+                            sb.append("/file/tools/");
                             sb.append(tool);
                             sb.append("\",\n");
                         }

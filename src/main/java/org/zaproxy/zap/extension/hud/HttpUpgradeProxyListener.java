@@ -128,7 +128,7 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
                         // Need to replace hardcoded http URLs with https ones
                         msg.getResponseBody()
                                 .setBody(respBody.replace("http://" + domain, "https://" + domain));
-                        msg.getResponseHeader().setContentLength(msg.getRequestBody().length());
+                        msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
                     }
                     if (respBody.contains("ws://")) {
                         // Need to replace hardcoded ws URLs with wss ones
@@ -139,7 +139,7 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
                             extHud.addUpgradedHttpsDomain(uri);
                         }
                         msg.getResponseBody().setBody(body);
-                        msg.getResponseHeader().setContentLength(msg.getRequestBody().length());
+                        msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
                     }
                 }
             } catch (URIException e) {

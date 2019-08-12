@@ -1,3 +1,4 @@
+import org.ysb33r.gradle.nodejs.tasks.NpmTask
 import org.zaproxy.gradle.addon.AddOnPlugin
 import org.zaproxy.gradle.addon.AddOnStatus
 import org.zaproxy.gradle.addon.misc.ConvertMarkdownToHtml
@@ -13,6 +14,7 @@ plugins {
     `java-library`
     id("org.zaproxy.add-on") version "0.2.0"
     id("com.diffplug.gradle.spotless") version "3.15.0"
+    id("org.ysb33r.nodejs.npm") version "0.6.2"
 }
 
 apply(from = "$rootDir/gradle/compile.gradle.kts")
@@ -23,10 +25,11 @@ repositories {
     mavenCentral()
 }
 
-version = "0.5.0"
+version = "0.6.0"
 description = "Display information from ZAP in browser."
 
 val generatedI18nJsFileDir = layout.buildDirectory.dir("zapAddOn/i18nJs")
+val npmDepsDir = layout.buildDirectory.dir("zapAddOn/npmDeps")
 val zapHome = layout.buildDirectory.dir("zapHome").get()
 val testZapHome = layout.buildDirectory.dir("testZapHome").get()
 val zapDownloadDir = layout.buildDirectory.dir("testZapInstall").get()
@@ -52,6 +55,7 @@ zapAddOn {
         author.set("ZAP Dev Team")
         changesFile.set(tasks.named<ConvertMarkdownToHtml>("generateManifestChanges").flatMap { it.html })
         files.from(generatedI18nJsFileDir)
+        files.from(npmDepsDir)
 
         dependencies {
             addOns {
@@ -75,6 +79,33 @@ zapAddOn {
         }
     }
 }
+
+nodejs {
+    executable(mapOf("version" to "10.16.1"))
+}
+
+val installNpmDeps by tasks.registering(NpmTask::class) {
+    group = LifecycleBasePlugin.BUILD_GROUP
+    description = "Installs the npm dependencies, to later include in the add-on."
+    inputs.files("package.json", "package-lock.json")
+    outputs.dir("node_modules")
+
+    command("install")
+}
+
+val copyNpmDeps by tasks.registering(Copy::class) {
+    group = LifecycleBasePlugin.BUILD_GROUP
+    description = "Copies the (required) npm dependencies for the add-on."
+    dependsOn(installNpmDeps)
+
+    from("node_modules/vue/dist/vue.js")
+    from("node_modules/vue-i18n/dist/vue-i18n.js")
+    from("node_modules/localforage/dist/localforage.min.js")
+
+    into(npmDepsDir.map({ it.file("hud/libraries/") }))
+}
+
+sourceSets["main"].output.dir(npmDepsDir, "builtBy" to copyNpmDeps)
 
 val generateI18nJsFile by tasks.creating(GenerateI18nJsFile::class) {
     bundleName.set("UIMessages")

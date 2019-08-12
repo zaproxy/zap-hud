@@ -1,23 +1,23 @@
 <html>
 <head>
-	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre.css"/>
-	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=libraries/spectre-icons.css"/>
-    <link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>?name=drawer.css"/>
+	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>/file/libraries/spectre.css"/>
+	<link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>/file/libraries/spectre-icons.css"/>
+    <link rel="stylesheet" type="text/css" href="<<ZAP_HUD_FILES>>/file/drawer.css"/>
 
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/localforage.min.js"></script>
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue.js"></script>
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=libraries/vue-i18n.js"></script>
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=i18n.js"></script>
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=utils.js"></script>
-	<script type="text/javascript" src="<<ZAP_HUD_FILES>>?name=drawer.js"></script>
+	<script type="text/javascript" src="<<ZAP_HUD_FILES>>/file/libraries/localforage.min.js"></script>
+	<script type="text/javascript" src="<<ZAP_HUD_FILES>>/file/libraries/vue.js"></script>
+	<script type="text/javascript" src="<<ZAP_HUD_FILES>>/file/libraries/vue-i18n.js"></script>
+	<script type="text/javascript" src="<<ZAP_HUD_FILES>>/file/i18n.js"></script>
+	<script type="text/javascript" src="<<ZAP_HUD_FILES>>/file/utils.js"></script>
+	<script type="text/javascript" src="<<ZAP_HUD_FILES>>/file/drawer.js"></script>
 </head>
 <body>
     <div id="app">
         <tabs>
-            <tab :name="$t('message.history_tool')">
+            <tab :name="$t('message.history_tool')" :id="'tab.history'">
                 <history></history>
             </tab>
-            <tab :name="$t('message.websockets_tool')">
+            <tab :name="$t('message.websockets_tool')" :id="'tab.websockets'">
                 <websockets></websockets>
             </tab>
         </tabs>
@@ -127,19 +127,19 @@
         <div style="height: 100%;">
             <div class="tabs">
                 <ul class="tab">
-                    <li v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true }">
-                        <a :href="tab.href" @click="selectTab(tab)" :class="{ 'badge': tab.isBadgeData}" :data-badge="tab.badgeData">{{ tab.name }}</a>
+                    <li v-if="tabsVisible" v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true }">
+                        <a :id="tab.id" :href="tab.href" @click="selectTab(tab)" :class="{ 'badge': tab.isBadgeData}" :data-badge="tab.badgeData">{{ tab.name }}</a>
                     </li>
                     <!-- invisible tab-item to push tab-action buttons right -->
-                    <li class="tab-item tab-action-spacer">
+                    <li v-if="tabsVisible" class="tab-item tab-action-spacer">
                     </li>
                     <li class="tab-item tab-action">
                         <drawer-button-showhide></drawer-button-showhide>
                     </li>
-                    <li class="tab-item tab-action">
+                    <li v-if="tabsVisible" class="tab-item tab-action">
                         <drawer-button-settings></drawer-button-settings>
                     </li>
-                    <li class="tab-item tab-action">
+                    <li v-if="tabsVisible" class="tab-item tab-action">
                         <button class="btn btn-action btn-sm"  @click="toggleOpenClose">
                             <i :class="{ 'icon': true, 'icon-arrow-up': isArrowUp, 'icon-arrow-down': !isArrowUp }"></i>
                         </button>

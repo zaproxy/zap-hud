@@ -4,7 +4,7 @@
  * Description goes here...
  */
 
-var IMAGE_URL = '<<ZAP_HUD_FILES>>?image=';
+var IMAGE_URL = '<<ZAP_HUD_FILES>>/image/';
 var orientation = "";
 var panelKey = "";
 var frameId = '';
@@ -143,7 +143,7 @@ Vue.component('hud-buttons', {
 		localforage.getItem('settings.isHudVisible')
 			.then(isHudVisible => {
 				if (isHudVisible !== null && !isHudVisible) {
-					return parent.postMessage({action:'hideSidePanels'}, document.referrer);
+					return parent.postMessage({action:'hideHudPanels'}, document.referrer);
 				}
 			})
 			.then( () => {

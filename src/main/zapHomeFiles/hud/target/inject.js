@@ -85,14 +85,22 @@
 		panel.style.height = (panel.offsetHeight - 33) + "px";
 	}
 
-	function showSidePanels() {
+	function showHudPanels() {
 		document.getElementById(LEFT_PANEL).style.display = "";
 		document.getElementById(RIGHT_PANEL).style.display = "";
+		var panel = document.getElementById(BOTTOM_DRAWER);
+		panel.style.width = "100%";
+		panel.style.left = "0px";
+		panel.style.right = "";
 	}
 
-	function hideSidePanels() {
+	function hideHudPanels() {
 		document.getElementById(LEFT_PANEL).style.display = "none";
 		document.getElementById(RIGHT_PANEL).style.display = "none";
+		var panel = document.getElementById(BOTTOM_DRAWER);
+		panel.style.width = "90px";
+		panel.style.left = "";
+		panel.style.right = "0px";
 	}
 
 	function hideAllDisplayFrames() {
@@ -290,7 +298,7 @@
 			let colour = colours[alert.risk];
 			el.style.borderColor = colour || 'red';
 			el.insertAdjacentHTML('afterend',
-				'<img src="' + ZAP_HUD_FILES + '?image=flag-' + colour + '.png" ' +
+				'<img src="' + ZAP_HUD_FILES + '/image/flag-' + colour + '.png" ' +
 				'id="zapHudAlert-' + alert.id + '" ' +
 				'title="' + alert.name + '" height="16" width="16" ' +
 				'onclick="injection.showZapAlert(' + alert.id + ');" />');
@@ -319,12 +327,12 @@
 				showPanel(message.orientation);
 				break;
 
-			case "showSidePanels":
-				showSidePanels();
+			case "showHudPanels":
+				showHudPanels();
 				break;
 
-			case "hideSidePanels":
-				hideSidePanels();
+			case "hideHudPanels":
+				hideHudPanels();
 				break;
 
 			case "showMainDisplay":
@@ -429,12 +437,12 @@
 
 		var template = document.createElement("template");
 		template.innerHTML = 
-			'<iframe id="' + MANAGEMENT + '" src="' + ZAP_HUD_FILES + '?name=management.html&amp;frameId=management&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
-			'<iframe id="' + LEFT_PANEL + '" src="' + ZAP_HUD_FILES + '?name=panel.html&amp;url=' + URL + '&amp;orientation=left&amp;frameId=leftPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="' + RIGHT_PANEL + '" src="' + ZAP_HUD_FILES + '?name=panel.html&amp;url=' + URL + '&amp;orientation=right&amp;frameId=rightPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="' + BOTTOM_DRAWER + '" src="' + ZAP_HUD_FILES + '?name=drawer.html&amp;frameId=drawer&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; overflow: hidden; left: 0px; bottom: 0px; width: 100%; height: 50px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="' + MAIN_DISPLAY + '" src="' + ZAP_HUD_FILES + '?name=display.html&amp;frameId=display&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;"></iframe>\n' +
-			'<iframe id="' + GROWLER_ALERTS + '" src="' + ZAP_HUD_FILES + '?name=growlerAlerts.html&amp;frameId=growlerAlerts&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; bottom: 30px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;"></iframe>';
+			'<iframe id="' + MANAGEMENT + '" src="' + ZAP_HUD_FILES + '/file/management.html?frameId=management&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
+			'<iframe id="' + LEFT_PANEL + '" src="' + ZAP_HUD_FILES + '/file/panel.html?url=' + URL + '&amp;orientation=left&amp;frameId=leftPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
+			'<iframe id="' + RIGHT_PANEL + '" src="' + ZAP_HUD_FILES + '/file/panel.html?url=' + URL + '&amp;orientation=right&amp;frameId=rightPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
+			'<iframe id="' + BOTTOM_DRAWER + '" src="' + ZAP_HUD_FILES + '/file/drawer.html?frameId=drawer&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; overflow: hidden; left: 0px; bottom: 0px; width: 100%; height: 50px; z-index: 2147483646;"></iframe>\n' +
+			'<iframe id="' + MAIN_DISPLAY + '" src="' + ZAP_HUD_FILES + '/file/display.html?frameId=display&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;"></iframe>\n' +
+			'<iframe id="' + GROWLER_ALERTS + '" src="' + ZAP_HUD_FILES + '/file/growlerAlerts.html?frameId=growlerAlerts&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; bottom: 30px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;"></iframe>';
 		document.body.appendChild(template.content);
 		document.body.style.marginBottom = "50px";
 		

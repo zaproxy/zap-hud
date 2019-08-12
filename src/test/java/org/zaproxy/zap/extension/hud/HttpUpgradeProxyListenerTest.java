@@ -45,16 +45,14 @@ public class HttpUpgradeProxyListenerTest {
         Mockito.when(ext.isUpgradedHttpsDomain(httpUri)).thenReturn(true);
 
         HttpUpgradeProxyListener hupl = new HttpUpgradeProxyListener(ext);
-        HttpMessage msg = new HttpMessage();
-        msg.getRequestHeader().setURI(httpUri);
-        msg.getResponseHeader().setHeader(HttpResponseHeader.CONTENT_TYPE, "text/html");
-        msg.setResponseBody(body);
+        HttpMessage msg = createMessage(httpUri, "text/html", body);
 
         // When
         hupl.onHttpResponseReceived(msg);
 
         // Then
         assertEquals(body.replace(httpUrl, httpsUrl), msg.getResponseBody().toString());
+        assertEquals(msg.getResponseBody().length(), msg.getResponseHeader().getContentLength());
     }
 
     @Test
@@ -74,16 +72,14 @@ public class HttpUpgradeProxyListenerTest {
         Mockito.when(ext.isUpgradedHttpsDomain(httpUri)).thenReturn(true);
 
         HttpUpgradeProxyListener hupl = new HttpUpgradeProxyListener(ext);
-        HttpMessage msg = new HttpMessage();
-        msg.getRequestHeader().setURI(httpUri);
-        msg.getResponseHeader().setHeader(HttpResponseHeader.CONTENT_TYPE, "text/html");
-        msg.setResponseBody(body);
+        HttpMessage msg = createMessage(httpUri, "text/html", body);
 
         // When
         hupl.onHttpResponseReceived(msg);
 
         // Then
         assertEquals(body.replace(httpUrl, httpsUrl), msg.getResponseBody().toString());
+        assertEquals(msg.getResponseBody().length(), msg.getResponseHeader().getContentLength());
     }
 
     @Test
@@ -96,16 +92,14 @@ public class HttpUpgradeProxyListenerTest {
         Mockito.when(ext.isUpgradedHttpsDomain(httpUri)).thenReturn(true);
 
         HttpUpgradeProxyListener hupl = new HttpUpgradeProxyListener(ext);
-        HttpMessage msg = new HttpMessage();
-        msg.getRequestHeader().setURI(httpUri);
-        msg.getResponseHeader().setHeader(HttpResponseHeader.CONTENT_TYPE, "image/png");
-        msg.setResponseBody(body);
+        HttpMessage msg = createMessage(httpUri, "image/png", body);
 
         // When
         hupl.onHttpResponseReceived(msg);
 
         // Then
         assertEquals(body, msg.getResponseBody().toString());
+        assertEquals(msg.getResponseBody().length(), msg.getResponseHeader().getContentLength());
     }
 
     @Test
@@ -118,16 +112,14 @@ public class HttpUpgradeProxyListenerTest {
         Mockito.when(ext.isUpgradedHttpsDomain(httpUri)).thenReturn(false);
 
         HttpUpgradeProxyListener hupl = new HttpUpgradeProxyListener(ext);
-        HttpMessage msg = new HttpMessage();
-        msg.getRequestHeader().setURI(httpUri);
-        msg.getResponseHeader().setHeader(HttpResponseHeader.CONTENT_TYPE, "text/html");
-        msg.setResponseBody(body);
+        HttpMessage msg = createMessage(httpUri, "text/html", body);
 
         // When
         hupl.onHttpResponseReceived(msg);
 
         // Then
         assertEquals(body, msg.getResponseBody().toString());
+        assertEquals(msg.getResponseBody().length(), msg.getResponseHeader().getContentLength());
     }
 
     @Test
@@ -162,5 +154,15 @@ public class HttpUpgradeProxyListenerTest {
         assertEquals(2, list.size());
         assertTrue(list.contains(wssUri1));
         assertTrue(list.contains(wssUri2));
+    }
+
+    private static HttpMessage createMessage(URI uri, String contentType, String body)
+            throws URIException {
+        HttpMessage msg = new HttpMessage();
+        msg.getRequestHeader().setURI(uri);
+        msg.getResponseHeader().setHeader(HttpResponseHeader.CONTENT_TYPE, contentType);
+        msg.setResponseBody(body);
+        msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
+        return msg;
     }
 }

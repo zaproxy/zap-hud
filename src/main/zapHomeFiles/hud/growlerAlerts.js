@@ -1,10 +1,10 @@
 // Injected string
 var ZAP_HUD_FILES = '<<ZAP_HUD_FILES>>';
 
-var INFORMATIONAL_FLAG = '<img src="' + ZAP_HUD_FILES + '?image=flag-blue.png" >&nbsp';
-var LOW_FLAG = '<img src="' + ZAP_HUD_FILES + '?image=flag-yellow.png" >&nbsp';
-var MEDIUM_FLAG = '<img src="' + ZAP_HUD_FILES + '?image=flag-orange.png" >&nbsp';
-var HIGH_FLAG = '<img src="' + ZAP_HUD_FILES + '?image=flag-red.png" >&nbsp';
+var INFORMATIONAL_FLAG = '<img src="' + ZAP_HUD_FILES + '/image/flag-blue.png" >&nbsp';
+var LOW_FLAG = '<img src="' + ZAP_HUD_FILES + '/image/flag-yellow.png" >&nbsp';
+var MEDIUM_FLAG = '<img src="' + ZAP_HUD_FILES + '/image/flag-orange.png" >&nbsp';
+var HIGH_FLAG = '<img src="' + ZAP_HUD_FILES + '/image/flag-red.png" >&nbsp';
 var DELAY_MS = 3000;
 var QUEUE_SIZE = 5;
 var MAX_LINE_LENGTH = 45;

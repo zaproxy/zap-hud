@@ -8,12 +8,12 @@ var CONFIG_TOOLS_LEFT = '<<ZAP_HUD_CONFIG_TOOLS_LEFT>>';
 var CONFIG_TOOLS_RIGHT = '<<ZAP_HUD_CONFIG_TOOLS_RIGHT>>';
 var CONFIG_DRAWER = '<<ZAP_HUD_CONFIG_DRAWER>>';
 
-importScripts(ZAP_HUD_FILES + "?name=libraries/localforage.min.js"); 
-importScripts(ZAP_HUD_FILES + "?name=libraries/vue.js"); 
-importScripts(ZAP_HUD_FILES + "?name=libraries/vue-i18n.js"); 
-importScripts(ZAP_HUD_FILES + "?name=i18n.js");
-importScripts(ZAP_HUD_FILES + "?name=utils.js");
-importScripts(ZAP_HUD_FILES + "?name=tools/utils/alertUtils.js");
+importScripts(ZAP_HUD_FILES + "/file/libraries/localforage.min.js"); 
+importScripts(ZAP_HUD_FILES + "/file/libraries/vue.js"); 
+importScripts(ZAP_HUD_FILES + "/file/libraries/vue-i18n.js"); 
+importScripts(ZAP_HUD_FILES + "/file/i18n.js");
+importScripts(ZAP_HUD_FILES + "/file/utils.js");
+importScripts(ZAP_HUD_FILES + "/file/tools/utils/alertUtils.js");
 
 var CACHE_NAME = "hud-cache-1.0";
 var targetUrl = "";
@@ -22,22 +22,22 @@ var webSocketCallbacks = {};
 var webSocketCallbackId = 0;
 
 var urlsToCache = [
-	ZAP_HUD_FILES + "?name=libraries/localforage.min.js",
-	ZAP_HUD_FILES + "?name=libraries/vue.js",
-	ZAP_HUD_FILES + "?name=libraries/vue-i18n.js",
-	ZAP_HUD_FILES + "?name=i18n.js",
-	ZAP_HUD_FILES + "?name=utils.js",
-	ZAP_HUD_FILES + "?name=panel.html",
-	ZAP_HUD_FILES + "?name=panel.css",
-	ZAP_HUD_FILES + "?name=panel.js",
-	ZAP_HUD_FILES + "?name=display.css",
-	ZAP_HUD_FILES + "?name=display.html",
-	ZAP_HUD_FILES + "?name=display.js",
-	ZAP_HUD_FILES + "?name=management.css",
-	ZAP_HUD_FILES + "?name=management.html",
-	ZAP_HUD_FILES + "?name=management.js",
-	ZAP_HUD_FILES + "?name=growlerAlerts.html",
-	ZAP_HUD_FILES + "?name=growlerAlerts.js"
+	ZAP_HUD_FILES + "/file/libraries/localforage.min.js",
+	ZAP_HUD_FILES + "/file/libraries/vue.js",
+	ZAP_HUD_FILES + "/file/libraries/vue-i18n.js",
+	ZAP_HUD_FILES + "/file/i18n.js",
+	ZAP_HUD_FILES + "/file/utils.js",
+	ZAP_HUD_FILES + "/file/panel.html",
+	ZAP_HUD_FILES + "/file/panel.css",
+	ZAP_HUD_FILES + "/file/panel.js",
+	ZAP_HUD_FILES + "/file/display.css",
+	ZAP_HUD_FILES + "/file/display.html",
+	ZAP_HUD_FILES + "/file/display.js",
+	ZAP_HUD_FILES + "/file/management.css",
+	ZAP_HUD_FILES + "/file/management.html",
+	ZAP_HUD_FILES + "/file/management.js",
+	ZAP_HUD_FILES + "/file/growlerAlerts.html",
+	ZAP_HUD_FILES + "/file/growlerAlerts.js"
 ];
 
 self.tools = {};
@@ -275,7 +275,7 @@ function showAddToolDialog(tabId, frameId) {
 	
 			tools = tools.map(tool => ({
                 'label': tool.label,
-                'image': ZAP_HUD_FILES + '?image=' + tool.icon,
+                'image': ZAP_HUD_FILES + '/image/' + tool.icon,
                 'toolname': tool.name
             }));
 
