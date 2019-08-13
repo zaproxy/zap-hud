@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+ - Comments tool which shows all of the HTML comments on a page [#378](https://github.com/zaproxy/zap-hud/issues/378)
 
 ## [0.6.0] - 2019-08-12
 

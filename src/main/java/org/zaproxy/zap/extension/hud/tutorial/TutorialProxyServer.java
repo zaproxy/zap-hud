@@ -43,6 +43,7 @@ import org.zaproxy.zap.extension.hud.tutorial.pages.AlertNotificationsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AttackModePage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.BreakPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.CommentsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.CompletePage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.EnablePage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.ErrorPage;
@@ -107,6 +108,7 @@ public class TutorialProxyServer extends ProxyServer {
         prev = addPage(new ActiveScanPage(this, prev));
         prev = addPage(new AttackModePage(this, prev));
         prev = addPage(new ToolConfigPage(this, prev));
+        prev = addPage(new CommentsPage(this, prev));
         prev = addPage(new HtmlReportPage(this, prev));
         prev = addPage(new HudConfigPage(this, prev));
         prev = addPage(new CompletePage(this, prev));

@@ -140,6 +140,15 @@ function windowMessageListener(event) {
 					return;
 				}
 				break;
+			case "showComments.count":
+				if (message.count === parseInt(message.count, 10) &&
+						message.suspicious === parseInt(message.suspicious, 10)) {
+					limitedData.count = message.count;
+					limitedData.suspicious = message.suspicious;
+					navigator.serviceWorker.controller.postMessage(limitedData);
+					return;
+				}
+				break;
 			default:
 				break;
 		}
@@ -167,6 +176,18 @@ function serviceWorkerMessageListener(event) {
 
 		case 'showEnable.count':
 			parent.postMessage({action: 'showEnable.count'}, document.referrer);
+			break;
+
+		case 'showComments.on':
+			parent.postMessage({action: 'showComments.on', suspicious: message.suspicious}, document.referrer);
+			break;
+
+		case 'showComments.off':
+			parent.postMessage({action: 'showComments.off'}, document.referrer);
+			break;
+
+		case 'showComments.count':
+			parent.postMessage({action: 'showComments.count', suspicious: message.suspicious}, document.referrer);
 			break;
 
 		case 'commonAlerts.alert':

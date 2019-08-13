@@ -166,7 +166,7 @@
 		document.getElementById(MANAGEMENT).style.height = "0px";
 	}
 	
-	// TODO put this code in a separate file and inject ?
+	// TODO showEnable section - put this code in a separate file and inject ?
 	var showEnabled = false;
 	var showEnabledCount = 0;
 	var showEnableTypeHiddenFields = [];
@@ -304,6 +304,100 @@
 				'onclick="injection.showZapAlert(' + alert.id + ');" />');
 		}
 	}
+	
+	// End of showEnable section
+	
+	// TODO showComments section - put this code in a separate file and inject ?
+	let commentImages = [];
+	
+	function includeComment(commentNode) {
+		return commentNode.textContent.trim().length > 0;
+	}
+
+	function isSuspiciousComment(commentNode, suspiciousList) {
+		var textUc = commentNode.textContent.toUpperCase();
+		for (var i = 0; i < suspiciousList.length; i++) {
+			if (textUc.indexOf(suspiciousList[i]) > -1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	function showCommentsOn(suspiciousList) {
+		let x = document.evaluate('//comment()', document, null, XPathResult.ANY_TYPE, null);
+		let count = 0;
+		let comments = [];
+		let comment = null;
+		// Can't change the DOM while iterating through the results, so put them in a list
+		while (comment = x.iterateNext()) {
+			if (includeComment(comment)) {
+				comments.push(comment);
+			}
+		}
+		let first = document.body.firstChild;
+		comments.forEach(comment => {
+			count += 1;
+			let img = new Image(16, 16);
+			img.src = ZAP_HUD_FILES + '/image/balloon.png';
+			img.title = comment.textContent;
+			img.id = 'zapHudComment-' + count;
+			img.style.zIndex="1000000";
+			img.onclick = function() {navigator.clipboard.writeText(comment.textContent);};
+			
+			if (isSuspiciousComment(comment, suspiciousList)) {
+				img.src = ZAP_HUD_FILES + '/image/balloon-yellow-exclamation.png';
+			}
+			
+			try {
+				if (document.body.contains(comment)) {
+					comment.parentNode.insertBefore(img, comment);
+				} else {
+					// Inject into the top of the body otherwise it wont be visible
+					if (first) {
+						// Keep the same 'first' node to keep the comments in order
+						document.body.insertBefore(img, first);
+					} else {
+						// Nothing in the body, unlikely but possible
+						document.body.appendChild(img);
+					}
+				}
+				commentImages.push(img);
+			} catch (err) {
+				console.log("Failed to add comment icon " + err.message);
+			}
+		});
+	}
+
+	function showCommentsOff() {
+		commentImages.forEach(img => {
+			img.parentNode.removeChild(img);
+		})
+		commentImages = [];
+	}
+	
+
+	function showCommentsCount(suspiciousList) {
+		let x = document.evaluate('//comment()', document, null, XPathResult.ANY_TYPE, null);
+		let comment = null;
+		let count = 0;
+		let sus = 0;
+	
+		while (comment = x.iterateNext()) {
+			if (includeComment(comment)) {
+				count += 1;
+				if (isSuspiciousComment(comment, suspiciousList)) {
+					sus += 1;
+				}
+			}
+		}
+		// Send to the management frame with the shared secret
+		var iframe = document.getElementById(MANAGEMENT);
+		iframe.contentWindow.postMessage({action: 'showComments.count', tabId: tabId, 
+			count: count, suspicious: sus, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
+	}
+	
+	// End of showComments section
 
 
 	function showZapAlertInternal (alertId) {
@@ -418,6 +512,18 @@
 
 			case "showEnable.count":
 				showEnableCount();
+				break;
+				
+			case "showComments.on":
+				showCommentsOn(message.suspicious);
+				break;
+
+			case "showComments.off":
+				showCommentsOff();
+				break;
+
+			case "showComments.count":
+				showCommentsCount(message.suspicious);
 				break;
 				
 			case "commonAlerts.alert":
