@@ -84,6 +84,7 @@ var WebSockets = (function() {
 			message.opCode = event.detail.opCode + '=' + event.detail.opCodeString;
 			message.channelId = event.detail.channelId;
 			message.messageId = event.detail.messageId;
+			message.uniqId = '' + message.channelId + message.messageId
 	
 			utils.messageAllTabs('drawer', {action: 'updateWebSockets', messages: [message]})
 				.catch(utils.errorHandler);

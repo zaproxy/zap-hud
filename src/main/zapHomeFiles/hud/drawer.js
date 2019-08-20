@@ -63,6 +63,23 @@ Vue.component('history', {
         },
         historyItemsFiltered() {
             this.historyItemsFilteredMessage = I18n.t("common_items_filtered", [this.hiddenMessageCount, this.messageCount]);
+        },
+        scrollToBottom() {
+            if (this.messages.length > 0) {
+                let lastMessage = this.messages[this.messages.length - 1]
+                let lastid = 'message-tr-' + lastMessage.id
+                let lastIdElem = document.getElementById(lastid);
+    
+                if(lastIdElem) {
+                    lastIdElem.scrollIntoView(false)
+                }
+    
+                //move horizontal scroll bar to the left
+                let tabsDetailsElems = document.querySelectorAll('tabs-details');
+                if (tabsDetailsElems.length > 0){
+                    tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
+                }
+            }
         }
     },
     watch: {
@@ -97,21 +114,9 @@ Vue.component('history', {
 
     },
     updated() {
-        if (this.messages.length > 0) {
-            let lastMessage = this.messages[this.messages.length - 1]
-            let lastid = 'message-tr-' + lastMessage.id
-            let lastIdElem = document.getElementById(lastid);
-
-            if(lastIdElem) {
-                lastIdElem.scrollIntoView({block:'end', behavior:'smooth'});
-            }
-
-            //move horizontal scroll bar to the left
-            let tabsDetailsElems = document.querySelectorAll('tabs-details');
-            if (tabsDetailsElems.length > 0){
-                tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
-            }
-        }
+        this.$nextTick(function () {
+            this.scrollToBottom()
+        })
     },
     beforeDestroy () {
         eventBus.$off('setMessages')
@@ -174,6 +179,23 @@ Vue.component('websockets', {
         },
         websocketsItemsFiltered() {
             this.websocketsItemsFilteredMessage = I18n.t("common_items_filtered", [this.hiddenMessageCount, this.messageCount]);
+        },
+        scrollToBottom() {
+            if (this.messages.length > 0) {
+                let lastMessage = this.messages[this.messages.length - 1]
+                let lastid = 'ws-message-tr-' + lastMessage.uniqId
+                let lastIdElem = document.getElementById(lastid);
+    
+                if(lastIdElem) {
+                    lastIdElem.scrollIntoView(false)
+                }
+    
+                //move horizontal scroll bar to the left
+                let tabsDetailsElems = document.querySelectorAll('tabs-details');
+                if (tabsDetailsElems.length > 0){
+                    tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
+                }
+            }
         }
     },
     watch: {
@@ -207,20 +229,9 @@ Vue.component('websockets', {
         });
     },
     updated() {
-        if (this.messages.length > 0) {
-            let lastMessage = this.messages[this.messages.length - 1]
-            let lastid = 'message-tr-' + lastMessage.messageId
-            let lastIdElem = document.querySelector(lastid);
-            if(lastIdElem){
-                lastIdElem.scrollIntoView({block:'end', behavior:'smooth'});
-            }
-
-            //move horizontal scroll bar to the left
-            let tabsDetailsElems = document.querySelectorAll('tabs-details');
-            if (tabsDetailsElems.length > 0){
-                tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
-            }
-        }
+        this.$nextTick(function () {
+            this.scrollToBottom()
+        });
     },
 });
 

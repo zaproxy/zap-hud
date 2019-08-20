@@ -110,7 +110,7 @@
             </table>
             <table id="websockets-messages" class="table table-striped table-hover table-scroll table-history drawer-messages" style="min-width: fit-content;">
                 <tbody>
-                    <tr v-for="message in filteredMessages" @click="messageSelected(message.channelId, message.messageId)" :id="'message-tr-'+message.messageId" class="message-tr">
+                    <tr v-for="message in filteredMessages" @click="messageSelected(message.channelId, message.messageId)" :id="'ws-message-tr-' + message.uniqId" class="message-tr">
                         <td class="field time"> {{ message.time }} </td>
                         <td class="field direction"> {{ $t('message.websockets_direction_' + message.direction.toLowerCase()) }} </td>
                         <td class="field opcode"> {{ message.opCode }} </td>
