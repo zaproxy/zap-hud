@@ -42,7 +42,7 @@
   "dependencies": {
     "localforage": "^1.7.3",
     "vue": "^2.6.10",
-    "vue-i18n": "^8.14.0"
+    "vue-i18n": "^8.14.1"
   },
   "devDependencies": {
     "ava": "^2.3.0",
