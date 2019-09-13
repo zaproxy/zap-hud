@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zaproxy.zap.extension.hud.ui.firefox;
+package org.zaproxy.zap.extension.hud.ui.browser;
 
 import io.github.bonigarcia.Options;
 import io.github.bonigarcia.SeleniumExtension;
@@ -28,10 +28,10 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.zaproxy.zap.extension.hud.ui.Constants;
 
 @ExtendWith({SeleniumExtension.class})
-public abstract class FirefoxUnitTest {
+public abstract class BrowsersTest {
     @Options FirefoxOptions firefoxOptions;
 
-    public FirefoxUnitTest() {
+    public BrowsersTest() {
         this.firefoxOptions = new FirefoxOptions();
 
         Proxy proxy = new Proxy();

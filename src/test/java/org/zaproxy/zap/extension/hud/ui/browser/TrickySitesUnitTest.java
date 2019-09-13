@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zaproxy.zap.extension.hud.ui.firefox;
+package org.zaproxy.zap.extension.hud.ui.browser;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
 @Tag("remote")
 /** Sites that have been known to cause the HUD problems. Expect this to be added to! */
-public class TrickySitesUnitTest extends FirefoxUnitTest {
+public class TrickySitesUnitTest extends BrowsersTest {
 
     private void testSite(FirefoxDriver driver, String site) throws InterruptedException {
         HUD hud = new HUD(driver);

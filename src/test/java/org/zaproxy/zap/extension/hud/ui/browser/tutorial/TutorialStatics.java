@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zaproxy.zap.extension.hud.ui.firefox.tutorial;
+package org.zaproxy.zap.extension.hud.ui.browser.tutorial;
 
 import org.junit.jupiter.api.Tag;
 import org.openqa.selenium.By;
