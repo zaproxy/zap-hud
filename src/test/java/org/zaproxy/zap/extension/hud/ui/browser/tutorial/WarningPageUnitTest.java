@@ -17,59 +17,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zaproxy.zap.extension.hud.ui.firefox.tutorial;
+package org.zaproxy.zap.extension.hud.ui.browser.tutorial;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.UpgradePage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
-import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
+import org.zaproxy.zap.extension.hud.ui.browser.BrowsersTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
 @Tag("tutorial")
-public class WelcomePageUnitTest extends FirefoxUnitTest {
+public class WarningPageUnitTest extends BrowsersTest {
 
     @Test
     public void genericPageUnitTests(FirefoxDriver driver) throws InterruptedException {
         HUD hud = new HUD(driver);
-        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
+        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(WarningPage.NAME));
         GenericUnitTest.runAllTests(driver);
     }
 
     @Test
-    public void testRedirectToHttps(FirefoxDriver driver) {
+    public void testPreviousButtonWorks(FirefoxDriver driver) {
         HUD hud = new HUD(driver);
-        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
+        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(WarningPage.NAME));
+        WebElement previousButton = TutorialStatics.getPreviousButton(driver);
+        assertNotNull(previousButton);
+        previousButton.click();
         assertEquals(TutorialStatics.getTutorialHudUrl(IntroPage.NAME), driver.getCurrentUrl());
-    }
-
-    @Test
-    public void testNoPreviousButton(FirefoxDriver driver) {
-        HUD hud = new HUD(driver);
-        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
-        assertThrows(
-                NoSuchElementException.class,
-                () -> {
-                    TutorialStatics.getPreviousButton(driver);
-                });
     }
 
     @Test
     public void testNextPageButtonWorks(FirefoxDriver driver) {
         HUD hud = new HUD(driver);
-        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
+        hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(WarningPage.NAME));
         WebElement nextButton = TutorialStatics.getNextButton(driver);
         assertNotNull(nextButton);
         nextButton.click();
         hud.waitForPageLoad();
-        assertEquals(TutorialStatics.getTutorialHudUrl(WarningPage.NAME), driver.getCurrentUrl());
+        assertEquals(TutorialStatics.getTutorialHudUrl(UpgradePage.NAME), driver.getCurrentUrl());
     }
 }

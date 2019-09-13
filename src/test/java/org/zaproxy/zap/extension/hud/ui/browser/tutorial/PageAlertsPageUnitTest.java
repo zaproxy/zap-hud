@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zaproxy.zap.extension.hud.ui.firefox.tutorial;
+package org.zaproxy.zap.extension.hud.ui.browser.tutorial;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,12 +34,12 @@ import org.zaproxy.zap.extension.hud.tutorial.pages.AlertNotificationsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.PageAlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.SiteAlertsPage;
 import org.zaproxy.zap.extension.hud.ui.Constants;
-import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
+import org.zaproxy.zap.extension.hud.ui.browser.BrowsersTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
 @Tag("tutorial")
-public class PageAlertsPageUnitTest extends FirefoxUnitTest {
+public class PageAlertsPageUnitTest extends BrowsersTest {
 
     @Test
     public void genericPageUnitTests(FirefoxDriver driver) throws InterruptedException {

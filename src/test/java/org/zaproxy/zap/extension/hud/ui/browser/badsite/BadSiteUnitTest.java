@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zaproxy.zap.extension.hud.ui.firefox.badsite;
+package org.zaproxy.zap.extension.hud.ui.browser.badsite;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -43,12 +43,12 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.zaproxy.zap.extension.hud.HudAPI;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
-import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
-import org.zaproxy.zap.extension.hud.ui.firefox.tutorial.TutorialStatics;
+import org.zaproxy.zap.extension.hud.ui.browser.BrowsersTest;
+import org.zaproxy.zap.extension.hud.ui.browser.tutorial.TutorialStatics;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
 @Tag("tutorial")
-public class BadSiteUnitTest extends FirefoxUnitTest {
+public class BadSiteUnitTest extends BrowsersTest {
 
     private static final String SERVICE_WORKER = "serviceworker.js";
     private static final String BAD_SITE_TEST_KEY = "badsitetest";
