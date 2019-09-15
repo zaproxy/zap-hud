@@ -7,15 +7,14 @@
 var ToggleScript = (function() {
 
 	// Constants
-	// todo: could probably switch this to a config file?
 	var NAME = "toggleScript";
 	var LABEL = "Toggle Script";
 	var ICON = {};
 		ICON.default = "report.png";
-		ICON.on = "break-off.png";
-		ICON.off = "break-on.png";
+		ICON.on = "light-on.png";
+		ICON.off = "light-off.png";
+	var SCRIPT;
 
-	//todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		var tool = {};
 		tool.name = NAME;
@@ -28,20 +27,18 @@ var ToggleScript = (function() {
 	}
 
 
-	// Right click functionality
+	// Select a script and update the UI accordingly
 	function showOptions(tabId) {
 		// Pop up a menu to select a script
 		selectScript(tabId)
 			.then((result) => {
 				if(!result.remove) {
-					var label = `Toggle ${result.selected.name}`;
-					var data = result.selected.enabled ? "Enabled" : "Disabled";
-					// Set icon to break-off (green light) when enabled 
-					// and break-on (red light) when disabled
-					var icon = result.selected.enabled ? ICON.on : ICON.off;
-					updateTool(label, data, icon);
+					SCRIPT = result.selected;
+					updateUI();
 				}
 				else {
+					// Set the currently selected script to null
+					SCRIPT = null;
 					// Reset the tool before removing it, so it shows up as default in the 'Add Tools' menu
 					// Load the tool so that panel and other properties don't get messed with
 					utils.loadTool(NAME).then(tool => {
@@ -61,18 +58,54 @@ var ToggleScript = (function() {
 			})
 	}
 
-	function updateTool(label, data, icon) {
+	function toggleScript(tabId) {
+		// If there is a selected script, 
+		if(SCRIPT) {
+			// Choose which API to execute based on enabled status
+			var action = SCRIPT.enabled 
+				? "disable"
+				: "enable"; 
+			// Update the tool's status via the API
+			apiCallWithResponse("script", "action", action, {scriptName: SCRIPT.name})
+				.catch(utils.errorHandler)
+				.then(() => {
+					// Switch enabled status in UI
+					SCRIPT.enabled = !SCRIPT.enabled;
+					updateUI()
+				});
+			
+		}
+		// If there is no currently selected script, select a script
+		else {
+			showOptions(tabId);
+		}
+	}
+
+	function updateUI() {
+		var data = SCRIPT.name;
+		// Set icon to break-off (green light) when enabled 
+		// and break-on (red light) when disabled
+		var icon = SCRIPT.enabled ? ICON.on : ICON.off;
 		utils.loadTool(NAME).then(tool => {
-			tool.label = label;
 			tool.data = data;
 			tool.icon = icon;
-			update = utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', tool: {name: NAME, label: label, data: data, icon: icon}});
-			write = utils.writeTool(tool);
-		})
+			utils.writeTool(tool)
+				.then(() => {
+					utils.messageAllTabs(tool.panel, {
+						action: 'broadcastUpdate', 
+						tool: {
+							name: NAME, 
+							label: tool.label, 
+							data: tool.data, 
+							icon: tool.icon
+						}
+					});
+				});
+			
+		}).catch(utils.errorHandler);
 	}
 
 	// Display Dropdown showing a list of scripts that can be manipulated
-	// Scripts can be obtained from http://localhost:8080/JSON/script/view/listScripts/
 	function selectScript(tabId) {
 		var config = {};
 		var allScripts;
@@ -94,7 +127,6 @@ var ToggleScript = (function() {
 				// Get an array of the script names to pass to the messageFrame
 				config.options = scripts.map(script => script.name);
 				config.options.push("Remove");
-				console.log(config.options);
 				// Create the messageFrame displaying the scripts
 				return utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config});
 			})
@@ -105,6 +137,7 @@ var ToggleScript = (function() {
 					// Because we passed messageFrame an array, response.id 
 					// will be the index of the selected element
 					result.selected = allScripts[response.id];
+					result.selected.enabled = result.selected.enabled === "true" ? true : false;
 					result.remove = false;
 				}
 				// If the last option (Remove) is selected, unset selected
@@ -139,13 +172,12 @@ var ToggleScript = (function() {
 				// Icon is left-clicked
 				// As per #335: "clicking on the tool would toggle the script on and off"
 				case "buttonClicked":
-					console.log("Button Clicked");
+					toggleScript(message.tabId);
 					break;
 
 				// icon is right-clicked
 				// As per #335: "right clicking it would give the option to change script"
 				case "buttonMenuClicked":
-					console.log("Menu Clicked");
 					showOptions(message.tabId);
 					break;
 
