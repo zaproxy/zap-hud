@@ -4,26 +4,25 @@
  * Description goes here...
  */
 
-var SiteTree = (function() {
-
+const SiteTree = (function () {
 	// Constants
 	// todo: could probably switch this to a config file?
-	var NAME = "site-tree";
-	var LABEL = I18n.t("sites_tool");
-	var DATA = {};
-		DATA.SITES = I18n.t("sites_status");
-	var ICONS = {};
-		ICONS.WORLD = "world.png";
+	const NAME = 'site-tree';
+	const LABEL = I18n.t('sites_tool');
+	const DATA = {};
+	DATA.SITES = I18n.t('sites_status');
+	const ICONS = {};
+	ICONS.WORLD = 'world.png';
 
-	//todo: change this to a util function that reads in a config file (json/xml)
+	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
-		var tool = {};
+		const tool = {};
 		tool.name = NAME;
 		tool.label = LABEL;
 		tool.data = DATA.SITES;
 		tool.icon = ICONS.WORLD;
 		tool.isSelected = false;
-		tool.panel = "";
+		tool.panel = '';
 		tool.position = 0;
 		tool.urls = [];
 
@@ -31,25 +30,24 @@ var SiteTree = (function() {
 	}
 
 	function showSiteTree(tabId) {
-		utils.messageFrame(tabId, "display", {action:"showSiteTree"})
+		utils.messageFrame(tabId, 'display', {action: 'showSiteTree'})
 			.catch(utils.errorHandler);
 	}
 
 	function showOptions(tabId) {
-		var config = {};
+		const config = {};
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
-		config.options = {remove: I18n.t("common_remove")};
+		config.options = {remove: I18n.t('common_remove')};
 
-		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, 'display', {action: 'showButtonOptions', config})
 			.then(response => {
 				// Handle button choice
-				if (response.id == "remove") {
+				if (response.id == 'remove') {
 					utils.removeToolFromPanel(tabId, NAME);
-				}
-				else {
-					//cancel
+				} else {
+					// Cancel
 				}
 			})
 			.catch(utils.errorHandler);
@@ -63,16 +61,16 @@ var SiteTree = (function() {
 			.catch(utils.errorHandler);
 	}
 
-	self.addEventListener("activate", event => {
+	self.addEventListener('activate', event => {
 		initializeStorage();
 	});
 
-	self.addEventListener("message", event => {
-		var message = event.data;
+	self.addEventListener('message', event => {
+		const message = event.data;
 
 		// Broadcasts
-		switch(message.action) {
-			case "initializeTools":
+		switch (message.action) {
+			case 'initializeTools':
 				initializeStorage();
 				break;
 
@@ -82,16 +80,16 @@ var SiteTree = (function() {
 
 		// Directed
 		if (message.tool === NAME) {
-			switch(message.action) {
-				case "buttonClicked":
+			switch (message.action) {
+				case 'buttonClicked':
 					showSiteTree(message.tabId);
 					break;
 
-				case "buttonMenuClicked":
+				case 'buttonMenuClicked':
 					showOptions(message.tabId);
 					break;
 
-				case "getTool":
+				case 'getTool':
 					getTool(event.ports[0]);
 					break;
 
