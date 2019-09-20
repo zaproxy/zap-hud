@@ -34,12 +34,11 @@ import javax.net.ssl.X509TrustManager;
 import net.sf.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.zaproxy.zap.extension.hud.HudAPI;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
@@ -82,8 +81,8 @@ public class BadSiteUnitTest extends BrowsersTest {
         }
     }
 
-    @Test
-    public void cannotAccessWebSocketsUrlWhenLoadingSwAsScript(FirefoxDriver driver)
+    @TestTemplate
+    public void cannotAccessWebSocketsUrlWhenLoadingSwAsScript(WebDriver driver)
             throws InterruptedException, MalformedURLException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
@@ -98,7 +97,7 @@ public class BadSiteUnitTest extends BrowsersTest {
         sb.append("document.head.appendChild(script);\n");
 
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
-        driver.executeScript(sb.toString());
+        ((JavascriptExecutor) driver).executeScript(sb.toString());
 
         // Now try to make use of it
 
@@ -106,17 +105,17 @@ public class BadSiteUnitTest extends BrowsersTest {
         assertTrue(result.toString().startsWith("https://zap//zapCallBackUrl"));
         try {
             // ZAP_HUD_WS should be protected via a closure
-            result = driver.executeScript("return ZAP_HUD_WS;");
+            result = ((JavascriptExecutor) driver).executeScript("return ZAP_HUD_WS;");
             // This class should not expect a JavascriptException in case the script above fails
             fail();
         } catch (JavascriptException e) {
             // Expected, but double check the error message
-            assertTrue(e.getMessage().contains("ReferenceError: ZAP_HUD_WS is not defined"));
+            assertTrue(e.getMessage().contains("ZAP_HUD_WS is not defined"));
         }
     }
 
-    @Test
-    public void cannotUseZapApiFromTarget(FirefoxDriver driver)
+    @TestTemplate
+    public void cannotUseZapApiFromTarget(WebDriver driver)
             throws InterruptedException, IOException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));

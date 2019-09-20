@@ -25,11 +25,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertNotificationsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.PageAlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.SiteAlertsPage;
@@ -41,15 +41,15 @@ import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 @Tag("tutorial")
 public class PageAlertsPageUnitTest extends BrowsersTest {
 
-    @Test
-    public void genericPageUnitTests(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void genericPageUnitTests(WebDriver driver) throws InterruptedException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(PageAlertsPage.NAME));
         GenericUnitTest.runAllTests(driver);
     }
 
-    @Test
-    public void testPreviousButtonWorks(FirefoxDriver driver) {
+    @TestTemplate
+    public void testPreviousButtonWorks(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(PageAlertsPage.NAME));
         WebElement previousButton = TutorialStatics.getPreviousButton(driver);
@@ -60,8 +60,9 @@ public class PageAlertsPageUnitTest extends BrowsersTest {
                 driver.getCurrentUrl());
     }
 
-    @Test
-    public void testTaskAndNextButton(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void testTaskAndNextButton(WebDriver driver) throws Exception {
+        HUD.callZapApiResetTasks();
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(PageAlertsPage.NAME));
 

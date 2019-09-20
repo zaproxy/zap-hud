@@ -20,8 +20,8 @@
 package org.zaproxy.zap.extension.hud.ui.browser;
 
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.openqa.selenium.firefox.FirefoxDriver;
+import org.junit.jupiter.api.TestTemplate;
+import org.openqa.selenium.WebDriver;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
@@ -29,7 +29,7 @@ import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 /** Alexa top sites */
 public class TopSitesUnitTest extends BrowsersTest {
 
-    private void testSite(FirefoxDriver driver, String site) throws InterruptedException {
+    private void testSite(WebDriver driver, String site) throws InterruptedException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud("http://" + site);
         GenericUnitTest.runAllTests(driver);
@@ -38,53 +38,53 @@ public class TopSitesUnitTest extends BrowsersTest {
         GenericUnitTest.runAllTests(driver);
     }
 
-    @Test
-    public void testGoogle(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void testGoogle(WebDriver driver) throws InterruptedException {
         testSite(driver, "google.com");
     }
 
-    @Test
-    public void testYoutube(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void testYoutube(WebDriver driver) throws InterruptedException {
         testSite(driver, "youtube.com");
     }
 
-    @Test
-    public void testFacebook(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void testFacebook(WebDriver driver) throws InterruptedException {
         testSite(driver, "facebook.com");
     }
 
-    @Test
-    public void testBaidu(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void testBaidu(WebDriver driver) throws InterruptedException {
         testSite(driver, "www.baidu.com");
     }
 
-    @Test
-    public void testWikipedia(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void testWikipedia(WebDriver driver) throws InterruptedException {
         testSite(driver, "www.wikipedia.org");
     }
 
-    @Test
-    public void testQq(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void testQq(WebDriver driver) throws InterruptedException {
         testSite(driver, "www.qq.com");
     }
 
-    @Test
-    public void testYahoo(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void testYahoo(WebDriver driver) throws InterruptedException {
         testSite(driver, "yahoo.com");
     }
 
-    @Test
-    public void testTaobao(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void testTaobao(WebDriver driver) throws InterruptedException {
         testSite(driver, "taobao.com");
     }
 
-    @Test
-    public void testTmall(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void testTmall(WebDriver driver) throws InterruptedException {
         testSite(driver, "tmall.com");
     }
 
-    @Test
-    public void testAmazon(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void testAmazon(WebDriver driver) throws InterruptedException {
         testSite(driver, "amazon.com");
     }
 }
