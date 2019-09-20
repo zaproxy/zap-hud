@@ -131,7 +131,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:$jupiterVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
 
-    testImplementation("io.github.bonigarcia:selenium-jupiter:2.2.0")
+    testImplementation("io.github.bonigarcia:selenium-jupiter:3.3.0")
     testImplementation("org.hamcrest:hamcrest-all:1.3")
     testImplementation("org.mockito:mockito-all:1.10.8")
     testImplementation(files(fileTree("lib").files))
@@ -247,12 +247,14 @@ tasks {
         args.set(listOf("-dev", "-config", "start.checkForUpdates=false", "-config", "hud.dir=$zapHome/hud") + hudDevArgs)
     }
 
+    register<Delete>("deleteTestHome") {
+        delete(testZapHome)
+    }
+
     register<CopyAddOn>("copyAddOnTestHome") {
         into(testZapHome.dir("plugin"))
 
-        doFirst {
-            delete(testZapHome)
-        }
+        dependsOn("deleteTestHome")
     }
 
     register<ZapStart>("zapStart") {

@@ -24,10 +24,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
 import org.zaproxy.zap.extension.hud.ui.browser.BrowsersTest;
@@ -37,22 +37,22 @@ import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 @Tag("tutorial")
 public class WelcomePageUnitTest extends BrowsersTest {
 
-    @Test
-    public void genericPageUnitTests(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void genericPageUnitTests(WebDriver driver) throws InterruptedException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
         GenericUnitTest.runAllTests(driver);
     }
 
-    @Test
-    public void testRedirectToHttps(FirefoxDriver driver) {
+    @TestTemplate
+    public void testRedirectToHttps(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
         assertEquals(TutorialStatics.getTutorialHudUrl(IntroPage.NAME), driver.getCurrentUrl());
     }
 
-    @Test
-    public void testNoPreviousButton(FirefoxDriver driver) {
+    @TestTemplate
+    public void testNoPreviousButton(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
         assertThrows(
@@ -62,8 +62,8 @@ public class WelcomePageUnitTest extends BrowsersTest {
                 });
     }
 
-    @Test
-    public void testNextPageButtonWorks(FirefoxDriver driver) {
+    @TestTemplate
+    public void testNextPageButtonWorks(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
         WebElement nextButton = TutorialStatics.getNextButton(driver);

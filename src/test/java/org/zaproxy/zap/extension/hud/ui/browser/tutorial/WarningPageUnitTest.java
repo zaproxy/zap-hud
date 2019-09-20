@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.UpgradePage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
@@ -36,15 +36,15 @@ import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 @Tag("tutorial")
 public class WarningPageUnitTest extends BrowsersTest {
 
-    @Test
-    public void genericPageUnitTests(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void genericPageUnitTests(WebDriver driver) throws InterruptedException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(WarningPage.NAME));
         GenericUnitTest.runAllTests(driver);
     }
 
-    @Test
-    public void testPreviousButtonWorks(FirefoxDriver driver) {
+    @TestTemplate
+    public void testPreviousButtonWorks(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(WarningPage.NAME));
         WebElement previousButton = TutorialStatics.getPreviousButton(driver);
@@ -53,8 +53,8 @@ public class WarningPageUnitTest extends BrowsersTest {
         assertEquals(TutorialStatics.getTutorialHudUrl(IntroPage.NAME), driver.getCurrentUrl());
     }
 
-    @Test
-    public void testNextPageButtonWorks(FirefoxDriver driver) {
+    @TestTemplate
+    public void testNextPageButtonWorks(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(WarningPage.NAME));
         WebElement nextButton = TutorialStatics.getNextButton(driver);

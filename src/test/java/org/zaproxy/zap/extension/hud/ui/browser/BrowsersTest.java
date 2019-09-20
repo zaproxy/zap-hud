@@ -19,38 +19,52 @@
  */
 package org.zaproxy.zap.extension.hud.ui.browser;
 
-import io.github.bonigarcia.Options;
-import io.github.bonigarcia.SeleniumExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
+import io.github.bonigarcia.seljup.BrowserBuilder;
+import io.github.bonigarcia.seljup.Options;
+import io.github.bonigarcia.seljup.SeleniumExtension;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.openqa.selenium.Proxy;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.CapabilityType;
 import org.zaproxy.zap.extension.hud.ui.Constants;
 
-@ExtendWith({SeleniumExtension.class})
+@TestInstance(Lifecycle.PER_CLASS)
 public abstract class BrowsersTest {
-    @Options FirefoxOptions firefoxOptions;
 
-    public BrowsersTest() {
-        this.firefoxOptions = new FirefoxOptions();
+    private static final Proxy PROXY =
+            new Proxy()
+                    .setHttpProxy(Constants.ZAP_HOST_PORT)
+                    .setFtpProxy(Constants.ZAP_HOST_PORT)
+                    .setSslProxy(Constants.ZAP_HOST_PORT);
 
-        Proxy proxy = new Proxy();
-        proxy.setHttpProxy(Constants.ZAP_HOST_PORT)
-                .setFtpProxy(Constants.ZAP_HOST_PORT)
-                .setSslProxy(Constants.ZAP_HOST_PORT);
+    @Options
+    private static final FirefoxOptions FIREFOX_OPTIONS =
+            new FirefoxOptions()
+                    .setHeadless(true)
+                    .addPreference("network.captive-portal-service.enabled", false)
+                    .addPreference("browser.safebrowsing.provider.mozilla.gethashURL", "")
+                    .addPreference("browser.safebrowsing.provider.mozilla.updateURL", "")
+                    .addPreference("network.proxy.no_proxies_on", "")
+                    .addPreference("network.proxy.allow_hijacking_localhost", true)
+                    .setProxy(PROXY);
 
-        this.firefoxOptions.addPreference("network.captive-portal-service.enabled", false);
-        this.firefoxOptions.addPreference("browser.safebrowsing.provider.mozilla.gethashURL", "");
-        this.firefoxOptions.addPreference("browser.safebrowsing.provider.mozilla.updateURL", "");
-        this.firefoxOptions.addPreference("network.proxy.type", 1);
-        this.firefoxOptions.addPreference("network.proxy.http", Constants.ZAP_HOST);
-        this.firefoxOptions.addPreference("network.proxy.http_port", Constants.ZAP_PORT);
-        this.firefoxOptions.addPreference("network.proxy.ssl", Constants.ZAP_HOST);
-        this.firefoxOptions.addPreference("network.proxy.ssl_port", Constants.ZAP_PORT);
-        this.firefoxOptions.addPreference("network.proxy.share_proxy_settings", true);
-        this.firefoxOptions.addPreference("network.proxy.no_proxies_on", "");
-        this.firefoxOptions.addPreference("network.proxy.allow_hijacking_localhost", true);
-        firefoxOptions.setCapability(CapabilityType.PROXY, (Object) null);
-        firefoxOptions.setHeadless(true);
+    @Options
+    private static final ChromeOptions CHROME_OPTIONS =
+            new ChromeOptions()
+                    .setHeadless(true)
+                    .addArguments("--proxy-bypass-list=<-loopback>", "--window-size=1024,768")
+                    .setProxy(PROXY);
+
+    @RegisterExtension SeleniumExtension seleniumExtension = new SeleniumExtension();
+
+    @BeforeAll
+    void setup() {
+        seleniumExtension.addBrowsers(BrowserBuilder.firefox().build());
+        // TODO uncomment once the tests are more reliable
+        // https://github.com/zaproxy/zap-hud/issues/344
+        // seleniumExtension.addBrowsers(BrowserBuilder.chrome().build());
     }
 }

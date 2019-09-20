@@ -25,11 +25,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertNotificationsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.PageAlertsPage;
@@ -40,15 +40,15 @@ import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 @Tag("tutorial")
 public class AlertNotificationsPageUnitTest extends BrowsersTest {
 
-    @Test
-    public void genericPageUnitTests(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void genericPageUnitTests(WebDriver driver) throws InterruptedException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(AlertNotificationsPage.NAME));
         GenericUnitTest.runAllTests(driver);
     }
 
-    @Test
-    public void testPreviousButtonWorks(FirefoxDriver driver) {
+    @TestTemplate
+    public void testPreviousButtonWorks(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(AlertNotificationsPage.NAME));
         WebElement previousButton = TutorialStatics.getPreviousButton(driver);
@@ -57,9 +57,10 @@ public class AlertNotificationsPageUnitTest extends BrowsersTest {
         assertEquals(TutorialStatics.getTutorialHudUrl(AlertsPage.NAME), driver.getCurrentUrl());
     }
 
-    @Test
+    @TestTemplate
     @Disabled
-    public void testTaskAndNextButton(FirefoxDriver driver) {
+    public void testTaskAndNextButton(WebDriver driver) throws Exception {
+        HUD.callZapApiResetTasks();
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(AlertNotificationsPage.NAME));
 

@@ -20,8 +20,8 @@
 package org.zaproxy.zap.extension.hud.ui.browser;
 
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.openqa.selenium.firefox.FirefoxDriver;
+import org.junit.jupiter.api.TestTemplate;
+import org.openqa.selenium.WebDriver;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
@@ -29,7 +29,7 @@ import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 /** Sites that have been known to cause the HUD problems. Expect this to be added to! */
 public class TrickySitesUnitTest extends BrowsersTest {
 
-    private void testSite(FirefoxDriver driver, String site) throws InterruptedException {
+    private void testSite(WebDriver driver, String site) throws InterruptedException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud("http://" + site);
         GenericUnitTest.runAllTests(driver);
@@ -38,8 +38,8 @@ public class TrickySitesUnitTest extends BrowsersTest {
         GenericUnitTest.runAllTests(driver);
     }
 
-    @Test
-    public void testBbc(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void testBbc(WebDriver driver) throws InterruptedException {
         testSite(driver, "bbc.com");
     }
 }
