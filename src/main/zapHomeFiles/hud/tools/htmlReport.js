@@ -4,38 +4,36 @@
  * When selected displays the standard HTML report in a new window / tab
  */
 
-var HtmlReport = (function() {
-
+const HtmlReport = (function () {
 	// Constants
 	// todo: could probably switch this to a config file?
-	var NAME = "htmlReport";
-	var LABEL = I18n.t("html_report_tool");
-	var ICON = "report.png";
+	const NAME = 'htmlReport';
+	const LABEL = I18n.t('html_report_tool');
+	const ICON = 'report.png';
 
-	//todo: change this to a util function that reads in a config file (json/xml)
+	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
-		var tool = {};
+		const tool = {};
 		tool.name = NAME;
 		tool.label = LABEL;
 		tool.data = '';
 		tool.icon = ICON;
-		tool.panel = "";
+		tool.panel = '';
 		tool.position = 0;
 		utils.writeTool(tool);
 	}
 
-
 	function showOptions(tabId) {
-		var config = {};
+		const config = {};
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
-		config.options = {remove: I18n.t("common_remove")};
+		config.options = {remove: I18n.t('common_remove')};
 
-		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, 'display', {action: 'showButtonOptions', config})
 			.then(response => {
 				// Handle button choice
-				if (response.id == "remove") {
+				if (response.id == 'remove') {
 					utils.removeToolFromPanel(tabId, NAME);
 				}
 			})
@@ -43,20 +41,20 @@ var HtmlReport = (function() {
 	}
 
 	function showHtmlReport(tabId) {
-		utils.messageFrame(tabId, "display", {action:"showHtmlReport"})
+		utils.messageFrame(tabId, 'display', {action: 'showHtmlReport'})
 			.catch(utils.errorHandler);
 	}
 
-	self.addEventListener("activate", event => {
+	self.addEventListener('activate', event => {
 		initializeStorage();
 	});
 
-	self.addEventListener("message", event => {
-		var message = event.data;
+	self.addEventListener('message', event => {
+		const message = event.data;
 
 		// Broadcasts
-		switch(message.action) {
-			case "initializeTools":
+		switch (message.action) {
+			case 'initializeTools':
 				initializeStorage();
 				break;
 
@@ -66,12 +64,12 @@ var HtmlReport = (function() {
 
 		// Directed
 		if (message.tool === NAME) {
-			switch(message.action) {
-				case "buttonClicked":
+			switch (message.action) {
+				case 'buttonClicked':
 					showHtmlReport(message.tabId);
 					break;
 
-				case "buttonMenuClicked":
+				case 'buttonMenuClicked':
 					showOptions(message.tabId);
 					break;
 
