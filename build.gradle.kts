@@ -172,10 +172,16 @@ tasks {
         commandLine("npm", "run", "lint-staged")
     }
 
-    register<Exec>("npmLintAllHud") {
+    val npmLintAllHud by registering(NpmTask::class) {
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Runs the XO linter on all files."
+ 
+        command("run")
+        cmdArgs("lint")
+    }
 
-        commandLine("npm", "run", "lint")
+    named("check") {
+        dependsOn(npmLintAllHud)
     }
 
     register<Exec>("npmTestHud") {
