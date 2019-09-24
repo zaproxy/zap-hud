@@ -4,21 +4,21 @@
  * Description goes here...
  */
 
-const IMAGE_URL = '<<ZAP_HUD_FILES>>/image/';
-let orientation = '';
-let panelKey = '';
-let frameId = '';
-let tabId = '';
-const context = {
+var IMAGE_URL = '<<ZAP_HUD_FILES>>/image/';
+var orientation = "";
+var panelKey = "";
+var frameId = '';
+var tabId = '';
+var context = {
 	url: document.referrer,
 	domain: utils.parseDomainFromUrl(document.referrer)
 };
 
-// The Vue app
-let app;
+// the Vue app
+var app;
 
 // Event dispatcher for Vue
-const eventBus = new Vue();
+var eventBus = new Vue();
 
 Vue.component('hud-button', {
 	template: '#hud-button-template',
@@ -28,7 +28,7 @@ Vue.component('hud-button', {
 			currentData: this.data,
 			currentIcon: this.icon,
 			showData: true,
-			orientation,
+			orientation: orientation,
 			marginleft: '0rem',
 			marginright: '0rem',
 			labelmarginleft: '0rem',
@@ -37,10 +37,10 @@ Vue.component('hud-button', {
 			isDisabled: false,
 			isClosed: true,
 			direction: 'ltr'
-		};
+		}
 	},
 	computed: {
-		isSmall() {
+		isSmall: function() {
 			return this.currentData == null;
 		}
 	},
@@ -52,13 +52,13 @@ Vue.component('hud-button', {
 				tool: this.name,
 				domain: context.domain,
 				url: context.url,
-				panelKey,
-				frameId,
-				tabId});
+				panelKey: panelKey,
+				frameId: frameId,
+				tabId: tabId});
 		},
 		showContextMenu(event) {
 			event.preventDefault();
-			navigator.serviceWorker.controller.postMessage({action: 'buttonMenuClicked', tool: this.name, frameId, tabId});
+			navigator.serviceWorker.controller.postMessage({action: "buttonMenuClicked", tool: this.name, frameId: frameId, tabId: tabId});
 		},
 		mouseOver() {
 			this.labelmarginleft = this.marginleft;
@@ -83,7 +83,7 @@ Vue.component('hud-button', {
 				if (!child.isClosed) {
 					areAllButtonsClosed = false;
 				}
-			});
+			})
 
 			if (areAllButtonsClosed) {
 				contractPanel();
@@ -91,19 +91,20 @@ Vue.component('hud-button', {
 		}
 	},
 	created() {
-		const self = this;
+		let self = this;
 
-		// Set the margins depending on the orientation
+		// set the margins depending on the orientation
 		if (orientation === 'left') {
 			self.marginleft = '.5rem';
-			self.direction = 'ltr';
-		} else {
-			self.marginright = '.5rem';
-			self.direction = 'rtl';
+			self.direction = "ltr"
+		}
+		else {
+			self.marginright = '.5rem'
+			self.direction = "rtl"
 		}
 
 		eventBus.$on('updateButton', data => {
-			utils.log(LOG_TRACE, 'panel.updateButton', 'updating button: ' + data.name, data);
+			utils.log(LOG_TRACE, 'panel.updateButton', 'updating button: ' + data.name, data)
 
 			if (self.name === data.name) {
 				if (data.icon !== undefined) {
@@ -118,10 +119,10 @@ Vue.component('hud-button', {
 					self.isDisabled = data.isDisabled;
 				}
 			}
-		});
+		})
 	},
-	beforeDestroy() {
-		eventBus.$off('updateButton');
+	beforeDestroy () {
+		eventBus.$off('updateButton')
 	}
 });
 
@@ -130,76 +131,77 @@ Vue.component('hud-buttons', {
 	data() {
 		return {
 			tools: [],
-			orientation,
+			orientation: orientation,
 			isVisible: false
-		};
+		}
 	},
 	created() {
-		const self = this;
-		const panel = orientation + 'Panel';
+		let self = this;
+		var panel = orientation + 'Panel';
 
-		// Check if currently hidden
+		// check if currently hidden
 		localforage.getItem('settings.isHudVisible')
 			.then(isHudVisible => {
 				if (isHudVisible !== null && !isHudVisible) {
-					return parent.postMessage({action: 'hideHudPanels'}, document.referrer);
+					return parent.postMessage({action:'hideHudPanels'}, document.referrer);
 				}
 			})
-			.then(() => {
-				// Hide the panels until we know whether to show them or not to prevent flashing
+			.then( () => {
+				// hide the panels until we know whether to show them or not to prevent flashing
 				this.isVisible = true;
 			})
-			.catch(utils.errorHandler);
+			.catch(utils.errorHandler)
 
-		// Initialize panels with tools
+		// initialize panels with tools
 		utils.loadPanelTools(panel)
 			.then(tools => {
 				self.tools = tools;
 
 				tools.forEach(tool => {
-					const channel = new MessageChannel();
+					let channel = new MessageChannel();
 
-					channel.port1.addEventListener('message', event => {
+					channel.port1.onmessage = function(event) {
 						eventBus.$emit('updateButton', {
 							name: tool.name,
 							data: event.data.data,
 							icon: event.data.icon,
 							isDisabled: event.data.isDisabled
 						});
-					});
+					};
 
 					navigator.serviceWorker.controller.postMessage({
 						action: 'getTool',
 						tool: tool.name,
-						context,
-						frameId,
-						tabId
+						context: context,
+						frameId: frameId,
+						tabId: tabId
 					}, [channel.port2]);
-				});
+				})
 			})
 			.catch(utils.errorHandler);
 
 		eventBus.$on('addButton', data => {
 			if (self.tools.filter(tool => tool.name === data.name) > 0) {
-				throw new Error('Attempted to add tool "' + data.name + '" to ' + orientation + 'panel, but it has already been added.');
-			} else {
-				self.tools.push(data.tool);
+				throw new Error('Attempted to add tool "' + data.name + '" to ' + orientation + 'panel, but it has already been added.')
 			}
-		});
+			else {
+				self.tools.push(data.tool)
+			}
+		})
 
-		// Listen to remove buttons
+		// listen to remove buttons
 		eventBus.$on('removeButton', data => {
 			self.tools = self.tools.filter(tool => tool.name !== data.name);
-		});
+		})
 	},
-	beforeDestroy() {
-		eventBus.$off('addButton');
-		eventBus.$off('removeButton');
+	beforeDestroy () {
+		eventBus.$off('addButton')
+		eventBus.$off('removeButton')
 	}
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-	const params = new URL(document.location).searchParams;
+document.addEventListener("DOMContentLoaded", () => {
+	let params = new URL(document.location).searchParams;
 
 	orientation = params.get('orientation');
 	panelKey = orientation + 'Panel';
@@ -208,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	window.name = panelKey;
 
-	// Initialize vue app
+	// initialize vue app
 	app = new Vue({
 		el: '#app',
 		data: {
@@ -226,12 +228,12 @@ function doesContextApply(toolContext) {
 		('scope' in toolContext && toolContext.scope.includes(context.domain));
 }
 
-navigator.serviceWorker.addEventListener('message', event => {
-	const message = event.data;
+navigator.serviceWorker.addEventListener("message", event => {
+	var message = event.data;
 	let tool;
 
-	switch (message.action) {
-		case 'broadcastUpdate':
+	switch(message.action) {
+		case "broadcastUpdate":
 			tool = message.tool;
 
 			if (message.context === undefined || doesContextApply(message.context)) {
@@ -240,35 +242,35 @@ navigator.serviceWorker.addEventListener('message', event => {
 					name: tool.name,
 					data: tool.data,
 					icon: tool.icon,
-					tool
+					tool: tool
 				});
 			}
 
 			break;
 
-		case 'updateData':
+		case "updateData":
 			tool = message.tool;
 
 			eventBus.$emit('updateButton', {
 				name: tool.name,
 				data: tool.data,
 				icon: tool.icon,
-				tool
+				tool: tool
 			});
 			break;
 
-		case 'addTool':
+		case "addTool":
 			tool = message.tool;
 			eventBus.$emit('addButton', {
 				name: tool.name,
 				data: tool.data,
 				icon: tool.icon,
-				tool
+				tool: tool
 			});
 
 			break;
 
-		case 'removeTool':
+		case "removeTool":
 			tool = message.tool;
 
 			eventBus.$emit('removeButton', {
@@ -281,19 +283,19 @@ navigator.serviceWorker.addEventListener('message', event => {
 	}
 });
 
-/* Sends message to inject script to expand or contract width of panel iframe */
+/* sends message to inject script to expand or contract width of panel iframe */
 function expandPanel() {
-	const message = {
-		action: 'expandPanel',
-		orientation
+	var message = {
+		action: "expandPanel",
+		orientation: orientation
 	};
 	parent.postMessage(message, document.referrer);
 }
 
 function contractPanel() {
-	const message = {
-		action: 'contractPanel',
-		orientation
+	var message = {
+		action: "contractPanel",
+		orientation: orientation
 	};
 
 	parent.postMessage(message, document.referrer);

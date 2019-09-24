@@ -101,9 +101,7 @@ public class BadSiteUnitTest extends BrowsersTest {
 
         // Now try to make use of it
 
-        Object result =
-                executeScriptWithRetry(
-                        driver, "return document.getElementById(\"zap-hud-management\").src;");
+        Object result = executeScriptWithRetry(driver, "return ZAP_HUD_FILES;");
         assertTrue(result.toString().startsWith("https://zap//zapCallBackUrl"));
         try {
             // ZAP_HUD_WS should be protected via a closure
