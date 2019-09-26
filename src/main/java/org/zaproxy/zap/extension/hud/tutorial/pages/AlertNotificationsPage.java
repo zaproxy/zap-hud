@@ -53,34 +53,32 @@ public class AlertNotificationsPage extends TutorialAlertsPage {
         super.setTaskCompleted(taskCompleted);
         if (taskCompleted) {
             Thread thread =
-                    new Thread() {
-
-                        public void run() {
-                            int alertRisk = Alert.RISK_INFO;
-                            while (alertRisk <= Alert.RISK_HIGH) {
-                                try {
-                                    sleep(500);
-                                } catch (InterruptedException e) {
-                                    // Ignore
+                    new Thread(
+                            () -> {
+                                int alertRisk = Alert.RISK_INFO;
+                                while (alertRisk <= Alert.RISK_HIGH) {
+                                    try {
+                                        Thread.sleep(500);
+                                    } catch (InterruptedException e) {
+                                        // Ignore
+                                    }
+                                    if (getHref() != null) {
+                                        Alert alert =
+                                                new Alert(
+                                                        TUTORIAL_ALERTS_PLUGIN_ID,
+                                                        alertRisk,
+                                                        Alert.CONFIDENCE_LOW,
+                                                        Constant.messages.getString(
+                                                                "hud.tutorial.page.alertsnotifications.alert.title."
+                                                                        + alertRisk));
+                                        alert.setDescription(
+                                                Constant.messages.getString(
+                                                        "hud.tutorial.page.alertsnotifications.alert.description"));
+                                        alertRisk += 1;
+                                        raiseAlert(alert);
+                                    }
                                 }
-                                if (getHref() != null) {
-                                    Alert alert =
-                                            new Alert(
-                                                    TUTORIAL_ALERTS_PLUGIN_ID,
-                                                    alertRisk,
-                                                    Alert.CONFIDENCE_LOW,
-                                                    Constant.messages.getString(
-                                                            "hud.tutorial.page.alertsnotifications.alert.title."
-                                                                    + alertRisk));
-                                    alert.setDescription(
-                                            Constant.messages.getString(
-                                                    "hud.tutorial.page.alertsnotifications.alert.description"));
-                                    alertRisk += 1;
-                                    raiseAlert(alert);
-                                }
-                            }
-                        }
-                    };
+                            });
 
             thread.start();
         }

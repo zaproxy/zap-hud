@@ -29,7 +29,7 @@ import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 /** Alexa top sites */
 public class TopSitesUnitTest extends BrowsersTest {
 
-    private void testSite(WebDriver driver, String site) throws InterruptedException {
+    private void testSite(WebDriver driver, String site) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud("http://" + site);
         GenericUnitTest.runAllTests(driver);
@@ -39,52 +39,52 @@ public class TopSitesUnitTest extends BrowsersTest {
     }
 
     @TestTemplate
-    public void testGoogle(WebDriver driver) throws InterruptedException {
+    public void testGoogle(WebDriver driver) {
         testSite(driver, "google.com");
     }
 
     @TestTemplate
-    public void testYoutube(WebDriver driver) throws InterruptedException {
+    public void testYoutube(WebDriver driver) {
         testSite(driver, "youtube.com");
     }
 
     @TestTemplate
-    public void testFacebook(WebDriver driver) throws InterruptedException {
+    public void testFacebook(WebDriver driver) {
         testSite(driver, "facebook.com");
     }
 
     @TestTemplate
-    public void testBaidu(WebDriver driver) throws InterruptedException {
+    public void testBaidu(WebDriver driver) {
         testSite(driver, "www.baidu.com");
     }
 
     @TestTemplate
-    public void testWikipedia(WebDriver driver) throws InterruptedException {
+    public void testWikipedia(WebDriver driver) {
         testSite(driver, "www.wikipedia.org");
     }
 
     @TestTemplate
-    public void testQq(WebDriver driver) throws InterruptedException {
+    public void testQq(WebDriver driver) {
         testSite(driver, "www.qq.com");
     }
 
     @TestTemplate
-    public void testYahoo(WebDriver driver) throws InterruptedException {
+    public void testYahoo(WebDriver driver) {
         testSite(driver, "yahoo.com");
     }
 
     @TestTemplate
-    public void testTaobao(WebDriver driver) throws InterruptedException {
+    public void testTaobao(WebDriver driver) {
         testSite(driver, "taobao.com");
     }
 
     @TestTemplate
-    public void testTmall(WebDriver driver) throws InterruptedException {
+    public void testTmall(WebDriver driver) {
         testSite(driver, "tmall.com");
     }
 
     @TestTemplate
-    public void testAmazon(WebDriver driver) throws InterruptedException {
+    public void testAmazon(WebDriver driver) {
         testSite(driver, "amazon.com");
     }
 }

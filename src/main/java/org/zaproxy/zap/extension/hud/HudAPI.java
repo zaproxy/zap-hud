@@ -79,7 +79,7 @@ public class HudAPI extends ApiImplementor {
 
     private static final int MAX_KEY_LENGTH = 50;
 
-    private Map<String, String> siteUrls = new HashMap<String, String>();
+    private Map<String, String> siteUrls = new HashMap<>();
     private ExtensionHUD extension;
 
     private static final String ACTION_LOG = "log";
@@ -103,8 +103,7 @@ public class HudAPI extends ApiImplementor {
     private static final String PARAM_VALUE = "value";
 
     /** The only files that can be included on domain */
-    private static final List<String> DOMAIN_FILE_WHITELIST =
-            Arrays.asList(new String[] {"inject.js"});
+    private static final List<String> DOMAIN_FILE_WHITELIST = Arrays.asList("inject.js");
 
     private ApiImplementor hudFileProxy;
     private String hudFileUrl;
@@ -186,7 +185,7 @@ public class HudAPI extends ApiImplementor {
         // Just used to handle files which need to be on the target domain
         try {
             String path = msg.getRequestHeader().getURI().getEscapedPath();
-            int lastSlash = path.lastIndexOf("/");
+            int lastSlash = path.lastIndexOf('/');
             String fileName = path.substring(lastSlash + 1);
 
             logger.debug("callback fileName = " + fileName);
@@ -334,7 +333,7 @@ public class HudAPI extends ApiImplementor {
 
         SiteNode node = Model.getSingleton().getSession().getSiteTree().findNode(uri);
         if (node != null) {
-            Map<String, Set<Alert>> alertMap = new HashMap<String, Set<Alert>>();
+            Map<String, Set<Alert>> alertMap = new HashMap<>();
             for (String risk : Alert.MSG_RISK) {
                 alertMap.put(risk, new HashSet<Alert>());
             }
@@ -361,14 +360,14 @@ public class HudAPI extends ApiImplementor {
             for (String risk : Alert.MSG_RISK) {
                 ApiResponseListWithoutArray riskResult = new ApiResponseListWithoutArray(risk);
                 for (Alert alert : alertMap.get(risk)) {
-                    Map<String, String> alertAtts = new HashMap<String, String>();
+                    Map<String, String> alertAtts = new HashMap<>();
                     alertAtts.put("name", alert.getName());
                     alertAtts.put("risk", Alert.MSG_RISK[alert.getRisk()]);
                     alertAtts.put("param", alert.getParam());
                     alertAtts.put("id", Integer.toString(alert.getAlertId()));
                     alertAtts.put("uri", alert.getUri());
                     alertAtts.put("evidence", alert.getEvidence());
-                    riskResult.addItem(new ApiResponseSet<String>(alert.getName(), alertAtts));
+                    riskResult.addItem(new ApiResponseSet<>(alert.getName(), alertAtts));
                 }
                 nodeAlerts.addItem(riskResult);
             }
@@ -380,7 +379,7 @@ public class HudAPI extends ApiImplementor {
             while (!parent.getParent().isRoot()) {
                 parent = parent.getParent();
             }
-            Map<String, Set<String>> alertMap = new HashMap<String, Set<String>>();
+            Map<String, Set<String>> alertMap = new HashMap<>();
             for (String risk : Alert.MSG_RISK) {
                 alertMap.put(risk, new HashSet<String>());
             }

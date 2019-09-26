@@ -46,7 +46,7 @@ import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 public class FramesPageUnitTest extends BrowsersTest {
 
     @TestTemplate
-    public void genericPageUnitTests(WebDriver driver) throws InterruptedException {
+    public void genericPageUnitTests(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
         GenericUnitTest.runAllTests(driver);

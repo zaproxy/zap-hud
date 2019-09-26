@@ -41,7 +41,7 @@ import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 public class AlertNotificationsPageUnitTest extends BrowsersTest {
 
     @TestTemplate
-    public void genericPageUnitTests(WebDriver driver) throws InterruptedException {
+    public void genericPageUnitTests(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(AlertNotificationsPage.NAME));
         GenericUnitTest.runAllTests(driver);
