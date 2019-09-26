@@ -53,6 +53,6 @@
     "vue-template-compiler": "^2.6.10",
     "webpack": "^4.40.2",
     "webpack-cli": "^3.3.9",
-    "xo": "^0.24.0"
+    "xo": "^0.25.1"
   }
 }
