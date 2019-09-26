@@ -55,6 +55,9 @@
       "no-negated-condition": "warn",
       "no-unused-vars": "warn",
       "prefer-destructuring": "warn",
+      "unicorn/no-for-loop": "warn",
+      "unicorn/prefer-includes": "warn",
+      "unicorn/prefer-string-slice": "warn",
       "unicorn/filename-case": "warn",
       "unicorn/prefer-query-selector": "warn"
     }
