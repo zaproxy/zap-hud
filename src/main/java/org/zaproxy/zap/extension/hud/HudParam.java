@@ -104,7 +104,7 @@ public class HudParam extends VersionedAbstractParam {
 
     private List<String> tutorialTasks;
 
-    private List<String> tutorialUpdates = new ArrayList<String>();
+    private List<String> tutorialUpdates = new ArrayList<>();
 
     private boolean newChangelog;
 
@@ -270,7 +270,7 @@ public class HudParam extends VersionedAbstractParam {
     }
 
     private List<String> convert(List<Object> objs) {
-        List<String> strs = new ArrayList<String>(objs.size());
+        List<String> strs = new ArrayList<>(objs.size());
         for (Object obj : objs) {
             strs.add(obj.toString());
         }

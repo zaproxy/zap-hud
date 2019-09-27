@@ -60,15 +60,22 @@ public class BadSiteUnitTest extends BrowsersTest {
         TrustManager[] trustAllCerts =
                 new TrustManager[] {
                     new X509TrustManager() {
+                        @Override
                         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                             return null;
                         }
 
+                        @Override
                         public void checkClientTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {}
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                            // Nothing to do.
+                        }
 
+                        @Override
                         public void checkServerTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {}
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                            // Nothing to do.
+                        }
                     }
                 };
 
@@ -83,7 +90,7 @@ public class BadSiteUnitTest extends BrowsersTest {
 
     @TestTemplate
     public void cannotAccessWebSocketsUrlWhenLoadingSwAsScript(WebDriver driver)
-            throws InterruptedException, MalformedURLException {
+            throws MalformedURLException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
         String swUrl = getHudFilesUrl(hud) + SERVICE_WORKER;

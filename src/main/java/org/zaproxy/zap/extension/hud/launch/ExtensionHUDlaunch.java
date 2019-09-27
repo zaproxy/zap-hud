@@ -46,7 +46,7 @@ public class ExtensionHUDlaunch extends ExtensionAdaptor implements CommandLineL
 
     public static final String NAME = "ExtensionHUDlaunch";
 
-    private static List<Class<? extends Extension>> DEPENDENCIES;
+    private static final List<Class<? extends Extension>> DEPENDENCIES;
     private static final String SELENIUM_EXTENSION_CLASS_NAME =
             "org.zaproxy.zap.extension.selenium.ExtensionSelenium";
 
@@ -58,20 +58,19 @@ public class ExtensionHUDlaunch extends ExtensionAdaptor implements CommandLineL
     private static final String FIREFOX = "Firefox";
     private static final String CHROME = "Chrome";
     private static final Set<String> SUPPORTED_BROWSERS =
-            new HashSet<String>(Arrays.asList(new String[] {FIREFOX, CHROME}));
+            new HashSet<>(Arrays.asList(FIREFOX, CHROME));
 
     private static final Logger LOGGER = Logger.getLogger(ExtensionHUDlaunch.class);
 
     static {
         List<Class<? extends Extension>> dependencies = new ArrayList<>(1);
-        Class<?> extSeleniumClass;
         try {
-            extSeleniumClass = Class.forName(SELENIUM_EXTENSION_CLASS_NAME);
+            Class<?> extSeleniumClass = Class.forName(SELENIUM_EXTENSION_CLASS_NAME);
             dependencies.add((Class<? extends Extension>) extSeleniumClass);
-            DEPENDENCIES = Collections.unmodifiableList(dependencies);
         } catch (ClassNotFoundException e) {
-            DEPENDENCIES = null;
+            dependencies = Collections.emptyList();
         }
+        DEPENDENCIES = dependencies;
     }
 
     public ExtensionHUDlaunch() {
@@ -110,8 +109,7 @@ public class ExtensionHUDlaunch extends ExtensionAdaptor implements CommandLineL
     }
 
     private Object callMethodByReflection(Object obj, String methodName, Object... args)
-            throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
-                    NoSuchMethodException, SecurityException {
+            throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         @SuppressWarnings("rawtypes")
         Class[] argClasses = new Class[args.length];
         int i = 0;
