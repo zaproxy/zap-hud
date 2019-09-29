@@ -10,9 +10,9 @@ var ToggleScript = (function() {
 	var NAME = "toggleScript";
 	var LABEL = "Toggle Script";
 	var ICON = {};
-		ICON.default = "report.png";
-		ICON.on = "light-on.png";
-		ICON.off = "light-off.png";
+		ICON.default = "script-add.png";
+		ICON.on = "script-enabled.png";
+		ICON.off = "script-disabled.png";
 	var SCRIPT;
 
 	function initializeStorage() {
