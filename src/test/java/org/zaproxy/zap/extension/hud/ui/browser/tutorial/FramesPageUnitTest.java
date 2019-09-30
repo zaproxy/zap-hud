@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zaproxy.zap.extension.hud.ui.firefox.tutorial;
+package org.zaproxy.zap.extension.hud.ui.browser.tutorial;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,33 +28,32 @@ import java.util.List;
 import java.util.function.Function;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.FramesPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.UpgradePage;
 import org.zaproxy.zap.extension.hud.ui.Constants;
-import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
+import org.zaproxy.zap.extension.hud.ui.browser.BrowsersTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
 @Tag("tutorial")
-public class FramesPageUnitTest extends FirefoxUnitTest {
+public class FramesPageUnitTest extends BrowsersTest {
 
-    @Test
-    public void genericPageUnitTests(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void genericPageUnitTests(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
         GenericUnitTest.runAllTests(driver);
     }
 
-    @Test
-    public void testPreviousButtonWorks(FirefoxDriver driver) {
+    @TestTemplate
+    public void testPreviousButtonWorks(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
         WebElement previousButton = TutorialStatics.getPreviousButton(driver);
@@ -63,8 +62,8 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
         assertEquals(TutorialStatics.getTutorialHudUrl(UpgradePage.NAME), driver.getCurrentUrl());
     }
 
-    @Test
-    public void testTaskAndNextButton(FirefoxDriver driver) throws Exception {
+    @TestTemplate
+    public void testTaskAndNextButton(WebDriver driver) throws Exception {
         HUD.callZapApiResetTasks();
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
@@ -98,8 +97,8 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
         assertEquals(TutorialStatics.getTutorialHudUrl(AlertsPage.NAME), driver.getCurrentUrl());
     }
 
-    @Test
-    public void testSidePanelsHiddenAndRevealed(FirefoxDriver driver) throws Exception {
+    @TestTemplate
+    public void testSidePanelsHiddenAndRevealed(WebDriver driver) throws Exception {
         HUD.callZapApiResetTasks();
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
@@ -121,9 +120,8 @@ public class FramesPageUnitTest extends FirefoxUnitTest {
         testSidePanesVisible(hud);
     }
 
-    @Test
-    public void testBottonDrawerTabsHiddenAndRevealed(FirefoxDriver driver)
-            throws URISyntaxException {
+    @TestTemplate
+    public void testBottonDrawerTabsHiddenAndRevealed(WebDriver driver) throws URISyntaxException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
 

@@ -77,7 +77,7 @@ public class TutorialProxyServer extends ProxyServer {
 
     private ExtensionHUD extension;
     private String hostPort;
-    private Map<String, TutorialPage> pages = new HashMap<String, TutorialPage>();
+    private Map<String, TutorialPage> pages = new HashMap<>();
 
     private Logger log = Logger.getLogger(this.getClass());
 

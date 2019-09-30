@@ -79,6 +79,7 @@ public class SiteAlertsJsPage extends TutorialAlertsPage {
         }
     }
 
+    @Override
     public void handleResponse(HttpMessage msg) {
         // Otherwise it would be html
         msg.getResponseHeader().setHeader(HttpHeader.CONTENT_TYPE, "text/javascript");

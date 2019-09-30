@@ -57,6 +57,7 @@ public class HistoryJsPage extends TutorialPage {
         return html.replace("<!-- KEY -->", key);
     }
 
+    @Override
     public void handleResponse(HttpMessage msg) {
         // Otherwise it would be html
         msg.getResponseHeader().setHeader(HttpHeader.CONTENT_TYPE, "text/javascript");

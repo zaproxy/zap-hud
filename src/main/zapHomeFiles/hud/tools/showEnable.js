@@ -4,32 +4,30 @@
  * Description goes here...
  */
 
-var ShowEnable = (function() {
-
+const ShowEnable = (function () {
 	// Constants
 	// todo: could probably switch this to a config file?
-	var NAME = "showEnable";
-	var LABEL = I18n.t("show_tool");
-	var ICONS = {};
-		ICONS.OFF = "show-off.png";
-		ICONS.ON = "show-on.png";
+	const NAME = 'showEnable';
+	const LABEL = I18n.t('show_tool');
+	const ICONS = {};
+	ICONS.OFF = 'show-off.png';
+	ICONS.ON = 'show-on.png';
 
-	//todo: change this to a util function that reads in a config file (json/xml)
+	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
-		var tool = {};
+		const tool = {};
 		tool.name = NAME;
 		tool.label = LABEL;
 		tool.data = 0;
 		tool.icon = ICONS.OFF;
 		tool.isSelected = false;
 		tool.isRunning = false;
-		tool.panel = "";
+		tool.panel = '';
 		tool.position = 0;
 		tool.count = 0;
 
 		utils.writeTool(tool);
 	}
-
 
 	function checkIsRunning() {
 		return new Promise(resolve => {
@@ -43,10 +41,9 @@ var ShowEnable = (function() {
 	function switchState() {
 		checkIsRunning()
 			.then(isRunning => {
-				if(!isRunning) {
+				if (!isRunning) {
 					switchOn();
-				}
-				else {
+				} else {
 					switchOff();
 				}
 			})
@@ -54,7 +51,7 @@ var ShowEnable = (function() {
 	}
 
 	function switchOn() {
-		utils.messageAllTabs("management", {action:"showEnable.on"});
+		utils.messageAllTabs('management', {action: 'showEnable.on'});
 
 		utils.loadTool(NAME)
 			.then(tool => {
@@ -68,7 +65,7 @@ var ShowEnable = (function() {
 	}
 
 	function switchOff() {
-		utils.messageAllTabs("management", {action:"showEnable.off"});
+		utils.messageAllTabs('management', {action: 'showEnable.off'});
 
 		utils.loadTool(NAME)
 			.then(tool => {
@@ -80,39 +77,38 @@ var ShowEnable = (function() {
 			})
 			.catch(utils.errorHandler);
 	}
-	
+
 	function setCount(tabId, count) {
 		utils.loadTool(NAME)
 			.then(tool => {
 				tool.data = count;
 
 				utils.writeTool(tool);
-				utils.messageFrame(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, data: count}})
+				utils.messageFrame(tabId, tool.panel, {action: 'updateData', tool: {name: NAME, data: count}});
 			})
 			.catch(utils.errorHandler);
 	}
 
 	function showOptions(tabId) {
-		var config = {};
+		const config = {};
 
 		config.tool = NAME;
 		config.toolLabel = LABEL;
-		config.options = {remove: I18n.t("common_remove")};
+		config.options = {remove: I18n.t('common_remove')};
 
-		utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config})
+		utils.messageFrame(tabId, 'display', {action: 'showButtonOptions', config})
 			.then(response => {
 				// Handle button choice
-				if (response.id == "remove") {
+				if (response.id === 'remove') {
 					utils.removeToolFromPanel(tabId, NAME);
-				}
-				else {
-					//cancel
+				} else {
+					// Cancel
 				}
 			})
 			.catch(utils.errorHandler);
 	}
 
-	self.addEventListener("activate", event => {
+	self.addEventListener('activate', event => {
 		initializeStorage();
 	});
 
@@ -120,28 +116,27 @@ var ShowEnable = (function() {
 		utils.loadTool(NAME)
 			.then(tool => {
 				if (tool.isRunning) {
-					port.postMessage({label: LABEL, data: 0, icon: ICONS.ON})
-					utils.messageFrame(tabId, "management", {action: 'showEnable.on'})
-				}
-				else {
-					port.postMessage({label: LABEL, data: 0, icon: ICONS.OFF})
+					port.postMessage({label: LABEL, data: 0, icon: ICONS.ON});
+					utils.messageFrame(tabId, 'management', {action: 'showEnable.on'});
+				} else {
+					port.postMessage({label: LABEL, data: 0, icon: ICONS.OFF});
 				}
 
-				utils.messageFrame(tabId, "management", {action:"showEnable.count"});
+				utils.messageFrame(tabId, 'management', {action: 'showEnable.count'});
 			})
-			.catch(utils.errorHandler)
+			.catch(utils.errorHandler);
 	}
 
-	self.addEventListener("message", event => {
-		var message = event.data;
+	self.addEventListener('message', event => {
+		const message = event.data;
 
 		// Broadcasts
-		switch(message.action) {
-			case "initializeTools":
+		switch (message.action) {
+			case 'initializeTools':
 				initializeStorage();
 				break;
 
-			case "showEnable.count":
+			case 'showEnable.count':
 				// The message from the target domain will have been validated in management.js
 				setCount(message.tabId, message.count);
 				break;
@@ -152,17 +147,18 @@ var ShowEnable = (function() {
 
 		// Directed
 		if (message.tool === NAME) {
-			switch(message.action) {
-				case "buttonClicked":
+			switch (message.action) {
+				case 'buttonClicked':
 					switchState();
 					break;
 
-				case "buttonMenuClicked":
+				case 'buttonMenuClicked':
 					showOptions(message.tabId);
 					break;
 
-				case "getTool":
+				case 'getTool':
 					getTool(message.tabId, event.ports[0]);
+					break;
 
 				default:
 					break;

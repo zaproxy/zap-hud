@@ -4,31 +4,30 @@
  * Description goes here...
  */
 
-var SiteAlertsInformational = (function() {
-
+const SiteAlertsInformational = (function () {
 	// Constants
 	// todo: could probably switch this to a config file?
-	var NAME = "site-alerts-informational";
-	var LABEL = I18n.t("alerts_site_info_tool");
-	var DIALOG = I18n.t("alerts_site_title");
-	var DATA = {};
-		DATA.NONE = "0";
-	var ICONS = {};
-        ICONS.PA = "site-alerts-informational.png";
-    var ALERT_TYPE = "site-alerts"
-    var ALERT_RISK = "Informational"
+	const NAME = 'site-alerts-informational';
+	const LABEL = I18n.t('alerts_site_info_tool');
+	const DIALOG = I18n.t('alerts_site_title');
+	const DATA = {};
+	DATA.NONE = '0';
+	const ICONS = {};
+	ICONS.PA = 'site-alerts-informational.png';
+	const ALERT_TYPE = 'site-alerts';
+	const ALERT_RISK = 'Informational';
 
-	//todo: change this to a util function that reads in a config file (json/xml)
+	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
-		var tool = {};
+		const tool = {};
 		tool.name = NAME;
 		tool.label = LABEL;
 		tool.data = DATA.NONE;
-        tool.icon = ICONS.PA;
-        tool.alertType = ALERT_TYPE;
-        tool.alertRisk = ALERT_RISK;
+		tool.icon = ICONS.PA;
+		tool.alertType = ALERT_TYPE;
+		tool.alertRisk = ALERT_RISK;
 		tool.isSelected = false;
-		tool.panel = "";
+		tool.panel = '';
 		tool.position = 0;
 		tool.alerts = {};
 		tool.cache = {};
@@ -41,30 +40,31 @@ var SiteAlertsInformational = (function() {
 	}
 
 	function showOptions(tabId) {
-		alertUtils.showOptions(tabId, NAME, LABEL)
+		alertUtils.showOptions(tabId, NAME, LABEL);
 	}
 
-	self.addEventListener("activate", event => {
+	self.addEventListener('activate', event => {
 		initializeStorage();
 	});
 
-	self.addEventListener("commonAlerts.Informational", event => utils.loadTool(NAME)
-        .then(tool => {
+	self.addEventListener('commonAlerts.Informational', event => utils.loadTool(NAME)
+		.then(tool => {
 			tool.data = event.detail.count;
 
 			if (tool.isSelected) {
-				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: event.detail.domain}, tool: {name: NAME, data: event.detail.count}})
+				utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain: event.detail.domain}, tool: {name: NAME, data: event.detail.count}});
 			}
-			return utils.writeTool(tool);
-        })
-        .catch(utils.errorHandler));
 
-	self.addEventListener("message", event => {
-		var message = event.data;
+			return utils.writeTool(tool);
+		})
+		.catch(utils.errorHandler));
+
+	self.addEventListener('message', event => {
+		const message = event.data;
 
 		// Broadcasts
-		switch(message.action) {
-			case "initializeTools":
+		switch (message.action) {
+			case 'initializeTools':
 				initializeStorage();
 				break;
 
@@ -74,12 +74,12 @@ var SiteAlertsInformational = (function() {
 
 		// Directed
 		if (message.tool === NAME) {
-			switch(message.action) {
-				case "buttonClicked":
+			switch (message.action) {
+				case 'buttonClicked':
 					showAlerts(message.tabId, message.domain);
 					break;
 
-				case "buttonMenuClicked":
+				case 'buttonMenuClicked':
 					showOptions(message.tabId);
 					break;
 

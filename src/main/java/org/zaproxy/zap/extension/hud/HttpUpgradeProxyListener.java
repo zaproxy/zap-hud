@@ -107,7 +107,7 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
                         LOG.debug("onHttpResponseReceived not upgrading " + url);
                         this.extHud.removeUpgradedHttpsDomain(url);
                         // Advise that we're no longer upgrading this domain to https
-                        Map<String, String> map = new HashMap<String, String>();
+                        Map<String, String> map = new HashMap<>();
                         map.put(
                                 HudEventPublisher.FIELD_DOMAIN,
                                 ExtensionHUD.getNormalisedDomain(url));
@@ -150,7 +150,7 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
     }
 
     protected static List<URI> extractWssUrls(String str) {
-        List<URI> list = new ArrayList<URI>();
+        List<URI> list = new ArrayList<>();
         Matcher m = WSS_REGEX_PATTERN.matcher(str);
         while (m.find()) {
             String wsUrl = m.group();
