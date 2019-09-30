@@ -1,6 +1,6 @@
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener('DOMContentLoaded', () => {
 	// Disable the fields
-	document.getElementById("field3").style.display = "none"; 
-	document.getElementById("field4").style.visibility = "hidden"; 
+	document.querySelector('#field3').style.display = 'none';
+	document.querySelector('#field4').style.visibility = 'hidden';
 });

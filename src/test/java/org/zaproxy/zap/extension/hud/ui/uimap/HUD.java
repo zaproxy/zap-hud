@@ -27,7 +27,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Function;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
@@ -219,14 +218,11 @@ public class HUD {
     public void waitForPageLoad() {
         Wait<WebDriver> wait = new WebDriverWait(webdriver, 30);
         wait.until(
-                new Function<WebDriver, Boolean>() {
-                    public Boolean apply(WebDriver driver) {
-                        return String.valueOf(
+                driver ->
+                        String.valueOf(
                                         ((JavascriptExecutor) driver)
                                                 .executeScript("return document.readyState"))
-                                .equals("complete");
-                    }
-                });
+                                .equals("complete"));
     }
 
     public static JSONObject callZapApi(String apiCall) throws MalformedURLException, IOException {

@@ -131,7 +131,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:$jupiterVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
 
-    testImplementation("io.github.bonigarcia:selenium-jupiter:2.2.0")
+    testImplementation("io.github.bonigarcia:selenium-jupiter:3.3.0")
     testImplementation("org.hamcrest:hamcrest-all:1.3")
     testImplementation("org.mockito:mockito-all:1.10.8")
     testImplementation(files(fileTree("lib").files))
@@ -172,10 +172,16 @@ tasks {
         commandLine("npm", "run", "lint-staged")
     }
 
-    register<Exec>("npmLintAllHud") {
+    val npmLintAllHud by registering(NpmTask::class) {
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Runs the XO linter on all files."
+ 
+        command("run")
+        cmdArgs("lint")
+    }
 
-        commandLine("npm", "run", "lint")
+    named("check") {
+        dependsOn(npmLintAllHud)
     }
 
     register<Exec>("npmTestHud") {
@@ -247,12 +253,14 @@ tasks {
         args.set(listOf("-dev", "-config", "start.checkForUpdates=false", "-config", "hud.dir=$zapHome/hud") + hudDevArgs)
     }
 
+    register<Delete>("deleteTestHome") {
+        delete(testZapHome)
+    }
+
     register<CopyAddOn>("copyAddOnTestHome") {
         into(testZapHome.dir("plugin"))
 
-        doFirst {
-            delete(testZapHome)
-        }
+        dependsOn("deleteTestHome")
     }
 
     register<ZapStart>("zapStart") {
@@ -301,8 +309,8 @@ tasks.test {
 
 tasks.withType<Test>().configureEach {
     systemProperties.putAll(mapOf(
-            "wdm.chromeDriverVersion" to "2.46",
-            "wdm.geckoDriverVersion" to "0.24.0",
+            "wdm.chromeDriverVersion" to "77.0.3865.40",
+            "wdm.geckoDriverVersion" to "0.25.0",
             "wdm.forceCache" to "true"))
 }
 

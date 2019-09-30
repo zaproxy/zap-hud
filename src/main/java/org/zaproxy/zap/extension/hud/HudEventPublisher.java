@@ -47,16 +47,14 @@ public class HudEventPublisher implements EventPublisher {
             ZAP.getEventBus()
                     .registerPublisher(
                             publisher,
-                            new String[] {
-                                EVENT_ENABLED_FOR_DESKTOP,
-                                EVENT_DISABLED_FOR_DESKTOP,
-                                EVENT_ENABLED_FOR_DAEMON,
-                                EVENT_DISABLED_FOR_DAEMON,
-                                EVENT_DEV_MODE_ENABLED,
-                                EVENT_DEV_MODE_DISABLED,
-                                EVENT_DOMAIN_UPGRADED_TO_HTTPS,
-                                EVENT_DOMAIN_REDIRECTED_TO_HTTPS
-                            });
+                            EVENT_ENABLED_FOR_DESKTOP,
+                            EVENT_DISABLED_FOR_DESKTOP,
+                            EVENT_ENABLED_FOR_DAEMON,
+                            EVENT_DISABLED_FOR_DAEMON,
+                            EVENT_DEV_MODE_ENABLED,
+                            EVENT_DEV_MODE_DISABLED,
+                            EVENT_DOMAIN_UPGRADED_TO_HTTPS,
+                            EVENT_DOMAIN_REDIRECTED_TO_HTTPS);
         }
         return publisher;
     }

@@ -176,13 +176,9 @@ public class OptionsHudPanel extends AbstractParamPanel {
                     new JCheckBox(
                             Constant.messages.getString("hud.optionspanel.label.developmentMode"));
             developmentMode.addActionListener(
-                    new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(ActionEvent event) {
-                            // TODO uncomment once the HUD works without unsafe eeval
-                            // getAllowUnsafeEval().setEnabled(developmentMode.isSelected());
-                        }
+                    e -> {
+                        // TODO uncomment once the HUD works without unsafe eeval
+                        // getAllowUnsafeEval().setEnabled(developmentMode.isSelected());
                     });
         }
         return developmentMode;
@@ -269,14 +265,10 @@ public class OptionsHudPanel extends AbstractParamPanel {
                             Constant.messages.getString(
                                     "hud.optionspanel.label.resetTutorialTasks"));
             resetTutorialTasks.addActionListener(
-                    new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(ActionEvent arg0) {
-                            extension.resetTutorialTasks();
-                            // Disable button to indicate its been done
-                            resetTutorialTasks.setEnabled(false);
-                        }
+                    e -> {
+                        extension.resetTutorialTasks();
+                        // Disable button to indicate its been done
+                        resetTutorialTasks.setEnabled(false);
                     });
         }
         return resetTutorialTasks;
