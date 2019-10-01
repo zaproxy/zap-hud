@@ -7,7 +7,7 @@
 const ToggleScript = (function () {
 	// Constants
 	const NAME = 'toggleScript';
-	const LABEL = 'Toggle Script'
+	const LABEL = 'Toggle Script';
 	const ICON = {};
 	ICON.default = 'script-add.png';
 	ICON.on = 'script-enabled.png';
@@ -70,9 +70,8 @@ const ToggleScript = (function () {
 					SCRIPT.enabled = !SCRIPT.enabled;
 					updateUI();
 				});
-		}
-		// If there is no currently selected script, select a script
-		else {
+		} else {
+			// If there is no currently selected script, select a script
 			showOptions(tabId);
 		}
 	}
@@ -134,9 +133,8 @@ const ToggleScript = (function () {
 					result.selected = allScripts[response.id];
 					result.selected.enabled = result.selected.enabled === 'true';
 					result.remove = false;
-				}
-				// If the last option (Remove) is selected, unset selected
-				else {
+				} else {
+					// If the last option (Remove) is selected, unset selected
 					result.remove = true;
 				}
 
