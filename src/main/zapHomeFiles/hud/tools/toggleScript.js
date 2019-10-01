@@ -4,39 +4,36 @@
  * When selected displays the standard HTML report in a new window / tab
  */
 
-var ToggleScript = (function() {
-
+const ToggleScript = (function () {
 	// Constants
-	var NAME = "toggleScript";
-	var LABEL = "Toggle Script";
-	var ICON = {};
-		ICON.default = "script-add.png";
-		ICON.on = "script-enabled.png";
-		ICON.off = "script-disabled.png";
-	var SCRIPT;
+	const NAME = 'toggleScript';
+	const LABEL = 'Toggle Script'
+	const ICON = {};
+	ICON.default = 'script-add.png';
+	ICON.on = 'script-enabled.png';
+	ICON.off = 'script-disabled.png';
+	let SCRIPT;
 
 	function initializeStorage() {
-		var tool = {};
+		const tool = {};
 		tool.name = NAME;
 		tool.data = '';
-		tool.panel = "";
+		tool.panel = '';
 		tool.position = 0;
 		tool.label = LABEL;
 		tool.icon = ICON.default;
 		utils.writeTool(tool);
 	}
 
-
 	// Select a script and update the UI accordingly
 	function showOptions(tabId) {
 		// Pop up a menu to select a script
 		selectScript(tabId)
-			.then((result) => {
-				if(!result.remove) {
+			.then(result => {
+				if (!result.remove) {
 					SCRIPT = result.selected;
 					updateUI();
-				}
-				else {
+				} else {
 					// Set the currently selected script to null
 					SCRIPT = null;
 					// Reset the tool before removing it, so it shows up as default in the 'Add Tools' menu
@@ -52,28 +49,27 @@ var ToggleScript = (function() {
 						utils.writeTool(tool);
 					}).then(() => {
 						// Remove the tool from the panel
-						utils.removeToolFromPanel(tabId, NAME);	
-					})
+						utils.removeToolFromPanel(tabId, NAME);
+					});
 				}
-			})
+			});
 	}
 
 	function toggleScript(tabId) {
-		// If there is a selected script, 
-		if(SCRIPT) {
+		// If there is a selected script,
+		if (SCRIPT) {
 			// Choose which API to execute based on enabled status
-			var action = SCRIPT.enabled 
-				? "disable"
-				: "enable"; 
+			const action = SCRIPT.enabled ?
+				'disable' :
+				'enable';
 			// Update the tool's status via the API
-			apiCallWithResponse("script", "action", action, {scriptName: SCRIPT.name})
+			apiCallWithResponse('script', 'action', action, {scriptName: SCRIPT.name})
 				.catch(utils.errorHandler)
 				.then(() => {
 					// Switch enabled status in UI
 					SCRIPT.enabled = !SCRIPT.enabled;
-					updateUI()
+					updateUI();
 				});
-			
 		}
 		// If there is no currently selected script, select a script
 		else {
@@ -82,33 +78,32 @@ var ToggleScript = (function() {
 	}
 
 	function updateUI() {
-		var data = SCRIPT.name;
-		// Set icon to break-off (green light) when enabled 
+		const data = SCRIPT.name;
+		// Set icon to break-off (green light) when enabled
 		// and break-on (red light) when disabled
-		var icon = SCRIPT.enabled ? ICON.on : ICON.off;
+		const icon = SCRIPT.enabled ? ICON.on : ICON.off;
 		utils.loadTool(NAME).then(tool => {
 			tool.data = data;
 			tool.icon = icon;
 			utils.writeTool(tool)
 				.then(() => {
 					utils.messageAllTabs(tool.panel, {
-						action: 'broadcastUpdate', 
+						action: 'broadcastUpdate',
 						tool: {
-							name: NAME, 
-							label: tool.label, 
-							data: tool.data, 
+							name: NAME,
+							label: tool.label,
+							data: tool.data,
 							icon: tool.icon
 						}
 					});
 				});
-			
 		}).catch(utils.errorHandler);
 	}
 
 	// Display Dropdown showing a list of scripts that can be manipulated
 	function selectScript(tabId) {
-		var config = {};
-		var allScripts;
+		const config = {};
+		let allScripts;
 		config.tool = NAME;
 		config.toolLabel = LABEL;
 		config.options = {};
@@ -116,7 +111,7 @@ var ToggleScript = (function() {
 		// Return a promise containing the selected script
 
 		// Call the listScripts API endpoint
-		return apiCallWithResponse("script", "view", "listScripts")
+		return apiCallWithResponse('script', 'view', 'listScripts')
 			.catch(utils.errorHandler)
 			.then(data => {
 				// Filter out built-in scripts
@@ -126,39 +121,40 @@ var ToggleScript = (function() {
 				allScripts = scripts;
 				// Get an array of the script names to pass to the messageFrame
 				config.options = scripts.map(script => script.name);
-				config.options.push("Remove");
+				config.options.push('Remove');
 				// Create the messageFrame displaying the scripts
-				return utils.messageFrame(tabId, "display", {action:"showButtonOptions", config:config});
+				return utils.messageFrame(tabId, 'display', {action: 'showButtonOptions', config});
 			})
 			.then(response => {
-				var result = {};
-				// allScripts does not contain the Remove option, so if response.id === allScripts.length, Remove must have been selected.
-				if(response.id !== allScripts.length) {
-					// Because we passed messageFrame an array, response.id 
+				const result = {};
+				// AllScripts does not contain the Remove option, so if response.id === allScripts.length, Remove must have been selected.
+				if (response.id !== allScripts.length) {
+					// Because we passed messageFrame an array, response.id
 					// will be the index of the selected element
 					result.selected = allScripts[response.id];
-					result.selected.enabled = result.selected.enabled === "true" ? true : false;
+					result.selected.enabled = result.selected.enabled === 'true';
 					result.remove = false;
 				}
 				// If the last option (Remove) is selected, unset selected
 				else {
 					result.remove = true;
 				}
+
 				return result;
 			})
 			.catch(utils.errorHandler);
 	}
 
-	self.addEventListener("activate", event => {
+	self.addEventListener('activate', event => {
 		initializeStorage();
 	});
 
-	self.addEventListener("message", event => {
-		var message = event.data;
+	self.addEventListener('message', event => {
+		const message = event.data;
 
 		// Broadcasts
-		switch(message.action) {
-			case "initializeTools":
+		switch (message.action) {
+			case 'initializeTools':
 				initializeStorage();
 				break;
 
@@ -168,16 +164,16 @@ var ToggleScript = (function() {
 
 		// Directed
 		if (message.tool === NAME) {
-			switch(message.action) {
+			switch (message.action) {
 				// Icon is left-clicked
 				// As per #335: "clicking on the tool would toggle the script on and off"
-				case "buttonClicked":
+				case 'buttonClicked':
 					toggleScript(message.tabId);
 					break;
 
-				// icon is right-clicked
+				// Icon is right-clicked
 				// As per #335: "right clicking it would give the option to change script"
-				case "buttonMenuClicked":
+				case 'buttonMenuClicked':
 					showOptions(message.tabId);
 					break;
 
