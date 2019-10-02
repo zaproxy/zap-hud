@@ -1,18 +1,26 @@
 /*
- * HTML Report tool
+ * Toggle Script tool
  *
- * When selected displays the standard HTML report in a new window / tab
+ * When selected, allows a user to choose a Script to toggle.
+ * Togglable scripts MUST have an enabled property in order to be selected.
+ * When left-clicked after a script is selected, will toggle that script to its opposite state.
  */
 
 const ToggleScript = (function () {
 	// Constants
 	const NAME = 'toggleScript';
-	const LABEL = 'Toggle Script';
+	const LABEL = I18n.t('togglescript_tool');
 	const ICON = {};
-	ICON.default = 'script-add.png';
-	ICON.on = 'script-enabled.png';
-	ICON.off = 'script-disabled.png';
-	let SCRIPT;
+	ICON.DEFAULT = 'script-add.png';
+	ICON.ON = 'script-enabled.png';
+	ICON.OFF = 'script-disabled.png';
+	const DATA = {};
+	DATA.ON = I18n.t('common_on');
+	DATA.OFF = I18n.t('common.off');
+	const NO_SCRIPTS_FOUND = I18n.t('togglescript_no_scripts_found');
+	const SELECT = I18n.t('togglescript_select');
+	const SCRIPT = I18n.t('togglescript_script');
+	let selectedScript;
 
 	function initializeStorage() {
 		const tool = {};
@@ -21,7 +29,7 @@ const ToggleScript = (function () {
 		tool.panel = '';
 		tool.position = 0;
 		tool.label = LABEL;
-		tool.icon = ICON.default;
+		tool.icon = ICON.DEFAULT;
 		utils.writeTool(tool);
 	}
 
@@ -30,25 +38,21 @@ const ToggleScript = (function () {
 		// Pop up a menu to select a script
 		selectScript(tabId)
 			.then(result => {
-				if (!result.remove) {
-					SCRIPT = result.selected;
+				if (!result.remove && result !== {}) {
+					selectedScript = result.selected;
 					updateUI();
-				} else {
-					// Set the currently selected script to null
-					SCRIPT = null;
+				} else if (result !== {}) {
+					selectedScript = null;
 					// Reset the tool before removing it, so it shows up as default in the 'Add Tools' menu
 					// Load the tool so that panel and other properties don't get messed with
 					utils.loadTool(NAME).then(tool => {
-						// Reset data, label and icon
 						tool.data = '';
 						tool.label = LABEL;
-						tool.icon = ICON.default;
+						tool.icon = ICON.DEFAULT;
 						return tool;
 					}).then(tool => {
-						// Write the reset tool to storage
 						utils.writeTool(tool);
 					}).then(() => {
-						// Remove the tool from the panel
 						utils.removeToolFromPanel(tabId, NAME);
 					});
 				}
@@ -56,31 +60,25 @@ const ToggleScript = (function () {
 	}
 
 	function toggleScript(tabId) {
-		// If there is a selected script,
-		if (SCRIPT) {
+		if (selectedScript) {
 			// Choose which API to execute based on enabled status
-			const action = SCRIPT.enabled ?
+			const action = selectedScript.enabled ?
 				'disable' :
 				'enable';
-			// Update the tool's status via the API
-			apiCallWithResponse('script', 'action', action, {scriptName: SCRIPT.name})
+			apiCallWithResponse('script', 'action', action, {scriptName: selectedScript.name})
 				.catch(utils.errorHandler)
 				.then(() => {
-					// Switch enabled status in UI
-					SCRIPT.enabled = !SCRIPT.enabled;
+					selectedScript.enabled = !selectedScript.enabled;
 					updateUI();
 				});
 		} else {
-			// If there is no currently selected script, select a script
 			showOptions(tabId);
 		}
 	}
 
 	function updateUI() {
-		const data = SCRIPT.name;
-		// Set icon to break-off (green light) when enabled
-		// and break-on (red light) when disabled
-		const icon = SCRIPT.enabled ? ICON.on : ICON.off;
+		const data = selectedScript.enabled ? DATA.ON : DATA.OFF;
+		const icon = selectedScript.enabled ? ICON.ON : ICON.OFF;
 		utils.loadTool(NAME).then(tool => {
 			tool.data = data;
 			tool.icon = icon;
@@ -107,9 +105,6 @@ const ToggleScript = (function () {
 		config.toolLabel = LABEL;
 		config.options = {};
 
-		// Return a promise containing the selected script
-
-		// Call the listScripts API endpoint
 		return apiCallWithResponse('script', 'view', 'listScripts')
 			.catch(utils.errorHandler)
 			.then(data => {
@@ -118,23 +113,26 @@ const ToggleScript = (function () {
 			})
 			.then(scripts => {
 				allScripts = scripts;
-				// Get an array of the script names to pass to the messageFrame
-				config.options = scripts.map(script => script.name);
+				config.options = scripts.map(script => {
+					const type = I18n.t(`togglescript_${script.type}`);
+					return `${SELECT} ${type} ${SCRIPT}: ${script.name}`;
+				});
+				if (config.options.length === 0) {
+					config.options.push(NO_SCRIPTS_FOUND);
+				}
+
 				config.options.push('Remove');
-				// Create the messageFrame displaying the scripts
 				return utils.messageFrame(tabId, 'display', {action: 'showButtonOptions', config});
 			})
 			.then(response => {
 				const result = {};
 				// AllScripts does not contain the Remove option, so if response.id === allScripts.length, Remove must have been selected.
-				if (response.id !== allScripts.length) {
-					// Because we passed messageFrame an array, response.id
-					// will be the index of the selected element
+				if (response.id < allScripts.length) {
 					result.selected = allScripts[response.id];
 					result.selected.enabled = result.selected.enabled === 'true';
 					result.remove = false;
-				} else {
-					// If the last option (Remove) is selected, unset selected
+				} else if (response.id !== 0) {
+					// Remove will never have an ID of 0, as it will come after results or NO_RESULTS_FOUND
 					result.remove = true;
 				}
 
