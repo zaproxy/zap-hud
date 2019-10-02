@@ -33,6 +33,7 @@ import org.zaproxy.zap.extension.api.ZapApiIgnore;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AjaxSpiderPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.HistoryPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.HudConfigPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.ToggleScriptPage;
 
 public class HudParam extends VersionedAbstractParam {
 
@@ -75,7 +76,7 @@ public class HudParam extends VersionedAbstractParam {
      * However for the HUD we do use it to flag new features, so it will typically be updated for
      * each new version of the HUD.
      */
-    private static final int PARAM_CURRENT_VERSION = 3;
+    private static final int PARAM_CURRENT_VERSION = 4;
 
     private String baseDirectory;
 
@@ -296,6 +297,9 @@ public class HudParam extends VersionedAbstractParam {
         }
         if (fileVersion <= 2) {
             addTutorialUpdate(HistoryPage.NAME);
+        }
+        if (fileVersion <= 3) {
+            addTutorialUpdate(ToggleScriptPage.NAME);
         }
         getConfig().setProperty(PARAM_TUTORIAL_UPDATES, tutorialUpdates);
 
