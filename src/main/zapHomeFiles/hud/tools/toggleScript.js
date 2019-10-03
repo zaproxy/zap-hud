@@ -105,16 +105,25 @@ const ToggleScript = (function () {
 		config.toolLabel = LABEL;
 		config.options = {};
 
-		return apiCallWithResponse('script', 'view', 'listScripts')
+		return Promise.all([
+			apiCallWithResponse('script', 'view', 'listScripts'),
+			apiCallWithResponse('script', 'view', 'listTypes')
+		])
 			.catch(utils.errorHandler)
-			.then(data => {
-				// Filter out built-in scripts
-				return data.listScripts.filter(script => (script.enabled !== undefined));
+			.then(([data, {listTypes}]) => {
+				// Filter out built-in scripts & flatten types list
+				return [
+					data.listScripts.filter(script => (script.enabled !== undefined)),
+					listTypes.reduce((type, current) => {
+						type[current.name] = current.uiName;
+						return type;
+					}, {})
+				];
 			})
-			.then(scripts => {
+			.then(([scripts, types]) => {
 				allScripts = scripts;
 				config.options = scripts.map(script => {
-					const type = I18n.t(`togglescript_${script.type}`);
+					const type = types[script.type];
 					return `${SELECT} ${type} ${SCRIPT}: ${script.name}`;
 				});
 				if (config.options.length === 0) {
