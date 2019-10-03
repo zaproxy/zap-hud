@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+ - Added 'Toggle Script' tool, allowing user-made scripts to be toggled on and off from the HUD [#335](https://github.com/zaproxy/zap-hud/issues/335)
 
 ## [0.6.0] - 2019-08-12
 
