@@ -25,7 +25,7 @@ repositories {
     mavenCentral()
 }
 
-version = "0.7.0"
+version = "0.8.0"
 description = "Display information from ZAP in browser."
 
 val generatedI18nJsFileDir = layout.buildDirectory.dir("zapAddOn/i18nJs")
