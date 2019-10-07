@@ -306,12 +306,20 @@ const injection = (function () {
 				High: 'red'
 			};
 			const colour = colours[alert.risk];
-			el.style.borderColor = colour || 'red';
-			el.insertAdjacentHTML('afterend',
-				'<img src="' + ZAP_HUD_FILES + '/image/flag-' + colour + '.png" ' +
-				'id="zapHudAlert-' + alert.id + '" ' +
-				'title="' + alert.name + '" height="16" width="16" ' +
-				'onclick="injection.showZapAlert(' + alert.id + ');" />');
+			const alertId = parseInt(alert.id, 10);
+			if (alertId >= 0) {
+				el.style.borderColor = colour || 'red';
+				const img = document.createElement('img');
+				img.src = ZAP_HUD_FILES + '/image/flag-' + colour + '.png';
+				img.id = 'zapHudAlert-' + alertId;
+				img.title = alert.name;
+				img.height = 16;
+				img.width = 16;
+				el.parentNode.insertBefore(img, el.nextSibling);
+				img.addEventListener('click', () => {
+					injection.showZapAlert(alertId);
+				});
+			}
 		}
 	}
 
