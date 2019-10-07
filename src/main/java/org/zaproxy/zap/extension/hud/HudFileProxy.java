@@ -42,7 +42,7 @@ public class HudFileProxy extends ApiImplementor {
     private static final Set<String> DYNAMIC_FILES;
 
     static {
-        DYNAMIC_FILES = new HashSet<String>();
+        DYNAMIC_FILES = new HashSet<>();
         DYNAMIC_FILES.add("inject.js");
         DYNAMIC_FILES.add("management.js");
     }

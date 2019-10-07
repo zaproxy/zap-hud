@@ -25,9 +25,42 @@
       "browser",
       "serviceworker"
     ],
+    "globals": [
+      "apiCall",
+      "apiCallWithResponse",
+      "alertify",
+      "alertUtils",
+      "dontShowAgain",
+      "I18n",
+      "IS_SERVICEWORKER_REFRESHED",
+      "localforage",
+      "LOG_DEBUG",
+      "LOG_ERROR",
+      "LOG_INFO",
+      "LOG_DEBUG",
+      "LOG_TRACE",
+      "LOG_WARN",
+      "registerForZapEvents",
+      "showAlerts",
+      "tabsDetails",
+      "utils",
+      "Vue"
+    ],
     "ignores": [
-      "src/**/hud/libraries/**"
-    ]
+      "src/**/hud/libraries/**",
+      "src/test/js/**",
+      "src/webpack/**"
+    ],
+    "rules": {
+      "no-negated-condition": "warn",
+      "no-unused-vars": "warn",
+      "prefer-destructuring": "warn",
+      "unicorn/no-for-loop": "warn",
+      "unicorn/prefer-includes": "warn",
+      "unicorn/prefer-string-slice": "warn",
+      "unicorn/filename-case": "warn",
+      "unicorn/prefer-query-selector": "warn"
+    }
   },
   "repository": {
     "type": "git",
@@ -42,17 +75,17 @@
   "dependencies": {
     "localforage": "^1.7.3",
     "vue": "^2.6.10",
-    "vue-i18n": "^8.13.0"
+    "vue-i18n": "^8.14.1"
   },
   "devDependencies": {
-    "ava": "^2.2.0",
+    "ava": "^2.4.0",
     "css-loader": "^3.2.0",
-    "lint-staged": "^9.2.1",
+    "lint-staged": "^9.4.1",
     "vue-loader": "^15.7.1",
     "vue-style-loader": "^4.1.2",
     "vue-template-compiler": "^2.6.10",
-    "webpack": "^4.39.0",
-    "webpack-cli": "^3.3.6",
-    "xo": "^0.24.0"
+    "webpack": "^4.41.0",
+    "webpack-cli": "^3.3.9",
+    "xo": "^0.25.3"
   }
 }

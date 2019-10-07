@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zaproxy.zap.extension.hud.ui.firefox.badsite;
+package org.zaproxy.zap.extension.hud.ui.browser.badsite;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,21 +34,20 @@ import javax.net.ssl.X509TrustManager;
 import net.sf.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.zaproxy.zap.extension.hud.HudAPI;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IntroPage;
-import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
-import org.zaproxy.zap.extension.hud.ui.firefox.tutorial.TutorialStatics;
+import org.zaproxy.zap.extension.hud.ui.browser.BrowsersTest;
+import org.zaproxy.zap.extension.hud.ui.browser.tutorial.TutorialStatics;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
 @Tag("tutorial")
-public class BadSiteUnitTest extends FirefoxUnitTest {
+public class BadSiteUnitTest extends BrowsersTest {
 
     private static final String SERVICE_WORKER = "serviceworker.js";
     private static final String BAD_SITE_TEST_KEY = "badsitetest";
@@ -61,15 +60,22 @@ public class BadSiteUnitTest extends FirefoxUnitTest {
         TrustManager[] trustAllCerts =
                 new TrustManager[] {
                     new X509TrustManager() {
+                        @Override
                         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                             return null;
                         }
 
+                        @Override
                         public void checkClientTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {}
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                            // Nothing to do.
+                        }
 
+                        @Override
                         public void checkServerTrusted(
-                                java.security.cert.X509Certificate[] certs, String authType) {}
+                                java.security.cert.X509Certificate[] certs, String authType) {
+                            // Nothing to do.
+                        }
                     }
                 };
 
@@ -82,9 +88,9 @@ public class BadSiteUnitTest extends FirefoxUnitTest {
         }
     }
 
-    @Test
-    public void cannotAccessWebSocketsUrlWhenLoadingSwAsScript(FirefoxDriver driver)
-            throws InterruptedException, MalformedURLException {
+    @TestTemplate
+    public void cannotAccessWebSocketsUrlWhenLoadingSwAsScript(WebDriver driver)
+            throws MalformedURLException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
         String swUrl = getHudFilesUrl(hud) + SERVICE_WORKER;
@@ -98,25 +104,27 @@ public class BadSiteUnitTest extends FirefoxUnitTest {
         sb.append("document.head.appendChild(script);\n");
 
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
-        driver.executeScript(sb.toString());
+        ((JavascriptExecutor) driver).executeScript(sb.toString());
 
         // Now try to make use of it
 
-        Object result = executeScriptWithRetry(driver, "return ZAP_HUD_FILES;");
+        Object result =
+                executeScriptWithRetry(
+                        driver, "return document.getElementById(\"zap-hud-management\").src;");
         assertTrue(result.toString().startsWith("https://zap//zapCallBackUrl"));
         try {
             // ZAP_HUD_WS should be protected via a closure
-            result = driver.executeScript("return ZAP_HUD_WS;");
+            result = ((JavascriptExecutor) driver).executeScript("return ZAP_HUD_WS;");
             // This class should not expect a JavascriptException in case the script above fails
             fail();
         } catch (JavascriptException e) {
             // Expected, but double check the error message
-            assertTrue(e.getMessage().contains("ReferenceError: ZAP_HUD_WS is not defined"));
+            assertTrue(e.getMessage().contains("ZAP_HUD_WS is not defined"));
         }
     }
 
-    @Test
-    public void cannotUseZapApiFromTarget(FirefoxDriver driver)
+    @TestTemplate
+    public void cannotUseZapApiFromTarget(WebDriver driver)
             throws InterruptedException, IOException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));

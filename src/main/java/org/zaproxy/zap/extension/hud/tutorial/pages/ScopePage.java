@@ -36,6 +36,7 @@ public class ScopePage extends TutorialPage {
         super(tutorialProxyServer, prev);
     }
 
+    @Override
     public void handlePostRequest(HttpMessage msg, Map<String, String> params) {
         if (msg.isInScope()) {
             this.setTaskCompleted(true);
