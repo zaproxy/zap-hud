@@ -450,15 +450,47 @@ const injection = (function () {
 
 		window.addEventListener('message', receiveMessages);
 
-		const template = document.createElement('template');
-		template.innerHTML =
-			'<iframe id="' + MANAGEMENT + '" src="' + ZAP_HUD_FILES + '/file/management.html?frameId=management&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
-			'<iframe id="' + LEFT_PANEL + '" src="' + ZAP_HUD_FILES + '/file/panel.html?url=' + URL + '&amp;orientation=left&amp;frameId=leftPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="' + RIGHT_PANEL + '" src="' + ZAP_HUD_FILES + '/file/panel.html?url=' + URL + '&amp;orientation=right&amp;frameId=rightPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="' + BOTTOM_DRAWER + '" src="' + ZAP_HUD_FILES + '/file/drawer.html?frameId=drawer&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; overflow: hidden; left: 0px; bottom: 0px; width: 100%; height: 50px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="' + MAIN_DISPLAY + '" src="' + ZAP_HUD_FILES + '/file/display.html?frameId=display&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;"></iframe>\n' +
-			'<iframe id="' + GROWLER_ALERTS + '" src="' + ZAP_HUD_FILES + '/file/growlerAlerts.html?frameId=growlerAlerts&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; bottom: 30px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;"></iframe>';
-		document.body.append(template.content);
+		const mframe = document.createElement('iframe');
+		mframe.id = MANAGEMENT;
+		mframe.src = ZAP_HUD_FILES + '/file/management.html?frameId=management&tabId=' + tabId;
+		mframe.scrolling = 'no';
+		mframe.style = 'position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647;';
+
+		const lframe = document.createElement('iframe');
+		lframe.id = LEFT_PANEL;
+		lframe.src = ZAP_HUD_FILES + '/file/panel.html?url=' + URL + '&orientation=left&frameId=leftPanel&tabId=' + tabId;
+		lframe.scrolling = 'no';
+		lframe.style = 'position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;';
+
+		const rframe = document.createElement('iframe');
+		rframe.id = RIGHT_PANEL;
+		rframe.src = ZAP_HUD_FILES + '/file/panel.html?url=' + URL + '&orientation=right&frameId=rightPanel&tabId=' + tabId;
+		rframe.scrolling = 'no';
+		rframe.style = 'position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;';
+
+		const bframe = document.createElement('iframe');
+		bframe.id = BOTTOM_DRAWER;
+		bframe.src = ZAP_HUD_FILES + '/file/drawer.html?frameId=drawer&tabId=' + tabId;
+		bframe.scrolling = 'no';
+		bframe.style = 'position: fixed; border: medium none; overflow: hidden; left: 0px; bottom: 0px; width: 100%; height: 50px; z-index: 2147483646;';
+
+		const dframe = document.createElement('iframe');
+		dframe.id = MAIN_DISPLAY;
+		dframe.src = ZAP_HUD_FILES + '/file/display.html?frameId=display&tabId=' + tabId;
+		dframe.style = 'position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;';
+
+		const gframe = document.createElement('iframe');
+		gframe.id = GROWLER_ALERTS;
+		gframe.src = ZAP_HUD_FILES + '/file/growlerAlerts.html?frameId=growlerAlerts&tabId=' + tabId;
+		gframe.style = 'position: fixed; right: 0px; bottom: 30px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;';
+
+		document.body.append(mframe);
+		document.body.append(lframe);
+		document.body.append(rframe);
+		document.body.append(bframe);
+		document.body.append(dframe);
+		document.body.append(gframe);
+
 		document.body.style.marginBottom = '50px';
 
 		const zapReplaceOffset = window.location.href.indexOf('zapHudReplaceReq=');
