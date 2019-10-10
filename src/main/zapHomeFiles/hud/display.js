@@ -1113,6 +1113,8 @@ navigator.serviceWorker.addEventListener('message', event => {
 
 			channel.port1.addEventListener('message', event => {
 				// Open window and inject the HTML report
+				// FIXME: remove after #620
+				// eslint-disable-next-line no-unsanitized/property
 				window.open('').document.body.innerHTML = event.data.response;
 			});
 
