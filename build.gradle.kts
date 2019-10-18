@@ -12,6 +12,7 @@ import org.zaproxy.gradle.tasks.ZapShutdown
 
 plugins {
     `java-library`
+    jacoco
     id("org.zaproxy.add-on") version "0.2.0"
     id("com.diffplug.gradle.spotless") version "3.15.0"
     id("org.ysb33r.nodejs.npm") version "0.6.2"
@@ -139,6 +140,10 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+}
+
+jacoco {
+    toolVersion = "0.8.5"
 }
 
 fun sourcesWithoutLibs(extension: String) =
