@@ -32,6 +32,7 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.options.Option;
@@ -118,10 +119,7 @@ public class ZapStart extends ZapApiTask {
                 .directory(installDir.get().getAsFile());
 
         List<String> command = new ArrayList<>();
-        command.add(
-                Os.isFamily(Os.FAMILY_WINDOWS)
-                        ? new File(installDir.get().getAsFile(), WINDOWS_START_SCRIPT).toString()
-                        : LINUX_START_SCRIPT);
+        command.addAll(getBaseCommand());
         command.addAll(asList(DIR_ARG, homeDir.get().toString()));
         command.addAll(asList(PORT_ARG, Integer.toString(getPort().get())));
         boolean apiKeyPresent = getApiKey().isPresent();
@@ -153,6 +151,14 @@ public class ZapStart extends ZapApiTask {
                             timeout, e.getMessage()),
                     e);
         }
+    }
+
+    @Internal
+    protected List<String> getBaseCommand() {
+        return Arrays.asList(
+                Os.isFamily(Os.FAMILY_WINDOWS)
+                        ? new File(installDir.get().getAsFile(), WINDOWS_START_SCRIPT).toString()
+                        : LINUX_START_SCRIPT);
     }
 
     private static void checkPortNotUsed(ClientApi client, int port) {
