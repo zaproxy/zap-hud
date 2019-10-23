@@ -25,6 +25,10 @@ spotless {
 
         googleJavaFormat().aosp()
     }
+
+    kotlinGradle {
+        ktlint()
+    }
 }
 
 tasks.validateTaskProperties {
