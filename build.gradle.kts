@@ -7,6 +7,7 @@ import org.zaproxy.gradle.addon.misc.CopyAddOn
 import org.zaproxy.gradle.addon.misc.ExtractLatestChangesFromChangelog
 import org.zaproxy.gradle.tasks.GenerateI18nJsFile
 import org.zaproxy.gradle.tasks.ZapDownloadWeekly
+import org.zaproxy.gradle.tasks.ZapJavaStart
 import org.zaproxy.gradle.tasks.ZapStart
 import org.zaproxy.gradle.tasks.ZapShutdown
 
@@ -146,6 +147,16 @@ jacoco {
     toolVersion = "0.8.5"
 }
 
+val jacocoReportAll by tasks.registering(JacocoReport::class) {
+    executionData(tasks.named("test").get(), tasks.named("testTutorial").get(), tasks.named("zapStartTest").get())
+    sourceSets(sourceSets.main.get())
+}
+
+val jacocoTestTutorialReport by tasks.registering(JacocoReport::class) {
+    executionData(tasks.named("testTutorial").get(), tasks.named("zapStartTest").get())
+    sourceSets(sourceSets.main.get())
+}
+
 fun sourcesWithoutLibs(extension: String) =
         fileTree("src") {
             include("**/*.$extension")
@@ -206,6 +217,7 @@ tasks {
         useJUnitPlatform {
             includeTags("tutorial")
         }
+        dependsOn("zapStartTest")
     }
 
     register<Test>("testRemote") {
@@ -214,6 +226,7 @@ tasks {
         useJUnitPlatform {
             includeTags("remote")
         }
+        dependsOn("zapStartTest")
     }
 
     register<ZapDownloadWeekly>("zapDownload") {
@@ -272,9 +285,25 @@ tasks {
         dependsOn("deleteTestHome")
     }
 
+    register<ZapJavaStart>("zapStartTest") {
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
+        description = "Starts ZAP for the tests."
+
+        dependsOn("zapDownload", "copyAddOnTestHome")
+        finalizedBy("zapStop")
+
+        installDir.set(zapInstallDir.asFile)
+        homeDir.set(testZapHome.asFile)
+        port.set(zapPort)
+        apiKey.set(zapApiKey)
+        args.set(zapCmdlineOpts)
+
+        jacoco.applyTo(this)
+    }
+
     register<ZapStart>("zapStart") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
-        description = "Starts ZAP for the unit tests"
+        description = "Starts ZAP for manual integration tests."
 
         dependsOn("zapDownload", "copyAddOnTestHome")
 
@@ -292,24 +321,21 @@ tasks {
         port.set(zapPort)
         apiKey.set(zapApiKey)
 
-        shouldRunAfter("test")
+        mustRunAfter(withType<Test>())
     }
 
     register("zapRunTests") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Starts ZAP, runs the tests and stops ZAP"
 
-        dependsOn("zapStart")
         dependsOn("test")
         dependsOn("testTutorial")
         // These are failing too often on travis, presumably due to timeouts?
         // dependsOn("testRemote")
-        dependsOn("zapStop")
     }
 }
 
 tasks.test {
-    shouldRunAfter("zapStart")
     useJUnitPlatform {
         excludeTags("remote", "tutorial")
     }
