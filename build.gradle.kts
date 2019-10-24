@@ -159,6 +159,10 @@ spotless {
         googleJavaFormat().aosp()
     }
 
+    kotlinGradle {
+        ktlint()
+    }
+
     // XXX Don't check for now to not require npm to try the HUD (runZap).
     // format("css", {
     //     target(sourcesWithoutLibs("css"))
@@ -180,7 +184,7 @@ tasks {
     val npmLintAllHud by registering(NpmTask::class) {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Runs the XO linter on all files."
- 
+
         command("run")
         cmdArgs("lint")
     }
@@ -196,20 +200,20 @@ tasks {
         commandLine("npm", "test")
     }
 
-    register<Test>("testTutorial") { 
+    register<Test>("testTutorial") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Runs the tutorial tests (ZAP must be running)."
-        useJUnitPlatform { 
-            includeTags("tutorial") 
-        } 
+        useJUnitPlatform {
+            includeTags("tutorial")
+        }
     }
 
-    register<Test>("testRemote") { 
+    register<Test>("testRemote") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Runs the remote tests (ZAP must be running)."
-        useJUnitPlatform { 
-            includeTags("remote") 
-        } 
+        useJUnitPlatform {
+            includeTags("remote")
+        }
     }
 
     register<ZapDownloadWeekly>("zapDownload") {
@@ -271,7 +275,7 @@ tasks {
     register<ZapStart>("zapStart") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Starts ZAP for the unit tests"
-        
+
         dependsOn("zapDownload", "copyAddOnTestHome")
 
         installDir.set(zapInstallDir.asFile)
@@ -280,21 +284,21 @@ tasks {
         apiKey.set(zapApiKey)
         args.set(zapCmdlineOpts)
     }
-    
+
     register<ZapShutdown>("zapStop") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Stops ZAP after the unit tests have been run"
-        
+
         port.set(zapPort)
         apiKey.set(zapApiKey)
 
         shouldRunAfter("test")
     }
-    
+
     register("zapRunTests") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Starts ZAP, runs the tests and stops ZAP"
-        
+
         dependsOn("zapStart")
         dependsOn("test")
         dependsOn("testTutorial")
@@ -302,14 +306,13 @@ tasks {
         // dependsOn("testRemote")
         dependsOn("zapStop")
     }
-
 }
 
-tasks.test { 
+tasks.test {
     shouldRunAfter("zapStart")
-    useJUnitPlatform { 
-        excludeTags("remote", "tutorial") 
-    }  
+    useJUnitPlatform {
+        excludeTags("remote", "tutorial")
+    }
 }
 
 tasks.withType<Test>().configureEach {
