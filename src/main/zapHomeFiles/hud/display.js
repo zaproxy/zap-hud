@@ -33,7 +33,18 @@ Vue.component('modal', {
 			}
 
 			app.keepShowing = false;
+		},
+		escapeKey(event) {
+			if (this.show && (event.key === 'Escape' || event.key === 'Esc')) {
+				this.close();
+			}
 		}
+	},
+	mounted() {
+		document.addEventListener('keydown', this.escapeKey);
+	},
+	beforeDestroy() {
+		document.removeEventListener('keydown', this.escapeKey);
 	}
 });
 
