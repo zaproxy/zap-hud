@@ -301,14 +301,14 @@ public abstract class TutorialPage {
     }
 
     protected Map<String, String> parsePostParams(HttpMessage msg) {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         String body = msg.getRequestBody().toString();
         if (this.tutorialProxyServer.isTutorialTestMode()) {
             log.info("Supplied data: " + body);
         }
 
         for (String keyValue : body.split("\\&")) {
-            int eqOffset = keyValue.indexOf("=");
+            int eqOffset = keyValue.indexOf('=');
             if (eqOffset > -1) {
                 map.put(keyValue.substring(0, eqOffset), keyValue.substring(eqOffset + 1).trim());
             } else {

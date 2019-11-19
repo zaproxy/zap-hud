@@ -22,6 +22,7 @@ package org.zaproxy.zap.extension.hud.tutorial;
 import java.util.Map;
 import org.parosproxy.paros.control.Control;
 import org.parosproxy.paros.core.scanner.Alert;
+import org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher;
 import org.parosproxy.paros.model.HistoryReference;
 import org.parosproxy.paros.network.HttpMessage;
 import org.zaproxy.zap.ZAP;
@@ -31,9 +32,8 @@ import org.zaproxy.zap.extension.alert.ExtensionAlert;
 
 public abstract class TutorialAlertsPage extends TutorialPage implements EventConsumer {
 
-    // TODO change to reference the class once we've updated to use a ZAP jar that contains it
     private static final String PROXY_LOG_EVENT_PUBLISHER_NAME =
-            "org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher";
+            ProxyListenerLogEventPublisher.getPublisher().getPublisherName();
 
     private String url;
     private HistoryReference href;
@@ -79,13 +79,16 @@ public abstract class TutorialAlertsPage extends TutorialPage implements EventCo
         if (url == null) {
             return;
         }
-        if (event.getEventType().equals("href.added")) {
+        if (event.getEventType().equals(ProxyListenerLogEventPublisher.EVENT_ADDED)) {
             Map<String, String> params = event.getParameters();
             if (url.equals(params.get("uri"))) {
                 try {
                     this.href =
                             new HistoryReference(
-                                    Integer.parseInt(params.get("historyReferenceId")));
+                                    Integer.parseInt(
+                                            params.get(
+                                                    ProxyListenerLogEventPublisher
+                                                            .FIELD_HISTORY_REFERENCE_ID)));
                     this.hrefAddedEventReceived(event);
                     ZAP.getEventBus().unregisterConsumer(this, PROXY_LOG_EVENT_PUBLISHER_NAME);
                 } catch (Exception e) {

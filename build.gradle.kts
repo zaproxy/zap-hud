@@ -7,11 +7,13 @@ import org.zaproxy.gradle.addon.misc.CopyAddOn
 import org.zaproxy.gradle.addon.misc.ExtractLatestChangesFromChangelog
 import org.zaproxy.gradle.tasks.GenerateI18nJsFile
 import org.zaproxy.gradle.tasks.ZapDownloadWeekly
+import org.zaproxy.gradle.tasks.ZapJavaStart
 import org.zaproxy.gradle.tasks.ZapStart
 import org.zaproxy.gradle.tasks.ZapShutdown
 
 plugins {
     `java-library`
+    jacoco
     id("org.zaproxy.add-on") version "0.2.0"
     id("com.diffplug.gradle.spotless") version "3.15.0"
     id("org.ysb33r.nodejs.npm") version "0.6.2"
@@ -25,7 +27,7 @@ repositories {
     mavenCentral()
 }
 
-version = "0.7.0"
+version = "0.8.0"
 description = "Display information from ZAP in browser."
 
 val generatedI18nJsFileDir = layout.buildDirectory.dir("zapAddOn/i18nJs")
@@ -131,7 +133,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:$jupiterVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
 
-    testImplementation("io.github.bonigarcia:selenium-jupiter:2.2.0")
+    testImplementation("io.github.bonigarcia:selenium-jupiter:3.3.0")
     testImplementation("org.hamcrest:hamcrest-all:1.3")
     testImplementation("org.mockito:mockito-all:1.10.8")
     testImplementation(files(fileTree("lib").files))
@@ -139,6 +141,20 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+}
+
+jacoco {
+    toolVersion = "0.8.5"
+}
+
+val jacocoReportAll by tasks.registering(JacocoReport::class) {
+    executionData(tasks.named("test").get(), tasks.named("testTutorial").get(), tasks.named("zapStartTest").get())
+    sourceSets(sourceSets.main.get())
+}
+
+val jacocoTestTutorialReport by tasks.registering(JacocoReport::class) {
+    executionData(tasks.named("testTutorial").get(), tasks.named("zapStartTest").get())
+    sourceSets(sourceSets.main.get())
 }
 
 fun sourcesWithoutLibs(extension: String) =
@@ -152,6 +168,10 @@ spotless {
         licenseHeaderFile("gradle/spotless/license.java")
 
         googleJavaFormat().aosp()
+    }
+
+    kotlinGradle {
+        ktlint()
     }
 
     // XXX Don't check for now to not require npm to try the HUD (runZap).
@@ -172,10 +192,16 @@ tasks {
         commandLine("npm", "run", "lint-staged")
     }
 
-    register<Exec>("npmLintAllHud") {
+    val npmLintAllHud by registering(NpmTask::class) {
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Runs the XO linter on all files."
 
-        commandLine("npm", "run", "lint")
+        command("run")
+        cmdArgs("lint")
+    }
+
+    named("check") {
+        dependsOn(npmLintAllHud)
     }
 
     register<Exec>("npmTestHud") {
@@ -185,20 +211,22 @@ tasks {
         commandLine("npm", "test")
     }
 
-    register<Test>("testTutorial") { 
+    register<Test>("testTutorial") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Runs the tutorial tests (ZAP must be running)."
-        useJUnitPlatform { 
-            includeTags("tutorial") 
-        } 
+        useJUnitPlatform {
+            includeTags("tutorial")
+        }
+        dependsOn("zapStartTest")
     }
 
-    register<Test>("testRemote") { 
+    register<Test>("testRemote") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Runs the remote tests (ZAP must be running)."
-        useJUnitPlatform { 
-            includeTags("remote") 
-        } 
+        useJUnitPlatform {
+            includeTags("remote")
+        }
+        dependsOn("zapStartTest")
     }
 
     register<ZapDownloadWeekly>("zapDownload") {
@@ -247,18 +275,36 @@ tasks {
         args.set(listOf("-dev", "-config", "start.checkForUpdates=false", "-config", "hud.dir=$zapHome/hud") + hudDevArgs)
     }
 
+    register<Delete>("deleteTestHome") {
+        delete(testZapHome)
+    }
+
     register<CopyAddOn>("copyAddOnTestHome") {
         into(testZapHome.dir("plugin"))
 
-        doFirst {
-            delete(testZapHome)
-        }
+        dependsOn("deleteTestHome")
+    }
+
+    register<ZapJavaStart>("zapStartTest") {
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
+        description = "Starts ZAP for the tests."
+
+        dependsOn("zapDownload", "copyAddOnTestHome")
+        finalizedBy("zapStop")
+
+        installDir.set(zapInstallDir.asFile)
+        homeDir.set(testZapHome.asFile)
+        port.set(zapPort)
+        apiKey.set(zapApiKey)
+        args.set(zapCmdlineOpts)
+
+        jacoco.applyTo(this)
     }
 
     register<ZapStart>("zapStart") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
-        description = "Starts ZAP for the unit tests"
-        
+        description = "Starts ZAP for manual integration tests."
+
         dependsOn("zapDownload", "copyAddOnTestHome")
 
         installDir.set(zapInstallDir.asFile)
@@ -267,42 +313,38 @@ tasks {
         apiKey.set(zapApiKey)
         args.set(zapCmdlineOpts)
     }
-    
+
     register<ZapShutdown>("zapStop") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Stops ZAP after the unit tests have been run"
-        
+
         port.set(zapPort)
         apiKey.set(zapApiKey)
 
-        shouldRunAfter("test")
+        mustRunAfter(withType<Test>())
     }
-    
+
     register("zapRunTests") {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Starts ZAP, runs the tests and stops ZAP"
-        
-        dependsOn("zapStart")
+
         dependsOn("test")
         dependsOn("testTutorial")
         // These are failing too often on travis, presumably due to timeouts?
         // dependsOn("testRemote")
-        dependsOn("zapStop")
     }
-
 }
 
-tasks.test { 
-    shouldRunAfter("zapStart")
-    useJUnitPlatform { 
-        excludeTags("remote", "tutorial") 
-    }  
+tasks.test {
+    useJUnitPlatform {
+        excludeTags("remote", "tutorial")
+    }
 }
 
 tasks.withType<Test>().configureEach {
     systemProperties.putAll(mapOf(
-            "wdm.chromeDriverVersion" to "2.46",
-            "wdm.geckoDriverVersion" to "0.24.0",
+            "wdm.chromeDriverVersion" to "78.0.3904.70",
+            "wdm.geckoDriverVersion" to "0.26.0",
             "wdm.forceCache" to "true"))
 }
 

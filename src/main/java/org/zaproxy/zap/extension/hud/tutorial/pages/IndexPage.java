@@ -51,6 +51,7 @@ public class IndexPage extends TutorialPage {
         return this.extHUD;
     }
 
+    @Override
     public String getHtml() {
         String html = super.getHtml();
         StringBuilder sb = new StringBuilder();

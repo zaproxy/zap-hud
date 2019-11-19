@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zaproxy.zap.extension.hud.ui.firefox.tutorial;
+package org.zaproxy.zap.extension.hud.ui.browser.tutorial;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,30 +25,30 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertNotificationsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.PageAlertsPage;
-import org.zaproxy.zap.extension.hud.ui.firefox.FirefoxUnitTest;
+import org.zaproxy.zap.extension.hud.ui.browser.BrowsersTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
 @Tag("tutorial")
-public class AlertNotificationsPageUnitTest extends FirefoxUnitTest {
+public class AlertNotificationsPageUnitTest extends BrowsersTest {
 
-    @Test
-    public void genericPageUnitTests(FirefoxDriver driver) throws InterruptedException {
+    @TestTemplate
+    public void genericPageUnitTests(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(AlertNotificationsPage.NAME));
         GenericUnitTest.runAllTests(driver);
     }
 
-    @Test
-    public void testPreviousButtonWorks(FirefoxDriver driver) {
+    @TestTemplate
+    public void testPreviousButtonWorks(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(AlertNotificationsPage.NAME));
         WebElement previousButton = TutorialStatics.getPreviousButton(driver);
@@ -57,9 +57,10 @@ public class AlertNotificationsPageUnitTest extends FirefoxUnitTest {
         assertEquals(TutorialStatics.getTutorialHudUrl(AlertsPage.NAME), driver.getCurrentUrl());
     }
 
-    @Test
+    @TestTemplate
     @Disabled
-    public void testTaskAndNextButton(FirefoxDriver driver) {
+    public void testTaskAndNextButton(WebDriver driver) throws Exception {
+        HUD.callZapApiResetTasks();
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(AlertNotificationsPage.NAME));
 

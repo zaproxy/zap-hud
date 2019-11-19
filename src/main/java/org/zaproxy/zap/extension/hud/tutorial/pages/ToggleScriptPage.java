@@ -3,7 +3,7 @@
  *
  * ZAP is an HTTP/HTTPS proxy for assessing web application security.
  *
- * Copyright 2018 The ZAP Development Team
+ * Copyright 2019 The ZAP Development Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +19,19 @@
  */
 package org.zaproxy.zap.extension.hud.tutorial.pages;
 
-import java.util.Map;
-import org.parosproxy.paros.network.HttpMessage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialPage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialProxyServer;
 
-public class ScopePage extends TutorialPage {
+public class ToggleScriptPage extends TutorialPage {
 
-    public static final String NAME = "Scope";
+    public static final String NAME = "ToggleScript";
 
-    public ScopePage(TutorialProxyServer tutorialProxyServer) {
+    public ToggleScriptPage(TutorialProxyServer tutorialProxyServer) {
         super(tutorialProxyServer);
     }
 
-    public ScopePage(TutorialProxyServer tutorialProxyServer, TutorialPage prev) {
+    public ToggleScriptPage(TutorialProxyServer tutorialProxyServer, TutorialPage prev) {
         super(tutorialProxyServer, prev);
-    }
-
-    @Override
-    public void handlePostRequest(HttpMessage msg, Map<String, String> params) {
-        if (msg.isInScope()) {
-            this.setTaskCompleted(true);
-        }
-        super.handlePostRequest(msg, params);
     }
 
     @Override

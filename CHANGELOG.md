@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+ - Added 'Toggle Script' tool, allowing user-made scripts to be toggled on and off from the HUD [#335](https://github.com/zaproxy/zap-hud/issues/335)
+ - Tweet link on completing the tutorial
  - Comments tool which shows all of the HTML comments on a page [#378](https://github.com/zaproxy/zap-hud/issues/378)
+
+### Fixed
+ - Dialogue windows close properly when the Escape key is pressed [#71](https://github.com/zaproxy/zap-hud/issues/71)
+
+## [0.7.0] - 2019-10-07
+
+### Changed
+ - Cleaned up injected code
 
 ## [0.6.0] - 2019-08-12
 
@@ -97,7 +107,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2018-12-03
 First alpha release.
 
-[Unreleased]: https://github.com/zaproxy/zap-hud/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/zaproxy/zap-hud/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/zaproxy/zap-hud/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/zaproxy/zap-hud/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/zaproxy/zap-hud/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/zaproxy/zap-hud/compare/v0.3.0...v0.4.0

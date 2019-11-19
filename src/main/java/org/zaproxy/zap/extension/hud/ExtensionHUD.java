@@ -19,13 +19,8 @@
  */
 package org.zaproxy.zap.extension.hud;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -104,7 +99,7 @@ public class ExtensionHUD extends ExtensionAdaptor
     private static final List<Class<? extends Extension>> DEPENDENCIES;
 
     private static final String REPLACE_REQUEST_PARAM = "zapHudReplaceReq=";
-    private Map<String, HttpMessage> recordedRequests = new HashMap<String, HttpMessage>();
+    private Map<String, HttpMessage> recordedRequests = new HashMap<>();
 
     static {
         List<Class<? extends Extension>> dependencies = new ArrayList<>(1);
@@ -130,17 +125,11 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     private ExtensionScript extScript = null;
     private String baseDirectory;
-    private Set<String> upgradedHttpsDomains = new HashSet<String>();
+    private Set<String> upgradedHttpsDomains = new HashSet<>();
     private TutorialProxyServer tutorialServer;
 
-    /** */
     public ExtensionHUD() {
-        this(NAME);
-    }
-
-    /** @param name */
-    public ExtensionHUD(String name) {
-        super(name);
+        super(NAME);
     }
 
     @Override
@@ -167,13 +156,7 @@ public class ExtensionHUD extends ExtensionAdaptor
 
             ZapMenuItem menuExtPage = new ZapMenuItem("hud.menu.hudGroup");
             menuExtPage.setEnabled(DesktopUtils.canOpenUrlInBrowser());
-            menuExtPage.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        @Override
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            DesktopUtils.openUrlInBrowser(ZAP_HUD_GROUP_PAGE);
-                        }
-                    });
+            menuExtPage.addActionListener(e -> DesktopUtils.openUrlInBrowser(ZAP_HUD_GROUP_PAGE));
             extensionHook.getHookMenu().addOnlineMenuItem(menuExtPage);
         }
 
@@ -256,13 +239,7 @@ public class ExtensionHUD extends ExtensionAdaptor
      * @param canGetFocus
      */
     private void setZapCanGetFocus(boolean canGetFocus) {
-        // Post 2.7.0 so for now try to access via reflection
-        try {
-            Method m = View.class.getMethod("setCanGetFocus", boolean.class);
-            m.invoke(View.getSingleton(), canGetFocus);
-        } catch (Exception e) {
-            log.debug(e.getMessage(), e);
-        }
+        View.getSingleton().setCanGetFocus(canGetFocus);
     }
 
     private void addHudScripts() {
@@ -342,13 +319,10 @@ public class ExtensionHUD extends ExtensionAdaptor
                     Constant.messages.getString("hud.toolbar.button.on.tooltip"));
             hudButton.setToolTipText(Constant.messages.getString("hud.toolbar.button.off.tooltip"));
             hudButton.addActionListener(
-                    new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            hudEnabledForDesktop = hudButton.isSelected();
-                            getHudParam().setEnabledForDesktop(hudEnabledForDesktop);
-                            setZapCanGetFocus(!hudEnabledForDesktop);
-                        }
+                    e -> {
+                        hudEnabledForDesktop = hudButton.isSelected();
+                        getHudParam().setEnabledForDesktop(hudEnabledForDesktop);
+                        setZapCanGetFocus(!hudEnabledForDesktop);
                     });
         }
         return hudButton;
@@ -362,15 +336,6 @@ public class ExtensionHUD extends ExtensionAdaptor
     @Override
     public String getDescription() {
         return Constant.messages.getString(PREFIX + ".desc");
-    }
-
-    @Override
-    public URL getURL() {
-        try {
-            return new URL(Constant.ZAP_EXTENSIONS_PAGE);
-        } catch (MalformedURLException e) {
-            return null;
-        }
     }
 
     @Override
@@ -418,7 +383,7 @@ public class ExtensionHUD extends ExtensionAdaptor
                     URI uri = msg.getRequestHeader().getURI();
                     if (this.isUpgradedHttpsDomain(uri)) {
                         // Advise that we've upgraded this domain to https
-                        Map<String, String> map = new HashMap<String, String>();
+                        Map<String, String> map = new HashMap<>();
                         map.put(HudEventPublisher.FIELD_DOMAIN, getNormalisedDomain(uri));
                         ZAP.getEventBus()
                                 .publishSyncEvent(
