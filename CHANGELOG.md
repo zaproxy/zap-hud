@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
  - Dialogue windows close properly when the Escape key is pressed [#71](https://github.com/zaproxy/zap-hud/issues/71)
+ - Sites upgraded to https fail if 'only in scope' switched on [#316](https://github.com/zaproxy/zap-hud/issues/316)
 
 ## [0.7.0] - 2019-10-07
 
