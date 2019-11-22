@@ -30,6 +30,7 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
 import org.parosproxy.paros.network.HttpHeader;
+import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.network.HttpResponseHeader;
 import org.zaproxy.zap.ZAP;
@@ -55,32 +56,40 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
         return 0;
     }
 
+    private void redirectMessage(HttpMessage msg, String targetUrl)
+            throws HttpMalformedHeaderException {
+        msg.setResponseHeader(
+                HudAPI.getAllowFramingResponseHeader(
+                        "302 OK", "text/html; charset=UTF-8", 0, false));
+        msg.getResponseHeader().addHeader(HttpHeader.LOCATION, targetUrl);
+        // Don't strictly need the body
+        msg.setResponseBody("<html><body>Redirecting to " + targetUrl + "</body></html>");
+        msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
+        LOG.debug("redirectMessage returning a 302 to " + targetUrl);
+    }
+
     @Override
     public boolean onHttpRequestSend(HttpMessage msg) {
         if (this.extHud.isHudEnabled()) {
-            if (this.extHud.getHudParam().isInScopeOnly() && !msg.isInScope()) {
-                return false;
-            }
             try {
+                URI uri = msg.getRequestHeader().getURI();
+                if (this.extHud.getHudParam().isInScopeOnly() && !msg.isInScope()) {
+                    if (this.extHud.isUpgradedHttpsDomain(uri)) {
+                        // 302 to the original http version..
+                        this.extHud.removeUpgradedHttpsDomain(uri);
+                        redirectMessage(
+                                msg, uri.toString().replaceFirst("(?i)https://", "http://"));
+                        return true;
+                    }
+                    return false;
+                }
                 if (!msg.getRequestHeader().isSecure()) {
                     // 302 to the https version..
-                    this.extHud.addUpgradedHttpsDomain(msg.getRequestHeader().getURI());
-                    msg.setResponseHeader(
-                            HudAPI.getAllowFramingResponseHeader(
-                                    "302 OK", "text/html; charset=UTF-8", 0, false));
-                    String url =
-                            msg.getRequestHeader()
-                                    .getURI()
-                                    .toString()
-                                    .replaceFirst("(?i)http://", "https://");
-                    msg.getResponseHeader().addHeader(HttpHeader.LOCATION, url);
-                    // Don't strictly need the body
-                    msg.setResponseBody("<html><body>Redirecting to " + url + "</body></html>");
-                    msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
-                    LOG.debug("onHttpRequestSend returning a 302 to " + url);
+                    this.extHud.addUpgradedHttpsDomain(uri);
+                    redirectMessage(msg, uri.toString().replaceFirst("(?i)http://", "https://"));
                     return true;
                 } else {
-                    if (this.extHud.isUpgradedHttpsDomain(msg.getRequestHeader().getURI())) {
+                    if (this.extHud.isUpgradedHttpsDomain(uri)) {
                         // Switch to using the HTTP version in the background
                         msg.getRequestHeader().setSecure(false);
                     }
