@@ -165,7 +165,7 @@ const injection = (function () {
 		document.getElementById(MANAGEMENT).style.height = '0px';
 	}
 
-	// TODO put this code in a separate file and inject ?
+	// TODO showEnable section - put this code in a separate file and inject ?
 	let showEnabled = false;
 	let showEnabledCount = 0;
 	let showEnableTypeHiddenFields = [];
@@ -269,12 +269,12 @@ const injection = (function () {
 		} else {
 			// Count the number of hidden fields
 			const inputs = document.querySelectorAll('input');
-			for (let index = 0; index < inputs.length; ++index) {
-				if (inputs[index].type === 'hidden') {
+			for (const element of inputs) {
+				if (element.type === 'hidden') {
 					count++;
-				} else if (inputs[index].style.display === 'none') {
+				} else if (element.style.display === 'none') {
 					count++;
-				} else if (inputs[index].style.visibility === 'hidden') {
+				} else if (element.style.visibility === 'hidden') {
 					count++;
 				}
 			}
@@ -290,9 +290,9 @@ const injection = (function () {
 		let el = document.getElementById(id);
 		if (!el) {
 			const els = document.getElementsByName(id);
-			for (let i = 0; i < els.length; i++) {
-				if (els[i] instanceof HTMLInputElement) {
-					el = els[i];
+			for (const element of els) {
+				if (element instanceof HTMLInputElement) {
+					el = element;
 					break;
 				}
 			}
@@ -322,6 +322,106 @@ const injection = (function () {
 			}
 		}
 	}
+
+	// End of showEnable section
+
+	// TODO showComments section - put this code in a separate file and inject ?
+	let commentImages = [];
+
+	function includeComment(commentNode) {
+		return commentNode.textContent.trim().length > 0;
+	}
+
+	function isSuspiciousComment(commentNode, suspiciousList) {
+		const textUc = commentNode.textContent.toUpperCase();
+		for (const element of suspiciousList) {
+			if (textUc.includes(element)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	function showCommentsOn(suspiciousList) {
+		const x = document.evaluate('//comment()', document, null, XPathResult.ANY_TYPE, null);
+		let count = 0;
+		const comments = [];
+		let comment = x.iterateNext();
+		// Can't change the DOM while iterating through the results, so put them in a list
+		while (comment) {
+			if (includeComment(comment)) {
+				comments.push(comment);
+			}
+
+			comment = x.iterateNext();
+		}
+
+		const first = document.body.firstChild;
+		comments.forEach(comment => {
+			count += 1;
+			const img = new Image(16, 16);
+			img.src = ZAP_HUD_FILES + '/image/balloon.png';
+			img.title = comment.textContent;
+			img.id = 'zapHudComment-' + count;
+			img.style.zIndex = '1000000';
+			img.addEventListener('click', () => {
+				navigator.clipboard.writeText(comment.textContent);
+			});
+
+			if (isSuspiciousComment(comment, suspiciousList)) {
+				img.src = ZAP_HUD_FILES + '/image/balloon-yellow-exclamation.png';
+			}
+
+			try {
+				if (document.body.contains(comment)) {
+					comment.parentNode.insertBefore(img, comment);
+				} else if (first) {
+					// Keep the same 'first' node to keep the comments in order
+					document.body.insertBefore(img, first);
+				} else {
+					// Nothing in the body, unlikely but possible
+					document.body.append(img);
+				}
+
+				commentImages.push(img);
+			} catch (error) {
+				console.log('Failed to add comment icon ' + error.message);
+			}
+		});
+	}
+
+	function showCommentsOff() {
+		commentImages.forEach(img => {
+			img.remove();
+		});
+		commentImages = [];
+	}
+
+	function showCommentsCount(suspiciousList) {
+		const x = document.evaluate('//comment()', document, null, XPathResult.ANY_TYPE, null);
+		let count = 0;
+		let sus = 0;
+		let comment = x.iterateNext();
+
+		while (comment) {
+			if (includeComment(comment)) {
+				count += 1;
+				if (isSuspiciousComment(comment, suspiciousList)) {
+					sus += 1;
+				}
+			}
+
+			comment = x.iterateNext();
+		}
+
+		// Send to the management frame with the shared secret
+		const iframe = document.getElementById(MANAGEMENT);
+		iframe.contentWindow.postMessage({action: 'showComments.count', tabId,
+			count, suspicious: sus, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
+	}
+
+	// End of showComments section
 
 	function showZapAlertInternal(alertId) {
 		// Send to the management frame with the shared secret
@@ -433,6 +533,18 @@ const injection = (function () {
 
 			case 'showEnable.count':
 				showEnableCount();
+				break;
+
+			case 'showComments.on':
+				showCommentsOn(message.suspicious);
+				break;
+
+			case 'showComments.off':
+				showCommentsOff();
+				break;
+
+			case 'showComments.count':
+				showCommentsCount(message.suspicious);
 				break;
 
 			case 'commonAlerts.alert':

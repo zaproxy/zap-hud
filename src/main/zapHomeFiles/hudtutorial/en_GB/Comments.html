@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Comments</title>
+	<link href="tutorial.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div class="roundContainer">
+	<h1>Comments</H1>
+	<!-- This is an example comment -->
+	The Comments tool <img src="balloon-white.png" title="This icon is part of the tutorial"> shows the number of HTML comments on the current page. 
+	It will not currently show comments in JavaScript or in sub-frames.
+	<p>
+	If any of the comments contain 'suspicious' strings then an exclamation mark will be added to the icon:
+	<img src="balloon-white-exclamation.png" title="This icon is part of the tutorial">
+	<p>
+	The suspicious strings are case insensitive and are currently hardcoded to:<br>
+	<code>TODO, FIXME, BUG, XXX, QUERY, DB, ADMIN, USER, PASSWORD, PWORD, PWD, SELECT</code> <br>
+	The intention is for these to be configurable from within the HUD in a future release.
+	<p>
+	If you click on the 'Comments' tool then the icon will change to
+	<img src="balloon.png" title="This icon is part of the tutorial"> or <img src="balloon-yellow-exclamation.png" title="This icon is part of the tutorial"> 
+	and the same icon will be shown in the target page everywhere there is an HTML comment.
+	Hovering over these icons will show the related comment and clicking on them will copy the comment to the clipboard.
+	<p>
+	Showing comments may well mess up the formating of the target page, and in some cases may
+	break functionality if there are any scripts which rely on the DOM structure not changing. 
+	Clicking on the 'Comment' tool again will return the page to its original state.
+	<p>
+	<!-- This is another example comment containing a suspicious pwd string -->
+	Unlike many of the other tools, the Comments tool is tab specific, so turning it on or off on one
+	tab will not affect the other tabs.
+	<p>
+	The Comments tool is not shown by default so you will need to add it to a panel as described in the Tools Configuration tutorial page.
+
+	<!-- TASK -->
+	<!-- BUTTONS -->
+
+</div>
+
+</body>
+</html>
