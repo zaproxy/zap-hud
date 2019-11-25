@@ -165,7 +165,7 @@ const injection = (function () {
 		document.getElementById(MANAGEMENT).style.height = '0px';
 	}
 
-	// TODO put this code in a separate file and inject ?
+	// TODO showEnable section - put this code in a separate file and inject ?
 	let showEnabled = false;
 	let showEnabledCount = 0;
 	let showEnableTypeHiddenFields = [];
@@ -269,12 +269,12 @@ const injection = (function () {
 		} else {
 			// Count the number of hidden fields
 			const inputs = document.querySelectorAll('input');
-			for (let index = 0; index < inputs.length; ++index) {
-				if (inputs[index].type === 'hidden') {
+			for (const element of inputs) {
+				if (element.type === 'hidden') {
 					count++;
-				} else if (inputs[index].style.display === 'none') {
+				} else if (element.style.display === 'none') {
 					count++;
-				} else if (inputs[index].style.visibility === 'hidden') {
+				} else if (element.style.visibility === 'hidden') {
 					count++;
 				}
 			}
@@ -290,9 +290,9 @@ const injection = (function () {
 		let el = document.getElementById(id);
 		if (!el) {
 			const els = document.getElementsByName(id);
-			for (let i = 0; i < els.length; i++) {
-				if (els[i] instanceof HTMLInputElement) {
-					el = els[i];
+			for (const element of els) {
+				if (element instanceof HTMLInputElement) {
+					el = element;
 					break;
 				}
 			}
@@ -322,6 +322,106 @@ const injection = (function () {
 			}
 		}
 	}
+
+	// End of showEnable section
+
+	// TODO showComments section - put this code in a separate file and inject ?
+	let commentImages = [];
+
+	function includeComment(commentNode) {
+		return commentNode.textContent.trim().length > 0;
+	}
+
+	function isSuspiciousComment(commentNode, suspiciousList) {
+		const textUc = commentNode.textContent.toUpperCase();
+		for (const element of suspiciousList) {
+			if (textUc.includes(element)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	function showCommentsOn(suspiciousList) {
+		const x = document.evaluate('//comment()', document, null, XPathResult.ANY_TYPE, null);
+		let count = 0;
+		const comments = [];
+		let comment = x.iterateNext();
+		// Can't change the DOM while iterating through the results, so put them in a list
+		while (comment) {
+			if (includeComment(comment)) {
+				comments.push(comment);
+			}
+
+			comment = x.iterateNext();
+		}
+
+		const first = document.body.firstChild;
+		comments.forEach(comment => {
+			count += 1;
+			const img = new Image(16, 16);
+			img.src = ZAP_HUD_FILES + '/image/balloon.png';
+			img.title = comment.textContent;
+			img.id = 'zapHudComment-' + count;
+			img.style.zIndex = '1000000';
+			img.addEventListener('click', () => {
+				navigator.clipboard.writeText(comment.textContent);
+			});
+
+			if (isSuspiciousComment(comment, suspiciousList)) {
+				img.src = ZAP_HUD_FILES + '/image/balloon-yellow-exclamation.png';
+			}
+
+			try {
+				if (document.body.contains(comment)) {
+					comment.parentNode.insertBefore(img, comment);
+				} else if (first) {
+					// Keep the same 'first' node to keep the comments in order
+					document.body.insertBefore(img, first);
+				} else {
+					// Nothing in the body, unlikely but possible
+					document.body.append(img);
+				}
+
+				commentImages.push(img);
+			} catch (error) {
+				console.log('Failed to add comment icon ' + error.message);
+			}
+		});
+	}
+
+	function showCommentsOff() {
+		commentImages.forEach(img => {
+			img.remove();
+		});
+		commentImages = [];
+	}
+
+	function showCommentsCount(suspiciousList) {
+		const x = document.evaluate('//comment()', document, null, XPathResult.ANY_TYPE, null);
+		let count = 0;
+		let sus = 0;
+		let comment = x.iterateNext();
+
+		while (comment) {
+			if (includeComment(comment)) {
+				count += 1;
+				if (isSuspiciousComment(comment, suspiciousList)) {
+					sus += 1;
+				}
+			}
+
+			comment = x.iterateNext();
+		}
+
+		// Send to the management frame with the shared secret
+		const iframe = document.getElementById(MANAGEMENT);
+		iframe.contentWindow.postMessage({action: 'showComments.count', tabId,
+			count, suspicious: sus, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
+	}
+
+	// End of showComments section
 
 	function showZapAlertInternal(alertId) {
 		// Send to the management frame with the shared secret
@@ -435,6 +535,18 @@ const injection = (function () {
 				showEnableCount();
 				break;
 
+			case 'showComments.on':
+				showCommentsOn(message.suspicious);
+				break;
+
+			case 'showComments.off':
+				showCommentsOff();
+				break;
+
+			case 'showComments.count':
+				showCommentsCount(message.suspicious);
+				break;
+
 			case 'commonAlerts.alert':
 				highlightAlert(message);
 				break;
@@ -450,15 +562,47 @@ const injection = (function () {
 
 		window.addEventListener('message', receiveMessages);
 
-		const template = document.createElement('template');
-		template.innerHTML =
-			'<iframe id="' + MANAGEMENT + '" src="' + ZAP_HUD_FILES + '/file/management.html?frameId=management&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647"></iframe>\n' +
-			'<iframe id="' + LEFT_PANEL + '" src="' + ZAP_HUD_FILES + '/file/panel.html?url=' + URL + '&amp;orientation=left&amp;frameId=leftPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="' + RIGHT_PANEL + '" src="' + ZAP_HUD_FILES + '/file/panel.html?url=' + URL + '&amp;orientation=right&amp;frameId=rightPanel&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="' + BOTTOM_DRAWER + '" src="' + ZAP_HUD_FILES + '/file/drawer.html?frameId=drawer&amp;tabId=' + tabId + '" scrolling="no" style="position: fixed; border: medium none; overflow: hidden; left: 0px; bottom: 0px; width: 100%; height: 50px; z-index: 2147483646;"></iframe>\n' +
-			'<iframe id="' + MAIN_DISPLAY + '" src="' + ZAP_HUD_FILES + '/file/display.html?frameId=display&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;"></iframe>\n' +
-			'<iframe id="' + GROWLER_ALERTS + '" src="' + ZAP_HUD_FILES + '/file/growlerAlerts.html?frameId=growlerAlerts&amp;tabId=' + tabId + '" style="position: fixed; right: 0px; bottom: 30px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;"></iframe>';
-		document.body.append(template.content);
+		const mframe = document.createElement('iframe');
+		mframe.id = MANAGEMENT;
+		mframe.src = ZAP_HUD_FILES + '/file/management.html?frameId=management&tabId=' + tabId;
+		mframe.scrolling = 'no';
+		mframe.style = 'position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647;';
+
+		const lframe = document.createElement('iframe');
+		lframe.id = LEFT_PANEL;
+		lframe.src = ZAP_HUD_FILES + '/file/panel.html?url=' + URL + '&orientation=left&frameId=leftPanel&tabId=' + tabId;
+		lframe.scrolling = 'no';
+		lframe.style = 'position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;';
+
+		const rframe = document.createElement('iframe');
+		rframe.id = RIGHT_PANEL;
+		rframe.src = ZAP_HUD_FILES + '/file/panel.html?url=' + URL + '&orientation=right&frameId=rightPanel&tabId=' + tabId;
+		rframe.scrolling = 'no';
+		rframe.style = 'position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;';
+
+		const bframe = document.createElement('iframe');
+		bframe.id = BOTTOM_DRAWER;
+		bframe.src = ZAP_HUD_FILES + '/file/drawer.html?frameId=drawer&tabId=' + tabId;
+		bframe.scrolling = 'no';
+		bframe.style = 'position: fixed; border: medium none; overflow: hidden; left: 0px; bottom: 0px; width: 100%; height: 50px; z-index: 2147483646;';
+
+		const dframe = document.createElement('iframe');
+		dframe.id = MAIN_DISPLAY;
+		dframe.src = ZAP_HUD_FILES + '/file/display.html?frameId=display&tabId=' + tabId;
+		dframe.style = 'position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;';
+
+		const gframe = document.createElement('iframe');
+		gframe.id = GROWLER_ALERTS;
+		gframe.src = ZAP_HUD_FILES + '/file/growlerAlerts.html?frameId=growlerAlerts&tabId=' + tabId;
+		gframe.style = 'position: fixed; right: 0px; bottom: 30px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;';
+
+		document.body.append(mframe);
+		document.body.append(lframe);
+		document.body.append(rframe);
+		document.body.append(bframe);
+		document.body.append(dframe);
+		document.body.append(gframe);
+
 		document.body.style.marginBottom = '50px';
 
 		const zapReplaceOffset = window.location.href.indexOf('zapHudReplaceReq=');

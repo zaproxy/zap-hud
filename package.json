@@ -51,8 +51,25 @@
       "src/test/js/**",
       "src/webpack/**"
     ],
+    "plugins": ["no-unsanitized"],
     "rules": {
       "no-negated-condition": "warn",
+      "no-unsanitized/method": ["error",
+        {
+          "escape": {
+            "methods": [
+              "DOMPurify.sanitize"
+            ]
+          }
+        }],
+      "no-unsanitized/property": ["error",
+        {
+          "escape": {
+            "methods": [
+              "DOMPurify.sanitize"
+            ]
+          }
+        }],
       "no-unused-vars": "warn",
       "prefer-destructuring": "warn",
       "unicorn/no-for-loop": "warn",
@@ -75,17 +92,18 @@
   "dependencies": {
     "localforage": "^1.7.3",
     "vue": "^2.6.10",
-    "vue-i18n": "^8.14.1"
+    "vue-i18n": "^8.15.0"
   },
   "devDependencies": {
     "ava": "^2.4.0",
     "css-loader": "^3.2.0",
-    "lint-staged": "^9.4.1",
-    "vue-loader": "^15.7.1",
+    "eslint-plugin-no-unsanitized": "^3.0.2",
+    "lint-staged": "^9.4.3",
+    "vue-loader": "^15.7.2",
     "vue-style-loader": "^4.1.2",
     "vue-template-compiler": "^2.6.10",
-    "webpack": "^4.41.0",
-    "webpack-cli": "^3.3.9",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
     "xo": "^0.25.3"
   }
 }
