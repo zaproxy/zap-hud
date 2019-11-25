@@ -31,6 +31,7 @@ import org.zaproxy.zap.common.VersionedAbstractParam;
 import org.zaproxy.zap.eventBus.Event;
 import org.zaproxy.zap.extension.api.ZapApiIgnore;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AjaxSpiderPage;
+import org.zaproxy.zap.extension.hud.tutorial.pages.CommentsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.HistoryPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.HudConfigPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.ToggleScriptPage;
@@ -299,6 +300,7 @@ public class HudParam extends VersionedAbstractParam {
             addTutorialUpdate(HistoryPage.NAME);
         }
         if (fileVersion <= 3) {
+            addTutorialUpdate(CommentsPage.NAME);
             addTutorialUpdate(ToggleScriptPage.NAME);
         }
         getConfig().setProperty(PARAM_TUTORIAL_UPDATES, tutorialUpdates);
