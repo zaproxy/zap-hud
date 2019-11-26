@@ -16,6 +16,7 @@ const SiteAlertsMedium = (function () {
 	ICONS.PA = 'site-alerts-medium.png';
 	const ALERT_TYPE = 'site-alerts';
 	const ALERT_RISK = 'Medium';
+	const ALERT_RISK_LABEL = I18n.t('alerts_risk_medium');
 
 	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -36,7 +37,7 @@ const SiteAlertsMedium = (function () {
 	}
 
 	function showAlerts(tabId, domain) {
-		alertUtils.showSiteAlerts(tabId, DIALOG, domain, ALERT_RISK);
+		alertUtils.showSiteAlerts(tabId, DIALOG, domain, ALERT_RISK_LABEL);
 	}
 
 	function showOptions(tabId) {

@@ -16,6 +16,7 @@ const PageAlertsInformational = (function () {
 	ICONS.PA = 'page-alerts-informational.png';
 	const ALERT_TYPE = 'page-alerts';
 	const ALERT_RISK = 'Informational';
+	const ALERT_RISK_LABEL = I18n.t('alerts_risk_info');
 
 	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -36,7 +37,7 @@ const PageAlertsInformational = (function () {
 	}
 
 	function showAlerts(tabId, url) {
-		alertUtils.showPageAlerts(tabId, DIALOG, url, ALERT_RISK);
+		alertUtils.showPageAlerts(tabId, DIALOG, url, ALERT_RISK_LABEL);
 	}
 
 	function showOptions(tabId) {

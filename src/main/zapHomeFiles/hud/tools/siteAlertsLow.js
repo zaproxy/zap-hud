@@ -16,6 +16,7 @@ const SiteAlertsLow = (function () {
 	ICONS.PA = 'site-alerts-low.png';
 	const ALERT_TYPE = 'site-alerts';
 	const ALERT_RISK = 'Low';
+	const ALERT_RISK_LABEL = I18n.t('alerts_risk_low');
 
 	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
@@ -36,7 +37,7 @@ const SiteAlertsLow = (function () {
 	}
 
 	function showAlerts(tabId, domain) {
-		alertUtils.showSiteAlerts(tabId, DIALOG, domain, ALERT_RISK);
+		alertUtils.showSiteAlerts(tabId, DIALOG, domain, ALERT_RISK_LABEL);
 	}
 
 	function showOptions(tabId) {
