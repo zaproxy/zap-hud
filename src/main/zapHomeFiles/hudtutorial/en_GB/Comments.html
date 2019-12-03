@@ -8,23 +8,23 @@
 <div class="roundContainer">
 	<h1>Comments</H1>
 	<!-- This is an example comment -->
-	The Comments tool <img src="balloon-white.png" title="This icon is part of the tutorial"> shows the number of HTML comments on the current page. 
-	It will not currently show comments in JavaScript or in sub-frames.
+	The Comments tool <img src="balloon-white.png" alt="[white speech balloon]" title="This icon is part of the tutorial"> shows the number of HTML comments on the current page. 
+	It will not currently show comments in JavaScript or sub-frames.
 	<p>
 	If any of the comments contain 'suspicious' strings then an exclamation mark will be added to the icon:
-	<img src="balloon-white-exclamation.png" title="This icon is part of the tutorial">
+	<img src="balloon-white-exclamation.png" alt="[white speech balloon with exclamation mark]" title="This icon is part of the tutorial">
 	<p>
 	The suspicious strings are case insensitive and are currently hardcoded to:<br>
 	<code>TODO, FIXME, BUG, XXX, QUERY, DB, ADMIN, USER, PASSWORD, PWORD, PWD, SELECT</code> <br>
 	The intention is for these to be configurable from within the HUD in a future release.
 	<p>
 	If you click on the 'Comments' tool then the icon will change to
-	<img src="balloon.png" title="This icon is part of the tutorial"> or <img src="balloon-yellow-exclamation.png" title="This icon is part of the tutorial"> 
-	and the same icon will be shown in the target page everywhere there is an HTML comment.
+	<img src="balloon.png" alt="[yellow speech balloon]" title="This icon is part of the tutorial"> or <img src="balloon-yellow-exclamation.png" alt="[yellow speech balloon with exclamation mark]" title="This icon is part of the tutorial"> 
+	and the same icon will be shown on the target page everywhere there is an HTML comment.
 	Hovering over these icons will show the related comment and clicking on them will copy the comment to the clipboard.
 	<p>
-	Showing comments may well mess up the formating of the target page, and in some cases may
-	break functionality if there are any scripts which rely on the DOM structure not changing. 
+	Showing comments may well mess up the formatting of the target page, and in some cases may
+	break functionality if any scripts rely on the DOM structure not changing.
 	Clicking on the 'Comment' tool again will return the page to its original state.
 	<p>
 	<!-- This is another example comment containing a suspicious pwd string -->
