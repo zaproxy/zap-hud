@@ -464,7 +464,7 @@ Vue.component('break-message-modal', {
 			self.request.isReadonly = !data.isResponseDisabled;
 			self.response.isReadonly = data.isResponseDisabled;
 
-			// Only show the Drop option for things that dont look like a requests for a web page as this can break the HUD UI
+			// Only show the Drop option for things that don't look like a requests for a web page as this can break the HUD UI
 			if (data.isResponseDisabled) {
 				// Its a request
 				const headerLc = data.request.header.toLowerCase();

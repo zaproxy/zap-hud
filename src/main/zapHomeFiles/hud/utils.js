@@ -717,7 +717,7 @@ const utils = (function () {
 		}
 
 		if (LOG_TO_ZAP) {
-			// We dont know if we're in the service worker here, so raise an event
+			// We don't know if we're in the service worker here, so raise an event
 			self.dispatchEvent(new CustomEvent('hud.log', {detail: {record}}));
 		}
 

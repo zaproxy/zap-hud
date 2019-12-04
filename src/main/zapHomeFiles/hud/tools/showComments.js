@@ -26,7 +26,7 @@ const ShowComments = (function () {
 		'PWD',
 		'SELECT'];
 
-	// Variables - tab specific so dont need to be stored
+	// Variables - tab specific so don't need to be stored
 	const loc = {};
 	loc.data = 0;
 	loc.isSuspicious = false;

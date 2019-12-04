@@ -112,7 +112,7 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
                     String loc = msg.getResponseHeader().getHeader(HttpResponseHeader.LOCATION);
                     if (loc != null && loc.toLowerCase().startsWith("https")) {
                         // We've upgraded it, but its upgrading itself anyway - let it do that so we
-                        // dont get into a browser loop
+                        // don't get into a browser loop
                         LOG.debug("onHttpResponseReceived not upgrading " + url);
                         this.extHud.removeUpgradedHttpsDomain(url);
                         // Advise that we're no longer upgrading this domain to https
