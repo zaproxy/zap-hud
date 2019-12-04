@@ -322,7 +322,7 @@ const utils = (function () {
 	}
 
 	/*
-	 * Return all tools from indexdb.
+	 * Return all tools from indexeddb.
 	 */
 	function loadAllTools() {
 		return localforage.getItem('tools')
@@ -424,7 +424,7 @@ const utils = (function () {
 	}
 
 	/*
-	 * Send a postMessage to an iframe window using the custom stored frame key in indexdb.
+	 * Send a postMessage to an iframe window using the custom stored frame key in indexeddb.
 	 */
 	function messageFrame(tabId, frameId, message) {
 		return clients.matchAll({includeUncontrolled: true})
