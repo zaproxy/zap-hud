@@ -69,11 +69,11 @@ public class AlertNotificationsPage extends TutorialAlertsPage {
                                                         alertRisk,
                                                         Alert.CONFIDENCE_LOW,
                                                         Constant.messages.getString(
-                                                                "hud.tutorial.page.alertsnotifications.alert.title."
+                                                                "hud.tutorial.page.alertnotifications.alert.title."
                                                                         + alertRisk));
                                         alert.setDescription(
                                                 Constant.messages.getString(
-                                                        "hud.tutorial.page.alertsnotifications.alert.description"));
+                                                        "hud.tutorial.page.alertnotifications.alert.description"));
                                         alertRisk += 1;
                                         raiseAlert(alert);
                                     }
