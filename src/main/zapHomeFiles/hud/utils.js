@@ -130,7 +130,7 @@ const utils = (function () {
 	/*
 	 * Return a parameter value from a uri string
 	 */
-	function getParamater(url, parameter) {
+	function getParameter(url, parameter) {
 		const start = url.indexOf(parameter) + parameter.length + 1;
 		let end = url.indexOf('&', start);
 		end = end === -1 ? url.length : end;
@@ -731,7 +731,7 @@ const utils = (function () {
 		parseResponseHeader,
 		isFromTrustedOrigin,
 		parseDomainFromUrl,
-		getParamater,
+		getParameter,
 		isHUDInitialized,
 		initializeHUD,
 		loadFrame,
