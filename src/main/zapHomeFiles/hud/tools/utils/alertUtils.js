@@ -63,7 +63,7 @@ const alertUtils = (function () {
 		localforage.getItem('upgradedDomains')
 			.then(upgradedDomains => {
 				if (targetDomain in upgradedDomains) {
-					// Its been upgraded to https by ZAP, but the alerts wont have been
+					// Its been upgraded to https by ZAP, but the alerts won't have been
 					target = target.replace('https://', 'http://');
 				}
 

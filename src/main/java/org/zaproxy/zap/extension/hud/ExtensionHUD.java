@@ -450,7 +450,7 @@ public class ExtensionHUD extends ExtensionAdaptor
         }
         sb.append(REPLACE_REQUEST_PARAM);
         sb.append(key);
-        // The request we get from the browser wont contain the fragment
+        // The request we get from the browser won't contain the fragment
         // and will have been downgraded from https -> http is relevant
         this.recordedRequests.put(sb.toString(), request);
 

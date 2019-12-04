@@ -126,7 +126,7 @@ public class ExtensionHUDlaunch extends ExtensionAdaptor implements CommandLineL
                 () -> {
                     try {
                         if (!View.isInitialised()) {
-                            // If we don't set this the HUD wont be enabled,
+                            // If we don't set this the HUD won't be enabled,
                             // which is a bit pointless
                             getExtHUD().setHudCmdlineOptionUsed(true);
                         }
