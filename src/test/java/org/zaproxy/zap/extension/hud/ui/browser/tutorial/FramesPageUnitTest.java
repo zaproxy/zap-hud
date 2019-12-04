@@ -121,7 +121,7 @@ public class FramesPageUnitTest extends BrowsersTest {
     }
 
     @TestTemplate
-    public void testBottonDrawerTabsHiddenAndRevealed(WebDriver driver) throws URISyntaxException {
+    public void testBottomDrawerTabsHiddenAndRevealed(WebDriver driver) throws URISyntaxException {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(FramesPage.NAME));
 
