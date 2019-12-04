@@ -30,7 +30,7 @@ Vue.component('welcome-screen', {
 			this.closeWelcomeScreen();
 		},
 		closeWelcomeScreen() {
-			if (dontShowAgain.checked) {
+			if (doNotShowAgain.checked) {
 				navigator.serviceWorker.controller.postMessage({
 					action: 'zapApiCall', component: 'hud', type: 'action',
 					name: 'setOptionShowWelcomeScreen',
@@ -43,7 +43,7 @@ Vue.component('welcome-screen', {
 	},
 	data() {
 		return {
-			dontShowAgain: false
+			doNotShowAgain: false
 		};
 	}
 });

@@ -30,7 +30,7 @@
       "apiCallWithResponse",
       "alertify",
       "alertUtils",
-      "dontShowAgain",
+      "doNotShowAgain",
       "I18n",
       "IS_SERVICEWORKER_REFRESHED",
       "localforage",
