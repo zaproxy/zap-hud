@@ -51,25 +51,31 @@
       "src/test/js/**",
       "src/webpack/**"
     ],
-    "plugins": ["no-unsanitized"],
+    "plugins": [
+      "no-unsanitized"
+    ],
     "rules": {
       "no-negated-condition": "warn",
-      "no-unsanitized/method": ["error",
+      "no-unsanitized/method": [
+        "error",
         {
           "escape": {
             "methods": [
               "DOMPurify.sanitize"
             ]
           }
-        }],
-      "no-unsanitized/property": ["error",
+        }
+      ],
+      "no-unsanitized/property": [
+        "error",
         {
           "escape": {
             "methods": [
               "DOMPurify.sanitize"
             ]
           }
-        }],
+        }
+      ],
       "no-unused-vars": "warn",
       "prefer-destructuring": "warn",
       "unicorn/no-for-loop": "warn",
