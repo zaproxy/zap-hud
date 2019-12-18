@@ -88,7 +88,7 @@ const Break = (function () {
 		return apiCallWithResponse('break', 'action', 'step')
 			.catch(error => {
 				if (tabId) {
-					// TabId wont be supplied if we're stepping through reqs that arrive when the window isnt ready
+					// TabId won't be supplied if we're stepping through reqs that arrive when the window isn't ready
 					utils.zapApiErrorDialog(tabId, error);
 					throw error;
 				}

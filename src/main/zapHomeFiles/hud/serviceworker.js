@@ -69,7 +69,7 @@ function initWebSockets() {
 	webSocket = new WebSocket(ZAP_HUD_WS);
 
 	webSocket.addEventListener('open', () => {
-		// Wont be able to log until ther websocket is set up
+		// Won't be able to log until ther websocket is set up
 		utils.log(LOG_INFO, 'serviceworker.initWebSockets', 'Initialized');
 		// Basic test
 		webSocket.send('{ "component" : "core", "type" : "view", "name" : "version" }');

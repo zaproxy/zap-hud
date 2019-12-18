@@ -50,7 +50,7 @@ public abstract class TutorialAlertsPage extends TutorialPage implements EventCo
     public void handleGetRequest(HttpMessage msg) {
         super.handleGetRequest(msg);
         if (this.url == null) {
-            // Store the URL being used so we dont have issues with localhost vs 127.0.0.1
+            // Store the URL being used so we don't have issues with localhost vs 127.0.0.1
             this.url = msg.getRequestHeader().getURI().toString();
             // Register for proxy log events so we can find out when the request has been passively
             // scanned and is therefore in the history
