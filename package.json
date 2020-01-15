@@ -30,7 +30,7 @@
       "apiCallWithResponse",
       "alertify",
       "alertUtils",
-      "dontShowAgain",
+      "doNotShowAgain",
       "I18n",
       "IS_SERVICEWORKER_REFRESHED",
       "localforage",
@@ -51,25 +51,31 @@
       "src/test/js/**",
       "src/webpack/**"
     ],
-    "plugins": ["no-unsanitized"],
+    "plugins": [
+      "no-unsanitized"
+    ],
     "rules": {
       "no-negated-condition": "warn",
-      "no-unsanitized/method": ["error",
+      "no-unsanitized/method": [
+        "error",
         {
           "escape": {
             "methods": [
               "DOMPurify.sanitize"
             ]
           }
-        }],
-      "no-unsanitized/property": ["error",
+        }
+      ],
+      "no-unsanitized/property": [
+        "error",
         {
           "escape": {
             "methods": [
               "DOMPurify.sanitize"
             ]
           }
-        }],
+        }
+      ],
       "no-unused-vars": "warn",
       "prefer-destructuring": "warn",
       "unicorn/no-for-loop": "warn",
@@ -91,18 +97,18 @@
   "homepage": "https://github.com/zaproxy/zap-hud/wiki",
   "dependencies": {
     "localforage": "^1.7.3",
-    "vue": "^2.6.10",
-    "vue-i18n": "^8.15.0"
+    "vue": "^2.6.11",
+    "vue-i18n": "^8.15.3"
   },
   "devDependencies": {
     "ava": "^2.4.0",
-    "css-loader": "^3.2.0",
+    "css-loader": "^3.4.2",
     "eslint-plugin-no-unsanitized": "^3.0.2",
-    "lint-staged": "^9.4.3",
-    "vue-loader": "^15.7.2",
+    "lint-staged": "^9.5.0",
+    "vue-loader": "^15.8.3",
     "vue-style-loader": "^4.1.2",
-    "vue-template-compiler": "^2.6.10",
-    "webpack": "^4.41.2",
+    "vue-template-compiler": "^2.6.11",
+    "webpack": "^4.41.5",
     "webpack-cli": "^3.3.10",
     "xo": "^0.25.3"
   }

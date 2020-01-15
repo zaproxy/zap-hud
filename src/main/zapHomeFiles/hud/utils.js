@@ -130,7 +130,7 @@ const utils = (function () {
 	/*
 	 * Return a parameter value from a uri string
 	 */
-	function getParamater(url, parameter) {
+	function getParameter(url, parameter) {
 		const start = url.indexOf(parameter) + parameter.length + 1;
 		let end = url.indexOf('&', start);
 		end = end === -1 ? url.length : end;
@@ -322,7 +322,7 @@ const utils = (function () {
 	}
 
 	/*
-	 * Return all tools from indexdb.
+	 * Return all tools from indexeddb.
 	 */
 	function loadAllTools() {
 		return localforage.getItem('tools')
@@ -424,7 +424,7 @@ const utils = (function () {
 	}
 
 	/*
-	 * Send a postMessage to an iframe window using the custom stored frame key in indexdb.
+	 * Send a postMessage to an iframe window using the custom stored frame key in indexeddb.
 	 */
 	function messageFrame(tabId, frameId, message) {
 		return clients.matchAll({includeUncontrolled: true})
@@ -717,7 +717,7 @@ const utils = (function () {
 		}
 
 		if (LOG_TO_ZAP) {
-			// We dont know if we're in the service worker here, so raise an event
+			// We don't know if we're in the service worker here, so raise an event
 			self.dispatchEvent(new CustomEvent('hud.log', {detail: {record}}));
 		}
 
@@ -731,7 +731,7 @@ const utils = (function () {
 		parseResponseHeader,
 		isFromTrustedOrigin,
 		parseDomainFromUrl,
-		getParamater,
+		getParameter,
 		isHUDInitialized,
 		initializeHUD,
 		loadFrame,

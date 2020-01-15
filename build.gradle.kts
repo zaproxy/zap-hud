@@ -14,7 +14,7 @@ import org.zaproxy.gradle.tasks.ZapShutdown
 plugins {
     `java-library`
     jacoco
-    id("org.zaproxy.add-on") version "0.2.0"
+    id("org.zaproxy.add-on") version "0.3.0"
     id("com.diffplug.gradle.spotless") version "3.15.0"
     id("org.ysb33r.nodejs.npm") version "0.6.2"
 }
@@ -27,7 +27,7 @@ repositories {
     mavenCentral()
 }
 
-version = "0.8.0"
+version = "0.9.0"
 description = "Display information from ZAP in browser."
 
 val generatedI18nJsFileDir = layout.buildDirectory.dir("zapAddOn/i18nJs")
@@ -55,6 +55,8 @@ zapAddOn {
 
     manifest {
         author.set("ZAP Dev Team")
+        url.set("https://www.zaproxy.org/docs/desktop/addons/hud/")
+        repo.set("https://github.com/zaproxy/zap-hud/")
         changesFile.set(tasks.named<ConvertMarkdownToHtml>("generateManifestChanges").flatMap { it.html })
         files.from(generatedI18nJsFileDir)
         files.from(npmDepsDir)

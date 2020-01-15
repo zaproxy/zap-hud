@@ -144,7 +144,7 @@ public class PageAlertsPageUnitTest extends BrowsersTest {
         driver.findElement(By.id("key")).sendKeys(key);
         driver.findElement(By.id("submit")).click();
 
-        // That should have completed the task. Reload the page so we dont pick up a ref to the old
+        // That should have completed the task. Reload the page so we don't pick up a ref to the old
         // page
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(PageAlertsPage.NAME));
 

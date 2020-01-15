@@ -175,7 +175,7 @@ public class HudAPI extends ApiImplementor {
 
     public boolean allowUnsafeEval() {
         /*
-         * TODO also require this.extension.getHudParam().isDevelopmentMode() once the HUD works with unsafe eval off.
+         * TODO also require this.extension.getHudParam().isDevelopmentMode() once the HUD works with unsafe-eval off.
          */
         return this.extension.getHudParam().isAllowUnsafeEval();
     }

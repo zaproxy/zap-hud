@@ -52,7 +52,7 @@ public class BadSiteUnitTest extends BrowsersTest {
     private static final String SERVICE_WORKER = "serviceworker.js";
     private static final String BAD_SITE_TEST_KEY = "badsitetest";
 
-    // Cache the files url as it wont change and this will speed things up a little bit
+    // Cache the files url as it won't change and this will speed things up a little bit
     private static String filesUrl = null;
 
     @BeforeAll

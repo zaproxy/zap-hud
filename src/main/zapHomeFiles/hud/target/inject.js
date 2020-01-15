@@ -184,14 +184,14 @@ const injection = (function () {
 				inputs[index].disabled = false;
 				inputs[index].style.borderColor = 'blue';
 				showEnabledDisabled.push(inputs[index]);
-				// We dont count disabled fields as they are still visible
+				// We don't count disabled fields as they are still visible
 			}
 
 			if (inputs[index].readOnly) {
 				inputs[index].readOnly = false;
 				inputs[index].style.borderColor = 'blue';
 				showEnabledReadOnly.push(inputs[index]);
-				// We dont count readonly fields as they are still visible
+				// We don't count readonly fields as they are still visible
 			}
 
 			if (inputs[index].type === 'hidden') {
@@ -608,7 +608,7 @@ const injection = (function () {
 		const zapReplaceOffset = window.location.href.indexOf('zapHudReplaceReq=');
 		if (zapReplaceOffset > 0) {
 			// Hide the zapHudReplaceReq injected when resending a message in the browser
-			// But dont loose any fragment
+			// But don't loose any fragment
 			const fragment = window.location.hash.substr(1);
 			let origUrl = window.location.href.substring(0, zapReplaceOffset - 1);
 			if (fragment) {
