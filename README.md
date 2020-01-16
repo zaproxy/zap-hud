@@ -21,7 +21,7 @@ Learn more:
 ### Downloading
 You can try out ZAP enabled with the HUD via any of: 
 
-* Download and run the latest [ZAP Release](https://github.com/zaproxy/zaproxy/wiki/Downloads#zap-280-standard)
+* Download and run the latest [ZAP Release](https://www.zaproxy.org/download/)
 
 or
 
