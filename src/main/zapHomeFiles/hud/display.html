@@ -407,7 +407,7 @@
         <template id="site-tree-node-template">
 			  <li>
 			    <div :class="{bold: ! model.isLeaf}">
-			      <span v-if="! model.isLeaf" @click="toggle">[{{ open ? '-' : '+' }}]</span>
+			      <span v-if="! model.isLeaf" @click="toggle" class="site-tree-control">[{{ open ? '-' : '+' }}]</span>
 			      <span v-if="model.hrefId > 0" @click="showHttpMessageDetails"><a href="#">{{ model.name }}</a></span>
 			      <span v-if="model.hrefId == 0" @click="toggle">{{ model.name }}</span>
 			    </div>
