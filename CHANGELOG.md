@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Changed HUD toolbar icon to add a target overlay when 'only in scope' option enabled.
 - Change cursor to pointer on clickable elements
+- Tweak break task tutorial wording
 
 ## [0.9.0] - 2020-01-15
 ### Added
