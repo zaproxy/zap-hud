@@ -57,6 +57,7 @@ import org.zaproxy.zap.extension.script.ScriptType;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 import org.zaproxy.zap.utils.DesktopUtils;
+import org.zaproxy.zap.view.OverlayIcon;
 import org.zaproxy.zap.view.ZapMenuItem;
 import org.zaproxy.zap.view.ZapToggleButton;
 
@@ -81,6 +82,11 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     private static final ImageIcon ICON =
             new ImageIcon(ExtensionHUD.class.getResource(RESOURCE + "/radar.png"));
+
+    private static final OverlayIcon IN_SCOPE_ONLY_ICON = new OverlayIcon(ICON);
+
+    private static final ImageIcon TARGET_OVERLAY_ICON =
+            new ImageIcon(ExtensionHUD.class.getResource(RESOURCE + "/target-overlay.png"));
 
     public static final String SCRIPT_TYPE_HUD = "hud";
 
@@ -107,6 +113,8 @@ public class ExtensionHUD extends ExtensionAdaptor
         dependencies.add(ExtensionWebSocket.class);
 
         DEPENDENCIES = Collections.unmodifiableList(dependencies);
+
+        IN_SCOPE_ONLY_ICON.add(TARGET_OVERLAY_ICON);
     }
 
     private HudAPI api = new HudAPI(this);
@@ -192,6 +200,7 @@ public class ExtensionHUD extends ExtensionAdaptor
         this.hudEnabledForDesktop = getHudParam().isEnabledForDesktop();
         if (View.isInitialised()) {
             this.getHudButton().setSelected(hudEnabledForDesktop);
+            setHudButton();
             setZapCanGetFocus(!this.hudEnabledForDesktop);
         }
         this.hudEnabledForDaemon = getHudParam().isEnabledForDaemon();
@@ -312,9 +321,20 @@ public class ExtensionHUD extends ExtensionAdaptor
         }
     }
 
+    private void setHudButton() {
+        if (hudButton != null) {
+            if (getHudParam().isInScopeOnly()) {
+                hudButton.setIcon(IN_SCOPE_ONLY_ICON);
+            } else {
+                hudButton.setIcon(ICON);
+            }
+        }
+    }
+
     private ZapToggleButton getHudButton() {
         if (hudButton == null) {
-            hudButton = new ZapToggleButton(ICON);
+            hudButton = new ZapToggleButton();
+            this.setHudButton();
             hudButton.setSelectedToolTipText(
                     Constant.messages.getString("hud.toolbar.button.on.tooltip"));
             hudButton.setToolTipText(Constant.messages.getString("hud.toolbar.button.off.tooltip"));
@@ -553,6 +573,7 @@ public class ExtensionHUD extends ExtensionAdaptor
         this.hudEnabledForDesktop = getHudParam().isEnabledForDesktop();
         if (View.isInitialised()) {
             this.getHudButton().setSelected(hudEnabledForDesktop);
+            this.setHudButton();
             setZapCanGetFocus(!this.hudEnabledForDesktop);
         }
         this.hudEnabledForDaemon = getHudParam().isEnabledForDaemon();

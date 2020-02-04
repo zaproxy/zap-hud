@@ -28,6 +28,7 @@
   font-size: .7em;
   padding: 0 1%;
   margin-bottom: 1%;
+  cursor: pointer;
 }
 
 .drawer-messages .message-tr td{
