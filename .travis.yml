@@ -7,7 +7,7 @@ jdk:
   - openjdk11
 
 addons:
-    firefox: latest
+    firefox: "73.0.1"
     chrome: stable
 
 before_cache:
