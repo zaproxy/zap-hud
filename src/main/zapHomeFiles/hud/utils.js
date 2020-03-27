@@ -431,10 +431,10 @@ const utils = (function () {
 			.then(clients => {
 				for (let i = 0; i < clients.length; i++) {
 					const client = clients[i];
-					const params = new URL(client.url).searchParams;
+					const parameters = new URL(client.url).searchParams;
 
-					const tid = params.get('tabId');
-					const fid = params.get('frameId');
+					const tid = parameters.get('tabId');
+					const fid = parameters.get('frameId');
 
 					if (tid === tabId && fid === frameId) {
 						return client;
@@ -470,9 +470,9 @@ const utils = (function () {
 
 				for (let i = 0; i < clients.length; i++) {
 					const client = clients[i];
-					const params = new URL(client.url).searchParams;
+					const parameters = new URL(client.url).searchParams;
 
-					const fid = params.get('frameId');
+					const fid = parameters.get('frameId');
 
 					if (fid === frameId) {
 						frameClients.push(client);
@@ -525,9 +525,9 @@ const utils = (function () {
 
 				for (let i = 0; i < clients.length; i++) {
 					const client = clients[i];
-					const params = new URL(client.url).searchParams;
+					const parameters = new URL(client.url).searchParams;
 
-					const fid = params.get('frameId');
+					const fid = parameters.get('frameId');
 
 					if (fid === frameId) {
 						frameClients.push(client);

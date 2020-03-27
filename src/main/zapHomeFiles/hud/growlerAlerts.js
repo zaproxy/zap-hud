@@ -23,10 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		utils.errorHandler('Problem loading Alertify. Alertify is undefined.');
 	}
 
-	const params = new URL(document.location).searchParams;
+	const parameters = new URL(document.location).searchParams;
 
-	frameId = params.get('frameId');
-	tabId = params.get('tabId');
+	frameId = parameters.get('frameId');
+	tabId = parameters.get('tabId');
 
 	alertify.maxLogItems(QUEUE_SIZE);
 	alertify.logPosition('bottom right');
@@ -123,5 +123,5 @@ function getRiskFlag(risk) {
 }
 
 function getHiddenId(alertId) {
-	return '<input id=\'alertId\' type=\'hidden\' name=\'alertId\' value=' + alertId + '>';
+	return `<input id="alertId" type="hidden" name="alertId" value="${alertId}">`;
 }

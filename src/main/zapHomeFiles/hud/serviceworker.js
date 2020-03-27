@@ -180,8 +180,8 @@ const onMessage = event => {
 		case 'targetload': {
 			const targetDomain = utils.parseDomainFromUrl(message.targetUrl);
 
-			const e = new CustomEvent('targetload', {detail: {tabId: message.tabId, url: message.targetUrl, domain: targetDomain}});
-			self.dispatchEvent(e);
+			const customEvent = new CustomEvent('targetload', {detail: {tabId: message.tabId, url: message.targetUrl, domain: targetDomain}});
+			self.dispatchEvent(customEvent);
 
 			break;
 		}
@@ -238,32 +238,32 @@ function registerForZapEvents(publisher) {
 	apiCall('event', 'register', publisher);
 }
 
-function apiCall(component, type, name, params) {
+function apiCall(component, type, name, parameters) {
 	if (!webSocket) {
 		// Can't use utils.log here as that could then put us in a loop
 		console.log('serviceworker.apiCall no WebSocket ' + component + ' ' + type + ' ' + name);
 		return;
 	}
 
-	if (!params) {
-		params = {};
+	if (!parameters) {
+		parameters = {};
 	}
 
-	const call = {component, type, name, params};
+	const call = {component, type, name, params: parameters};
 	webSocket.send(JSON.stringify(call));
 }
 
-function apiCallWithResponse(component, type, name, params) {
+function apiCallWithResponse(component, type, name, parameters) {
 	if (!webSocket) {
 		console.log('serviceworker.apiCallWithResponse no WebSocket ' + component + ' ' + type + ' ' + name);
 		return;
 	}
 
-	if (!params) {
-		params = {};
+	if (!parameters) {
+		parameters = {};
 	}
 
-	const call = {component, type, name, params};
+	const call = {component, type, name, params: parameters};
 	const pFunctions = {};
 	const p = new Promise(((resolve, reject) => {
 		pFunctions.resolve = resolve;

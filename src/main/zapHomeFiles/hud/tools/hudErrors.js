@@ -131,9 +131,9 @@ const HudErrors = (function () {
 			tool.records.push(event.detail.record);
 
 			return Promise.all([utils.writeTool(tool), localforage.getItem(IS_SERVICEWORKER_REFRESHED)]);
-		}).then(params => {
-			const tool = params[0];
-			const isServiceWorkerRefreshed = params[1];
+		}).then(parameters => {
+			const tool = parameters[0];
+			const isServiceWorkerRefreshed = parameters[1];
 
 			// We need to check if the serviceworker has taken control over the panels first
 			// if not this will cause a NoClientError in the messageAllTab function which will send another

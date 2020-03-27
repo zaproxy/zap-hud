@@ -146,11 +146,11 @@ const CommonAlerts = (function () {
 								const alertRisk = RISKS[risk];
 								for (const alertName in pageAlerts[alertRisk]) {
 									if (Object.prototype.hasOwnProperty.call(pageAlerts[alertRisk], alertName)) {
-										const reportedParams = new Set();
+										const reportedParameters = new Set();
 										for (let i = 0; i < pageAlerts[alertRisk][alertName].length; i++) {
 											const alert = pageAlerts[alertRisk][alertName][i];
-											if (alert.param.length > 0 && !reportedParams.has(alert.param)) {
-												reportedParams.add(alert.param);
+											if (alert.param.length > 0 && !reportedParameters.has(alert.param)) {
+												reportedParameters.add(alert.param);
 												utils.messageFrame(event.detail.tabId, 'management', {
 													action: 'commonAlerts.alert',
 													name: alert.name,
