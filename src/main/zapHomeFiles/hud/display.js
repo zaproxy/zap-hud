@@ -26,7 +26,7 @@ Vue.component('modal', {
 		close() {
 			this.$emit('close');
 		},
-		afterLeave(el) {
+		afterLeave(element) {
 			if (!app.keepShowing) {
 				app.backStack = [];
 				hideDisplayFrame();
@@ -528,12 +528,12 @@ Vue.component('history-message-modal', {
 			}, [channel.port2]);
 		},
 		ascanRequest() {
-			const req = this.request;
+			const request = this.request;
 			this.$emit('close');
 			navigator.serviceWorker.controller.postMessage(
 				{
 					tabId, frameId, action: 'ascanRequest', tool: 'active-scan',
-					uri: req.uri, method: req.method, body: req.body
+					uri: request.uri, method: request.method, body: request.body
 				});
 		}
 	},
@@ -878,10 +878,10 @@ Vue.component('tab', {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-	const params = new URL(document.location).searchParams;
+	const parameters = new URL(document.location).searchParams;
 
-	frameId = params.get('frameId');
-	tabId = params.get('tabId');
+	frameId = parameters.get('frameId');
+	tabId = parameters.get('tabId');
 
 	/* Vue app */
 	app = new Vue({

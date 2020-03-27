@@ -53,10 +53,10 @@ function showTutorial() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-	const params = new URL(document.location).searchParams;
+	const parameters = new URL(document.location).searchParams;
 
-	frameId = params.get('frameId');
-	tabId = params.get('tabId');
+	frameId = parameters.get('frameId');
+	tabId = parameters.get('tabId');
 
 	app = new Vue({
 		el: '#app',

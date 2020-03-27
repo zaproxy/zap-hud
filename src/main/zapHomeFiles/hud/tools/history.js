@@ -56,17 +56,17 @@ const History = (function () {
 			throw new Error('Could not load HTTP message details');
 		}
 
-		const parsedReqData = utils.parseRequestHeader(data.requestHeader);
+		const parsedRequestData = utils.parseRequestHeader(data.requestHeader);
 
-		Promise.all([self.tools['active-scan'].isRunning(), self.tools.scope.isInScope(utils.parseDomainFromUrl(parsedReqData.uri))])
+		Promise.all([self.tools['active-scan'].isRunning(), self.tools.scope.isInScope(utils.parseDomainFromUrl(parsedRequestData.uri))])
 			.then(results => {
 				const isAscanRunning = results[0];
 				const isInScope = results[1];
 
 				const config = {
 					request: {
-						method: parsedReqData.method,
-						uri: parsedReqData.uri,
+						method: parsedRequestData.method,
+						uri: parsedRequestData.uri,
 						header: data.requestHeader.trim(),
 						body: data.requestBody
 					},
@@ -102,13 +102,13 @@ const History = (function () {
 	}
 
 	function sendRequest(header, body) {
-		let req = header;
+		let request = header;
 
 		if (body) {
-			req = req + '\r\n\r\n' + body;
+			request = request + '\r\n\r\n' + body;
 		}
 
-		return apiCallWithResponse('core', 'action', 'sendRequest', {request: req})
+		return apiCallWithResponse('core', 'action', 'sendRequest', {request})
 			.catch(utils.errorHandler);
 	}
 
@@ -119,10 +119,10 @@ const History = (function () {
 		const message = {};
 
 		const date = new Date(Number(event.detail.timeSentInMs));
-		const dateStr = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
+		const dateString = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
 
 		message.timeInMs = event.detail.timeSentInMs;
-		message.time = dateStr;
+		message.time = dateString;
 		message.method = event.detail.method;
 		message.url = event.detail.uri;
 		message.code = event.detail.statusCode;

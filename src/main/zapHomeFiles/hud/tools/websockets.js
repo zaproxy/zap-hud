@@ -72,10 +72,10 @@ const WebSockets = (function () {
 			const message = {};
 
 			const date = new Date(Number(event.detail.timeSentInMs));
-			const dateStr = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
+			const dateString = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
 
 			message.timeInMs = event.detail.timeSentInMs;
-			message.time = dateStr;
+			message.time = dateString;
 			message.direction = event.detail.direction;
 			message.length = event.detail.length;
 			message.messageSummary = event.detail.messageSummary;
