@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		localforage.getItem('starttime')
 			.then(startT => {
 				const currentTime = new Date().getTime();
-				const diff = currentTime - parseInt(startT, 10);
+				const diff = currentTime - Number.parseInt(startT, 10);
 				console.log('Time (ms) to load UI: ' + diff);
 			});
 
@@ -124,7 +124,7 @@ function windowMessageListener(event) {
 		limitedData.tabId = message.tabId;
 		switch (message.action) {
 			case 'showEnable.count':
-				if (message.count === parseInt(message.count, 10)) {
+				if (message.count === Number.parseInt(message.count, 10)) {
 					limitedData.count = message.count;
 					navigator.serviceWorker.controller.postMessage(limitedData);
 					return;
@@ -132,7 +132,7 @@ function windowMessageListener(event) {
 
 				break;
 			case 'commonAlerts.showAlert':
-				if (message.alertId === parseInt(message.alertId, 10)) {
+				if (message.alertId === Number.parseInt(message.alertId, 10)) {
 					limitedData.alertId = message.alertId;
 					navigator.serviceWorker.controller.postMessage(limitedData);
 					return;
@@ -140,8 +140,8 @@ function windowMessageListener(event) {
 
 				break;
 			case 'showComments.count':
-				if (message.count === parseInt(message.count, 10) &&
-						message.suspicious === parseInt(message.suspicious, 10)) {
+				if (message.count === Number.parseInt(message.count, 10) &&
+						message.suspicious === Number.parseInt(message.suspicious, 10)) {
 					limitedData.count = message.count;
 					limitedData.suspicious = message.suspicious;
 					navigator.serviceWorker.controller.postMessage(limitedData);

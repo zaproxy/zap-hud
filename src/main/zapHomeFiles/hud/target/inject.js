@@ -306,7 +306,7 @@ const injection = (function () {
 				High: 'red'
 			};
 			const colour = colours[alert.risk];
-			const alertId = parseInt(alert.id, 10);
+			const alertId = Number.parseInt(alert.id, 10);
 			if (alertId >= 0) {
 				element.style.borderColor = colour || 'red';
 				const img = document.createElement('img');
