@@ -157,8 +157,8 @@ const ShowComments = (function () {
 
 			case 'showComments.count':
 				// Check its an int - its been supplied by the target domain so in theory could have been tampered with
-				if (message.count === parseInt(message.count, 10) &&
-						message.suspicious === parseInt(message.suspicious, 10)) {
+				if (message.count === Number.parseInt(message.count, 10) &&
+						message.suspicious === Number.parseInt(message.suspicious, 10)) {
 					setState(message.tabId, message.count, message.suspicious > 0);
 				}
 
