@@ -49,6 +49,8 @@ public abstract class BrowsersTest {
                     .addPreference("browser.safebrowsing.provider.mozilla.updateURL", "")
                     .addPreference("network.proxy.no_proxies_on", "")
                     .addPreference("network.proxy.allow_hijacking_localhost", true)
+                    // Breaks the HUD otherwise (Issue 701)
+                    .addPreference("browser.tabs.documentchannel", false)
                     .setProxy(PROXY);
 
     @Options
