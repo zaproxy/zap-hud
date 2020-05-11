@@ -101,7 +101,7 @@
     "vue-i18n": "^8.17.1"
   },
   "devDependencies": {
-    "ava": "^3.7.0",
+    "ava": "^3.8.2",
     "css-loader": "^3.5.3",
     "eslint-plugin-no-unsanitized": "^3.0.2",
     "lint-staged": "^10.1.7",
