@@ -104,7 +104,7 @@
     "ava": "^3.7.0",
     "css-loader": "^3.5.3",
     "eslint-plugin-no-unsanitized": "^3.0.2",
-    "lint-staged": "^10.1.7",
+    "lint-staged": "^10.2.10",
     "vue-loader": "^15.9.2",
     "vue-style-loader": "^4.1.2",
     "vue-template-compiler": "^2.6.11",
