@@ -23,17 +23,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertNotificationsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.PageAlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.SiteAlertsPage;
-import org.zaproxy.zap.extension.hud.ui.Constants;
 import org.zaproxy.zap.extension.hud.ui.browser.BrowsersTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
@@ -76,35 +75,9 @@ public class PageAlertsPageUnitTest extends BrowsersTest {
 
         // Wait for the alert - this will depend on the ZAP passive scan thread
         WebElement panel = hud.waitForLeftPanel();
-
-        WebElement infoPageButton = null;
-        for (int i = 0; i < TutorialStatics.ALERT_LONG_LOOP_COUNT; i++) {
-            try {
-                assertNotNull(panel);
-                driver.switchTo().frame(panel);
-                List<WebElement> buttons = hud.getHudButtons();
-                if (buttons != null && buttons.size() >= 7) {
-                    infoPageButton = buttons.get(6);
-                    if (infoPageButton.getText().length() > 0
-                            && !infoPageButton.getText().equals("0")) {
-                        break;
-                    }
-                }
-                // Try again - the panel might have been reloaded
-                infoPageButton = null;
-                driver.switchTo().parentFrame();
-                panel = hud.waitForLeftPanel();
-            } catch (Exception e1) {
-                System.out.println("PageAlertsPage exception " + e1.getMessage());
-            }
-            try {
-                Thread.sleep(Constants.GENERIC_TESTS_RETRY_SLEEP_MS);
-            } catch (InterruptedException e) {
-                // Ignore
-            }
-        }
-        assertNotNull(infoPageButton);
-        assertEquals("1", infoPageButton.getText());
+        driver.switchTo().frame(panel);
+        WebElement infoPageButton = hud.getHudButtons().get(6);
+        hud.wbWait().until(ExpectedConditions.textToBePresentInElement(infoPageButton, "1"));
 
         // Click it, make sure we can see the alert
         infoPageButton.click();
