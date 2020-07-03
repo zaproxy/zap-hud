@@ -20,7 +20,6 @@
 package org.zaproxy.zap.extension.hud.ui.generic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -39,13 +38,13 @@ public class BottomPanelUnitTest {
     public static void testBottomPanelLoads(WebDriver wd) {
         HUD hud = new HUD(wd);
         Assertions.assertNotNull(hud.waitForBottomPanel());
+        wd.switchTo().defaultContent();
     }
 
     public static void testBottomContainsExpectedButtons(WebDriver wd) {
         HUD hud = new HUD(wd);
         List<WebElement> buttons = hud.waitForHudButtons(HUD.BOTTOM_PANEL_BY_ID, EXPECTED_BUTTONS);
-        assertNotNull(buttons);
         assertEquals(EXPECTED_BUTTONS, buttons.size());
-        wd.switchTo().parentFrame();
+        wd.switchTo().defaultContent();
     }
 }

@@ -33,11 +33,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AlertsPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.FramesPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.UpgradePage;
-import org.zaproxy.zap.extension.hud.ui.Constants;
 import org.zaproxy.zap.extension.hud.ui.browser.BrowsersTest;
 import org.zaproxy.zap.extension.hud.ui.generic.GenericUnitTest;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
@@ -142,21 +140,19 @@ public class FramesPageUnitTest extends BrowsersTest {
         testDrawerTabsVisible(hud);
     }
 
-    private static void checkPanelVisible(WebDriver wd, WebElement panel) {
-        checkWithRetry(wd, driver -> panel.isDisplayed());
+    private static void checkPanelVisible(HUD hud, WebElement panel) {
+        checkWithRetry(hud, driver -> panel.isDisplayed());
         Assertions.assertEquals("block", panel.getCssValue("display"));
     }
 
-    private static void checkWithRetry(WebDriver driver, Function<WebDriver, Object> check) {
-        new WebDriverWait(driver, Constants.GENERIC_TESTS_TIMEOUT_SECS)
-                .until(wd -> check.apply(driver));
+    private static void checkWithRetry(HUD hud, Function<WebDriver, Object> check) {
+        hud.wbWait().until(wd -> check.apply(wd));
     }
 
     private static void testSidePanesVisible(HUD hud) {
-        WebDriver wd = hud.getWebDriver();
-        checkPanelVisible(wd, hud.waitForLeftPanel());
-        checkPanelVisible(wd, hud.waitForRightPanel());
-        checkPanelVisible(wd, hud.waitForBottomPanel());
+        checkPanelVisible(hud, hud.waitForLeftPanel());
+        checkPanelVisible(hud, hud.waitForRightPanel());
+        checkPanelVisible(hud, hud.waitForBottomPanel());
     }
 
     private static void testClickHudButton(WebDriver wd, boolean hidden) {
@@ -169,16 +165,15 @@ public class FramesPageUnitTest extends BrowsersTest {
         wd.switchTo().defaultContent();
     }
 
-    private static void checkPanelHidden(WebDriver wd, WebElement panel) {
-        checkWithRetry(wd, driver -> !panel.isDisplayed());
+    private static void checkPanelHidden(HUD hud, WebElement panel) {
+        checkWithRetry(hud, driver -> !panel.isDisplayed());
         Assertions.assertEquals("none", panel.getCssValue("display"));
     }
 
     private static void testSidePanesHidden(HUD hud) {
-        WebDriver wd = hud.getWebDriver();
-        checkPanelHidden(wd, hud.waitForLeftPanel());
-        checkPanelHidden(wd, hud.waitForRightPanel());
-        checkPanelVisible(wd, hud.waitForBottomPanel());
+        checkPanelHidden(hud, hud.waitForLeftPanel());
+        checkPanelHidden(hud, hud.waitForRightPanel());
+        checkPanelVisible(hud, hud.waitForBottomPanel());
     }
 
     private void testDrawerTabsVisible(HUD hud) {

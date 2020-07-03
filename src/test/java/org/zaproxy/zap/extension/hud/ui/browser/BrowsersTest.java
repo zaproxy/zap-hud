@@ -44,6 +44,7 @@ public abstract class BrowsersTest {
     private static final FirefoxOptions FIREFOX_OPTIONS =
             new FirefoxOptions()
                     .setHeadless(true)
+                    .setAcceptInsecureCerts(true)
                     .addPreference("network.captive-portal-service.enabled", false)
                     .addPreference("browser.safebrowsing.provider.mozilla.gethashURL", "")
                     .addPreference("browser.safebrowsing.provider.mozilla.updateURL", "")
@@ -57,6 +58,7 @@ public abstract class BrowsersTest {
     private static final ChromeOptions CHROME_OPTIONS =
             new ChromeOptions()
                     .setHeadless(true)
+                    .setAcceptInsecureCerts(true)
                     .addArguments("--proxy-bypass-list=<-loopback>", "--window-size=1024,768")
                     .setProxy(PROXY);
 

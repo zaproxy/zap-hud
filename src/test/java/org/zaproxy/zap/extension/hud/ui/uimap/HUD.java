@@ -31,9 +31,10 @@ import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -78,9 +79,12 @@ public class HUD {
         return webdriver.findElement(LEFT_PANEL_BY_ID);
     }
 
+    public WebDriverWait wbWait() {
+        return new WebDriverWait(webdriver, 20);
+    }
+
     public WebElement waitForElement(By by) {
-        return (new WebDriverWait(webdriver, Constants.GENERIC_TESTS_TIMEOUT_SECS))
-                .until(ExpectedConditions.presenceOfElementLocated(by));
+        return wbWait().until(ExpectedConditions.presenceOfElementLocated(by));
     }
 
     public WebElement getFirstVisible(By by) {
@@ -93,7 +97,7 @@ public class HUD {
     }
 
     public WebElement waitForLeftPanel() {
-        return waitForElement(LEFT_PANEL_BY_ID);
+        return webdriver.findElement(LEFT_PANEL_BY_ID);
     }
 
     public WebElement getRightPanel() {
@@ -125,88 +129,53 @@ public class HUD {
     }
 
     public WebElement waitForHudTab(By byPanel, String href) {
-        List<WebElement> links = null;
-        for (int i = 0; i < Constants.GENERIC_TESTS_RETRY_COUNT; i++) {
-            try {
-                webdriver.switchTo().frame(this.waitForElement(byPanel));
-                links = webdriver.findElements(By.partialLinkText(href));
-                if (links.size() > 0) {
-                    return links.get(0);
-                }
-                warning("HUD.waitForHudTab No links containing " + href);
-            } catch (WebDriverException e1) {
-                // Not unexpected
-                warning("Exception getting tab, retrying: " + e1.getMessage());
-                // Sometimes helps
-                webdriver.switchTo().defaultContent();
-            }
-            try {
-                Thread.sleep(Constants.GENERIC_TESTS_RETRY_SLEEP_MS);
-            } catch (InterruptedException e) {
-                // Ignore
-            }
-        }
-        return null;
+        webdriver.switchTo().frame(this.waitForElement(byPanel));
+        return webdriver.findElements(By.partialLinkText(href)).get(0);
     }
 
     public List<WebElement> getHudButtons() {
-        // return webdriver.findElements(HUD_BUTTON_BY_CLASSNAME);
-        /* This should work, but it looks like a Firefox bug is causing problems
-        return new WebDriverWait(this.webdriver, this.timeoutInSecs)
-                .until(ExpectedConditions.presenceOfAllElementsLocatedBy(HUD_BUTTON_BY_CLASSNAME));
-                */
-        for (int i = 0; i < Constants.GENERIC_TESTS_RETRY_COUNT; i++) {
-            try {
-                return webdriver.findElements(HUD_BUTTON_BY_CLASSNAME);
-            } catch (WebDriverException e1) {
-                warning(
-                        "HUD.getHudButtons Exception getting buttons, retrying: "
-                                + e1.getMessage());
-                // Sometimes helps
-                webdriver.switchTo().defaultContent();
-                try {
-                    Thread.sleep(Constants.GENERIC_TESTS_RETRY_SLEEP_MS);
-                } catch (InterruptedException e) {
-                    // Ignore
-                }
-            }
-        }
-        return null;
+        return webdriver.findElements(HUD_BUTTON_BY_CLASSNAME);
     }
 
     public List<WebElement> waitForHudButtons(By byPanel, int expected) {
-        List<WebElement> buttons = null;
-        for (int i = 0; i < Constants.GENERIC_TESTS_RETRY_COUNT; i++) {
-            try {
-                webdriver.switchTo().frame(this.waitForElement(byPanel));
-                buttons = webdriver.findElements(HUD_BUTTON_BY_CLASSNAME);
-                if (buttons.size() >= expected) {
-                    break;
-                }
-                warning(
-                        "HUD.waitForHudButtons Only got "
-                                + buttons.size()
-                                + ", expected "
-                                + expected
-                                + " retrying");
-            } catch (WebDriverException e1) {
-                // Not unexpected
-                warning("Exception getting buttons, retrying: " + e1.getMessage());
-                // Sometimes helps
-                webdriver.switchTo().defaultContent();
-            }
-            try {
-                Thread.sleep(Constants.GENERIC_TESTS_RETRY_SLEEP_MS);
-            } catch (InterruptedException e) {
-                // Ignore
-            }
-        }
-        return buttons;
+        waitAndSwitchToFrame(byPanel);
+        return wbWait().until(numberOfElementsToBeAtLeast(HUD_BUTTON_BY_CLASSNAME, expected));
+    }
+
+    public WebElement waitAndSwitchToFrame(By by) {
+        webdriver.switchTo().defaultContent();
+        wbWait().until(HUD::documentReadyStateIsComplete);
+        WebElement frame = wbWait().until(ExpectedConditions.presenceOfElementLocated(by));
+        webdriver.switchTo().frame(frame);
+        wbWait().until(HUD::documentReadyStateIsComplete);
+        return frame;
     }
 
     public void openUrlWaitForHud(String url) {
         this.webdriver.get(url);
         waitForPageLoad();
+        waitForHudInitialisation();
+    }
+
+    private void waitForHudInitialisation() {
+        TimeoutException exception = null;
+        for (int i = 0; i < 10; i++) {
+            try {
+                waitForHudButtons(LEFT_PANEL_BY_ID, 2);
+                webdriver.switchTo().defaultContent();
+                return;
+            } catch (TimeoutException e) {
+                exception = e;
+
+                // Try removing the ServiceWorker as sometimes it's not properly initialised.
+                JavascriptExecutor jsExecutor = (JavascriptExecutor) webdriver;
+                jsExecutor.executeScript(
+                        "let unregister = regs => regs.forEach(reg => reg.unregister())\n"
+                                + "navigator.serviceWorker.getRegistrations().then(unregister)");
+                webdriver.navigate().refresh();
+            }
+        }
+        throw exception;
     }
 
     public void openRelativePage(String page) throws URISyntaxException {
@@ -217,12 +186,13 @@ public class HUD {
 
     public void waitForPageLoad() {
         Wait<WebDriver> wait = new WebDriverWait(webdriver, 30);
-        wait.until(
-                driver ->
-                        String.valueOf(
-                                        ((JavascriptExecutor) driver)
-                                                .executeScript("return document.readyState"))
-                                .equals("complete"));
+        wait.until(HUD::documentReadyStateIsComplete);
+    }
+
+    private static boolean documentReadyStateIsComplete(WebDriver driver) {
+        JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
+        Object readyState = jsExecutor.executeScript("return document.readyState");
+        return String.valueOf(readyState).equals("complete");
     }
 
     public static JSONObject callZapApi(String apiCall) throws MalformedURLException, IOException {
@@ -260,5 +230,26 @@ public class HUD {
 
     public void log(String msg) {
         System.out.println(new Date() + " " + this.getClass().getSimpleName() + " " + msg);
+    }
+
+    private static ExpectedCondition<List<WebElement>> numberOfElementsToBeAtLeast(
+            By locator, int number) {
+        return new ExpectedCondition<List<WebElement>>() {
+            private int currentNumber = 0;
+
+            @Override
+            public List<WebElement> apply(WebDriver webDriver) {
+                List<WebElement> elements = webDriver.findElements(locator);
+                currentNumber = elements.size();
+                return currentNumber >= number ? elements : null;
+            }
+
+            @Override
+            public String toString() {
+                return String.format(
+                        "number of elements found by %s to be at least \"%s\". Current number: \"%s\"",
+                        locator, number, currentNumber);
+            }
+        };
     }
 }
