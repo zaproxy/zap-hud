@@ -128,7 +128,7 @@ const CommonAlerts = (function () {
 							self.dispatchEvent(event);
 						};
 
-						RISKS.forEach(processRisk);
+						RISKS.forEach(risk => processRisk(risk));
 					})
 					.catch(utils.errorHandler);
 

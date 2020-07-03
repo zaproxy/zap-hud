@@ -38,7 +38,7 @@ Vue.component('history', {
 				try {
 					re = new RegExp(this.filter);
 					this.isRegExError = false;
-				} catch (error) {
+				} catch {
 					this.isRegExError = true;
 					return []; // Return empty array if invalid RegEx
 				}
@@ -148,7 +148,7 @@ Vue.component('websockets', {
 				try {
 					re = new RegExp(this.filter);
 					this.isRegExError = false;
-				} catch (error) {
+				} catch {
 					this.isRegExError = true;
 					return []; // Return empty array if invalid RegEx
 				}
