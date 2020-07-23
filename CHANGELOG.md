@@ -5,7 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Telemetry config option (no telemetry yet)
 
+### Changed
+- To use ZAP 2.9.0 jar for access to the latest features
 
 ## [0.10.0] - 2020-02-04
 ### Changed
