@@ -186,7 +186,7 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     @Override
     public void unload() {
-        getExtScript().removeScripType(hudScriptType);
+        getExtScript().removeScriptType(hudScriptType);
         getExtScript().removeListener(this);
 
         HudEventPublisher.unregister();

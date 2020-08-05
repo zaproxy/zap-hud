@@ -89,7 +89,7 @@
     "type": "git",
     "url": "git+https://github.com/zaproxy/zap-hud.git"
   },
-  "author": "David Scrobonia",
+  "author": "ZAP Core Team",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/zaproxy/zap-hud/issues"
