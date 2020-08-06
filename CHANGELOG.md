@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Telemetry config option (no telemetry yet)
+- Minimal telemetry implementation and config option
 
 ### Changed
 - To use ZAP 2.9.0 jar for access to the latest features
