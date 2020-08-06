@@ -36,8 +36,6 @@ public class TutorialStatics {
     public static By NEXT_BUTTON_BY_ID = By.id("next-button");
     public static By PREVIOUS_BUTTON_BY_ID = By.id("previous-button");
     public static int ALERT_LOOP_COUNT = 10;
-    // Long loop for alerts that can take some time to appear - hopefully can reduce in the future
-    public static int ALERT_LONG_LOOP_COUNT = 100;
 
     private static String getTutorialHostPort() {
         if (tutorialHostPort == null) {

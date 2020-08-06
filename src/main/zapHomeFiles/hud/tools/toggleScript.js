@@ -114,10 +114,7 @@ const ToggleScript = (function () {
 				// Filter out built-in scripts & flatten types list
 				return [
 					data.listScripts.filter(script => (script.enabled !== undefined)),
-					listTypes.reduce((type, current) => {
-						type[current.name] = current.uiName;
-						return type;
-					}, {})
+					Object.fromEntries(listTypes.map(type => [type.name, type.uiName]))
 				];
 			})
 			.then(([scripts, types]) => {

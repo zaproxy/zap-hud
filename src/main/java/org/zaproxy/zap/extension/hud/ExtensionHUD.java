@@ -44,9 +44,11 @@ import org.parosproxy.paros.extension.ExtensionAdaptor;
 import org.parosproxy.paros.extension.ExtensionHook;
 import org.parosproxy.paros.extension.OptionsChangedListener;
 import org.parosproxy.paros.extension.history.ProxyListenerLog;
+import org.parosproxy.paros.model.Model;
 import org.parosproxy.paros.model.OptionsParam;
 import org.parosproxy.paros.network.HttpHeader;
 import org.parosproxy.paros.network.HttpMessage;
+import org.parosproxy.paros.network.HttpSender;
 import org.parosproxy.paros.view.View;
 import org.zaproxy.zap.ZAP;
 import org.zaproxy.zap.eventBus.Event;
@@ -57,6 +59,7 @@ import org.zaproxy.zap.extension.script.ScriptType;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 import org.zaproxy.zap.utils.DesktopUtils;
+import org.zaproxy.zap.utils.DisplayUtils;
 import org.zaproxy.zap.view.OverlayIcon;
 import org.zaproxy.zap.view.ZapMenuItem;
 import org.zaproxy.zap.view.ZapToggleButton;
@@ -107,6 +110,8 @@ public class ExtensionHUD extends ExtensionAdaptor
     private static final String REPLACE_REQUEST_PARAM = "zapHudReplaceReq=";
     private Map<String, HttpMessage> recordedRequests = new HashMap<>();
 
+    private HttpSender httpSender;
+
     static {
         List<Class<? extends Extension>> dependencies = new ArrayList<>(1);
         dependencies.add(ExtensionScript.class);
@@ -135,6 +140,14 @@ public class ExtensionHUD extends ExtensionAdaptor
     private String baseDirectory;
     private Set<String> upgradedHttpsDomains = new HashSet<>();
     private TutorialProxyServer tutorialServer;
+
+    public enum Telemetry {
+        HUD_START,
+        TUTORIAL_START,
+        TUTORIAL_END
+    };
+
+    private List<Telemetry> telemetryTrack = new ArrayList<>();
 
     public ExtensionHUD() {
         super(NAME);
@@ -186,7 +199,7 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     @Override
     public void unload() {
-        getExtScript().removeScripType(hudScriptType);
+        getExtScript().removeScriptType(hudScriptType);
         getExtScript().removeListener(this);
 
         HudEventPublisher.unregister();
@@ -328,6 +341,7 @@ public class ExtensionHUD extends ExtensionAdaptor
             } else {
                 hudButton.setIcon(ICON);
             }
+            DisplayUtils.scaleIcon(hudButton);
         }
     }
 
@@ -589,5 +603,49 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     public List<String> getSupportedBrowserIds() {
         return Arrays.asList("firefox", "chrome");
+    }
+
+    public void telemetryPoint(Telemetry telemetry) {
+        if (this.getHudParam().isEnableTelemetry() && !telemetryTrack.contains(telemetry)) {
+            telemetryTrack.add(telemetry);
+
+            String url;
+            switch (telemetry) {
+                case HUD_START:
+                    url = "https://bit.ly/owaspzap-hud";
+                    break;
+                case TUTORIAL_START:
+                    url = "https://bit.ly/owaspzap-hud-tutorial-start";
+                    break;
+                case TUTORIAL_END:
+                    url = "https://bit.ly/owaspzap-hud-tutorial-end";
+                    break;
+                default:
+                    return;
+            }
+
+            new Thread(
+                            () -> {
+                                try {
+                                    HttpMessage msg = new HttpMessage(new URI(url, true));
+                                    getHttpSender().sendAndReceive(msg, true);
+                                } catch (Exception e) {
+                                    log.debug(e.getMessage(), e);
+                                }
+                            },
+                            "HUD-telemetry")
+                    .start();
+        }
+    }
+
+    private HttpSender getHttpSender() {
+        if (httpSender == null) {
+            httpSender =
+                    new HttpSender(
+                            Model.getSingleton().getOptionsParam().getConnectionParam(),
+                            true,
+                            HttpSender.CHECK_FOR_UPDATES_INITIATOR);
+        }
+        return httpSender;
     }
 }

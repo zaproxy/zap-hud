@@ -20,11 +20,8 @@
 package org.zaproxy.zap.extension.hud.ui.generic;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.zaproxy.zap.extension.hud.ui.uimap.HUD;
 
 public class RightPanelUnitTest {
@@ -41,17 +38,12 @@ public class RightPanelUnitTest {
     public static void testRightPanelLoads(WebDriver wd) {
         HUD hud = new HUD(wd);
         assertNotNull(hud.waitForRightPanel());
+        wd.switchTo().defaultContent();
     }
 
     public static void testRightContainsExpectedButtons(WebDriver wd) {
         HUD hud = new HUD(wd);
-        List<WebElement> buttons = hud.waitForHudButtons(HUD.RIGHT_PANEL_BY_ID, EXPECTED_BUTTONS);
-        assertNotNull(buttons);
-        // An exact match would be better, but its proved to be too flaky :/
-        if (buttons.size() < EXPECTED_BUTTONS) {
-            hud.warning("RightPanelUnitTest only found " + buttons.size() + " buttons");
-        }
-        assertTrue(buttons.size() >= EXPECTED_BUTTONS);
-        wd.switchTo().parentFrame();
+        hud.waitForHudButtons(HUD.RIGHT_PANEL_BY_ID, EXPECTED_BUTTONS);
+        wd.switchTo().defaultContent();
     }
 }

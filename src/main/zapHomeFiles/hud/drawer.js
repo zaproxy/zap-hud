@@ -38,7 +38,7 @@ Vue.component('history', {
 				try {
 					re = new RegExp(this.filter);
 					this.isRegExError = false;
-				} catch (error) {
+				} catch {
 					this.isRegExError = true;
 					return []; // Return empty array if invalid RegEx
 				}
@@ -99,10 +99,10 @@ Vue.component('history', {
 		if (this.messages.length > 0) {
 			const lastMessage = this.messages[this.messages.length - 1];
 			const lastid = 'message-tr-' + lastMessage.id;
-			const lastIdElem = document.getElementById(lastid);
+			const lastIdElement = document.getElementById(lastid);
 
-			if (lastIdElem) {
-				lastIdElem.scrollIntoView({block: 'end', behavior: 'smooth'});
+			if (lastIdElement) {
+				lastIdElement.scrollIntoView({block: 'end', behavior: 'smooth'});
 			}
 
 			// Move horizontal scroll bar to the left
@@ -148,7 +148,7 @@ Vue.component('websockets', {
 				try {
 					re = new RegExp(this.filter);
 					this.isRegExError = false;
-				} catch (error) {
+				} catch {
 					this.isRegExError = true;
 					return []; // Return empty array if invalid RegEx
 				}
@@ -209,9 +209,9 @@ Vue.component('websockets', {
 		if (this.messages.length > 0) {
 			const lastMessage = this.messages[this.messages.length - 1];
 			const lastid = 'message-tr-' + lastMessage.messageId;
-			const lastIdElem = document.querySelector(lastid);
-			if (lastIdElem) {
-				lastIdElem.scrollIntoView({block: 'end', behavior: 'smooth'});
+			const lastIdElement = document.querySelector(lastid);
+			if (lastIdElement) {
+				lastIdElement.scrollIntoView({block: 'end', behavior: 'smooth'});
 			}
 
 			// Move horizontal scroll bar to the left
@@ -458,10 +458,10 @@ Vue.component('drawer-button-showhide', {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-	const params = new URL(document.location).searchParams;
+	const parameters = new URL(document.location).searchParams;
 
-	frameId = params.get('frameId');
-	tabId = params.get('tabId');
+	frameId = parameters.get('frameId');
+	tabId = parameters.get('tabId');
 
 	/* Vue app */
 	app = new Vue({

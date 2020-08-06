@@ -287,18 +287,18 @@ const injection = (function () {
 
 	function highlightAlert(alert) {
 		const id = alert.param;
-		let el = document.getElementById(id);
-		if (!el) {
+		let element = document.getElementById(id);
+		if (!element) {
 			const els = document.getElementsByName(id);
-			for (const element of els) {
-				if (element instanceof HTMLInputElement) {
-					el = element;
+			for (const namedElement of els) {
+				if (namedElement instanceof HTMLInputElement) {
+					element = namedElement;
 					break;
 				}
 			}
 		}
 
-		if (el) {
+		if (element) {
 			const colours = {
 				Informational: 'blue',
 				Low: 'yellow',
@@ -306,16 +306,16 @@ const injection = (function () {
 				High: 'red'
 			};
 			const colour = colours[alert.risk];
-			const alertId = parseInt(alert.id, 10);
+			const alertId = Number.parseInt(alert.id, 10);
 			if (alertId >= 0) {
-				el.style.borderColor = colour || 'red';
+				element.style.borderColor = colour || 'red';
 				const img = document.createElement('img');
 				img.src = ZAP_HUD_FILES + '/image/flag-' + colour + '.png';
 				img.id = 'zapHudAlert-' + alertId;
 				img.title = alert.name;
 				img.height = 16;
 				img.width = 16;
-				el.parentNode.insertBefore(img, el.nextSibling);
+				element.parentNode.insertBefore(img, element.nextSibling);
 				img.addEventListener('click', () => {
 					injection.showZapAlert(alertId);
 				});

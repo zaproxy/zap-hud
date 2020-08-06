@@ -4,7 +4,7 @@
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
 <TITLE>Options HUD screen</TITLE>
 </HEAD>
-<BODY BGCOLOR="#ffffff">
+<BODY>
 	<H1>Options HUD screen</H1>
 
 	<h2>Enable when using the ZAP Desktop</h2>
@@ -16,6 +16,19 @@
 	When set the HUD will be injected into HTML responses when ZAP is started in daemon or 'headless' mode. 
 	This defaults to false as many people use ZAP for automation, injecting the HUD would not help and could cause
 	existing tests to break.
+
+	<h2>Enable anonymous telemetry</h2>
+	
+	When set will send pings to a bit.ly URL when:
+	<UL>
+	<LI>The HUD is used
+	<LI>The HUD tutorial first page is visited
+	<LI>The HUD tutorial last page is visited
+	</UL>
+	Each ping is sent at most once per ZAP run and the only information available to the ZAP team is the number
+	of pings made and the countries they have come from.<br>
+	We get very little feedback and so information like this really helps us understand how ZAP is being used.
+	We have limited time to spend and so want to focus on features that people are actually using.
 
 	<h2>Show the HUD welcome screen when a browser is opened</h2>
 	

@@ -59,6 +59,7 @@ import org.zaproxy.zap.extension.api.ApiResponseElement;
 import org.zaproxy.zap.extension.api.ApiResponseList;
 import org.zaproxy.zap.extension.api.ApiResponseSet;
 import org.zaproxy.zap.extension.api.ApiView;
+import org.zaproxy.zap.extension.hud.ExtensionHUD.Telemetry;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 
@@ -103,7 +104,7 @@ public class HudAPI extends ApiImplementor {
     private static final String PARAM_VALUE = "value";
 
     /** The only files that can be included on domain */
-    private static final List<String> DOMAIN_FILE_WHITELIST = Arrays.asList("inject.js");
+    private static final List<String> DOMAIN_FILE_ALLOWLIST = Arrays.asList("inject.js");
 
     private ApiImplementor hudFileProxy;
     private String hudFileUrl;
@@ -190,7 +191,7 @@ public class HudAPI extends ApiImplementor {
 
             logger.debug("callback fileName = " + fileName);
             if (fileName != null) {
-                if (DOMAIN_FILE_WHITELIST.contains(fileName)) {
+                if (DOMAIN_FILE_ALLOWLIST.contains(fileName)) {
                     msg.setResponseBody(
                             this.getFile(msg, ExtensionHUD.TARGET_DIRECTORY + "/" + fileName));
                     // Currently only javascript files are returned
@@ -494,12 +495,7 @@ public class HudAPI extends ApiImplementor {
                 } else if (file.equals("serviceworker.js")) {
                     contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
                 } else if (file.equals("management.html")) {
-                    // TODO move into js
-                    contents =
-                            contents.replace(
-                                    "<<SHOW_WELCOME_SCREEN>>",
-                                    Boolean.toString(
-                                            this.extension.getHudParam().isShowWelcomeScreen()));
+                    this.extension.telemetryPoint(Telemetry.HUD_START);
                 } else if (file.equals("management.js")) {
                     contents =
                             contents.replace(

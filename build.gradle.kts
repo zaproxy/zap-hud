@@ -27,7 +27,7 @@ repositories {
     mavenCentral()
 }
 
-version = "0.10.0"
+version = "0.11.0"
 description = "Display information from ZAP in browser."
 
 val generatedI18nJsFileDir = layout.buildDirectory.dir("zapAddOn/i18nJs")
@@ -48,7 +48,7 @@ zapAddOn {
     addOnName.set("HUD - Heads Up Display")
     addOnStatus.set(AddOnStatus.BETA)
 
-    zapVersion.set("2.8.0")
+    zapVersion.set("2.9.0")
 
     releaseLink.set("https://github.com/zaproxy/zap-hud/compare/v@PREVIOUS_VERSION@...v@CURRENT_VERSION@")
     unreleasedLink.set("https://github.com/zaproxy/zap-hud/compare/v@CURRENT_VERSION@...HEAD")
@@ -345,7 +345,7 @@ tasks.test {
 
 tasks.withType<Test>().configureEach {
     systemProperties.putAll(mapOf(
-            "wdm.chromeDriverVersion" to "78.0.3904.70",
+            "wdm.chromeDriverVersion" to "83.0.4103.39",
             "wdm.geckoDriverVersion" to "0.26.0",
             "wdm.forceCache" to "true"))
 }
