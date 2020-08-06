@@ -59,6 +59,7 @@ import org.zaproxy.zap.extension.script.ScriptType;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 import org.zaproxy.zap.utils.DesktopUtils;
+import org.zaproxy.zap.utils.DisplayUtils;
 import org.zaproxy.zap.view.OverlayIcon;
 import org.zaproxy.zap.view.ZapMenuItem;
 import org.zaproxy.zap.view.ZapToggleButton;
@@ -340,6 +341,7 @@ public class ExtensionHUD extends ExtensionAdaptor
             } else {
                 hudButton.setIcon(ICON);
             }
+            DisplayUtils.scaleIcon(hudButton);
         }
     }
 
