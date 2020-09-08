@@ -102,7 +102,7 @@
   },
   "devDependencies": {
     "ava": "^3.12.1",
-    "css-loader": "^4.2.2",
+    "css-loader": "^4.3.0",
     "eslint-plugin-no-unsanitized": "^3.1.2",
     "lint-staged": "^10.3.0",
     "vue-loader": "^15.9.3",
