@@ -564,7 +564,7 @@ const injection = (function () {
 
 		const mframe = document.createElement('iframe');
 		mframe.id = MANAGEMENT;
-		mframe.src = ZAP_HUD_FILES + '/file/management.html?frameId=management&tabId=' + tabId;
+		mframe.src = ZAP_HUD_FILES + '/file/management.html?url=' + URL + '&frameId=management&tabId=' + tabId;
 		mframe.scrolling = 'no';
 		mframe.style = 'position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647;';
 
@@ -582,18 +582,18 @@ const injection = (function () {
 
 		const bframe = document.createElement('iframe');
 		bframe.id = BOTTOM_DRAWER;
-		bframe.src = ZAP_HUD_FILES + '/file/drawer.html?frameId=drawer&tabId=' + tabId;
+		bframe.src = ZAP_HUD_FILES + '/file/drawer.html?url=' + URL + '&frameId=drawer&tabId=' + tabId;
 		bframe.scrolling = 'no';
 		bframe.style = 'position: fixed; border: medium none; overflow: hidden; left: 0px; bottom: 0px; width: 100%; height: 50px; z-index: 2147483646;';
 
 		const dframe = document.createElement('iframe');
 		dframe.id = MAIN_DISPLAY;
-		dframe.src = ZAP_HUD_FILES + '/file/display.html?frameId=display&tabId=' + tabId;
+		dframe.src = ZAP_HUD_FILES + '/file/display.html?url=' + URL + '&frameId=display&tabId=' + tabId;
 		dframe.style = 'position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;';
 
 		const gframe = document.createElement('iframe');
 		gframe.id = GROWLER_ALERTS;
-		gframe.src = ZAP_HUD_FILES + '/file/growlerAlerts.html?frameId=growlerAlerts&tabId=' + tabId;
+		gframe.src = ZAP_HUD_FILES + '/file/growlerAlerts.html?url=' + URL + '&frameId=growlerAlerts&tabId=' + tabId;
 		gframe.style = 'position: fixed; right: 0px; bottom: 30px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;';
 
 		document.body.append(mframe);

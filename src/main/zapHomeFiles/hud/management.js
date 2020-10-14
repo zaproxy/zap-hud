@@ -16,9 +16,10 @@ const ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
 let app;
 let tabId = '';
 let frameId = '';
+const urlParameter = utils.getParameter(document.location.href, 'url');
 const context = {
-	url: document.referrer,
-	domain: utils.parseDomainFromUrl(document.referrer)
+	url: urlParameter,
+	domain: utils.parseDomainFromUrl(urlParameter)
 };
 
 Vue.component('welcome-screen', {
@@ -38,7 +39,7 @@ Vue.component('welcome-screen', {
 			}
 
 			app.showWelcomeScreen = false;
-			parent.postMessage({action: 'contractManagement'}, document.referrer);
+			parent.postMessage({action: 'contractManagement'}, context.url);
 		}
 	},
 	data() {
@@ -70,13 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
 		// Temp time test
 		localforage.setItem('starttime', startTime);
 
-		parent.postMessage({action: 'hideAllDisplayFrames'}, document.referrer);
+		parent.postMessage({action: 'hideAllDisplayFrames'}, context.url);
 
 		localforage.setItem('is_first_load', true);
 
 		startServiceWorker();
 	} else {
-		parent.postMessage({action: 'showAllDisplayFrames'}, document.referrer);
+		parent.postMessage({action: 'showAllDisplayFrames'}, context.url);
 
 		// Temp time test
 		localforage.getItem('starttime')
@@ -92,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				localforage.setItem('is_first_load', false);
 
 				if (isFirstLoad && SHOW_WELCOME_SCREEN) {
-					parent.postMessage({action: 'expandManagement'}, document.referrer);
+					parent.postMessage({action: 'expandManagement'}, context.url);
 					app.showWelcomeScreen = true;
 				}
 			});
@@ -164,35 +165,35 @@ function serviceWorkerMessageListener(event) {
 
 	switch (message.action) {
 		case 'refreshTarget':
-			parent.postMessage({action: 'refresh'}, document.referrer);
+			parent.postMessage({action: 'refresh'}, context.url);
 			break;
 
 		case 'showEnable.on':
-			parent.postMessage({action: 'showEnable.on'}, document.referrer);
+			parent.postMessage({action: 'showEnable.on'}, context.url);
 			break;
 
 		case 'showEnable.off':
-			parent.postMessage({action: 'showEnable.off'}, document.referrer);
+			parent.postMessage({action: 'showEnable.off'}, context.url);
 			break;
 
 		case 'showEnable.count':
-			parent.postMessage({action: 'showEnable.count'}, document.referrer);
+			parent.postMessage({action: 'showEnable.count'}, context.url);
 			break;
 
 		case 'showComments.on':
-			parent.postMessage({action: 'showComments.on', suspicious: message.suspicious}, document.referrer);
+			parent.postMessage({action: 'showComments.on', suspicious: message.suspicious}, context.url);
 			break;
 
 		case 'showComments.off':
-			parent.postMessage({action: 'showComments.off'}, document.referrer);
+			parent.postMessage({action: 'showComments.off'}, context.url);
 			break;
 
 		case 'showComments.count':
-			parent.postMessage({action: 'showComments.count', suspicious: message.suspicious}, document.referrer);
+			parent.postMessage({action: 'showComments.count', suspicious: message.suspicious}, context.url);
 			break;
 
 		case 'commonAlerts.alert':
-			parent.postMessage(message, document.referrer);
+			parent.postMessage(message, context.url);
 			break;
 
 		case 'showTutorial':
@@ -219,7 +220,7 @@ function startServiceWorker() {
 			})
 			.then(() => {
 				// Refresh the frames so the service worker can take control
-				parent.postMessage({action: 'refreshAllFrames'}, document.referrer);
+				parent.postMessage({action: 'refreshAllFrames'}, context.url);
 			})
 			.catch(utils.errorHandler);
 	} else {

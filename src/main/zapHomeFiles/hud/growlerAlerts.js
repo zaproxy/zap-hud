@@ -13,9 +13,10 @@ const alertQueue = [];
 
 let tabId = '';
 let frameId = '';
+const urlParameter = utils.getParameter(document.location.href, 'url');
 const context = {
-	url: document.referrer,
-	domain: utils.parseDomainFromUrl(document.referrer)
+	url: urlParameter,
+	domain: utils.parseDomainFromUrl(urlParameter)
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -96,11 +97,11 @@ function showGrowlerAlert(alert) {
 }
 
 function expandFrame(lines) {
-	parent.postMessage({action: 'heightenGrowlerFrame', lines}, document.referrer);
+	parent.postMessage({action: 'heightenGrowlerFrame', lines}, context.url);
 }
 
 function shrinkFrame(lines) {
-	parent.postMessage({action: 'shortenGrowlerFrame', lines}, document.referrer);
+	parent.postMessage({action: 'shortenGrowlerFrame', lines}, context.url);
 }
 
 function getRiskFlag(risk) {
