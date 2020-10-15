@@ -40,12 +40,14 @@ import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.control.Control;
 import org.parosproxy.paros.core.scanner.Alert;
 import org.parosproxy.paros.model.Model;
 import org.parosproxy.paros.model.SiteNode;
+import org.parosproxy.paros.network.HttpHeader;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.view.View;
@@ -436,10 +438,16 @@ public class HudAPI extends ApiImplementor {
             }
             // Inject content into specific files
             if (file.equals("target/inject.js")) {
+                // The referrer is on domain so should still work in Firefox
+                String referrer = msg.getRequestHeader().getHeader(HttpHeader.REFERER);
+                if (referrer != null) {
+                    url = StringEscapeUtils.escapeJavaScript(referrer);
+                }
                 String secret =
                         this.extension.getHudParam().isTutorialTestMode()
                                 ? SHARED_TEST_NON_SECRET
                                 : SHARED_SECRET;
+                logger.debug("Injecting url into inject.js: " + url);
                 contents =
                         contents.replace("<<URL>>", url).replace("<<ZAP_SHARED_SECRET>>", secret);
             }

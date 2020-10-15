@@ -9,9 +9,10 @@ let orientation = '';
 let panelKey = '';
 let frameId = '';
 let tabId = '';
+const urlParameter = utils.getParameter(document.location.href, 'url');
 const context = {
-	url: document.referrer,
-	domain: utils.parseDomainFromUrl(document.referrer)
+	url: urlParameter,
+	domain: utils.parseDomainFromUrl(urlParameter)
 };
 
 // The Vue app
@@ -142,7 +143,7 @@ Vue.component('hud-buttons', {
 		localforage.getItem('settings.isHudVisible')
 			.then(isHudVisible => {
 				if (isHudVisible !== null && !isHudVisible) {
-					return parent.postMessage({action: 'hideHudPanels'}, document.referrer);
+					return parent.postMessage({action: 'hideHudPanels'}, context.url);
 				}
 			})
 			.then(() => {
@@ -289,7 +290,7 @@ function expandPanel() {
 		action: 'expandPanel',
 		orientation
 	};
-	parent.postMessage(message, document.referrer);
+	parent.postMessage(message, context.url);
 }
 
 function contractPanel() {
@@ -298,5 +299,5 @@ function contractPanel() {
 		orientation
 	};
 
-	parent.postMessage(message, document.referrer);
+	parent.postMessage(message, context.url);
 }

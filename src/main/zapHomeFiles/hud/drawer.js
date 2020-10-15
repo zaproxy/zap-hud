@@ -3,9 +3,10 @@ let app;
 const eventBus = new Vue();
 let frameId = '';
 let tabId = '';
+const urlParameter = utils.getParameter(document.location.href, 'url');
 const context = {
-	url: document.referrer,
-	domain: utils.parseDomainFromUrl(document.referrer)
+	url: urlParameter,
+	domain: utils.parseDomainFromUrl(urlParameter)
 };
 
 Vue.component('history', {
@@ -239,14 +240,14 @@ Vue.component('tabs', {
 			this.isArrowUp = true;
 			localforage.setItem('drawer.isDrawerOpen', false)
 				.catch(utils.errorHandler);
-			parent.postMessage({tabId, frameId, action: 'hideBottomDrawer'}, document.referrer);
+			parent.postMessage({tabId, frameId, action: 'hideBottomDrawer'}, context.url);
 		},
 		openDrawer() {
 			this.isOpen = true;
 			this.isArrowUp = false;
 			localforage.setItem('drawer.isDrawerOpen', true)
 				.catch(utils.errorHandler);
-			parent.postMessage({tabId, frameId, action: 'showBottomDrawer'}, document.referrer);
+			parent.postMessage({tabId, frameId, action: 'showBottomDrawer'}, context.url);
 		},
 		toggleOpenClose() {
 			if (this.isOpen) {
@@ -420,7 +421,7 @@ Vue.component('drawer-button-showhide', {
 			localforage.setItem('settings.isHudVisible', true)
 				.then(function (value) {
 					this.icon = utils.getZapImagePath('radar.png');
-					parent.postMessage({tabId, frameId, action: 'showHudPanels'}, document.referrer);
+					parent.postMessage({tabId, frameId, action: 'showHudPanels'}, context.url);
 					eventBus.$emit('showTabs', {});
 				})
 				.catch(utils.errorHandler);
@@ -430,7 +431,7 @@ Vue.component('drawer-button-showhide', {
 			localforage.setItem('settings.isHudVisible', false)
 				.then(function (value) {
 					this.icon = utils.getZapImagePath('radar-grey.png');
-					parent.postMessage({tabId, frameId, action: 'hideHudPanels'}, document.referrer);
+					parent.postMessage({tabId, frameId, action: 'hideHudPanels'}, context.url);
 					eventBus.$emit('hideTabs', {});
 				})
 				.catch(utils.errorHandler);
