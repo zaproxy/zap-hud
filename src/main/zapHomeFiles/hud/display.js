@@ -2,9 +2,10 @@
 let app;
 let tabId = '';
 let frameId = '';
+const urlParameter = utils.getParameter(document.location.href, 'url');
 const context = {
-	url: document.referrer,
-	domain: utils.parseDomainFromUrl(document.referrer)
+	url: urlParameter,
+	domain: utils.parseDomainFromUrl(urlParameter)
 };
 
 // Event dispatcher for Vue
@@ -1155,10 +1156,10 @@ navigator.serviceWorker.addEventListener('message', event => {
 
 /* The injected script makes the main frame visible */
 function showDisplayFrame() {
-	return utils.messageWindow(parent, {action: 'showMainDisplay'}, document.referrer);
+	return utils.messageWindow(parent, {action: 'showMainDisplay'}, context.url);
 }
 
 /* The injected script makes the main frame invisible */
 function hideDisplayFrame() {
-	parent.postMessage({action: 'hideMainDisplay'}, document.referrer);
+	parent.postMessage({action: 'hideMainDisplay'}, context.url);
 }
