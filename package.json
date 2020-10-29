@@ -103,7 +103,7 @@
   "devDependencies": {
     "ava": "^3.13.0",
     "css-loader": "^4.3.0",
-    "eslint-plugin-no-unsanitized": "^3.1.2",
+    "eslint-plugin-no-unsanitized": "^3.1.4",
     "lint-staged": "^10.4.0",
     "vue-loader": "^15.9.4",
     "vue-style-loader": "^4.1.2",
