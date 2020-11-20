@@ -89,11 +89,10 @@ public class ZapStart extends ZapApiTask {
     }
 
     @Option(
-        option = "add-args",
-        description =
-                "Additional command line arguments to start ZAP with.\n"
-                        + "                It also uses the arguments specified by the build."
-    )
+            option = "add-args",
+            description =
+                    "Additional command line arguments to start ZAP with.\n"
+                            + "                It also uses the arguments specified by the build.")
     public void optionArgs(String args) {
         getArgs().addAll(Arrays.asList(args.split(" ")));
     }

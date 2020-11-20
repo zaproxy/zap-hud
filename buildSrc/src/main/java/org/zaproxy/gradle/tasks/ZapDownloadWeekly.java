@@ -30,7 +30,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
-import org.gradle.api.file.UnableToDeleteFileException;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
@@ -93,7 +92,7 @@ public class ZapDownloadWeekly extends DefaultTask {
             try (InputStream in = URI.create(weeklyUrl).toURL().openStream()) {
                 Files.copy(in, file);
             }
-        } catch (UnableToDeleteFileException e) {
+        } catch (RuntimeException e) {
             getLogger().error("Failed to delete the ZIP file.", e);
             throw e;
         } catch (Exception e) {

@@ -23,9 +23,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.gradle.api.Action;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.Internal;
 import org.gradle.process.CommandLineArgumentProvider;
+import org.gradle.process.JavaDebugOptions;
 import org.gradle.process.JavaForkOptions;
 import org.gradle.process.ProcessForkOptions;
 
@@ -292,6 +294,16 @@ public class ZapJavaStart extends ZapStart implements JavaForkOptions {
 
     @Override
     public JavaForkOptions systemProperty(String arg0, Object arg1) {
+        throw unsupportedOperationException();
+    }
+
+    @Override
+    public void debugOptions(Action<JavaDebugOptions> action) {
+        throw unsupportedOperationException();
+    }
+
+    @Override
+    public JavaDebugOptions getDebugOptions() {
         throw unsupportedOperationException();
     }
 }

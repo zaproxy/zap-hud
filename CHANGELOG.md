@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2020-02-04
+### Changed
+- Updated gradle (6.5) and spotless (4.3.0) to support JDK14
 
 ## [0.12.0] - 2020-10-15
 ### Fixed
