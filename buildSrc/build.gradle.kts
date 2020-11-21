@@ -25,14 +25,10 @@ spotless {
 
         googleJavaFormat().aosp()
     }
-// @FIXME uncomment this again. spotless keeps complaining that the empty file settings.gradle.kts needed a change
-    // settings.gradle.kts
-    //        @@ -0,0 +1 @@
-    //        +
-    //
-//    kotlinGradle {
-//        ktlint()
-//    }
+
+    kotlinGradle {
+        ktlint()
+    }
 }
 
 tasks.validateTaskProperties {
