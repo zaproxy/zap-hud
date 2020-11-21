@@ -2,20 +2,20 @@ import org.ysb33r.gradle.nodejs.tasks.NpmTask
 import org.zaproxy.gradle.addon.AddOnPlugin
 import org.zaproxy.gradle.addon.AddOnStatus
 import org.zaproxy.gradle.addon.misc.ConvertMarkdownToHtml
-import org.zaproxy.gradle.addon.misc.CreateGitHubRelease
 import org.zaproxy.gradle.addon.misc.CopyAddOn
+import org.zaproxy.gradle.addon.misc.CreateGitHubRelease
 import org.zaproxy.gradle.addon.misc.ExtractLatestChangesFromChangelog
 import org.zaproxy.gradle.tasks.GenerateI18nJsFile
 import org.zaproxy.gradle.tasks.ZapDownloadWeekly
 import org.zaproxy.gradle.tasks.ZapJavaStart
-import org.zaproxy.gradle.tasks.ZapStart
 import org.zaproxy.gradle.tasks.ZapShutdown
+import org.zaproxy.gradle.tasks.ZapStart
 
 plugins {
     `java-library`
     jacoco
     id("org.zaproxy.add-on") version "0.3.0"
-    id("com.diffplug.gradle.spotless") version "3.15.0"
+    id("com.diffplug.gradle.spotless") version "4.3.0"
     id("org.ysb33r.nodejs.npm") version "0.6.2"
 }
 
