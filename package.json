@@ -52,7 +52,8 @@
       "src/webpack/**"
     ],
     "plugins": [
-      "no-unsanitized"
+      "no-unsanitized",
+      "license-header"
     ],
     "rules": {
       "no-negated-condition": "warn",
@@ -82,7 +83,8 @@
       "unicorn/prefer-includes": "warn",
       "unicorn/prefer-string-slice": "warn",
       "unicorn/filename-case": "warn",
-      "unicorn/prefer-query-selector": "warn"
+      "unicorn/prefer-query-selector": "warn",
+      "license-header/header": [ "error", "./gradle/spotless/license.java" ]
     }
   },
   "repository": {
@@ -103,6 +105,7 @@
   "devDependencies": {
     "ava": "^3.13.0",
     "css-loader": "^5.0.1",
+    "eslint-plugin-license-header": "^0.2.0",
     "eslint-plugin-no-unsanitized": "^3.1.4",
     "lint-staged": "^10.5.1",
     "vue-loader": "^15.9.5",
