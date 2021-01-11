@@ -6,7 +6,7 @@
  */
 
 // temp time test
-const startTime = new Date().getTime();
+const startTime = Date.now();
 
 // Injected strings
 const SHOW_WELCOME_SCREEN = '<<SHOW_WELCOME_SCREEN>>' === 'true';
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		// Temp time test
 		localforage.getItem('starttime')
 			.then(startT => {
-				const currentTime = new Date().getTime();
+				const currentTime = Date.now();
 				const diff = currentTime - Number.parseInt(startT, 10);
 				console.log('Time (ms) to load UI: ' + diff);
 			});

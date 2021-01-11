@@ -29,7 +29,7 @@ const injection = (function () {
 	}
 
 	function generateTabId() {
-		const millis = new Date().getTime();
+		const millis = Date.now();
 		const r = Math.floor(Math.random() * 1000);
 		const tabId = String(millis) + '-' + r;
 

@@ -468,9 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	app = new Vue({
 		i18n: I18n.i18n,
 		el: '#app',
-		data: {
-
-		}
+		data: {}
 	});
 });
 
