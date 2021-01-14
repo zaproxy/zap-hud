@@ -20,7 +20,7 @@ plugins {
 }
 
 apply(from = "$rootDir/gradle/compile.gradle.kts")
-apply(from = "$rootDir/gradle/travis-ci.gradle.kts")
+apply(from = "$rootDir/gradle/ci.gradle.kts")
 
 repositories {
     mavenLocal()
