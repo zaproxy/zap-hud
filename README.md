@@ -1,4 +1,4 @@
-# ![HUD Logo](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/assets/images/hud_logo_128px.png) OWASP ZAP Heads Up Display 
+# ![HUD Logo](https://raw.githubusercontent.com/zaproxy/zap-hud/main/assets/images/hud_logo_128px.png) OWASP ZAP Heads Up Display 
 ![Release: Beta](https://img.shields.io/badge/release-beta-brightgreen.svg)
 [![Known Vulnerabilities](https://snyk.io/test/github/zaproxy/zap-hud/badge.svg?targetFile=package.json)](https://snyk.io/test/github/zaproxy/zap-hud?targetFile=package.json)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/zaproxy/zap-hud.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/zaproxy/zap-hud/alerts/)
@@ -14,7 +14,7 @@ Learn more:
 * Video: [The OWASP ZAP HUD - Usable Security Tooling](https://youtu.be/ztfgip-UhWw)
 * Wiki: [Inside the HUD](../../wiki)
 
-![](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/assets/images/hud-break.gif)
+![](https://raw.githubusercontent.com/zaproxy/zap-hud/main/assets/images/hud-break.gif)
 
 ## Using the HUD
 
@@ -34,14 +34,14 @@ or
 
 In all cases you will need Java 8+ installed.
 
-You'll see the HUD Radar icon ![Radar Icon](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/src/main/resources/org/zaproxy/zap/extension/hud/resources/radar.png) in the toolbar. When the icon is selected the HUD will be added to your browser.
+You'll see the HUD Radar icon ![Radar Icon](https://raw.githubusercontent.com/zaproxy/zap-hud/main/src/main/resources/org/zaproxy/zap/extension/hud/resources/radar.png) in the toolbar. When the icon is selected the HUD will be added to your browser.
 
-![Toolbar with Radar](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/assets/images/toolbar_radar.png)
+![Toolbar with Radar](https://raw.githubusercontent.com/zaproxy/zap-hud/main/assets/images/toolbar_radar.png)
 
 ### Starting the HUD
 1. Quick Start: Select either `Firefox` or `Chrome` on the `Quick Start` tab and click on the `Launch Browser` button.
 
-![](https://raw.githubusercontent.com/zaproxy/zap-hud/develop/assets/images/ZAP-Launch-browser.png)
+![](https://raw.githubusercontent.com/zaproxy/zap-hud/main/assets/images/ZAP-Launch-browser.png)
 
 2. Manually: You can also configure Firefox or Chrome to proxy via ZAP manually, but you will need to import the ZAP Root CA Certificate (and may require other setting changes in up-to-date browsers).
 
