@@ -214,9 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	// Initialize vue app
 	app = new Vue({
 		el: '#app',
-		data: {
-
-		}
+		data: {}
 	});
 });
 

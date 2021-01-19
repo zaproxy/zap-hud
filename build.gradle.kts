@@ -20,14 +20,14 @@ plugins {
 }
 
 apply(from = "$rootDir/gradle/compile.gradle.kts")
-apply(from = "$rootDir/gradle/travis-ci.gradle.kts")
+apply(from = "$rootDir/gradle/ci.gradle.kts")
 
 repositories {
     mavenLocal()
     mavenCentral()
 }
 
-version = "0.12.0"
+version = "0.13.0"
 description = "Display information from ZAP in browser."
 
 val generatedI18nJsFileDir = layout.buildDirectory.dir("zapAddOn/i18nJs")

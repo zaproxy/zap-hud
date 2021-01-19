@@ -11,7 +11,7 @@ const LOG_DEBUG = 4;	// Relatively fine grain events which can help debug proble
 const LOG_TRACE = 5;	// Very fine grain events, highest level
 const LOG_STRS = ['OFF', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'];
 
-class NoClientIdError extends Error { }
+class NoClientIdError extends Error {}
 
 const utils = (function () {
 	/*
@@ -112,19 +112,17 @@ const utils = (function () {
 	 * Parses the domain from a uri string.
 	 */
 	function parseDomainFromUrl(url) {
-		let hostname;
-
-		if (url.indexOf('://') > -1) {
-			hostname = url.split('/')[2];
-		} else {
-			hostname = url.split('/')[0];
-		}
+		let hostname = hasScheme(url) ? url.split('/')[2] : url.split('/')[0];
 
 		// Find & remove "?" & "#"
 		hostname = hostname.split('?')[0];
 		hostname = hostname.split('#')[0];
 
 		return hostname;
+	}
+
+	function hasScheme(url) {
+		return url.indexOf('://') > -1;
 	}
 
 	/*
@@ -662,12 +660,12 @@ const utils = (function () {
 	/*
 	 * Log an error in a human readable way with a stack trace.
 	 */
-	function errorHandler(err) {
-		let message = err.toString();
+	function errorHandler(error) {
+		let message = error.toString();
 
-		if (err.stack) {
+		if (error.stack) {
 			// Construct the stack trace
-			const lines = err.stack.split('\n').slice(0, -1);
+			const lines = error.stack.split('\n').slice(0, -1);
 			lines.forEach(line => {
 				const functionName = line.substring(0, line.indexOf('/'));
 				const urlAndLineNo = line.substring(line.indexOf('http'), line.length - 1);
@@ -685,7 +683,7 @@ const utils = (function () {
 			});
 		}
 
-		log(LOG_ERROR, 'errorHandler', message, err);
+		log(LOG_ERROR, 'errorHandler', message, error);
 	}
 
 	function getZapFilePath(file) {
