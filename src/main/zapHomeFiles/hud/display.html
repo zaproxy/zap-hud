@@ -32,13 +32,13 @@
         <!-- a base modal component -->
         <template id="modal-template">
             <transition name="modal" @after-leave="afterLeave">
-            <div :class="{ 'active': true, 'modal': true, 'modal-wd': isWide, 'modal-sm': isSmall }" id="modal-id" v-show="show">
+            <div :class="{ 'active': true, 'modal': true, 'modal-wd': isWide, 'modal-sm': isSmall }" id="modal-id" v-show="show" role="dialog" aria-modal="true" aria-labelledby="modal-title">
                 <a href="#close" class="modal-overlay" aria-label="Close" @click="close"></a>
                 <div class="modal-container">
                     <div class="modal-header">
                         <slot name="header"></slot>
                         <a href="#close" class="btn btn-clear float-right" aria-label="Close" @click="close"></a>
-                        <div class="modal-title h5">{{title}}</div>
+                        <div class="modal-title h5" id="modal-title">{{title}}</div>
                     </div>
 
                     <div class="modal-body">
@@ -56,7 +56,7 @@
         <template id="nav-modal-template">
             <modal :title="title" :show="show" @close="close">
                 <div slot="header">
-                    <button v-if="isBackShowing" class="btn btn-action btn-sm float-left"  @click="back">
+                    <button v-if="isBackShowing" class="btn btn-action btn-sm float-left"  @click="back" aria-label=" Back">
                         <i class="icon icon-back"></i>
                     </button>
                 </div>
@@ -74,7 +74,7 @@
             <modal :title="title" :show="show" @close="close">
                 <div slot="body">
                     <div class="content">
-                        <span v-html="text">
+                        <span v-html="text"></span>
                     </div>
                 </div>
                 <div slot="footer">
@@ -254,7 +254,7 @@
             <modal :title="title" :show="show" @close="close">
                 <div slot="body">
                     <ul class="menu">
-                        <li v-for="(label, id) in items" class="menu-item" @click="itemSelect(id)"> {{ label }} </li>
+                        <li v-for="(label, id) in items" class="menu-item" @click="itemSelect(id)" role="link"> {{ label }} </li>
                     </ul>
                 </div>
             </modal>
@@ -265,7 +265,7 @@
             <modal :title="title" :show="show" @close="close">
                 <div slot="body">
                     <ul class="menu">
-                        <li v-for="(conf, id) in items" class="menu-item" @click="itemSelect(id)">
+                        <li v-for="(conf, id) in items" class="menu-item" @click="itemSelect(id)" role="link">
                             <img v-if="conf.startimage"  :src="'<<ZAP_HUD_FILES>>/image/' + conf.startimage" />
                             {{ conf.label }}
                             <img v-if="conf.endimage"  :src="'<<ZAP_HUD_FILES>>/image/' + conf.endimage" />
@@ -312,7 +312,7 @@
                 <div slot="footer">
                 	<div><span class="errorMessages">{{errors}}</span></div>
                 	<div class="float-left">
-                    <button :class="{'btn': true, 'disabled': isAscanDisabled}" @click="ascanRequest"> {{ $t('message.history_ascan_request') }} <img src="<<ZAP_HUD_FILES>>/image/flame.png" /> </button>
+                    <button :class="{'btn': true, 'disabled': isAscanDisabled}" @click="ascanRequest"> {{ $t('message.history_ascan_request') }} <img src="<<ZAP_HUD_FILES>>/image/flame.png" alt="Active Scan"/> </button>
                     </div>
                     <button class="btn btn-primary" @click="replay"> {{ $t('message.history_replay_console') }} </button>
                     <button class="btn" @click="replayInBrowser"> {{ $t('message.history_replay_browser') }} </button>
@@ -373,9 +373,9 @@
         <template id="tabs-template">
             <div>
                 <div class="tabs">
-                    <ul class="tab tab-block">
-                        <li v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true, 'disabled': tab.disabled }">
-                            <a :href="tab.href" @click="selectTab(tab)">{{ tab.name }}</a>
+                    <ul class="tab tab-block" role="tablist">
+                        <li v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true, 'disabled': tab.disabled }" role="presentation">
+                            <a :href="tab.href" @click="selectTab(tab)" :aria-selected="tab.isActive">{{ tab.name }} role="tab"></a>
                         </li>
                     </ul>
                 </div>
