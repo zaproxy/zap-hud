@@ -110,6 +110,6 @@
     "vue-template-compiler": "^2.6.12",
     "webpack": "^5.24.2",
     "webpack-cli": "^4.5.0",
-    "xo": "^0.37.1"
+    "xo": "^0.38.1"
   }
 }
