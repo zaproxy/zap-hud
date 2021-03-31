@@ -27,7 +27,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
 import org.parosproxy.paros.network.HttpHeader;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
@@ -45,7 +46,7 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
 
     private ExtensionHUD extHud;
 
-    private Logger LOG = Logger.getLogger(this.getClass());
+    private Logger LOG = LogManager.getLogger(this.getClass());
 
     public HttpUpgradeProxyListener(ExtensionHUD extHud) {
         this.extHud = extHud;
@@ -65,7 +66,7 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
         // Don't strictly need the body
         msg.setResponseBody("<html><body>Redirecting to " + targetUrl + "</body></html>");
         msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
-        LOG.debug("redirectMessage returning a 302 to " + targetUrl);
+        LOG.debug("redirectMessage returning a 302 to {}", targetUrl);
     }
 
     @Override
@@ -113,7 +114,7 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
                     if (loc != null && loc.toLowerCase().startsWith("https")) {
                         // We've upgraded it, but its upgrading itself anyway - let it do that so we
                         // don't get into a browser loop
-                        LOG.debug("onHttpResponseReceived not upgrading " + url);
+                        LOG.debug("onHttpResponseReceived not upgrading {}", url);
                         this.extHud.removeUpgradedHttpsDomain(url);
                         // Advise that we're no longer upgrading this domain to https
                         Map<String, String> map = new HashMap<>();
@@ -144,7 +145,7 @@ public class HttpUpgradeProxyListener implements OverrideMessageProxyListener {
                         String body = respBody.replace("ws://", "wss://");
                         // Now extract all of the wss urls to flag them as upgraded
                         for (URI uri : extractWssUrls(body)) {
-                            LOG.debug("Adding upgraded ws URL: " + uri);
+                            LOG.debug("Adding upgraded ws URL: {}", uri);
                             extHud.addUpgradedHttpsDomain(uri);
                         }
                         msg.getResponseBody().setBody(body);

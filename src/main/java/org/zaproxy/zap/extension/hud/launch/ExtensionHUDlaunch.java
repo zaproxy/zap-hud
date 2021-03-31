@@ -28,7 +28,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.parosproxy.paros.CommandLine;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.control.Control;
@@ -60,7 +61,7 @@ public class ExtensionHUDlaunch extends ExtensionAdaptor implements CommandLineL
     private static final Set<String> SUPPORTED_BROWSERS =
             new HashSet<>(Arrays.asList(FIREFOX, CHROME));
 
-    private static final Logger LOGGER = Logger.getLogger(ExtensionHUDlaunch.class);
+    private static final Logger LOGGER = LogManager.getLogger(ExtensionHUDlaunch.class);
 
     static {
         List<Class<? extends Extension>> dependencies = new ArrayList<>(1);
