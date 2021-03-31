@@ -23,7 +23,8 @@ import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.network.HttpMessage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IndexPage;
@@ -44,7 +45,7 @@ public abstract class TutorialPage {
     private String key;
     private String antiCsrfToken = UUID.randomUUID().toString();
 
-    public Logger log = Logger.getLogger(this.getClass());
+    public Logger log = LogManager.getLogger(this.getClass());
 
     public TutorialPage(TutorialProxyServer tutorialProxyServer) {
         this.tutorialProxyServer = tutorialProxyServer;
@@ -135,7 +136,7 @@ public abstract class TutorialPage {
             html = html.replace("<!-- BUTTONS -->", this.getButtonsHtml());
             html = html.replace("<!-- CSRF -->", this.antiCsrfToken);
         } else {
-            log.error("Failed to find tutorial text page: " + this.getName() + ".html");
+            log.error("Failed to find tutorial text page: {}.html", this.getName());
         }
         return html;
     }
@@ -152,7 +153,7 @@ public abstract class TutorialPage {
     public String setTaskToken() {
         this.key = Integer.toString(10000000 + rnd.nextInt(90000000));
         if (this.tutorialProxyServer.isTutorialTestMode()) {
-            log.info("Generated key " + key);
+            log.info("Generated key {}", key);
         }
         return this.key;
     }
@@ -183,15 +184,15 @@ public abstract class TutorialPage {
 
         for (Map.Entry<String, String> entry : params.entrySet()) {
             if (entry.getKey().equals("key")) {
-                log.debug("Expecting key=" + key + " got " + entry.getValue());
+                log.debug("Expecting key={} got {}", key, entry.getValue());
                 if (entry.getValue().equals(key)) {
                     if (this.tutorialProxyServer.isTutorialTestMode()) {
-                        log.info("Passed the task with key " + key);
+                        log.info("Passed the task with key {}", key);
                     }
                     taskOk = true;
                     taskPassed();
                 } else if (this.tutorialProxyServer.isTutorialTestMode()) {
-                    log.info("Unexpected key value: " + entry.getValue());
+                    log.info("Unexpected key value: {}", entry.getValue());
                 }
             } else if (entry.getKey().equals("anticsrf")) {
                 if (entry.getValue().equals(this.antiCsrfToken)) {
@@ -200,7 +201,7 @@ public abstract class TutorialPage {
                     }
                     csrfOk = true;
                 } else if (this.tutorialProxyServer.isTutorialTestMode()) {
-                    log.info("Anticsrf token bad " + entry.getValue());
+                    log.info("Anticsrf token bad {}", entry.getValue());
                 }
             }
         }
@@ -210,7 +211,7 @@ public abstract class TutorialPage {
         }
 
         if (this.tutorialProxyServer.isTutorialTestMode() && !this.taskJustCompleted) {
-            log.info("Did not pass the task for key " + key);
+            log.info("Did not pass the task for key {}", key);
         }
     }
 
@@ -304,7 +305,7 @@ public abstract class TutorialPage {
         Map<String, String> map = new HashMap<>();
         String body = msg.getRequestBody().toString();
         if (this.tutorialProxyServer.isTutorialTestMode()) {
-            log.info("Supplied data: " + body);
+            log.info("Supplied data: {}", body);
         }
 
         for (String keyValue : body.split("\\&")) {

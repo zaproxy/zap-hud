@@ -41,7 +41,8 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.control.Control;
 import org.parosproxy.paros.core.scanner.Alert;
@@ -127,7 +128,7 @@ public class HudAPI extends ApiImplementor {
     /** Cookie used on the ZAP domain - should never be exposed to a target site. */
     private final String zapHudCookie = UUID.randomUUID().toString();
 
-    private static Logger logger = Logger.getLogger(HudAPI.class);
+    private static Logger logger = LogManager.getLogger(HudAPI.class);
 
     public HudAPI(ExtensionHUD extension) {
         this.extension = extension;
@@ -191,7 +192,7 @@ public class HudAPI extends ApiImplementor {
             int lastSlash = path.lastIndexOf('/');
             String fileName = path.substring(lastSlash + 1);
 
-            logger.debug("callback fileName = " + fileName);
+            logger.debug("callback fileName = {}", fileName);
             if (fileName != null) {
                 if (DOMAIN_FILE_ALLOWLIST.contains(fileName)) {
                     msg.setResponseBody(
@@ -420,11 +421,13 @@ public class HudAPI extends ApiImplementor {
             if (sw != null) {
                 contents = sw.getContents();
             } else {
-                logger.warn("Failed to access script " + file + " via the script extension");
+                logger.warn("Failed to access script {} via the script extension", file);
                 File f = new File(this.extension.getHudParam().getBaseDirectory(), file);
                 if (!f.exists()) {
                     logger.error(
-                            "No such file " + f.getAbsolutePath(), new FileNotFoundException(file));
+                            "No such file {}",
+                            f.getAbsolutePath(),
+                            new FileNotFoundException(file));
                     return null;
                 }
                 // Quick way to read a small text file
@@ -447,7 +450,7 @@ public class HudAPI extends ApiImplementor {
                         this.extension.getHudParam().isTutorialTestMode()
                                 ? SHARED_TEST_NON_SECRET
                                 : SHARED_SECRET;
-                logger.debug("Injecting url into inject.js: " + url);
+                logger.debug("Injecting url into inject.js: {}", url);
                 contents =
                         contents.replace("<<URL>>", url).replace("<<ZAP_SHARED_SECRET>>", secret);
             }
@@ -567,7 +570,7 @@ public class HudAPI extends ApiImplementor {
             InputStream is =
                     this.getClass().getResourceAsStream(ExtensionHUD.RESOURCE + "/" + name);
             if (is == null) {
-                logger.error("No such resource: " + name);
+                logger.error("No such resource: {}", name);
                 return null;
             }
             ByteArrayOutputStream bos = new ByteArrayOutputStream();

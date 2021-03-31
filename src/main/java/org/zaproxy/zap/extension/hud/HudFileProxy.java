@@ -21,7 +21,8 @@ package org.zaproxy.zap.extension.hud;
 
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.parosproxy.paros.network.HttpHeader;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
@@ -35,7 +36,7 @@ public class HudFileProxy extends ApiImplementor {
 
     private static final String PREFIX = "hudfiles";
 
-    private static final Logger LOG = Logger.getLogger(HudFileProxy.class);
+    private static final Logger LOG = LogManager.getLogger(HudFileProxy.class);
 
     private HudAPI api;
 
@@ -97,7 +98,7 @@ public class HudFileProxy extends ApiImplementor {
             String path = msg.getRequestHeader().getURI().getPath();
             if (path.contains("..")) {
                 // Looks like an injection attack
-                LOG.warn("Attempted injection attack? " + msg.getRequestHeader().getURI());
+                LOG.warn("Attempted injection attack? {}", msg.getRequestHeader().getURI());
                 throw new ApiException(
                         ApiException.Type.ILLEGAL_PARAMETER,
                         msg.getRequestHeader().getURI().toString());
@@ -109,10 +110,10 @@ public class HudFileProxy extends ApiImplementor {
                         msg.getRequestHeader().getURI().toString());
             }
             String type = pathElements[4];
-            LOG.debug("callback type = " + type);
+            LOG.debug("callback type = {}", type);
             if (type.equals("file")) {
                 String file = path.substring(path.indexOf("file") + 5);
-                LOG.debug("callback file = " + file);
+                LOG.debug("callback file = {}", file);
                 msg.setResponseBody(api.getFile(msg, file));
                 msg.setResponseHeader(getResponseHeader(file, msg.getResponseBody().length()));
 
@@ -141,7 +142,7 @@ public class HudFileProxy extends ApiImplementor {
                 return msg.getResponseBody().toString();
             } else if (type.equals("image")) {
                 String file = path.substring(path.indexOf("image") + 6);
-                LOG.debug("callback image = " + file);
+                LOG.debug("callback image = {}", file);
 
                 msg.setResponseBody(api.getImage(file));
                 msg.setResponseHeader(getResponseHeader(file, msg.getResponseBody().length()));

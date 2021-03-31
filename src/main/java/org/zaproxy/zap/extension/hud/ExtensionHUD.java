@@ -35,7 +35,8 @@ import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.control.Control;
 import org.parosproxy.paros.core.proxy.ProxyListener;
@@ -127,7 +128,7 @@ public class ExtensionHUD extends ExtensionAdaptor
     private ScriptType hudScriptType =
             new ScriptType(SCRIPT_TYPE_HUD, "hud.script.type.hud", ICON, false);
 
-    private Logger log = Logger.getLogger(this.getClass());
+    private Logger log = LogManager.getLogger(this.getClass());
 
     private ZapToggleButton hudButton = null;
     private boolean hudEnabledForDesktop = false;
@@ -387,9 +388,9 @@ public class ExtensionHUD extends ExtensionAdaptor
                 if (replacedMsg != null) {
                     msg.setRequestHeader(replacedMsg.getRequestHeader());
                     msg.setRequestBody(replacedMsg.getRequestBody());
-                    log.debug("Replaced full message " + msg.getRequestHeader().getMethod());
+                    log.debug("Replaced full message {}", msg.getRequestHeader().getMethod());
                 } else {
-                    log.warn("Failed to find request with url " + url);
+                    log.warn("Failed to find request with url {}", url);
                 }
             }
         } catch (Exception e) {
@@ -443,7 +444,7 @@ public class ExtensionHUD extends ExtensionAdaptor
                         msg.getResponseHeader().setHeader(HTTP_HEADER_WEBKIT_CSP, null);
                     }
                 } else {
-                    log.debug("Failed to find body tag on " + msg.getRequestHeader().getURI());
+                    log.debug("Failed to find body tag on {}", msg.getRequestHeader().getURI());
                 }
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
@@ -493,7 +494,7 @@ public class ExtensionHUD extends ExtensionAdaptor
             sb.append(fragment);
         }
         String reqUrl = sb.toString().replace("http://", "https://");
-        log.debug("setRecordedRequest returning " + reqUrl);
+        log.debug("setRecordedRequest returning {}", reqUrl);
         return reqUrl;
     }
 

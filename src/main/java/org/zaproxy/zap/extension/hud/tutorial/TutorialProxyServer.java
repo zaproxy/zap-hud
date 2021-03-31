@@ -25,7 +25,8 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
 import org.parosproxy.paros.core.proxy.ProxyServer;
@@ -76,13 +77,11 @@ public class TutorialProxyServer extends ProxyServer {
     private static final String STATUS_OK = "200 OK";
     private static final String STATUS_NOT_FOUND = "404 Not Found";
     private static final String STATUS_REDIRECT = "302 Found";
-    private static final Logger LOG = Logger.getLogger(TutorialProxyServer.class);
+    private static final Logger LOG = LogManager.getLogger(TutorialProxyServer.class);
 
     private ExtensionHUD extension;
     private String hostPort;
     private Map<String, TutorialPage> pages = new HashMap<>();
-
-    private Logger log = Logger.getLogger(this.getClass());
 
     public TutorialProxyServer(ExtensionHUD extension) {
         this("ZAP-HUD-Tutorial");
@@ -126,7 +125,7 @@ public class TutorialProxyServer extends ProxyServer {
 
     private TutorialPage addPage(TutorialPage page) {
         if (this.pages.put(page.getName(), page) != null) {
-            log.error("2 tutorial pages with the same name registered: " + page.getName());
+            LOG.error("2 tutorial pages with the same name registered: {}", page.getName());
         }
         return page;
     }
@@ -138,7 +137,7 @@ public class TutorialProxyServer extends ProxyServer {
                         extension.getHudParam().getTutorialHost(),
                         extension.getHudParam().getTutorialPort(),
                         true);
-        LOG.debug("HUD Tutorial port is " + port);
+        LOG.debug("HUD Tutorial port is {}", port);
         this.hostPort = extension.getHudParam().getTutorialHost() + ":" + port;
     }
 
@@ -182,14 +181,14 @@ public class TutorialProxyServer extends ProxyServer {
         File f =
                 new File(this.extension.getHudParam().getBaseDirectory() + "/../hudtutorial", name);
         if (!f.exists()) {
-            LOG.debug("No such tutorial file: " + f.getAbsolutePath());
+            LOG.debug("No such tutorial file: {}", f.getAbsolutePath());
             return null;
         }
         // Quick way to read a small text file
         try {
             return new String(Files.readAllBytes(f.toPath()));
         } catch (IOException e) {
-            LOG.error(e.getMessage() + e);
+            LOG.error(e.getMessage(), e);
             return null;
         }
     }
@@ -242,16 +241,14 @@ public class TutorialProxyServer extends ProxyServer {
         public boolean onHttpRequestSend(HttpMessage msg) {
             if (isTutorialTestMode()) {
                 LOG.info(
-                        "onHttpRequestSend "
-                                + msg.getRequestHeader().getMethod()
-                                + " "
-                                + msg.getRequestHeader().getURI().toString());
+                        "onHttpRequestSend {} {}",
+                        msg.getRequestHeader().getMethod(),
+                        msg.getRequestHeader().getURI());
             } else {
                 LOG.debug(
-                        "onHttpRequestSend "
-                                + msg.getRequestHeader().getMethod()
-                                + " "
-                                + msg.getRequestHeader().getURI().toString());
+                        "onHttpRequestSend {} {}",
+                        msg.getRequestHeader().getMethod(),
+                        msg.getRequestHeader().getURI());
             }
 
             try {
@@ -303,7 +300,7 @@ public class TutorialProxyServer extends ProxyServer {
                 } else {
                     String body = getLocallizedTextFile(name);
                     if (body == null) {
-                        LOG.debug("Failed to find tutorial file " + name);
+                        LOG.debug("Failed to find tutorial file {}", name);
                         body = getLocallizedTextFile("404.html");
                         msg.setResponseBody(body);
                         msg.setResponseHeader(
@@ -319,7 +316,7 @@ public class TutorialProxyServer extends ProxyServer {
                         } else if (name.endsWith(".js")) {
                             contentType = "text/javascript";
                         } else {
-                            log.error("Unexpected tutorial file extension: " + name);
+                            LOG.error("Unexpected tutorial file extension: {}", name);
                         }
                         msg.setResponseHeader(
                                 getDefaultResponseHeader(
@@ -335,7 +332,7 @@ public class TutorialProxyServer extends ProxyServer {
         @Override
         public boolean onHttpResponseReceived(HttpMessage msg) {
             if (isTutorialTestMode()) {
-                LOG.info("onHttpResponseReceived " + msg.getRequestHeader().getURI().toString());
+                LOG.info("onHttpResponseReceived {}", msg.getRequestHeader().getURI());
             }
             return false;
         }
