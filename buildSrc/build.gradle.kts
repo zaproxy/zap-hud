@@ -1,6 +1,6 @@
 plugins {
     `java-gradle-plugin`
-    id("com.diffplug.gradle.spotless") version "3.15.0"
+    id("com.diffplug.spotless") version "5.12.1"
 }
 
 apply(from = "../gradle/compile.gradle.kts")
@@ -23,14 +23,10 @@ spotless {
     java {
         licenseHeaderFile("../gradle/spotless/license.java")
 
-        googleJavaFormat().aosp()
+        googleJavaFormat("1.7").aosp()
     }
 
     kotlinGradle {
         ktlint()
     }
-}
-
-tasks.validateTaskProperties {
-    enableStricterValidation = true
 }
