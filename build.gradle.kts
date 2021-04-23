@@ -86,7 +86,7 @@ zapAddOn {
 }
 
 nodejs {
-    executable(mapOf("version" to "10.16.1"))
+    executable(mapOf("version" to "10.24.1"))
     appendPath(project.provider { System.getenv(OperatingSystem.current().pathVar) })
 }
 
