@@ -260,31 +260,28 @@ public class HudParam extends VersionedAbstractParam {
     @Override
     protected void parseImpl() {
         baseDirectory =
-                getConfig()
-                        .getString(
-                                PARAM_BASE_DIRECTORY,
-                                Constant.getZapHome() + ExtensionHUD.DIRECTORY_NAME);
-        enabledForDesktop = getConfig().getBoolean(PARAM_ENABLED_DESKTOP, true);
-        enabledForDaemon = getConfig().getBoolean(PARAM_ENABLED_DAEMON, false);
-        developmentMode = getConfig().getBoolean(PARAM_DEV_MODE, false);
+                getString(
+                        PARAM_BASE_DIRECTORY, Constant.getZapHome() + ExtensionHUD.DIRECTORY_NAME);
+        enabledForDesktop = getBoolean(PARAM_ENABLED_DESKTOP, true);
+        enabledForDaemon = getBoolean(PARAM_ENABLED_DAEMON, false);
+        developmentMode = getBoolean(PARAM_DEV_MODE, false);
         // TODO default allowUnsafeEval to false once the HUD works without it set
-        allowUnsafeEval = getConfig().getBoolean(PARAM_ALLOW_UNSAFE_EVAL, true);
+        allowUnsafeEval = getBoolean(PARAM_ALLOW_UNSAFE_EVAL, true);
         // Remove the next line when the HUD can run without this
         allowUnsafeEval = true;
-        inScopeOnly = getConfig().getBoolean(PARAM_IN_SCOPE_ONLY, false);
-        removeCSP = getConfig().getBoolean(PARAM_REMOVE_CSP, true);
-        tutorialPort = getConfig().getInt(PARAM_TUTORIAL_PORT, 0);
-        tutorialHost = getConfig().getString(PARAM_TUTORIAL_HOST, "127.0.0.1");
-        isSkipTutorialTasks = getConfig().getBoolean(PARAM_TUTORIAL_SKIP_TASKS, false);
-        isTutorialTestMode = getConfig().getBoolean(PARAM_TUTORIAL_TEST_MODE, false);
+        inScopeOnly = getBoolean(PARAM_IN_SCOPE_ONLY, false);
+        removeCSP = getBoolean(PARAM_REMOVE_CSP, true);
+        tutorialPort = getInt(PARAM_TUTORIAL_PORT, 0);
+        tutorialHost = getString(PARAM_TUTORIAL_HOST, "127.0.0.1");
+        isSkipTutorialTasks = getBoolean(PARAM_TUTORIAL_SKIP_TASKS, false);
+        isTutorialTestMode = getBoolean(PARAM_TUTORIAL_TEST_MODE, false);
         tutorialTasks = convert(getConfig().getList(PARAM_TUTORIAL_TASKS));
         tutorialUpdates = convert(getConfig().getList(PARAM_TUTORIAL_UPDATES));
-        showWelcomeScreen = getConfig().getBoolean(PARAM_SHOW_WELCOME_SCREEN, true);
-        newChangelog = getConfig().getBoolean(PARAM_NEW_CHANGELOG, false);
-        enableOnDomainMsgs = getConfig().getBoolean(PARAM_ENABLE_ON_DOMAIN_MSGS, true);
+        showWelcomeScreen = getBoolean(PARAM_SHOW_WELCOME_SCREEN, true);
+        newChangelog = getBoolean(PARAM_NEW_CHANGELOG, false);
+        enableOnDomainMsgs = getBoolean(PARAM_ENABLE_ON_DOMAIN_MSGS, true);
         enableTelemetry =
-                !Constant.isSilent()
-                        && getConfig().getBoolean(PARAM_ENABLE_TELEMETRY, !Constant.isDevMode());
+                !Constant.isSilent() && getBoolean(PARAM_ENABLE_TELEMETRY, !Constant.isDevMode());
     }
 
     private List<String> convert(List<Object> objs) {
