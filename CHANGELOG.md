@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fix typo in tutorial.
-
+- Added initial accessibility fixes for modals and tabs
 ## [0.12.0] - 2020-10-15
 ### Fixed
 - Problems with Firefox 81 due to referer header not being set cross domain. [#815](https://github.com/zaproxy/zap-hud/issues/815)

@@ -13,7 +13,7 @@
 </head>
 <body>
     <div id="app">
-        <tabs>
+        <tabs role="tablist">
             <tab :name="$t('message.history_tool')" :id="'tab.history'">
                 <history></history>
             </tab>
@@ -126,9 +126,9 @@
     <template id="tabs-template">
         <div style="height: 100%;">
             <div class="tabs">
-                <ul class="tab">
-                    <li v-if="tabsVisible" v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true }">
-                        <a :id="tab.id" :href="tab.href" @click="selectTab(tab)" :class="{ 'badge': tab.isBadgeData}" :data-badge="tab.badgeData">{{ tab.name }}</a>
+                <ul class="tab" role="tablist"> 
+                    <li v-if="tabsVisible" v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true }" role="presentation">
+                        <a :id="tab.id" :href="tab.href" @click="selectTab(tab)" :class="{ 'badge': tab.isBadgeData}" :data-badge="tab.badgeData" :aria-selected=" tab.isActive">{{ tab.name }}</a>
                     </li>
                     <!-- invisible tab-item to push tab-action buttons right -->
                     <li v-if="tabsVisible" class="tab-item tab-action-spacer">
