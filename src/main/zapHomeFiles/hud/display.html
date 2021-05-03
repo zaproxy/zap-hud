@@ -375,7 +375,7 @@
                 <div class="tabs">
                     <ul class="tab tab-block" role="tablist">
                         <li v-for="tab in tabs" :class="{ 'active': tab.isActive, 'tab-item': true, 'disabled': tab.disabled }" role="presentation">
-                            <a :href="tab.href" @click="selectTab(tab)" :aria-selected="tab.isActive">{{ tab.name }} role="tab"></a>
+                            <a :href="tab.href" @click="selectTab(tab)" :aria-selected="tab.isActive" role="tab">{{ tab.name }}</a>
                         </li>
                     </ul>
                 </div>
