@@ -1,11 +1,11 @@
 import org.ysb33r.gradle.nodejs.tasks.NpmTask
 import org.ysb33r.grolifant.api.core.OperatingSystem
-import org.zaproxy.gradle.addon.AddOnPlugin
 import org.zaproxy.gradle.addon.AddOnStatus
+import org.zaproxy.gradle.addon.internal.model.ProjectInfo
+import org.zaproxy.gradle.addon.internal.model.ReleaseState
+import org.zaproxy.gradle.addon.internal.tasks.GenerateReleaseStateLastCommit
 import org.zaproxy.gradle.addon.misc.ConvertMarkdownToHtml
 import org.zaproxy.gradle.addon.misc.CopyAddOn
-import org.zaproxy.gradle.addon.misc.CreateGitHubRelease
-import org.zaproxy.gradle.addon.misc.ExtractLatestChangesFromChangelog
 import org.zaproxy.gradle.tasks.GenerateI18nJsFile
 import org.zaproxy.gradle.tasks.ZapDownloadWeekly
 import org.zaproxy.gradle.tasks.ZapJavaStart
@@ -15,7 +15,7 @@ import org.zaproxy.gradle.tasks.ZapStart
 plugins {
     `java-library`
     jacoco
-    id("org.zaproxy.add-on") version "0.5.0"
+    id("org.zaproxy.add-on") version "0.6.0"
     id("com.diffplug.spotless") version "5.12.1"
     id("org.ysb33r.nodejs.npm") version "0.10.0-alpha.1"
 }
@@ -28,7 +28,6 @@ repositories {
     mavenCentral()
 }
 
-version = "0.13.0"
 description = "Display information from ZAP in browser."
 
 val generatedI18nJsFileDir = layout.buildDirectory.dir("zapAddOn/i18nJs")
@@ -352,33 +351,15 @@ tasks.withType<Test>().configureEach {
             "wdm.forceCache" to "true"))
 }
 
-System.getenv("GITHUB_REF")?.let { ref ->
-    if ("refs/tags/" !in ref) {
-        return@let
-    }
+val projectInfo = ProjectInfo.from(project)
+val generateReleaseStateLastCommit by tasks.registering(GenerateReleaseStateLastCommit::class) {
+    projects.set(listOf(projectInfo))
+}
 
-    tasks.register<CreateGitHubRelease>("createReleaseFromGitHubRef") {
-        val targetTag = ref.removePrefix("refs/tags/")
-        val targetAddOnVersion = targetTag.removePrefix("v")
-
-        authToken.set(System.getenv("GITHUB_TOKEN"))
-        repo.set(System.getenv("GITHUB_REPOSITORY"))
-        tag.set(targetTag)
-
-        title.set(provider { "v${zapAddOn.addOnVersion.get()}" })
-        bodyFile.set(tasks.named<ExtractLatestChangesFromChangelog>("extractLatestChanges").flatMap { it.latestChanges })
-
-        assets {
-            register("add-on") {
-                file.set(tasks.named<Jar>(AddOnPlugin.JAR_ZAP_ADD_ON_TASK_NAME).flatMap { it.archiveFile })
-            }
-        }
-
-        doFirst {
-            val addOnVersion = zapAddOn.addOnVersion.get()
-            require(addOnVersion == targetAddOnVersion) {
-                "Version of the tag $targetAddOnVersion does not match the version of the add-on $addOnVersion"
-            }
-        }
+val releaseAddOn by tasks.registering {
+    if (ReleaseState.read(projectInfo).isNewRelease()) {
+        dependsOn("createRelease")
+        dependsOn("handleRelease")
+        dependsOn("createPullRequestNextDevIter")
     }
 }
