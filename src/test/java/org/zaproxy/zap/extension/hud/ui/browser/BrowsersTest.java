@@ -35,10 +35,7 @@ import org.zaproxy.zap.extension.hud.ui.Constants;
 public abstract class BrowsersTest {
 
     private static final Proxy PROXY =
-            new Proxy()
-                    .setHttpProxy(Constants.ZAP_HOST_PORT)
-                    .setFtpProxy(Constants.ZAP_HOST_PORT)
-                    .setSslProxy(Constants.ZAP_HOST_PORT);
+            new Proxy().setHttpProxy(Constants.ZAP_HOST_PORT).setSslProxy(Constants.ZAP_HOST_PORT);
 
     @Options
     private static final FirefoxOptions FIREFOX_OPTIONS =
