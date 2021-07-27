@@ -15,7 +15,8 @@ import org.zaproxy.gradle.tasks.ZapStart
 plugins {
     `java-library`
     jacoco
-    id("org.zaproxy.add-on") version "0.6.0"
+    id("org.zaproxy.add-on") version "0.7.0"
+    id("org.zaproxy.crowdin") version "0.1.0"
     id("com.diffplug.spotless") version "5.12.1"
     id("org.ysb33r.nodejs.npm") version "0.10.0-alpha.1"
 }
@@ -81,6 +82,17 @@ zapAddOn {
                 }
             }
         }
+    }
+}
+
+crowdin {
+    credentials {
+        token.set(System.getenv("CROWDIN_AUTH_TOKEN"))
+    }
+
+    configuration {
+        file.set(file("gradle/crowdin.yml"))
+        tokens.set(mutableMapOf("%addOnId%" to zapAddOn.addOnId.get()))
     }
 }
 
@@ -361,5 +373,6 @@ val releaseAddOn by tasks.registering {
         dependsOn("createRelease")
         dependsOn("handleRelease")
         dependsOn("createPullRequestNextDevIter")
+        dependsOn("crowdinUploadSourceFiles")
     }
 }
