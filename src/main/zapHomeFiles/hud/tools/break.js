@@ -6,7 +6,6 @@
 
 const Break = (function () {
 	// Constants
-	// todo: could probably switch this to a config file?
 	const NAME = 'break';
 	const LABEL = I18n.t('break_tool');
 	const DATA = {};
@@ -16,7 +15,6 @@ const Break = (function () {
 	ICONS.OFF = 'break-off.png';
 	ICONS.ON = 'break-on.png';
 
-	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		const tool = {};
 		tool.name = NAME;

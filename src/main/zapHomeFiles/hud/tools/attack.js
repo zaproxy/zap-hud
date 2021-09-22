@@ -6,7 +6,6 @@
 
 const Attack = (function () {
 	// Constants
-	// todo: could probably switch this to a config file?
 	const NAME = 'attack';
 	const LABEL = I18n.t('attack_tool');
 	const DATA = {};
@@ -19,7 +18,6 @@ const Attack = (function () {
 	DIALOG.ON = I18n.t('attack_start');
 	DIALOG.OFF = I18n.t('attack_stop');
 
-	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		const tool = {};
 		tool.name = NAME;

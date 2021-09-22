@@ -6,7 +6,6 @@
 
 const Spider = (function () {
 	// Constants
-	// todo: could probably switch this to a config file?
 	const NAME = 'spider';
 	const LABEL = I18n.t('spider_tool');
 	const DATA = {};
@@ -23,7 +22,6 @@ const Spider = (function () {
 	DIALOG.STOP_1 = I18n.t('spider_stop_1');
 	DIALOG.STOP_2 = I18n.t('spider_stop_2');
 
-	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		const tool = {};
 		tool.name = NAME;

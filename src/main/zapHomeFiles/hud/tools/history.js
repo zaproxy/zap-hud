@@ -6,14 +6,13 @@
 
 const History = (function () {
 	// Constants
-	// todo: could probably switch this to a config file?
+
 	const NAME = 'history';
 	const LABEL = I18n.t('history_tool');
 	const ICONS = {};
 	ICONS.CLOCK = 'clock.png';
 	const tool = {};
 
-	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		tool.name = NAME;
 		tool.label = LABEL;

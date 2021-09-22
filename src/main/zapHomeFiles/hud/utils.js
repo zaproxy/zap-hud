@@ -13,6 +13,8 @@ const LOG_STRS = ['OFF', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'];
 
 class NoClientIdError extends Error {}
 
+/* exported utils */
+
 const utils = (function () {
 	/*
 	 * Utility Functions
