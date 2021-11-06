@@ -16,9 +16,10 @@ plugins {
     `java-library`
     jacoco
     id("org.zaproxy.add-on") version "0.7.0"
-    id("org.zaproxy.crowdin") version "0.1.0"
-    id("com.diffplug.spotless") version "5.12.1"
-    id("org.ysb33r.nodejs.npm") version "0.10.0-alpha.1"
+    id("org.zaproxy.crowdin") version "0.2.1"
+    id("com.diffplug.spotless") version "5.17.1"
+    id("org.ysb33r.nodejs.npm") version "0.12.1"
+    id("com.github.ben-manes.versions") version "0.39.0"
 }
 
 apply(from = "$rootDir/gradle/compile.gradle.kts")
@@ -97,7 +98,7 @@ crowdin {
 }
 
 nodejs {
-    executable(mapOf("version" to "10.24.1"))
+    executableByVersion("10.24.1")
     appendPath(project.provider { System.getenv(OperatingSystem.current().pathVar) })
 }
 
@@ -139,7 +140,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-val jupiterVersion = "5.3.1"
+val jupiterVersion = "5.8.1"
 
 dependencies {
     compileOnly(files(fileTree("lib").files))
@@ -148,9 +149,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:$jupiterVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
 
-    testImplementation("io.github.bonigarcia:selenium-jupiter:3.3.0")
+    testImplementation("io.github.bonigarcia:selenium-jupiter:3.4.0")
     testImplementation("org.hamcrest:hamcrest-all:1.3")
-    testImplementation("org.mockito:mockito-all:1.10.8")
+    testImplementation("org.mockito:mockito-all:1.10.19")
     testImplementation(files(fileTree("lib").files))
 }
 
@@ -173,10 +174,10 @@ val jacocoTestTutorialReport by tasks.registering(JacocoReport::class) {
 }
 
 fun sourcesWithoutLibs(extension: String) =
-        fileTree("src") {
-            include("**/*.$extension")
-            exclude("**/hud/libraries/**")
-        }
+    fileTree("src") {
+        include("**/*.$extension")
+        exclude("**/hud/libraries/**")
+    }
 
 spotless {
     java {
@@ -357,10 +358,13 @@ tasks.test {
 }
 
 tasks.withType<Test>().configureEach {
-    systemProperties.putAll(mapOf(
+    systemProperties.putAll(
+        mapOf(
             "wdm.chromeDriverVersion" to "83.0.4103.39",
             "wdm.geckoDriverVersion" to "0.26.0",
-            "wdm.forceCache" to "true"))
+            "wdm.forceCache" to "true"
+        )
+    )
 }
 
 val projectInfo = ProjectInfo.from(project)
