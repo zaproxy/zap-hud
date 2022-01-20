@@ -72,7 +72,7 @@
 
 
     <template id="websockets-template">
-        <div role="region" aria-label="Websockets">
+        <div role="region" aria-label="WebSockets">
             <table class="table drawer-header">
                 <thead>
                     <tr>
@@ -140,7 +140,7 @@
                         <drawer-button-settings></drawer-button-settings>
                     </li>
                     <li v-if="tabsVisible" class="tab-item tab-action">
-                        <button class="btn btn-action btn-sm"  @click="toggleOpenClose" aria-label="Open/close">
+                        <button class="btn btn-action btn-sm"  @click="toggleOpenClose" aria-label="Open/Close">
                             <i :class="{ 'icon': true, 'icon-arrow-up': isArrowUp, 'icon-arrow-down': !isArrowUp }"></i>
                         </button>
                     </li>
@@ -165,7 +165,7 @@
     </template>
 
     <template id="drawer-button-showhide-template">
-        <drawer-button-template :icon="icon" @click="toggleIsVisible" aria-label="show/hide HUD"></drawer-button-template>
+        <drawer-button-template :icon="icon" @click="toggleIsVisible" aria-label="Show/Hide HUD"></drawer-button-template>
     </template>
 
     <!-- tab component -->
