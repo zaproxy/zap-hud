@@ -15,13 +15,13 @@
 
 	<template id="hud-buttons-template">
 		<div id="hud-buttons" :class="{'d-hide': !isVisible, 'd-visible': isVisible}">
-			<hud-button v-for="tool in tools" :key="tool.name" :label="tool.label" :icon="'<<ZAP_HUD_FILES>>/image/' + tool.icon" :data="tool.data" :name="tool.name"></hud-button>
-			<hud-button icon="<<ZAP_HUD_FILES>>/image/plus.png" name="add-tool"></hud-button>
+			<hud-button v-for="tool in tools" :key="tool.name" :label="tool.label" :icon="'<<ZAP_HUD_FILES>>/image/' + tool.icon" :data="tool.data" :name="tool.name" role="button" :aria-label="label"></hud-button>
+			<hud-button icon="<<ZAP_HUD_FILES>>/image/plus.png" name="add-tool" aria-label="Add Tool"></hud-button>
 		</div>
 	</template>
 
 	<template id="hud-button-template">
-		<div :class="{'hud-button': true, 'small': isSmall, 'active': isActive, 'disabled': isDisabled}" :style="{'float': orientation, 'direction': direction}" @click="selectButton" @contextmenu="showContextMenu" @mouseover="mouseOver" @mouseleave="mouseLeave">
+		<div :class="{'hud-button': true, 'small': isSmall, 'active': isActive, 'disabled': isDisabled}" :style="{'float': orientation, 'direction': direction}" @click="selectButton" @contextmenu="showContextMenu" @mouseover="mouseOver" @mouseleave="mouseLeave" role="button">
 			<img :src="currentIcon" :style="{'float': orientation}">
 			<span id="data" v-show="showData" :style="{'float': orientation, 'margin-left': marginleft, 'margin-right': marginright}">{{currentData}}</span>
 			<span id="label" @transitionend="transitionEnd" :style="{'float': orientation, 'margin-left': labelmarginleft, 'margin-right': labelmarginright}">{{label}}</span>

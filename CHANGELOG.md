@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-
+- Added accessibility fixes for rapid navigation between panels. 
+- added semantic roles and better labeling for screen reader users
 ## [0.13.0] - 2021-10-06
 ### Changed
 - Update minimum ZAP version to 2.11.0.
