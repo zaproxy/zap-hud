@@ -213,6 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// Initialize vue app
 	app = new Vue({
+		i18n: I18n.i18n,
 		el: '#app',
 		data: {}
 	});

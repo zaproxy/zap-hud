@@ -24,7 +24,7 @@
     </div>
 
     <template id="history-template">
-        <div role="region" aria-label="History">
+        <div role="region" :aria-label=$t('message.a11y_label_history')>
             <table class="table drawer-header">
                 <thead>
                     <tr>
@@ -72,7 +72,7 @@
 
 
     <template id="websockets-template">
-        <div role="region" aria-label="WebSockets">
+        <div role="region" :aria-label=$t('message.a11y_label_websockets')>
             <table class="table drawer-header">
                 <thead>
                     <tr>
