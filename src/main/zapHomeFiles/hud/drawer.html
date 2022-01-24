@@ -140,7 +140,7 @@
                         <drawer-button-settings></drawer-button-settings>
                     </li>
                     <li v-if="tabsVisible" class="tab-item tab-action">
-                        <button class="btn btn-action btn-sm"  @click="toggleOpenClose" aria-label="Open/Close">
+                        <button class="btn btn-action btn-sm"  @click="toggleOpenClose" :aria-label=$t('message.a11y_label_open_close')>
                             <i :class="{ 'icon': true, 'icon-arrow-up': isArrowUp, 'icon-arrow-down': !isArrowUp }"></i>
                         </button>
                     </li>
@@ -161,11 +161,11 @@
     </template>
 
     <template id="drawer-button-settings-template">
-        <drawer-button-template :icon="icon" @click="showHudSettings" aria-label="Settings"></drawer-button-template>
+        <drawer-button-template :icon="icon" @click="showHudSettings" :aria-label=$t('message.a11y_label_settings')></drawer-button-template>
     </template>
 
     <template id="drawer-button-showhide-template">
-        <drawer-button-template :icon="icon" @click="toggleIsVisible" aria-label="Show/Hide HUD"></drawer-button-template>
+        <drawer-button-template :icon="icon" @click="toggleIsVisible" :aria-label=$t('message.a11y_label_show_hide')></drawer-button-template>
     </template>
 
     <!-- tab component -->
