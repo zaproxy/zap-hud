@@ -7,51 +7,51 @@ The HUD
 </TITLE>
 </HEAD>
 <BODY>
-<H1>The HUD</H1>
+<H1>The HUD  (визуальный интерфейс)</H1>
 
-The HUD is a completely new interface that brings information and functionality from ZAP into your browser.
+HUD — это совершенно новый интерфейс, который переносит информацию и функции из ZAP в ваш браузер. 
 <p>
-For more details see:
+Подробнее смотри:
 <ul>
-<li>Blog: <a href="https://segment.com/blog/hacking-with-a-heads-up-display/">https://segment.com/blog/hacking-with-a-heads-up-display/</a></li>
-<li>Video: <a href="https://www.youtube.com/watch?v=ztfgip-UhWw">https://www.youtube.com/watch?v=ztfgip-UhWw</a></li>
-<li>The HUD wiki: <a href="https://github.com/zaproxy/zap-hud/wiki">https://github.com/zaproxy/zap-hud/wiki</a></li>
+<li>Блог:<a href="https://segment.com/blog/hacking-with-a-heads-up-display/">https://segment.com/blog/hacking-with-a-heads-up-display/</a></li>
+<li>Видео:<a href="https://www.youtube.com/watch?v=ztfgip-UhWw">https://www.youtube.com/watch?v=ztfgip-UhWw</a></li>
+<li> HUD вики: <a href="https://github.com/zaproxy/zap-hud/wiki">https://github.com/zaproxy/zap-hud/wiki</a></li>
 </ul>
 
-<H2>Command Line Options</H2>
-The HUD works equally well with ZAP in desktop and daemon modes.<br>
-As many people use ZAP in daemon mode for automated testing the HUD is disabled by default in this mode.<br>
-The HUD add-on adds new ZAP command line options which enable the HUD in daemon mode and launch a browser 
-preconfigured to proxy through ZAP and ignore certificate errors:
+<H2>Параметры командной строки </H2>
+HUD одинаково хорошо работает с ZAP как в режиме рабочего стола, так и в режиме демона.<br>
+Поскольку многие люди используют ZAP в режиме демона для автоматизированного тестирования, HUD по умолчанию отключен в этом режиме.<br>
+Надстройка HUD добавляет новые параметры командной строки ZAP, которые включают HUD в режиме демона и запускают браузер.
+предварительно настроен для проксирования через ZAP и игнорирования ошибок сертификата: 
 <ul>
-<li>-hud : launch a browser with the HUD enabled, only needed if you don't want to specify a browser or url</li>
-<li>-hudbrowser &lt;browser&gt; : the browser ZAP will use, either Firefox (the default) or Chrome</li>
-<li>-hudurl &lt;url&gt; : the URL that will be opened in the browser, by default none</li>
+<li>-hud : запустите браузер с включенным HUD, требуется только в том случае, если вы не хотите указывать браузер или URL-адрес </li>
+<li>-hudbrowser &lt;browser&gt; : браузер, который будет использовать ZAP, либо Firefox (по умолчанию), либо Chrome. </li>
+<li>-hudurl &lt;url&gt; : URL-адрес, который будет открыт в браузере, по умолчанию нет </li>
 </ul>
-Any combination of these parameters will launch a browser with the HUD enabled.<br><br>
+Любая комбинация этих параметров запустит браузер с включенным HUD.<br><br>
 
-You can also enable the HUD in daemon mode without launching a browser using the ZAP command line option:
+Вы также можете включить HUD в режиме демона без запуска браузера, используя параметр командной строки ZAP: 
 <pre>-config hud.enabledForDaemon=true</pre>
 
-<H2>Getting Involved</H2>
+<H2>Вовлечены</H2>
 
-ZAP is a community project and so we are always very keen to hear from anyone who'd like to contribute, 
-just post to the <a href="https://groups.google.com/group/zaproxy-hud">ZAP HUD Group</a>
+ZAP — это общественный проект, поэтому мы всегда рады услышать от всех, кто хотел бы внести свой вклад,
+просто отправьте сообщение в <a href="https://groups.google.com/group/zaproxy-hud">группу ZAP HUD</a> 
 
-<H2>Caveats</H2>
+<H2>Предостережения </H2>
 
-This is still early days for this add-on :)
+Это еще рано для этого дополнения :)
 
-Some known issues include:
+Некоторые известные проблемы включают в себя: 
 
 <ul>
-<li>Only a limited amount of ZAP functionality is available</li>
-<li>We're still using Vue.js in dev mode so can't apply a suitably strong CSP</li>
-<li>The JavaScript code needs to be properly formatted and linted</li>
-<li>Firefox has been tested more than Chrome, but both should work</li>
-<li>The code to support the HUD in multiple browser tabs is very new so might be buggy</li>
-<li>In particular don't close the first tab on Firefox or the HUD will stop working</li>
-<li>Documentation could, of course, be better</li>
+<li>Доступен только ограниченный набор функций ZAP. </li>
+<li>Мы все еще используем Vue.js в режиме разработки, поэтому не можем применить достаточно сильный CSP. </li>
+<li>Код JavaScript должен быть правильно отформатирован и проверен. </li>
+<li>Firefox был протестирован больше, чем Chrome, но оба должны работать. </li>
+<li>Код для поддержки HUD на нескольких вкладках браузера очень новый, поэтому может содержать ошибки. </li>
+<li>В частности, не закрывайте первую вкладку в Firefox, иначе HUD перестанет работать. </li>
+<li>Документация могла бы быть, конечно, лучше </li>
 </ul>
 
 </BODY>
