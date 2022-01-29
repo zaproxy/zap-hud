@@ -50,7 +50,7 @@ zapAddOn {
     addOnName.set("HUD - Heads Up Display")
     addOnStatus.set(AddOnStatus.BETA)
 
-    zapVersion.set("2.11.0")
+    zapVersion.set("2.11.1")
 
     releaseLink.set("https://github.com/zaproxy/zap-hud/compare/v@PREVIOUS_VERSION@...v@CURRENT_VERSION@")
     unreleasedLink.set("https://github.com/zaproxy/zap-hud/compare/v@CURRENT_VERSION@...HEAD")
