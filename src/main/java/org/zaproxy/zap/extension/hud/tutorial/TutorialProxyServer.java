@@ -21,20 +21,19 @@ package org.zaproxy.zap.extension.hud.tutorial;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.Socket;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.parosproxy.paros.Constant;
-import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
-import org.parosproxy.paros.core.proxy.ProxyServer;
-import org.parosproxy.paros.core.proxy.ProxyThread;
 import org.parosproxy.paros.network.HttpHeader;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
-import org.parosproxy.paros.network.HttpSender;
+import org.zaproxy.addon.network.ExtensionNetwork;
+import org.zaproxy.addon.network.server.HttpMessageHandler;
+import org.zaproxy.addon.network.server.HttpMessageHandlerContext;
+import org.zaproxy.addon.network.server.Server;
 import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.hud.ExtensionHUD;
 import org.zaproxy.zap.extension.hud.ExtensionHUD.Telemetry;
@@ -71,7 +70,7 @@ import org.zaproxy.zap.extension.hud.tutorial.pages.UpgradePage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WarningPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.WebSocketsPage;
 
-public class TutorialProxyServer extends ProxyServer {
+public class TutorialProxyServer {
 
     private static final String DEFAULT_LOCALE = "en_GB";
     private static final String STATUS_OK = "200 OK";
@@ -80,12 +79,14 @@ public class TutorialProxyServer extends ProxyServer {
     private static final Logger LOG = LogManager.getLogger(TutorialProxyServer.class);
 
     private ExtensionHUD extension;
+    private ExtensionNetwork extensionNetwork;
     private String hostPort;
     private Map<String, TutorialPage> pages = new HashMap<>();
+    private Server server;
 
-    public TutorialProxyServer(ExtensionHUD extension) {
-        this("ZAP-HUD-Tutorial");
+    public TutorialProxyServer(ExtensionHUD extension, ExtensionNetwork extensionNetwork) {
         this.extension = extension;
+        this.extensionNetwork = extensionNetwork;
 
         // New pages must be added here
         TutorialPage prev = addPage(new IntroPage(this));
@@ -130,25 +131,38 @@ public class TutorialProxyServer extends ProxyServer {
         return page;
     }
 
+    private Server getServer() {
+        if (server == null) {
+            this.server = extensionNetwork.createHttpServer(new TutorialListener());
+        }
+        return server;
+    }
+
     /** The server is started after initialisation so that the parameters will have been loaded. */
     public void start() {
-        int port =
-                this.startServer(
-                        extension.getHudParam().getTutorialHost(),
-                        extension.getHudParam().getTutorialPort(),
-                        true);
-        LOG.debug("HUD Tutorial port is {}", port);
-        this.hostPort = extension.getHudParam().getTutorialHost() + ":" + port;
+        try {
+            int port =
+                    getServer()
+                            .start(
+                                    extension.getHudParam().getTutorialHost(),
+                                    extension.getHudParam().getTutorialPort());
+            LOG.debug("HUD Tutorial port is {}", port);
+            this.hostPort = extension.getHudParam().getTutorialHost() + ":" + port;
+        } catch (IOException e) {
+            LOG.warn("An error occurred while starting the server.", e);
+        }
     }
 
-    public TutorialProxyServer(String threadName) {
-        super(threadName);
-        this.addOverrideMessageProxyListener(new TutorialListener());
-    }
+    public void stop() {
+        if (server == null) {
+            return;
+        }
 
-    @Override
-    protected ProxyThread createProxyProcess(Socket clientSocket) {
-        return new TutorialProxyThread(this, clientSocket);
+        try {
+            getServer().stop();
+        } catch (IOException e) {
+            LOG.debug("An error occurred while stopping the server.", e);
+        }
     }
 
     public String getTutorialUrl(String page) {
@@ -230,23 +244,20 @@ public class TutorialProxyServer extends ProxyServer {
         return extension.getHudParam().isTutorialTestMode();
     }
 
-    private class TutorialListener implements OverrideMessageProxyListener {
+    private class TutorialListener implements HttpMessageHandler {
 
         @Override
-        public int getArrangeableListenerOrder() {
-            return 0;
-        }
+        public void handleMessage(HttpMessageHandlerContext ctx, HttpMessage msg) {
+            ctx.overridden();
 
-        @Override
-        public boolean onHttpRequestSend(HttpMessage msg) {
             if (isTutorialTestMode()) {
                 LOG.info(
-                        "onHttpRequestSend {} {}",
+                        "handleMessage {} {}",
                         msg.getRequestHeader().getMethod(),
                         msg.getRequestHeader().getURI());
             } else {
                 LOG.debug(
-                        "onHttpRequestSend {} {}",
+                        "handleMessage {} {}",
                         msg.getRequestHeader().getMethod(),
                         msg.getRequestHeader().getURI());
             }
@@ -326,34 +337,11 @@ public class TutorialProxyServer extends ProxyServer {
             } catch (HttpMalformedHeaderException e) {
                 LOG.error(e.getMessage(), e);
             }
-            return true;
-        }
-
-        @Override
-        public boolean onHttpResponseReceived(HttpMessage msg) {
-            if (isTutorialTestMode()) {
-                LOG.info("onHttpResponseReceived {}", msg.getRequestHeader().getURI());
-            }
-            return false;
         }
     }
 
     public TutorialPage getTutorialPage(String name) {
         return this.pages.get(name);
-    }
-
-    private class TutorialProxyThread extends ProxyThread {
-
-        TutorialProxyThread(ProxyServer server, Socket socket) {
-            // TODO change initiator?
-            super(
-                    server,
-                    socket,
-                    new HttpSender(
-                            server.getConnectionParam(),
-                            true,
-                            HttpSender.MANUAL_REQUEST_INITIATOR));
-        }
     }
 
     public void resetTasks() {

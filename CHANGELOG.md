@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added semantic roles and better labelling for screen reader users.
 ### Changed
 - Update minimum ZAP version to 2.11.1.
+- Depend on Network add-on for the tutorial server.
+
 ## [0.13.0] - 2021-10-06
 ### Changed
 - Update minimum ZAP version to 2.11.0.

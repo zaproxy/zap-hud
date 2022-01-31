@@ -65,6 +65,9 @@ zapAddOn {
 
         dependencies {
             addOns {
+                register("network") {
+                    version.set(">= 0.1.0")
+                }
                 register("websocket")
             }
         }
@@ -143,6 +146,7 @@ java {
 val jupiterVersion = "5.8.1"
 
 dependencies {
+    compileOnly("org.zaproxy.addon:network:0.1.0")
     compileOnly(files(fileTree("lib").files))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
@@ -152,6 +156,7 @@ dependencies {
     testImplementation("io.github.bonigarcia:selenium-jupiter:3.4.0")
     testImplementation("org.hamcrest:hamcrest-all:1.3")
     testImplementation("org.mockito:mockito-all:1.10.19")
+    testImplementation("org.zaproxy.addon:network:0.1.0")
     testImplementation(files(fileTree("lib").files))
 }
 
