@@ -51,6 +51,7 @@ import org.parosproxy.paros.network.HttpHeader;
 import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.network.HttpSender;
 import org.parosproxy.paros.view.View;
+import org.zaproxy.addon.network.ExtensionNetwork;
 import org.zaproxy.zap.ZAP;
 import org.zaproxy.zap.eventBus.Event;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialProxyServer;
@@ -115,6 +116,7 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     static {
         List<Class<? extends Extension>> dependencies = new ArrayList<>(1);
+        dependencies.add(ExtensionNetwork.class);
         dependencies.add(ExtensionScript.class);
         dependencies.add(ExtensionWebSocket.class);
 
@@ -190,7 +192,12 @@ public class ExtensionHUD extends ExtensionAdaptor
 
         this.getExtScript().addListener(this);
 
-        tutorialServer = new TutorialProxyServer(this);
+        tutorialServer =
+                new TutorialProxyServer(
+                        this,
+                        Control.getSingleton()
+                                .getExtensionLoader()
+                                .getExtension(ExtensionNetwork.class));
     }
 
     @Override
@@ -205,7 +212,7 @@ public class ExtensionHUD extends ExtensionAdaptor
 
         HudEventPublisher.unregister();
 
-        tutorialServer.stopServer();
+        tutorialServer.stop();
     }
 
     @Override
