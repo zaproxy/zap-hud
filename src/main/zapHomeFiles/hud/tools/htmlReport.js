@@ -6,12 +6,10 @@
 
 const HtmlReport = (function () {
 	// Constants
-	// todo: could probably switch this to a config file?
 	const NAME = 'htmlReport';
 	const LABEL = I18n.t('html_report_tool');
 	const ICON = 'report.png';
 
-	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		const tool = {};
 		tool.name = NAME;

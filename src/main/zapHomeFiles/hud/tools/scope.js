@@ -6,7 +6,6 @@
 
 const Scope = (function () {
 	// Constants
-	// todo: could probably switch this to a config file?
 	const NAME = 'scope';
 	const LABEL = I18n.t('scope_tool');
 	const DATA = {};
@@ -21,7 +20,6 @@ const Scope = (function () {
 	DIALOG.REQUIRED = I18n.t('scope_required');
 	const HUD_CONTEXT = I18n.t('scope_hud_context');
 
-	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		const tool = {};
 		tool.name = NAME;

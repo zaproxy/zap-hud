@@ -6,7 +6,6 @@
 
 const PageAlertsLow = (function () {
 	// Constants
-	// todo: could probably switch this to a config file?
 	const NAME = 'page-alerts-low';
 	const LABEL = I18n.t('alerts_page_low_tool');
 	const DIALOG = I18n.t('alerts_page_title');
@@ -17,7 +16,7 @@ const PageAlertsLow = (function () {
 	const ALERT_TYPE = 'page-alerts';
 	const ALERT_RISK = 'Low';
 	const ALERT_RISK_LABEL = I18n.t('alerts_risk_low');
-	// Todo: change this to a util function that reads in a config file (json/xml)
+
 	function initializeStorage() {
 		const tool = {};
 		tool.name = NAME;

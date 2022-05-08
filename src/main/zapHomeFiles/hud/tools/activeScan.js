@@ -6,7 +6,6 @@
 
 const ActiveScan = (function () {
 	// Constants
-	// todo: could probably switch this to a config file?
 	const NAME = 'active-scan';
 	const LABEL = I18n.t('ascan_tool');
 	const DATA = {};
@@ -25,7 +24,6 @@ const ActiveScan = (function () {
 	DIALOG.STOP_2 = I18n.t('ascan_stop_2');
 	const ACTIVE_SCAN_EVENT = 'org.zaproxy.zap.extension.ascan.ActiveScanEventPublisher';
 
-	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		const tool = {};
 		tool.name = NAME;

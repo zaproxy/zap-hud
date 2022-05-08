@@ -6,7 +6,6 @@
 
 const CommonAlerts = (function () {
 	// Constants
-	// todo: could probably switch this to a config file?
 	const NAME = 'common-alerts';
 	const LABEL = 'Common Alerts';
 	const DATA = {};
@@ -14,7 +13,6 @@ const CommonAlerts = (function () {
 	const alertCache = {};
 	const RISKS = ['Informational', 'Low', 'Medium', 'High'];
 
-	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		// TODO change to try loading from localstorage
 		const tool = {};

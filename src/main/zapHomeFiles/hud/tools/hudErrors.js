@@ -6,14 +6,12 @@
 
 const HudErrors = (function () {
 	// Constants
-	// todo: could probably switch this to a config file?
 	const NAME = 'hudErrors';
 	const LABEL = I18n.t('hud_errors_tool');
 	const ICONS = {};
 	ICONS.NONE = 'bug-grey.png';
 	ICONS.SOME = 'bug-red.png';
 
-	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		const tool = {};
 		tool.name = NAME;

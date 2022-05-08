@@ -6,14 +6,12 @@
 
 const ShowEnable = (function () {
 	// Constants
-	// todo: could probably switch this to a config file?
 	const NAME = 'showEnable';
 	const LABEL = I18n.t('show_tool');
 	const ICONS = {};
 	ICONS.OFF = 'show-off.png';
 	ICONS.ON = 'show-on.png';
 
-	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		const tool = {};
 		tool.name = NAME;

@@ -6,7 +6,6 @@
 
 const SiteTree = (function () {
 	// Constants
-	// todo: could probably switch this to a config file?
 	const NAME = 'site-tree';
 	const LABEL = I18n.t('sites_tool');
 	const DATA = {};
@@ -14,7 +13,6 @@ const SiteTree = (function () {
 	const ICONS = {};
 	ICONS.WORLD = 'world.png';
 
-	// Todo: change this to a util function that reads in a config file (json/xml)
 	function initializeStorage() {
 		const tool = {};
 		tool.name = NAME;
