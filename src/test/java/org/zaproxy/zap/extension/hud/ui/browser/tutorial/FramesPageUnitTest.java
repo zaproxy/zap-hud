@@ -27,6 +27,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.function.Function;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.By;
@@ -50,6 +51,7 @@ public class FramesPageUnitTest extends BrowsersTest {
         GenericUnitTest.runAllTests(driver);
     }
 
+    @Disabled
     @TestTemplate
     public void testPreviousButtonWorks(WebDriver driver) {
         HUD hud = new HUD(driver);
@@ -60,6 +62,7 @@ public class FramesPageUnitTest extends BrowsersTest {
         assertEquals(TutorialStatics.getTutorialHudUrl(UpgradePage.NAME), driver.getCurrentUrl());
     }
 
+    @Disabled
     @TestTemplate
     public void testTaskAndNextButton(WebDriver driver) throws Exception {
         HUD.callZapApiResetTasks();

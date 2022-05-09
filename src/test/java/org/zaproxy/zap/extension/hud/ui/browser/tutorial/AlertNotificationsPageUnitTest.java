@@ -48,6 +48,7 @@ public class AlertNotificationsPageUnitTest extends BrowsersTest {
     }
 
     @TestTemplate
+    @Disabled
     public void testPreviousButtonWorks(WebDriver driver) {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(AlertNotificationsPage.NAME));
