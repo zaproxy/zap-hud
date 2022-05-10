@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.NoSuchElementException;
@@ -62,6 +63,7 @@ public class WelcomePageUnitTest extends BrowsersTest {
                 });
     }
 
+    @Disabled
     @TestTemplate
     public void testNextPageButtonWorks(WebDriver driver) {
         HUD hud = new HUD(driver);

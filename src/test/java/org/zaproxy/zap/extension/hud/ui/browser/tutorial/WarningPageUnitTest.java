@@ -22,6 +22,7 @@ package org.zaproxy.zap.extension.hud.ui.browser.tutorial;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestTemplate;
 import org.openqa.selenium.WebDriver;
@@ -43,6 +44,7 @@ public class WarningPageUnitTest extends BrowsersTest {
         GenericUnitTest.runAllTests(driver);
     }
 
+    @Disabled
     @TestTemplate
     public void testPreviousButtonWorks(WebDriver driver) {
         HUD hud = new HUD(driver);
