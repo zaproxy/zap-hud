@@ -1,5 +1,4 @@
-import org.ysb33r.gradle.nodejs.tasks.NpmTask
-import org.ysb33r.grolifant.api.core.OperatingSystem
+import com.github.gradle.node.npm.task.NpmTask
 import org.zaproxy.gradle.addon.AddOnStatus
 import org.zaproxy.gradle.addon.internal.model.ProjectInfo
 import org.zaproxy.gradle.addon.internal.model.ReleaseState
@@ -18,8 +17,8 @@ plugins {
     id("org.zaproxy.add-on") version "0.8.0"
     id("org.zaproxy.crowdin") version "0.2.1"
     id("com.diffplug.spotless") version "5.17.1"
-    id("org.ysb33r.nodejs.npm") version "0.12.1"
     id("com.github.ben-manes.versions") version "0.39.0"
+    id("com.github.node-gradle.node") version "3.4.0"
 }
 
 apply(from = "$rootDir/gradle/compile.gradle.kts")
@@ -100,24 +99,15 @@ crowdin {
     }
 }
 
-nodejs {
-    executableByVersion("10.24.1")
-    appendPath(project.provider { System.getenv(OperatingSystem.current().pathVar) })
-}
-
-val installNpmDeps by tasks.registering(NpmTask::class) {
-    group = LifecycleBasePlugin.BUILD_GROUP
-    description = "Installs the npm dependencies, to later include in the add-on."
-    inputs.files("package.json", "package-lock.json")
-    outputs.dir("node_modules")
-
-    command("install")
+node {
+    download.set(true)
+    version.set("10.24.1")
 }
 
 val copyNpmDeps by tasks.registering(Copy::class) {
     group = LifecycleBasePlugin.BUILD_GROUP
     description = "Copies the (required) npm dependencies for the add-on."
-    dependsOn(installNpmDeps)
+    dependsOn(tasks.npmInstall)
 
     from("node_modules/vue/dist/vue.js")
     from("node_modules/vue-i18n/dist/vue-i18n.js")
@@ -165,7 +155,7 @@ tasks.withType<Test>().configureEach {
 }
 
 jacoco {
-    toolVersion = "0.8.5"
+    toolVersion = "0.8.8"
 }
 
 val jacocoReportAll by tasks.registering(JacocoReport::class) {
@@ -217,8 +207,8 @@ tasks {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Runs the XO linter on all files."
 
-        command("run")
-        cmdArgs("lint")
+        dependsOn(npmInstall)
+        npmCommand.set(listOf("run", "lint"))
     }
 
     named("check") {
