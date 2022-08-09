@@ -27,6 +27,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
@@ -51,6 +52,7 @@ public class HUD {
 
     public HUD(WebDriver webdriver) {
         this.webdriver = webdriver;
+        this.webdriver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
     }
 
     public static String LEFT_PANEL_ID = "zap-hud-left-panel";

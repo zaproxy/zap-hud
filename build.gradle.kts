@@ -366,7 +366,7 @@ tasks.withType<Test>().configureEach {
     systemProperties.putAll(
         mapOf(
             "wdm.chromeDriverVersion" to "83.0.4103.39",
-            "wdm.geckoDriverVersion" to "0.26.0",
+            "wdm.geckoDriverVersion" to "0.31.0",
             "wdm.forceCache" to "true"
         )
     )
