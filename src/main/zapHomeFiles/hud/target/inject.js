@@ -562,12 +562,15 @@ const injection = (function () {
 
 		window.addEventListener('message', receiveMessages);
 
+		const sandbox = 'allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation';
+
 		const mframe = document.createElement('iframe');
 		mframe.id = MANAGEMENT;
 		mframe.src = ZAP_HUD_FILES + '/file/management.html?url=' + URL + '&frameId=management&tabId=' + tabId;
 		mframe.scrolling = 'no';
 		mframe.style = 'position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647;';
 		mframe.title = 'Management Area';
+		mframe.setAttribute('sandbox', sandbox);
 
 		const lframe = document.createElement('iframe');
 		lframe.id = LEFT_PANEL;
@@ -575,6 +578,7 @@ const injection = (function () {
 		lframe.scrolling = 'no';
 		lframe.style = 'position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;';
 		lframe.title = 'Left Panel';
+		lframe.setAttribute('sandbox', sandbox);
 
 		const rframe = document.createElement('iframe');
 		rframe.id = RIGHT_PANEL;
@@ -582,6 +586,7 @@ const injection = (function () {
 		rframe.scrolling = 'no';
 		rframe.style = 'position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;';
 		rframe.title = 'Right Panel';
+		rframe.setAttribute('sandbox', sandbox);
 
 		const bframe = document.createElement('iframe');
 		bframe.id = BOTTOM_DRAWER;
@@ -589,18 +594,21 @@ const injection = (function () {
 		bframe.scrolling = 'no';
 		bframe.style = 'position: fixed; border: medium none; overflow: hidden; left: 0px; bottom: 0px; width: 100%; height: 50px; z-index: 2147483646;';
 		bframe.title = 'Bottom Drawer';
+		bframe.setAttribute('sandbox', sandbox);
 
 		const dframe = document.createElement('iframe');
 		dframe.id = MAIN_DISPLAY;
 		dframe.src = ZAP_HUD_FILES + '/file/display.html?url=' + URL + '&frameId=display&tabId=' + tabId;
 		dframe.style = 'position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; border: 0px none; display: none; z-index: 2147483647;';
 		dframe.title = 'Main Display';
+		dframe.setAttribute('sandbox', sandbox);
 
 		const gframe = document.createElement('iframe');
 		gframe.id = GROWLER_ALERTS;
 		gframe.src = ZAP_HUD_FILES + '/file/growlerAlerts.html?url=' + URL + '&frameId=growlerAlerts&tabId=' + tabId;
 		gframe.style = 'position: fixed; right: 0px; bottom: 30px; width: 500px; height: 0px;border: 0px none; z-index: 2147483647;';
 		gframe.title = 'Growler Alerts';
+		gframe.setAttribute('sandbox', sandbox);
 
 		document.body.append(mframe);
 		document.body.append(lframe);
