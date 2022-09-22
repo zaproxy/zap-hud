@@ -40,6 +40,7 @@ import org.zaproxy.zap.eventBus.Event;
 import org.zaproxy.zap.view.LayoutHelper;
 
 /** The HUD options panel. */
+@SuppressWarnings("serial")
 public class OptionsHudPanel extends AbstractParamPanel {
 
     private static final long serialVersionUID = -1L;
