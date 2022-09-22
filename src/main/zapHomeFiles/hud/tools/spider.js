@@ -188,9 +188,24 @@ const Spider = (function () {
 			.catch(utils.errorHandler);
 	}
 
+	function spiderStatusHandler(event) {
+		const eventType = event.detail['event.type'];
+		utils.log(LOG_DEBUG, 'SpiderEventPublisher eventListener', 'Received ' + eventType + ' event');
+		if (eventType === 'scan.started') {
+			updateProgress('0%');
+		} else if (eventType === 'scan.progress') {
+			updateProgress(event.detail.scanProgress + '%');
+		} else if (eventType === 'scan.stopped' || eventType === 'scan.completed') {
+			spiderStopped();
+		}
+	}
+
 	self.addEventListener('activate', event => {
 		initializeStorage();
+		// Events up to 2.11.1
 		registerForZapEvents('org.zaproxy.zap.extension.spider.SpiderEventPublisher');
+		// Events post 2.11.1
+		registerForZapEvents('org.zaproxy.addon.spider.SpiderEventPublisher');
 	});
 
 	self.addEventListener('message', event => {
@@ -228,15 +243,10 @@ const Spider = (function () {
 	});
 
 	self.addEventListener('org.zaproxy.zap.extension.spider.SpiderEventPublisher', event => {
-		const eventType = event.detail['event.type'];
-		utils.log(LOG_DEBUG, 'SpiderEventPublisher eventListener', 'Received ' + eventType + ' event');
-		if (eventType === 'scan.started') {
-			updateProgress('0%');
-		} else if (eventType === 'scan.progress') {
-			updateProgress(event.detail.scanProgress + '%');
-		} else if (eventType === 'scan.stopped' || eventType === 'scan.completed') {
-			spiderStopped();
-		}
+		spiderStatusHandler(event);
+	});
+	self.addEventListener('org.zaproxy.addon.spider.SpiderEventPublisher', event => {
+		spiderStatusHandler(event);
 	});
 
 	return {
