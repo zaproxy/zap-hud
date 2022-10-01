@@ -1,6 +1,6 @@
 plugins {
     `java-gradle-plugin`
-    id("com.diffplug.spotless") version "5.12.1"
+    id("com.diffplug.spotless") version "6.11.0"
 }
 
 apply(from = "../gradle/compile.gradle.kts")
@@ -15,8 +15,9 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    val javaVersion = JavaVersion.VERSION_11
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
 }
 
 spotless {

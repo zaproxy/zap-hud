@@ -16,7 +16,7 @@ plugins {
     jacoco
     id("org.zaproxy.add-on") version "0.8.0"
     id("org.zaproxy.crowdin") version "0.2.1"
-    id("com.diffplug.spotless") version "5.17.1"
+    id("com.diffplug.spotless") version "6.11.0"
     id("com.github.ben-manes.versions") version "0.39.0"
     id("com.github.node-gradle.node") version "3.4.0"
 }
@@ -129,8 +129,9 @@ val generateI18nJsFile by tasks.creating(GenerateI18nJsFile::class) {
 sourceSets["main"].output.dir(generatedI18nJsFileDir, "builtBy" to generateI18nJsFile)
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    val javaVersion = JavaVersion.VERSION_11
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
 }
 
 val jupiterVersion = "5.8.1"
