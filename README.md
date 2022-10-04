@@ -1,8 +1,7 @@
 # ![HUD Logo](https://raw.githubusercontent.com/zaproxy/zap-hud/main/assets/images/hud_logo_128px.png) OWASP ZAP Heads Up Display 
 ![Release: Beta](https://img.shields.io/badge/release-beta-brightgreen.svg)
 [![Known Vulnerabilities](https://snyk.io/test/github/zaproxy/zap-hud/badge.svg?targetFile=package.json)](https://snyk.io/test/github/zaproxy/zap-hud?targetFile=package.json)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/zaproxy/zap-hud.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/zaproxy/zap-hud/alerts/)
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/zaproxy/zap-hud.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/zaproxy/zap-hud/context:javascript)
+[![CodeQL](https://github.com/zaproxy/zap-hud/actions/workflows/codeql.yml/badge.svg)](https://github.com/zaproxy/zap-hud/actions/workflows/codeql.yml)
 
 <img align="center" alt="Welcome to the HUD" src="assets/images/ZAP-HUD-Welcome-banner.png" width="100%">
 

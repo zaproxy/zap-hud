@@ -1,3 +1,0 @@
-path_classifiers:
-  third_party:
-    - "src/main/zapHomeFiles/hud/libraries/*.*"
