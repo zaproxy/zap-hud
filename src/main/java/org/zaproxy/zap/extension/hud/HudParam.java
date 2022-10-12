@@ -69,7 +69,6 @@ public class HudParam extends VersionedAbstractParam {
     private static final String PARAM_ENABLE_ON_DOMAIN_MSGS =
             PARAM_BASE_KEY + ".enableOnDomainMsgs";
     private static final String PARAM_UI_OPTION_PREFIX = PARAM_BASE_KEY + ".uiOption.";
-    private static final String PARAM_ENABLE_TELEMETRY = PARAM_BASE_KEY + ".enableTelemetry";
 
     /**
      * The version of the configurations. Used to keep track of configurations changes between
@@ -242,11 +241,6 @@ public class HudParam extends VersionedAbstractParam {
         return enableTelemetry;
     }
 
-    public void setEnableTelemetry(boolean enableTelemetry) {
-        this.enableTelemetry = enableTelemetry;
-        getConfig().setProperty(PARAM_ENABLE_TELEMETRY, enableTelemetry);
-    }
-
     @Override
     protected String getConfigVersionKey() {
         return PARAM_BASE_KEY + VERSION_ATTRIBUTE;
@@ -280,8 +274,6 @@ public class HudParam extends VersionedAbstractParam {
         showWelcomeScreen = getBoolean(PARAM_SHOW_WELCOME_SCREEN, true);
         newChangelog = getBoolean(PARAM_NEW_CHANGELOG, false);
         enableOnDomainMsgs = getBoolean(PARAM_ENABLE_ON_DOMAIN_MSGS, true);
-        enableTelemetry =
-                !Constant.isSilent() && getBoolean(PARAM_ENABLE_TELEMETRY, !Constant.isDevMode());
     }
 
     private List<String> convert(List<Object> objs) {

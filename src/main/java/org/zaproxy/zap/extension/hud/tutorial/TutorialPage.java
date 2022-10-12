@@ -21,6 +21,7 @@ package org.zaproxy.zap.extension.hud.tutorial;
 
 import java.security.SecureRandom;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.network.HttpMessage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.IndexPage;
+import org.zaproxy.zap.utils.Stats;
 
 public abstract class TutorialPage {
 
@@ -120,6 +122,8 @@ public abstract class TutorialPage {
     }
 
     public String getHtml() {
+        // Just record the user got to this page, not the number of times they displayed it
+        Stats.setHighwaterMark("stats.hud.tutorial." + this.getName().toLowerCase(Locale.ROOT), 0);
         String html = tutorialProxyServer.getLocallizedTextFile(this.getName() + ".html");
         if (html != null) {
             if (!this.tutorialProxyServer.isSkipTutorialTasks()

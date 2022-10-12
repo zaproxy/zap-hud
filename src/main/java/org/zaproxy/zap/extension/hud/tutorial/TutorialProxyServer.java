@@ -36,7 +36,6 @@ import org.zaproxy.addon.network.server.HttpMessageHandlerContext;
 import org.zaproxy.addon.network.server.Server;
 import org.zaproxy.zap.extension.api.API;
 import org.zaproxy.zap.extension.hud.ExtensionHUD;
-import org.zaproxy.zap.extension.hud.ExtensionHUD.Telemetry;
 import org.zaproxy.zap.extension.hud.HudParam;
 import org.zaproxy.zap.extension.hud.tutorial.pages.ActiveScanPage;
 import org.zaproxy.zap.extension.hud.tutorial.pages.AjaxSpiderPage;
@@ -348,9 +347,5 @@ public class TutorialProxyServer {
         for (TutorialPage page : pages.values()) {
             page.resetTask();
         }
-    }
-
-    public void telemetryPoint(Telemetry telemetry) {
-        this.extension.telemetryPoint(telemetry);
     }
 }
