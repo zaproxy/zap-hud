@@ -62,9 +62,9 @@ import org.zaproxy.zap.extension.api.ApiResponseElement;
 import org.zaproxy.zap.extension.api.ApiResponseList;
 import org.zaproxy.zap.extension.api.ApiResponseSet;
 import org.zaproxy.zap.extension.api.ApiView;
-import org.zaproxy.zap.extension.hud.ExtensionHUD.Telemetry;
 import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
+import org.zaproxy.zap.utils.Stats;
 
 public class HudAPI extends ApiImplementor {
 
@@ -195,6 +195,7 @@ public class HudAPI extends ApiImplementor {
             logger.debug("callback fileName = {}", fileName);
             if (fileName != null) {
                 if (DOMAIN_FILE_ALLOWLIST.contains(fileName)) {
+                    Stats.incCounter("stats.hud.callback");
                     msg.setResponseBody(
                             this.getFile(msg, ExtensionHUD.TARGET_DIRECTORY + "/" + fileName));
                     // Currently only javascript files are returned
@@ -461,6 +462,7 @@ public class HudAPI extends ApiImplementor {
                 contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
 
                 if (file.equals("serviceworker.js")) {
+                    Stats.incCounter("stats.hud.serviceworker");
                     // Inject the tool filenames
                     StringBuilder sb = new StringBuilder();
                     File toolsDir =
@@ -503,10 +505,9 @@ public class HudAPI extends ApiImplementor {
                                     "<<DEV_MODE>>",
                                     Boolean.toString(
                                             this.extension.getHudParam().isDevelopmentMode()));
-                } else if (file.equals("serviceworker.js")) {
-                    contents = contents.replace("<<ZAP_HUD_WS>>", getWebSocketUrl());
                 } else if (file.equals("management.html")) {
-                    this.extension.telemetryPoint(Telemetry.HUD_START);
+                    // Just record 1 rather than incrementing
+                    Stats.setHighwaterMark("stats.hud.start", 0);
                 } else if (file.equals("management.js")) {
                     contents =
                             contents.replace(

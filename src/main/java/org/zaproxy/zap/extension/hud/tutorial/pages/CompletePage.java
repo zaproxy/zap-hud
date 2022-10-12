@@ -19,7 +19,6 @@
  */
 package org.zaproxy.zap.extension.hud.tutorial.pages;
 
-import org.zaproxy.zap.extension.hud.ExtensionHUD.Telemetry;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialPage;
 import org.zaproxy.zap.extension.hud.tutorial.TutorialProxyServer;
 
@@ -38,11 +37,5 @@ public class CompletePage extends TutorialPage {
     @Override
     public String getName() {
         return NAME;
-    }
-
-    @Override
-    public String getHtml() {
-        this.getTutorialProxyServer().telemetryPoint(Telemetry.TUTORIAL_END);
-        return super.getHtml();
     }
 }

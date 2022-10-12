@@ -52,7 +52,6 @@ public class OptionsHudPanel extends AbstractParamPanel {
     private JTextField baseDirectory;
     private JCheckBox enabledForDesktop = null;
     private JCheckBox enabledForDaemon = null;
-    private JCheckBox enableTelemetry = null;
     private JCheckBox inScopeOnly = null;
     private JCheckBox enableOnDomainMsgs = null;
     private JCheckBox showWelcomeScreen = null;
@@ -85,7 +84,6 @@ public class OptionsHudPanel extends AbstractParamPanel {
         int i = 0;
         panel.add(getEnabledForDesktop(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getEnabledForDaemon(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
-        panel.add(getEnableTelemetry(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getShowWelcomeScreen(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getInScopeOnly(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
         panel.add(getEnableOnDomainMsgs(), LayoutHelper.getGBC(0, ++i, 2, 1.0));
@@ -124,15 +122,6 @@ public class OptionsHudPanel extends AbstractParamPanel {
                             Constant.messages.getString("hud.optionspanel.label.enabledForDaemon"));
         }
         return enabledForDaemon;
-    }
-
-    private JCheckBox getEnableTelemetry() {
-        if (enableTelemetry == null) {
-            enableTelemetry =
-                    new JCheckBox(
-                            Constant.messages.getString("hud.optionspanel.label.enableTelemetry"));
-        }
-        return enableTelemetry;
     }
 
     private JCheckBox getInScopeOnly() {
@@ -214,7 +203,6 @@ public class OptionsHudPanel extends AbstractParamPanel {
 
         getEnabledForDesktop().setSelected(param.isEnabledForDesktop());
         getEnabledForDaemon().setSelected(param.isEnabledForDaemon());
-        getEnableTelemetry().setSelected(param.isEnableTelemetry());
         getBaseDirectory().setText(param.getBaseDirectory());
         getInScopeOnly().setSelected(param.isInScopeOnly());
         getEnableOnDomainMsgs().setSelected(param.isEnableOnDomainMsgs());
@@ -261,7 +249,6 @@ public class OptionsHudPanel extends AbstractParamPanel {
 
         param.setEnabledForDesktop(getEnabledForDesktop().isSelected());
         param.setEnabledForDaemon(getEnabledForDaemon().isSelected());
-        param.setEnableTelemetry(getEnableTelemetry().isSelected());
         param.setBaseDirectory(getBaseDirectory().getText());
         param.setInScopeOnly(getInScopeOnly().isSelected());
         param.setEnableOnDomainMsgs(getEnableOnDomainMsgs().isSelected());
