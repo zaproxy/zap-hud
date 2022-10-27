@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Use stats instead of bitly for telemetry
+- Update minimum ZAP version to 2.12.0.
 
 ## [0.14.0] - 2022-09-22
 ### Added
