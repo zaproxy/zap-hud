@@ -19,7 +19,8 @@ Vue.component('history', {
 			hiddenMessageCount: 0,
 			isRegExError: false,
 			historyItemsFilteredMessage: '',
-			enableRegExText: I18n.t('common_enable_regex')
+			enableRegExText: I18n.t('common_enable_regex'),
+			clearText: I18n.t('common_clear')
 		};
 	},
 	computed: {
@@ -64,6 +65,9 @@ Vue.component('history', {
 		},
 		historyItemsFiltered() {
 			this.historyItemsFilteredMessage = I18n.t('common_items_filtered', [this.hiddenMessageCount, this.messageCount]);
+		},
+		clearHttpMessages() {
+			navigator.serviceWorker.controller.postMessage({tabId, frameId, action: 'clearHttpMessages', tool: 'history'});
 		}
 	},
 	watch: {
@@ -129,7 +133,8 @@ Vue.component('websockets', {
 			hiddenMessageCount: 0,
 			isRegExError: false,
 			websocketsItemsFilteredMessage: '',
-			enableRegExText: I18n.t('common_enable_regex')
+			enableRegExText: I18n.t('common_enable_regex'),
+			clearText: I18n.t('common_clear')
 		};
 	},
 	computed: {
@@ -174,6 +179,9 @@ Vue.component('websockets', {
 		},
 		websocketsItemsFiltered() {
 			this.websocketsItemsFilteredMessage = I18n.t('common_items_filtered', [this.hiddenMessageCount, this.messageCount]);
+		},
+		clearWebSocketsMessages() {
+			navigator.serviceWorker.controller.postMessage({tabId, frameId, action: 'clearWebSocketsMessages', tool: 'websockets'});
 		}
 	},
 	watch: {
@@ -195,7 +203,7 @@ Vue.component('websockets', {
 			})
 			.catch(utils.errorHandler);
 
-		eventBus.$on('setMessages', data => {
+		eventBus.$on('setWebSockets', data => {
 			this.messages = data.messages;
 		});
 
@@ -221,6 +229,10 @@ Vue.component('websockets', {
 				tabsDetails[0].scrollTo(0, tabsDetails.scrollHeight);
 			}
 		}
+	},
+	beforeDestroy() {
+		eventBus.$off('setWebSockets');
+		eventBus.$off('updateWebSockets');
 	}
 });
 
@@ -486,6 +498,20 @@ navigator.serviceWorker.addEventListener('message', event => {
 			break;
 		case 'updateWebSockets':
 			eventBus.$emit('updateWebSockets', {
+				messages: event.data.messages,
+				port
+			});
+
+			break;
+		case 'setMessages':
+			eventBus.$emit('setMessages', {
+				messages: event.data.messages,
+				port
+			});
+
+			break;
+		case 'setWebSockets':
+			eventBus.$emit('setWebSockets', {
 				messages: event.data.messages,
 				port
 			});

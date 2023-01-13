@@ -65,6 +65,14 @@ const WebSockets = (function () {
 			.catch(utils.errorHandler);
 	}
 
+	function clearMessages() {
+		utils.messageAllTabs('drawer', {action: 'setWebSockets', messages: []})
+			.catch(utils.errorHandler);
+
+		tool.messages = [];
+		utils.writeTool(tool);
+	}
+
 	self.addEventListener('org.zaproxy.zap.extension.websocket.WebSocketEventPublisher', event => {
 		const eventType = event.detail['event.type'];
 
@@ -116,6 +124,10 @@ const WebSockets = (function () {
 
 			case 'unload':
 				trimMessages(message.time);
+				break;
+
+			case 'clearWebSocketsMessages':
+				clearMessages();
 				break;
 
 			default:
