@@ -83,14 +83,6 @@ public class ExtensionHUD extends ExtensionAdaptor
 
     protected static final String RESOURCE = "/org/zaproxy/zap/extension/hud/resources";
 
-    private static final ImageIcon ICON =
-            new ImageIcon(ExtensionHUD.class.getResource(RESOURCE + "/radar.png"));
-
-    private static final OverlayIcon IN_SCOPE_ONLY_ICON = new OverlayIcon(ICON);
-
-    private static final ImageIcon TARGET_OVERLAY_ICON =
-            new ImageIcon(ExtensionHUD.class.getResource(RESOURCE + "/target-overlay.png"));
-
     public static final String SCRIPT_TYPE_HUD = "hud";
 
     protected static final String DIRECTORY_NAME = "hud";
@@ -117,14 +109,14 @@ public class ExtensionHUD extends ExtensionAdaptor
         dependencies.add(ExtensionWebSocket.class);
 
         DEPENDENCIES = Collections.unmodifiableList(dependencies);
-
-        IN_SCOPE_ONLY_ICON.add(TARGET_OVERLAY_ICON);
     }
+
+    private ImageIcon mainIcon;
+    private OverlayIcon inScopeOnlyIcon;
 
     private HudAPI api = new HudAPI(this);
 
-    private ScriptType hudScriptType =
-            new ScriptType(SCRIPT_TYPE_HUD, "hud.script.type.hud", ICON, false);
+    private ScriptType hudScriptType;
 
     private Logger log = LogManager.getLogger(this.getClass());
 
@@ -175,6 +167,12 @@ public class ExtensionHUD extends ExtensionAdaptor
         // No reason this cant be used in daemon mode ;)
         extensionHook.addProxyListener(this);
 
+        hudScriptType =
+                new ScriptType(
+                        SCRIPT_TYPE_HUD,
+                        "hud.script.type.hud",
+                        hasView() ? getMainIcon() : null,
+                        false);
         hudScriptType.addCapability("external");
         this.getExtScript().registerScriptType(hudScriptType);
 
@@ -186,6 +184,22 @@ public class ExtensionHUD extends ExtensionAdaptor
                         Control.getSingleton()
                                 .getExtensionLoader()
                                 .getExtension(ExtensionNetwork.class));
+    }
+
+    private ImageIcon getMainIcon() {
+        if (mainIcon == null) {
+            mainIcon = new ImageIcon(getClass().getResource(RESOURCE + "/radar.png"));
+        }
+        return mainIcon;
+    }
+
+    private ImageIcon getInScopeOnlyIcon() {
+        if (inScopeOnlyIcon == null) {
+            inScopeOnlyIcon = new OverlayIcon(getMainIcon());
+            inScopeOnlyIcon.add(
+                    new ImageIcon(getClass().getResource(RESOURCE + "/target-overlay.png")));
+        }
+        return inScopeOnlyIcon;
     }
 
     @Override
@@ -333,9 +347,9 @@ public class ExtensionHUD extends ExtensionAdaptor
     private void setHudButton() {
         if (hudButton != null) {
             if (getHudParam().isInScopeOnly()) {
-                hudButton.setIcon(IN_SCOPE_ONLY_ICON);
+                hudButton.setIcon(getInScopeOnlyIcon());
             } else {
-                hudButton.setIcon(ICON);
+                hudButton.setIcon(getMainIcon());
             }
             DisplayUtils.scaleIcon(hudButton);
         }
