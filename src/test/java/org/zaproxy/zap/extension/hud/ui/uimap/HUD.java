@@ -25,9 +25,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
@@ -52,7 +53,7 @@ public class HUD {
 
     public HUD(WebDriver webdriver) {
         this.webdriver = webdriver;
-        this.webdriver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+        this.webdriver.manage().timeouts().pageLoadTimeout(Duration.of(30, ChronoUnit.SECONDS));
     }
 
     public static String LEFT_PANEL_ID = "zap-hud-left-panel";
@@ -82,7 +83,7 @@ public class HUD {
     }
 
     public WebDriverWait wbWait() {
-        return new WebDriverWait(webdriver, 20);
+        return new WebDriverWait(webdriver, Duration.of(20, ChronoUnit.SECONDS));
     }
 
     public WebElement waitForElement(By by) {
@@ -187,7 +188,7 @@ public class HUD {
     }
 
     public void waitForPageLoad() {
-        Wait<WebDriver> wait = new WebDriverWait(webdriver, 30);
+        Wait<WebDriver> wait = new WebDriverWait(webdriver, Duration.of(30, ChronoUnit.SECONDS));
         wait.until(HUD::documentReadyStateIsComplete);
     }
 
@@ -236,7 +237,7 @@ public class HUD {
 
     private static ExpectedCondition<List<WebElement>> numberOfElementsToBeAtLeast(
             By locator, int number) {
-        return new ExpectedCondition<List<WebElement>>() {
+        return new ExpectedCondition<>() {
             private int currentNumber = 0;
 
             @Override
