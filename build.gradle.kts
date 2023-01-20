@@ -143,7 +143,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:$jupiterVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
 
-    testImplementation("io.github.bonigarcia:selenium-jupiter:3.4.0")
+    testImplementation("io.github.bonigarcia:selenium-jupiter:4.3.2")
+    testImplementation("org.seleniumhq.selenium:selenium-java:4.7.2")
     testImplementation("org.hamcrest:hamcrest-all:1.3")
     testImplementation("org.mockito:mockito-all:1.10.19")
     testImplementation("org.zaproxy.addon:network:0.1.0")

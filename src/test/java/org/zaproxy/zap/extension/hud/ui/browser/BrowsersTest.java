@@ -21,7 +21,7 @@ package org.zaproxy.zap.extension.hud.ui.browser;
 
 import io.github.bonigarcia.seljup.BrowserBuilder;
 import io.github.bonigarcia.seljup.Options;
-import io.github.bonigarcia.seljup.SeleniumExtension;
+import io.github.bonigarcia.seljup.SeleniumJupiter;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -53,19 +53,21 @@ public abstract class BrowsersTest {
 
     @Options
     private static final ChromeOptions CHROME_OPTIONS =
-            new ChromeOptions()
-                    .setHeadless(true)
-                    .setAcceptInsecureCerts(true)
-                    .addArguments("--proxy-bypass-list=<-loopback>", "--window-size=1024,768")
-                    .setProxy(PROXY);
+            (ChromeOptions)
+                    new ChromeOptions()
+                            .setHeadless(true)
+                            .setAcceptInsecureCerts(true)
+                            .addArguments(
+                                    "--proxy-bypass-list=<-loopback>", "--window-size=1024,768")
+                            .setProxy(PROXY);
 
-    @RegisterExtension SeleniumExtension seleniumExtension = new SeleniumExtension();
+    @RegisterExtension SeleniumJupiter seleniumJupiter = new SeleniumJupiter();
 
     @BeforeAll
     void setup() {
-        seleniumExtension.addBrowsers(BrowserBuilder.firefox().build());
+        seleniumJupiter.addBrowsers(BrowserBuilder.firefox().build());
         // TODO uncomment once the tests are more reliable
         // https://github.com/zaproxy/zap-hud/issues/344
-        // seleniumExtension.addBrowsers(BrowserBuilder.chrome().build());
+        // seleniumJupiter.addBrowsers(BrowserBuilder.chrome().build());
     }
 }

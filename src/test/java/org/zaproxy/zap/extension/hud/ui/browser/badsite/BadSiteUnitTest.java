@@ -27,6 +27,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -156,7 +158,7 @@ public class BadSiteUnitTest extends BrowsersTest {
     }
 
     private static Object executeScriptWithRetry(WebDriver driver, String script) {
-        return new WebDriverWait(driver, 10L)
+        return new WebDriverWait(driver, Duration.of(10, ChronoUnit.SECONDS))
                 .ignoring(JavascriptException.class)
                 .until(wd -> ((JavascriptExecutor) wd).executeScript(script));
     }
