@@ -15,7 +15,7 @@ plugins {
     `java-library`
     jacoco
     id("org.zaproxy.add-on") version "0.8.0"
-    id("org.zaproxy.crowdin") version "0.2.1"
+    id("org.zaproxy.crowdin") version "0.3.1"
     id("com.diffplug.spotless") version "6.11.0"
     id("com.github.ben-manes.versions") version "0.39.0"
     id("com.github.node-gradle.node") version "3.4.0"
