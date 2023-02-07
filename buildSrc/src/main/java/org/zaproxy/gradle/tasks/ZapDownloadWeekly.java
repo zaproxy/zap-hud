@@ -19,6 +19,7 @@
  */
 package org.zaproxy.gradle.tasks;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -29,7 +30,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
@@ -40,17 +40,17 @@ import org.w3c.dom.NodeList;
 /** A task that downloads a ZAP weekly release. */
 public class ZapDownloadWeekly extends DefaultTask {
 
-    private final DirectoryProperty into;
+    private final Property<File> into;
     private final Property<String> zapVersions;
 
     public ZapDownloadWeekly() {
         ObjectFactory objects = getProject().getObjects();
-        into = objects.directoryProperty();
+        into = objects.property(File.class);
         zapVersions = objects.property(String.class);
     }
 
     @Input
-    public DirectoryProperty getInto() {
+    public Property<File> getInto() {
         return into;
     }
 
@@ -78,7 +78,7 @@ public class ZapDownloadWeekly extends DefaultTask {
             String weeklyUrl = elementNodeList.item(0).getTextContent();
 
             String fileName = weeklyUrl.substring(weeklyUrl.lastIndexOf('/') + 1);
-            Path file = into.get().getAsFile().toPath().resolve(fileName);
+            Path file = into.get().toPath().resolve(fileName);
             if (Files.exists(file)) {
                 try (ZipFile zip = new ZipFile(file.toFile())) {
                     getLogger().info("Skipping download, the file already exists.");
