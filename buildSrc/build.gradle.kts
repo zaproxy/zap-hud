@@ -1,6 +1,6 @@
 plugins {
     `java-gradle-plugin`
-    id("com.diffplug.spotless") version "6.11.0"
+    id("com.diffplug.spotless") version "6.14.1"
 }
 
 apply(from = "../gradle/compile.gradle.kts")
@@ -10,8 +10,8 @@ repositories {
 }
 
 dependencies {
-    implementation("org.apache.commons:commons-lang3:3.8.1")
-    implementation("org.zaproxy:zap-clientapi:1.6.0")
+    implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("org.zaproxy:zap-clientapi:1.11.0")
 }
 
 java {

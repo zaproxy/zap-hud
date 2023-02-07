@@ -16,9 +16,9 @@ plugins {
     jacoco
     id("org.zaproxy.add-on") version "0.8.0"
     id("org.zaproxy.crowdin") version "0.3.1"
-    id("com.diffplug.spotless") version "6.11.0"
-    id("com.github.ben-manes.versions") version "0.39.0"
-    id("com.github.node-gradle.node") version "3.4.0"
+    id("com.diffplug.spotless") version "6.14.1"
+    id("com.github.ben-manes.versions") version "0.45.0"
+    id("com.github.node-gradle.node") version "3.5.1"
 }
 
 apply(from = "$rootDir/gradle/compile.gradle.kts")
@@ -133,7 +133,7 @@ java {
     targetCompatibility = javaVersion
 }
 
-val jupiterVersion = "5.8.1"
+val jupiterVersion = "5.9.2"
 
 dependencies {
     compileOnly("org.zaproxy.addon:network:0.1.0")
@@ -153,10 +153,6 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
-}
-
-jacoco {
-    toolVersion = "0.8.8"
 }
 
 val jacocoReportAll by tasks.registering(JacocoReport::class) {
@@ -357,9 +353,9 @@ tasks.withType<Test>().configureEach {
     systemProperties.putAll(
         mapOf(
             "wdm.chromeDriverVersion" to "83.0.4103.39",
-            "wdm.geckoDriverVersion" to "0.31.0",
-            "wdm.forceCache" to "true"
-        )
+            "wdm.geckoDriverVersion" to "0.32.1",
+            "wdm.forceCache" to "true",
+        ),
     )
 }
 

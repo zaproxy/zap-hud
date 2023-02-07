@@ -59,7 +59,7 @@ public class ZapJavaStart extends ZapStart implements JavaForkOptions {
                     }
                 });
         command.add(CLASSPATH_ARG);
-        command.add(getZapJarName(getInstallDir().getAsFile().get()));
+        command.add(getZapJarName(getInstallDir().get()));
         command.add(MAIN_CLASSNAME);
         return command;
     }
@@ -121,7 +121,7 @@ public class ZapJavaStart extends ZapStart implements JavaForkOptions {
     @Internal
     @Override
     public File getWorkingDir() {
-        return getInstallDir().getAsFile().get();
+        return getInstallDir().get();
     }
 
     @Override

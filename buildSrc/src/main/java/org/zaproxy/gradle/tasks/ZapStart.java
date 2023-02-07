@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.tools.ant.taskdefs.condition.Os;
-import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
@@ -54,26 +53,26 @@ public class ZapStart extends ZapApiTask {
     private static final String LINUX_START_SCRIPT = "./zap.sh";
     private static final String WINDOWS_START_SCRIPT = "zap.bat";
 
-    private final DirectoryProperty installDir;
-    private final DirectoryProperty homeDir;
+    private final Property<File> installDir;
+    private final Property<File> homeDir;
     private final ListProperty<String> args;
     private final Property<Integer> connectionTimeout;
 
     public ZapStart() {
         ObjectFactory objects = getProject().getObjects();
-        installDir = objects.directoryProperty();
-        homeDir = objects.directoryProperty();
+        installDir = objects.property(File.class);
+        homeDir = objects.property(File.class);
         args = objects.listProperty(String.class);
         connectionTimeout = objects.property(Integer.class).value(DEFAULT_TIMEOUT);
     }
 
     @Input
-    public DirectoryProperty getInstallDir() {
+    public Property<File> getInstallDir() {
         return installDir;
     }
 
     @Input
-    public DirectoryProperty getHomeDir() {
+    public Property<File> getHomeDir() {
         return homeDir;
     }
 
@@ -114,8 +113,8 @@ public class ZapStart extends ZapApiTask {
 
         ProcessBuilder pb = new ProcessBuilder();
         pb.redirectErrorStream(true)
-                .redirectOutput(new File(homeDir.get().getAsFile(), "output"))
-                .directory(installDir.get().getAsFile());
+                .redirectOutput(new File(homeDir.get(), "output"))
+                .directory(installDir.get());
 
         List<String> command = new ArrayList<>();
         command.addAll(getBaseCommand());
@@ -156,7 +155,7 @@ public class ZapStart extends ZapApiTask {
     protected List<String> getBaseCommand() {
         return Arrays.asList(
                 Os.isFamily(Os.FAMILY_WINDOWS)
-                        ? new File(installDir.get().getAsFile(), WINDOWS_START_SCRIPT).toString()
+                        ? new File(installDir.get(), WINDOWS_START_SCRIPT).toString()
                         : LINUX_START_SCRIPT);
     }
 
