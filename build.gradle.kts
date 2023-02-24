@@ -100,7 +100,7 @@ crowdin {
 
 node {
     download.set(true)
-    version.set("10.24.1")
+    version.set("19.7.0")
 }
 
 val copyNpmDeps by tasks.registering(Copy::class) {
