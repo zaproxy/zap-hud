@@ -212,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	window.name = panelKey;
 
 	// Initialize vue app
+	// eslint-disable-next-line no-unused-vars
 	app = new Vue({
 		i18n: I18n.i18n,
 		el: '#app',

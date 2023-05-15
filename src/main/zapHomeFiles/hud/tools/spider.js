@@ -48,17 +48,15 @@ const Spider = (function () {
 				const config = {};
 				config.buttons = [{text: I18n.t('common_cancel'), id: 'cancel'}];
 
-				if (!isRunning) {
-					if (!isInScope) {
-						config.text = DIALOG.START_ADD_SCOPE_1 + domain + DIALOG.START_ADD_SCOPE_2 + domain + DIALOG.START_ADD_SCOPE_3;
-						config.buttons.unshift({text: I18n.t('common_start'), id: 'start-add-to-scope'});
-					} else {
-						config.text = DIALOG.START_1 + domain + DIALOG.START_2;
-						config.buttons.unshift({text: I18n.t('common_start'), id: 'start'});
-					}
-				} else {
+				if (isRunning) {
 					config.text = DIALOG.STOP_1 + tool.runningScope[0] + DIALOG.STOP_2;
 					config.buttons.unshift({text: I18n.t('common_stop'), id: 'stop'});
+				} else if (isInScope) {
+					config.text = DIALOG.START_1 + domain + DIALOG.START_2;
+					config.buttons.unshift({text: I18n.t('common_start'), id: 'start'});
+				} else {
+					config.text = DIALOG.START_ADD_SCOPE_1 + domain + DIALOG.START_ADD_SCOPE_2 + domain + DIALOG.START_ADD_SCOPE_3;
+					config.buttons.unshift({text: I18n.t('common_start'), id: 'start-add-to-scope'});
 				}
 
 				return config;
@@ -85,7 +83,7 @@ const Spider = (function () {
 	function startSpider(tabId, domain) {
 		utils.getUpgradedDomain(domain)
 			.then(upgradedDomain => {
-				apiCallWithResponse('spider', 'action', 'scan', {url: upgradedDomain}).then(response => {
+				apiCallWithResponse('spider', 'action', 'scan', {url: upgradedDomain}).then(_response => {
 					spiderStarted(tabId, domain);
 				})
 					.catch(error => {
@@ -110,7 +108,7 @@ const Spider = (function () {
 	}
 
 	function stopSpider(tabId) {
-		apiCallWithResponse('spider', 'action', 'stop').then(response => {
+		apiCallWithResponse('spider', 'action', 'stop').then(_response => {
 			spiderStopped(tabId);
 		})
 			.catch(error => {
@@ -118,7 +116,7 @@ const Spider = (function () {
 			});
 	}
 
-	function spiderStopped(tabId) {
+	function spiderStopped(_tabId) {
 		utils.loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = false;
@@ -200,7 +198,7 @@ const Spider = (function () {
 		}
 	}
 
-	self.addEventListener('activate', event => {
+	self.addEventListener('activate', _event => {
 		initializeStorage();
 		// Events up to 2.11.1
 		registerForZapEvents('org.zaproxy.zap.extension.spider.SpiderEventPublisher');

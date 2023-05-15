@@ -53,13 +53,13 @@ const SiteTree = (function () {
 
 	function getTool(port) {
 		utils.loadTool(NAME)
-			.then(tool => {
+			.then(_tool => {
 				port.postMessage({label: LABEL, data: DATA.SITES, icon: ICONS.WORLD});
 			})
 			.catch(utils.errorHandler);
 	}
 
-	self.addEventListener('activate', event => {
+	self.addEventListener('activate', _event => {
 		initializeStorage();
 	});
 
