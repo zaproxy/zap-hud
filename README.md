@@ -3,6 +3,25 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/zaproxy/zap-hud/badge.svg?targetFile=package.json)](https://snyk.io/test/github/zaproxy/zap-hud?targetFile=package.json)
 [![CodeQL](https://github.com/zaproxy/zap-hud/actions/workflows/codeql.yml/badge.svg)](https://github.com/zaproxy/zap-hud/actions/workflows/codeql.yml)
 
+# The HUD is no longer under active development
+
+Unfortunately the HUD is no longer under active development due to the fact no one is focusing on it.
+
+The HUD is a unique and innovative interface that we know some people love.
+But it also needs a non trivial amount of maintenance and we just don’t have enough volunteers to maintain it right now.
+
+If you would like to get involved please get in touch via the [ZAP HUD Group](https://groups.google.com/group/zaproxy-hud).
+
+In order to keep maintaining the HUD we do not actually need anyone with Java experience - we have that covered.
+We need someone with good Java Script experience and the confidence to dive into non trivial browser issues.
+
+The HUD is a very unconventional project, and does unusual things in order to get around browser security features.
+Browser changes often break the HUD in strange ways.
+
+We know that the HUD no longer loads reliably all of the time in Firefox and Chrome, and the integration tests we have for it have been broken for some time.
+
+If you are up for a challenge then [let us know](https://groups.google.com/group/zaproxy-hud)!
+
 <img align="center" alt="Welcome to the HUD" src="assets/images/ZAP-HUD-Welcome-banner.png" width="100%">
 
 The HUD is an interface that provides the functionality of ZAP **directly in the browser**.
@@ -31,7 +50,7 @@ or
     ./gradlew runZap
     ```
 
-In all cases you will need Java 8+ installed.
+In all cases you will need Java 11+ installed.
 
 You'll see the HUD Radar icon ![Radar Icon](https://raw.githubusercontent.com/zaproxy/zap-hud/main/src/main/resources/org/zaproxy/zap/extension/hud/resources/radar.png) in the toolbar. When the icon is selected the HUD will be added to your browser.
 
