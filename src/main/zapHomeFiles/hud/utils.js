@@ -726,6 +726,13 @@ const utils = (function () {
 		}
 	}
 
+	/*
+	 * Convert Date object to time string
+	 */
+	function dateToTimeString(dateObject) {
+		return dateObject.toISOString().slice(11, 23);
+	}
+
 	return {
 		parseRequestHeader,
 		parseResponseHeader,
@@ -757,6 +764,7 @@ const utils = (function () {
 		getZapFilePath,
 		getZapImagePath,
 		zapApiErrorDialog,
-		log
+		log,
+		dateToTimeString
 	};
 })();

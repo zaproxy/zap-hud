@@ -617,7 +617,7 @@ Vue.component('websocket-message-modal', {
 
 		eventBus.$on('showWebSocketMessageModal', data => {
 			const date = new Date(Number(data.msg.timestamp));
-			self.time = date.toJSON().slice(11, 23);
+			self.time = utils.dateToTimeString(date);
 			self.payload = data.msg.payload;
 			self.channelId = data.msg.channelId;
 			self.outgoing = data.msg.outgoing;
@@ -680,7 +680,7 @@ Vue.component('break-websocket-message-modal', {
 
 		eventBus.$on('showBreakWebSocketMessageModal', data => {
 			const date = new Date(Number(data.msg.timestamp));
-			self.time = date.toJSON().slice(11, 23);
+			self.time = utils.dateToTimeString(date);
 			self.payload = data.msg.payload;
 			self.channelId = data.msg.channelId;
 			self.outgoing = data.msg.outgoing;

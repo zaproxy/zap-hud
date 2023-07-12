@@ -80,7 +80,7 @@ const WebSockets = (function () {
 			const message = {};
 
 			const date = new Date(Number(event.detail.timeSentInMs));
-			const dateString = date.toJSON().slice(11, 23);
+			const dateString = utils.dateToTimeString(date);
 
 			message.timeInMs = event.detail.timeSentInMs;
 			message.time = dateString;
