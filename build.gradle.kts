@@ -26,6 +26,9 @@ apply(from = "$rootDir/gradle/ci.gradle.kts")
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+    }
 }
 
 description = "Display information from ZAP in browser."
@@ -48,7 +51,7 @@ zapAddOn {
     addOnName.set("HUD - Heads Up Display")
     addOnStatus.set(AddOnStatus.BETA)
 
-    zapVersion.set("2.12.0")
+    zapVersion.set("2.13.0")
 
     releaseLink.set("https://github.com/zaproxy/zap-hud/compare/v@PREVIOUS_VERSION@...v@CURRENT_VERSION@")
     unreleasedLink.set("https://github.com/zaproxy/zap-hud/compare/v@CURRENT_VERSION@...HEAD")
@@ -136,6 +139,8 @@ java {
 val jupiterVersion = "5.9.2"
 
 dependencies {
+    zap("org.zaproxy:zap:2.13.0-SNAPSHOT")
+
     compileOnly("org.zaproxy.addon:network:0.1.0")
     compileOnly(files(fileTree("lib").files))
 
