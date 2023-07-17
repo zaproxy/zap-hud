@@ -26,9 +26,6 @@ apply(from = "$rootDir/gradle/ci.gradle.kts")
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-    }
 }
 
 description = "Display information from ZAP in browser."
@@ -139,8 +136,6 @@ java {
 val jupiterVersion = "5.9.2"
 
 dependencies {
-    zap("org.zaproxy:zap:2.13.0-SNAPSHOT")
-
     compileOnly("org.zaproxy.addon:network:0.1.0")
     compileOnly(files(fileTree("lib").files))
 
