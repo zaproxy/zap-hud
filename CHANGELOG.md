@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Update displayed time format to include leading zeros (Issue 1256).
 
 ## [0.17.0] - 2023-07-11
 ### Changed

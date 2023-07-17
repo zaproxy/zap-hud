@@ -616,8 +616,7 @@ Vue.component('websocket-message-modal', {
 		const self = this;
 
 		eventBus.$on('showWebSocketMessageModal', data => {
-			const date = new Date(Number(data.msg.timestamp));
-			self.time = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
+			self.time = utils.timestampToTimeString(data.msg.timestamp);
 			self.payload = data.msg.payload;
 			self.channelId = data.msg.channelId;
 			self.outgoing = data.msg.outgoing;
@@ -679,8 +678,7 @@ Vue.component('break-websocket-message-modal', {
 		const self = this;
 
 		eventBus.$on('showBreakWebSocketMessageModal', data => {
-			const date = new Date(Number(data.msg.timestamp));
-			self.time = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
+			self.time = utils.timestampToTimeString(data.msg.timestamp);
 			self.payload = data.msg.payload;
 			self.channelId = data.msg.channelId;
 			self.outgoing = data.msg.outgoing;

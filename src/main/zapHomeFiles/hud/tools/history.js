@@ -125,11 +125,10 @@ const History = (function () {
 
 		const message = {};
 
-		const date = new Date(Number(event.detail.timeSentInMs));
-		const dateString = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
+		const timeString = utils.timestampToTimeString(event.detail.timeSentInMs);
 
 		message.timeInMs = event.detail.timeSentInMs;
-		message.time = dateString;
+		message.time = timeString;
 		message.method = event.detail.method;
 		message.url = event.detail.uri;
 		message.code = event.detail.statusCode;

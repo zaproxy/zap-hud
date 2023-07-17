@@ -79,11 +79,10 @@ const WebSockets = (function () {
 		if (eventType === 'ws.message') {
 			const message = {};
 
-			const date = new Date(Number(event.detail.timeSentInMs));
-			const dateString = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
+			const timeString = utils.timestampToTimeString(event.detail.timeSentInMs);
 
 			message.timeInMs = event.detail.timeSentInMs;
-			message.time = dateString;
+			message.time = timeString;
 			message.direction = event.detail.direction;
 			message.length = event.detail.length;
 			message.messageSummary = event.detail.messageSummary;

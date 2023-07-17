@@ -726,6 +726,14 @@ const utils = (function () {
 		}
 	}
 
+	/*
+	 * Convert timestamp to time string
+	 */
+	function timestampToTimeString(timestamp) {
+		const dateObject = new Date(Number(timestamp));
+		return dateObject.toISOString().slice(11, 23);
+	}
+
 	return {
 		parseRequestHeader,
 		parseResponseHeader,
@@ -757,6 +765,7 @@ const utils = (function () {
 		getZapFilePath,
 		getZapImagePath,
 		zapApiErrorDialog,
-		log
+		log,
+		timestampToTimeString
 	};
 })();
