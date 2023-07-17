@@ -727,9 +727,10 @@ const utils = (function () {
 	}
 
 	/*
-	 * Convert Date object to time string
+	 * Convert timestamp to time string
 	 */
-	function dateToTimeString(dateObject) {
+	function timestampToTimeString(timestamp) {
+		const dateObject = new Date(Number(timestamp));
 		return dateObject.toISOString().slice(11, 23);
 	}
 
@@ -765,6 +766,6 @@ const utils = (function () {
 		getZapImagePath,
 		zapApiErrorDialog,
 		log,
-		dateToTimeString
+		timestampToTimeString
 	};
 })();
