@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -207,9 +206,11 @@ public class HUD {
                         + "="
                         + Constants.ZAP_TEST_API_KEY;
 
-        try (InputStream in = new URL(apiUrl).openStream()) {
+        try (InputStream in = new URI(apiUrl).toURL().openStream()) {
             String str = IOUtils.toString(in, "UTF-8");
             return JSONObject.fromObject(str);
+        } catch (URISyntaxException e) {
+            throw new MalformedURLException(e.getMessage());
         }
     }
 

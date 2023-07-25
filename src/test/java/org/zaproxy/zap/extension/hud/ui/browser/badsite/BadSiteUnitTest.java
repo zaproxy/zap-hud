@@ -25,8 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import javax.net.ssl.HttpsURLConnection;
@@ -91,8 +90,7 @@ public class BadSiteUnitTest extends BrowsersTest {
     }
 
     @TestTemplate
-    public void cannotAccessWebSocketsUrlWhenLoadingSwAsScript(WebDriver driver)
-            throws MalformedURLException {
+    public void cannotAccessWebSocketsUrlWhenLoadingSwAsScript(WebDriver driver) throws Exception {
         HUD hud = new HUD(driver);
         hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
         String swUrl = getHudFilesUrl(hud) + SERVICE_WORKER;
@@ -168,9 +166,9 @@ public class BadSiteUnitTest extends BrowsersTest {
      *
      * @param driver
      * @return
-     * @throws MalformedURLException
+     * @throws Exception
      */
-    private String getHudFilesUrl(HUD hud) throws MalformedURLException {
+    private static String getHudFilesUrl(HUD hud) throws Exception {
         if (filesUrl == null) {
             hud.openUrlWaitForHud(TutorialStatics.getTutorialUrl(IntroPage.NAME));
             // Get hold of the API URL
@@ -182,7 +180,7 @@ public class BadSiteUnitTest extends BrowsersTest {
             str = str.substring(str.lastIndexOf("https://"));
             // Sanity check its a valid URL
             assertTrue(str.length() > 0);
-            new URL(str);
+            new URI(str).toURL();
             filesUrl = str;
 
             hud.getWebDriver().switchTo().parentFrame();

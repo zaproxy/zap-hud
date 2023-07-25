@@ -1,4 +1,5 @@
 import com.github.gradle.node.npm.task.NpmTask
+import org.zaproxy.gradle.addon.AddOnPlugin
 import org.zaproxy.gradle.addon.AddOnStatus
 import org.zaproxy.gradle.addon.internal.model.ProjectInfo
 import org.zaproxy.gradle.addon.internal.model.ReleaseState
@@ -14,11 +15,11 @@ import org.zaproxy.gradle.tasks.ZapStart
 plugins {
     `java-library`
     jacoco
-    id("org.zaproxy.add-on") version "0.8.0"
+    id("org.zaproxy.add-on") version "0.9.0"
     id("org.zaproxy.crowdin") version "0.3.1"
-    id("com.diffplug.spotless") version "6.14.1"
-    id("com.github.ben-manes.versions") version "0.45.0"
-    id("com.github.node-gradle.node") version "3.5.1"
+    id("com.diffplug.spotless") version "6.20.0"
+    id("com.github.ben-manes.versions") version "0.47.0"
+    id("com.github.node-gradle.node") version "5.0.0"
 }
 
 apply(from = "$rootDir/gradle/compile.gradle.kts")
@@ -127,26 +128,28 @@ val generateI18nJsFile by tasks.creating(GenerateI18nJsFile::class) {
 
 sourceSets["main"].output.dir(generatedI18nJsFileDir, "builtBy" to generateI18nJsFile)
 
+tasks.named(AddOnPlugin.GENERATE_MANIFEST_TASK_NAME) {
+    dependsOn(copyNpmDeps)
+    dependsOn(generateI18nJsFile)
+}
+
 java {
     val javaVersion = JavaVersion.VERSION_11
     sourceCompatibility = javaVersion
     targetCompatibility = javaVersion
 }
 
-val jupiterVersion = "5.9.2"
-
 dependencies {
     compileOnly("org.zaproxy.addon:network:0.1.0")
     compileOnly(files(fileTree("lib").files))
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:$jupiterVersion")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("io.github.bonigarcia:selenium-jupiter:4.3.2")
-    testImplementation("org.seleniumhq.selenium:selenium-java:4.7.2")
+    testImplementation("io.github.bonigarcia:selenium-jupiter:4.3.6")
+    testImplementation("org.seleniumhq.selenium:selenium-java:4.10.0")
     testImplementation("org.hamcrest:hamcrest-all:1.3")
-    testImplementation("org.mockito:mockito-all:1.10.19")
+    testImplementation("org.mockito:mockito-core:5.4.0")
     testImplementation("org.zaproxy.addon:network:0.1.0")
     testImplementation(files(fileTree("lib").files))
 }
@@ -175,7 +178,7 @@ spotless {
     java {
         licenseHeaderFile("gradle/spotless/license.java")
 
-        googleJavaFormat("1.7").aosp()
+        googleJavaFormat("1.17.0").aosp()
     }
 
     kotlinGradle {
@@ -248,7 +251,7 @@ tasks {
 
         doLast {
             copy {
-                from(zipTree(fileTree(zapDownloadDir.asFile).matching { "*.zip" }.singleFile)).eachFile {
+                from(zipTree(fileTree(zapDownloadDir.asFile).matching { include("*.zip") }.singleFile)).eachFile {
                     path = path.substring(relativePath.segments[0].length)
                 }
                 into(zapInstallDir)
