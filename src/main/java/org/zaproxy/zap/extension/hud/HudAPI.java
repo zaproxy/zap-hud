@@ -119,6 +119,7 @@ public class HudAPI extends ApiImplementor {
      * real shared secret
      */
     public static final String SHARED_TEST_NON_SECRET = "TEST_MODE";
+
     /**
      * Shared secret used to ensure that we only accept messages from the ZAP code running on the
      * target domain

@@ -40,7 +40,7 @@ public abstract class BrowsersTest {
     @Options
     private static final FirefoxOptions FIREFOX_OPTIONS =
             new FirefoxOptions()
-                    .setHeadless(true)
+                    .addArguments("-headless")
                     .setAcceptInsecureCerts(true)
                     .addPreference("network.captive-portal-service.enabled", false)
                     .addPreference("browser.safebrowsing.provider.mozilla.gethashURL", "")
@@ -55,10 +55,11 @@ public abstract class BrowsersTest {
     private static final ChromeOptions CHROME_OPTIONS =
             (ChromeOptions)
                     new ChromeOptions()
-                            .setHeadless(true)
                             .setAcceptInsecureCerts(true)
                             .addArguments(
-                                    "--proxy-bypass-list=<-loopback>", "--window-size=1024,768")
+                                    "--proxy-bypass-list=<-loopback>",
+                                    "--window-size=1024,768",
+                                    "--headless=new")
                             .setProxy(PROXY);
 
     @RegisterExtension SeleniumJupiter seleniumJupiter = new SeleniumJupiter();
