@@ -1,4 +1,4 @@
-# ![HUD Logo](https://raw.githubusercontent.com/zaproxy/zap-hud/main/assets/images/hud_logo_128px.png) OWASP ZAP Heads Up Display 
+# ![HUD Logo](https://raw.githubusercontent.com/zaproxy/zap-hud/main/assets/images/hud_logo_128px.png) ZAP Heads Up Display 
 ![Release: Beta](https://img.shields.io/badge/release-beta-brightgreen.svg)
 [![Known Vulnerabilities](https://snyk.io/test/github/zaproxy/zap-hud/badge.svg?targetFile=package.json)](https://snyk.io/test/github/zaproxy/zap-hud?targetFile=package.json)
 [![CodeQL](https://github.com/zaproxy/zap-hud/actions/workflows/codeql.yml/badge.svg)](https://github.com/zaproxy/zap-hud/actions/workflows/codeql.yml)
@@ -29,7 +29,7 @@ The HUD is an interface that provides the functionality of ZAP **directly in the
 Learn more:
 
 * Blog: [Hacking with a Heads Up Display](https://segment.com/blog/hacking-with-a-heads-up-display/)
-* Video: [The OWASP ZAP HUD - Usable Security Tooling](https://youtu.be/ztfgip-UhWw)
+* Video: [The ZAP HUD - Usable Security Tooling](https://youtu.be/ztfgip-UhWw)
 * Wiki: [Inside the HUD](../../wiki)
 
 ![](https://raw.githubusercontent.com/zaproxy/zap-hud/main/assets/images/hud-break.gif)
