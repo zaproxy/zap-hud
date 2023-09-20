@@ -1,4 +1,4 @@
-import test from 'ava';
+const test = require('ava');
 
 // TODO: use clean build system
 // Dynamically load utils functions from utils.js
