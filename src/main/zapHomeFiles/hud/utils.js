@@ -733,7 +733,8 @@ const utils = (function () {
 		const dateObject = new Date(Number(timestamp));
 		return dateObject.toISOString().slice(11, 23);
 	}
-	module.exports= {
+
+	module.exports = {
 		parseRequestHeader,
 		parseResponseHeader,
 		isFromTrustedOrigin,
@@ -801,6 +802,4 @@ const utils = (function () {
 		log,
 		timestampToTimeString
 	};
-
-
 })();
