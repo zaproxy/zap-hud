@@ -733,7 +733,40 @@ const utils = (function () {
 		const dateObject = new Date(Number(timestamp));
 		return dateObject.toISOString().slice(11, 23);
 	}
-
+	module.exports= {
+		parseRequestHeader,
+		parseResponseHeader,
+		isFromTrustedOrigin,
+		parseDomainFromUrl,
+		getParameter,
+		isHUDInitialized,
+		initializeHUD,
+		loadFrame,
+		saveFrame,
+		registerTool,
+		registerTools,
+		loadTool,
+		writeTool,
+		loadPanelTools,
+		loadAllTools,
+		addToolToPanel,
+		removeToolFromPanel,
+		messageFrame,
+		messageAllTabs,
+		getAllClients,
+		getWindowVisibilityState,
+		messageWindow,
+		sortToolsByPosition,
+		configureButtonHtml,
+		getUpgradedDomain,
+		getUpgradedUrl,
+		errorHandler,
+		getZapFilePath,
+		getZapImagePath,
+		zapApiErrorDialog,
+		log,
+		timestampToTimeString
+	};
 	return {
 		parseRequestHeader,
 		parseResponseHeader,
@@ -768,4 +801,6 @@ const utils = (function () {
 		log,
 		timestampToTimeString
 	};
+
+
 })();
