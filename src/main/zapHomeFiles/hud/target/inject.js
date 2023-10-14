@@ -567,7 +567,6 @@ const injection = (function () {
 		const mframe = document.createElement('iframe');
 		mframe.id = MANAGEMENT;
 		mframe.src = ZAP_HUD_FILES + '/file/management.html?url=' + URL + '&frameId=management&tabId=' + tabId;
-		mframe.scrolling = 'no';
 		mframe.style = 'position: fixed; right: 0px; bottom: 50px; width:28px; height:60px; border: medium none; overflow: hidden; z-index: 2147483647;';
 		mframe.title = 'Management Area';
 		mframe.setAttribute('sandbox', sandbox);
@@ -575,15 +574,13 @@ const injection = (function () {
 		const lframe = document.createElement('iframe');
 		lframe.id = LEFT_PANEL;
 		lframe.src = ZAP_HUD_FILES + '/file/panel.html?url=' + URL + '&orientation=left&frameId=leftPanel&tabId=' + tabId;
-		lframe.scrolling = 'no';
-		lframe.style = 'position: fixed; border: medium none; top: 30%; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;';
+		lframe.style = 'position: fixed; border: medium none; top: 30%; overflow: hidden; border: medium none; left: 0px; width: 110px; height: 300px; z-index: 2147483646;';
 		lframe.title = 'Left Panel';
 		lframe.setAttribute('sandbox', sandbox);
 
 		const rframe = document.createElement('iframe');
 		rframe.id = RIGHT_PANEL;
 		rframe.src = ZAP_HUD_FILES + '/file/panel.html?url=' + URL + '&orientation=right&frameId=rightPanel&tabId=' + tabId;
-		rframe.scrolling = 'no';
 		rframe.style = 'position: fixed; border: medium none; top: 30%; overflow: hidden; right: 0px; width: 110px; height: 300px; z-index: 2147483646;';
 		rframe.title = 'Right Panel';
 		rframe.setAttribute('sandbox', sandbox);
@@ -591,7 +588,6 @@ const injection = (function () {
 		const bframe = document.createElement('iframe');
 		bframe.id = BOTTOM_DRAWER;
 		bframe.src = ZAP_HUD_FILES + '/file/drawer.html?url=' + URL + '&frameId=drawer&tabId=' + tabId;
-		bframe.scrolling = 'no';
 		bframe.style = 'position: fixed; border: medium none; overflow: hidden; left: 0px; bottom: 0px; width: 100%; height: 50px; z-index: 2147483646;';
 		bframe.title = 'Bottom Drawer';
 		bframe.setAttribute('sandbox', sandbox);
