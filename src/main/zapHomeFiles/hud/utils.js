@@ -15,6 +15,7 @@ class NoClientIdError extends Error {}
 
 /* exported utils */
 
+// Here utils is using an IIFE so that it is executed as soon as the file is loaded.
 const utils = (function () {
 	/*
 	 * Utility Functions
