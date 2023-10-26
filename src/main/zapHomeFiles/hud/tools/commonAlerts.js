@@ -31,7 +31,7 @@ const CommonAlerts = (function () {
 		return utils.messageAllTabs('growlerAlerts', {action: 'showGrowlerAlert', alert});
 	}
 
-	self.addEventListener('activate', event => {
+	self.addEventListener('activate', _event => {
 		initializeStorage();
 		registerForZapEvents('org.zaproxy.zap.extension.alert.AlertEventPublisher');
 		registerForZapEvents('org.zaproxy.zap.extension.hud.HudEventPublisher');
@@ -85,7 +85,7 @@ const CommonAlerts = (function () {
 				if (zapReplaceOffset > 0) {
 					// Strip off the string used for resending in the browser
 					// Will be preceded by ? or &
-					origTarget = origTarget.substring(0, zapReplaceOffset - 1);
+					origTarget = origTarget.slice(0, zapReplaceOffset - 1);
 				}
 
 				let target = origTarget;
@@ -145,8 +145,8 @@ const CommonAlerts = (function () {
 								for (const alertName in pageAlerts[alertRisk]) {
 									if (Object.prototype.hasOwnProperty.call(pageAlerts[alertRisk], alertName)) {
 										const reportedParameters = new Set();
-										for (let i = 0; i < pageAlerts[alertRisk][alertName].length; i++) {
-											const alert = pageAlerts[alertRisk][alertName][i];
+
+										pageAlerts[alertRisk][alertName].forEach(alert => {
 											if (alert.param.length > 0 && !reportedParameters.has(alert.param)) {
 												reportedParameters.add(alert.param);
 												utils.messageFrame(event.detail.tabId, 'management', {
@@ -156,7 +156,7 @@ const CommonAlerts = (function () {
 													risk: alert.risk,
 													param: alert.param});
 											}
-										}
+										});
 									}
 								}
 							}
@@ -196,7 +196,7 @@ const CommonAlerts = (function () {
 			}
 
 			const risk = event.detail.riskString;
-			const name = event.detail.name;
+			const {detail: {name}} = event;
 
 			if (alertCache[targetDomain][risk][name] === undefined) {
 				alertCache[targetDomain][risk][name] = {};

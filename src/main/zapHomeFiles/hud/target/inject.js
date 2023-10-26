@@ -33,7 +33,7 @@ const injection = (function () {
 		const r = Math.floor(Math.random() * 1000);
 		const tabId = String(millis) + '-' + r;
 
-		return tabId.substring(6);
+		return tabId.slice(6);
 	}
 
 	/* TARGET INTERACTIONS */
@@ -46,27 +46,27 @@ const injection = (function () {
 	/* Change width of iframe for expanding buttons */
 	function expandPanel(panelOrientation) {
 		// Todo: is this too hacky?
-		const panel = document.getElementById(HUD_PREFIX + panelOrientation + '-panel');
+		const panel = document.querySelector('#' + HUD_PREFIX + panelOrientation + '-panel');
 
 		panel.style.width = '300px';
 	}
 
 	function contractPanel(panelOrientation) {
-		const panel = document.getElementById(HUD_PREFIX + panelOrientation + '-panel');
+		const panel = document.querySelector('#' + HUD_PREFIX + panelOrientation + '-panel');
 
 		panel.style.width = '110px';
 	}
 
 	/* Dynamically size growler iframes with number of alerts */
 	function heightenGrowlerFrame(lines) {
-		const panel = document.getElementById(GROWLER_ALERTS);
+		const panel = document.querySelector('#' + GROWLER_ALERTS);
 		const offset = 56 + (30 * lines);
 
 		panel.style.height = (panel.offsetHeight + offset) + 'px';
 	}
 
 	function shortenGrowlerFrame(lines) {
-		const panel = document.getElementById(GROWLER_ALERTS);
+		const panel = document.querySelector('#' + GROWLER_ALERTS);
 		const offset = 56 + (30 * lines);
 
 		panel.style.height = (panel.offsetHeight - offset) + 'px';
@@ -74,95 +74,95 @@ const injection = (function () {
 
 	/* Dynamically size iframes with number of buttons */
 	function heighten(panelOrientation) {
-		const panel = document.getElementById(HUD_PREFIX + panelOrientation + '-panel');
+		const panel = document.querySelector('#' + HUD_PREFIX + panelOrientation + '-panel');
 
 		panel.style.height = (panel.offsetHeight + 33) + 'px';
 	}
 
 	function shorten(panelOrientation) {
-		const panel = document.getElementById(HUD_PREFIX + panelOrientation + '-panel');
+		const panel = document.querySelector('#' + HUD_PREFIX + panelOrientation + '-panel');
 
 		panel.style.height = (panel.offsetHeight - 33) + 'px';
 	}
 
 	function showHudPanels() {
-		document.getElementById(LEFT_PANEL).style.display = '';
-		document.getElementById(RIGHT_PANEL).style.display = '';
-		const panel = document.getElementById(BOTTOM_DRAWER);
+		document.querySelector('#' + LEFT_PANEL).style.display = '';
+		document.querySelector('#' + RIGHT_PANEL).style.display = '';
+		const panel = document.querySelector('#' + BOTTOM_DRAWER);
 		panel.style.width = '100%';
 		panel.style.left = '0px';
 		panel.style.right = '';
 	}
 
 	function hideHudPanels() {
-		document.getElementById(LEFT_PANEL).style.display = 'none';
-		document.getElementById(RIGHT_PANEL).style.display = 'none';
-		const panel = document.getElementById(BOTTOM_DRAWER);
+		document.querySelector('#' + LEFT_PANEL).style.display = 'none';
+		document.querySelector('#' + RIGHT_PANEL).style.display = 'none';
+		const panel = document.querySelector('#' + BOTTOM_DRAWER);
 		panel.style.width = '90px';
 		panel.style.left = '';
 		panel.style.right = '0px';
 	}
 
 	function hideAllDisplayFrames() {
-		document.getElementById(LEFT_PANEL).style.display = 'none';
-		document.getElementById(RIGHT_PANEL).style.display = 'none';
-		document.getElementById(BOTTOM_DRAWER).style.display = 'none';
-		document.getElementById(GROWLER_ALERTS).style.display = 'none';
+		document.querySelector('#' + LEFT_PANEL).style.display = 'none';
+		document.querySelector('#' + RIGHT_PANEL).style.display = 'none';
+		document.querySelector('#' + BOTTOM_DRAWER).style.display = 'none';
+		document.querySelector('#' + GROWLER_ALERTS).style.display = 'none';
 	}
 
 	function showAllDisplayFrames() {
-		document.getElementById(LEFT_PANEL).style.display = '';
-		document.getElementById(RIGHT_PANEL).style.display = '';
-		document.getElementById(BOTTOM_DRAWER).style.display = '';
-		document.getElementById(GROWLER_ALERTS).style.display = '';
+		document.querySelector('#' + LEFT_PANEL).style.display = '';
+		document.querySelector('#' + RIGHT_PANEL).style.display = '';
+		document.querySelector('#' + BOTTOM_DRAWER).style.display = '';
+		document.querySelector('#' + GROWLER_ALERTS).style.display = '';
 	}
 
 	function refreshAllFrames() {
-		document.getElementById(LEFT_PANEL).src = document.getElementById(LEFT_PANEL).src;
-		document.getElementById(RIGHT_PANEL).src = document.getElementById(RIGHT_PANEL).src;
-		document.getElementById(MAIN_DISPLAY).src = document.getElementById(MAIN_DISPLAY).src;
-		document.getElementById(BOTTOM_DRAWER).src = document.getElementById(BOTTOM_DRAWER).src;
-		document.getElementById(GROWLER_ALERTS).src = document.getElementById(GROWLER_ALERTS).src;
-		document.getElementById(MANAGEMENT).src = document.getElementById(MANAGEMENT).src;
+		document.querySelector('#' + LEFT_PANEL).src = document.querySelector('#' + LEFT_PANEL).src;
+		document.querySelector('#' + RIGHT_PANEL).src = document.querySelector('#' + RIGHT_PANEL).src;
+		document.querySelector('#' + MAIN_DISPLAY).src = document.querySelector('#' + MAIN_DISPLAY).src;
+		document.querySelector('#' + BOTTOM_DRAWER).src = document.querySelector('#' + BOTTOM_DRAWER).src;
+		document.querySelector('#' + GROWLER_ALERTS).src = document.querySelector('#' + GROWLER_ALERTS).src;
+		document.querySelector('#' + MANAGEMENT).src = document.querySelector('#' + MANAGEMENT).src;
 	}
 
 	function refreshDisplayFrames() {
-		document.getElementById(LEFT_PANEL).src = document.getElementById(LEFT_PANEL).src;
-		document.getElementById(RIGHT_PANEL).src = document.getElementById(RIGHT_PANEL).src;
-		document.getElementById(MAIN_DISPLAY).src = document.getElementById(MAIN_DISPLAY).src;
-		document.getElementById(BOTTOM_DRAWER).src = document.getElementById(BOTTOM_DRAWER).src;
-		document.getElementById(GROWLER_ALERTS).src = document.getElementById(GROWLER_ALERTS).src;
+		document.querySelector('#' + LEFT_PANEL).src = document.querySelector('#' + LEFT_PANEL).src;
+		document.querySelector('#' + RIGHT_PANEL).src = document.querySelector('#' + RIGHT_PANEL).src;
+		document.querySelector('#' + MAIN_DISPLAY).src = document.querySelector('#' + MAIN_DISPLAY).src;
+		document.querySelector('#' + BOTTOM_DRAWER).src = document.querySelector('#' + BOTTOM_DRAWER).src;
+		document.querySelector('#' + GROWLER_ALERTS).src = document.querySelector('#' + GROWLER_ALERTS).src;
 	}
 
 	function refreshManagementFrame() {
-		document.getElementById(MANAGEMENT).src = document.getElementById(MANAGEMENT).src;
+		document.querySelector('#' + MANAGEMENT).src = document.querySelector('#' + MANAGEMENT).src;
 	}
 
 	/* Hide or show main iframe for popups and dialogs */
 	function showMainDisplay() {
-		document.getElementById(MAIN_DISPLAY).style.display = '';
+		document.querySelector('#' + MAIN_DISPLAY).style.display = '';
 	}
 
 	function hideMainDisplay() {
-		document.getElementById(MAIN_DISPLAY).style.display = 'none';
+		document.querySelector('#' + MAIN_DISPLAY).style.display = 'none';
 	}
 
 	function showBottomDrawer() {
-		document.getElementById(BOTTOM_DRAWER).style.height = '30%';
+		document.querySelector('#' + BOTTOM_DRAWER).style.height = '30%';
 	}
 
 	function hideBottomDrawer() {
-		document.getElementById(BOTTOM_DRAWER).style.height = '50px';
+		document.querySelector('#' + BOTTOM_DRAWER).style.height = '50px';
 	}
 
 	function expandManagement() {
-		document.getElementById(MANAGEMENT).style.width = '100%';
-		document.getElementById(MANAGEMENT).style.height = '100%';
+		document.querySelector('#' + MANAGEMENT).style.width = '100%';
+		document.querySelector('#' + MANAGEMENT).style.height = '100%';
 	}
 
 	function contractManagement() {
-		document.getElementById(MANAGEMENT).style.width = '0px';
-		document.getElementById(MANAGEMENT).style.height = '0px';
+		document.querySelector('#' + MANAGEMENT).style.width = '0px';
+		document.querySelector('#' + MANAGEMENT).style.height = '0px';
 	}
 
 	// TODO showEnable section - put this code in a separate file and inject ?
@@ -281,13 +281,13 @@ const injection = (function () {
 		}
 
 		// Send to the management frame with the shared secret
-		const iframe = document.getElementById(MANAGEMENT);
+		const iframe = document.querySelector('#' + MANAGEMENT);
 		iframe.contentWindow.postMessage({action: 'showEnable.count', tabId, count, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
 	}
 
 	function highlightAlert(alert) {
 		const id = alert.param;
-		let element = document.getElementById(id);
+		let element = document.querySelector('#' + id);
 		if (!element) {
 			const els = document.getElementsByName(id);
 			for (const namedElement of els) {
@@ -416,7 +416,7 @@ const injection = (function () {
 		}
 
 		// Send to the management frame with the shared secret
-		const iframe = document.getElementById(MANAGEMENT);
+		const iframe = document.querySelector('#' + MANAGEMENT);
 		iframe.contentWindow.postMessage({action: 'showComments.count', tabId,
 			count, suspicious: sus, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
 	}
@@ -425,7 +425,7 @@ const injection = (function () {
 
 	function showZapAlertInternal(alertId) {
 		// Send to the management frame with the shared secret
-		const iframe = document.getElementById(MANAGEMENT);
+		const iframe = document.querySelector('#' + MANAGEMENT);
 		iframe.contentWindow.postMessage({action: 'commonAlerts.showAlert', alertId, tabId, sharedSecret: ZAP_SHARED_SECRET}, ZAP_HUD_FILES);
 	}
 
@@ -623,8 +623,8 @@ const injection = (function () {
 		if (zapReplaceOffset > 0) {
 			// Hide the zapHudReplaceReq injected when resending a message in the browser
 			// But don't loose any fragment
-			const fragment = window.location.hash.substr(1);
-			let origUrl = window.location.href.substring(0, zapReplaceOffset - 1);
+			const fragment = window.location.hash.slice(1);
+			let origUrl = window.location.href.slice(0, zapReplaceOffset - 1);
 			if (fragment) {
 				origUrl += '#' + fragment;
 			}

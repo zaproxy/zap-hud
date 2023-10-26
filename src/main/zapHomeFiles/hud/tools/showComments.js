@@ -46,10 +46,10 @@ const ShowComments = (function () {
 	}
 
 	function switchState(tabId) {
-		if (!loc.isRunning) {
-			switchOn(tabId);
-		} else {
+		if (loc.isRunning) {
 			switchOff(tabId);
+		} else {
+			switchOn(tabId);
 		}
 	}
 
@@ -129,7 +129,7 @@ const ShowComments = (function () {
 			.catch(utils.errorHandler);
 	}
 
-	self.addEventListener('activate', event => {
+	self.addEventListener('activate', _event => {
 		initializeStorage();
 	});
 
