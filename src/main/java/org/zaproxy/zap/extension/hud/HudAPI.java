@@ -131,6 +131,7 @@ public class HudAPI extends ApiImplementor {
 
     private static Logger logger = LogManager.getLogger(HudAPI.class);
 
+    @SuppressWarnings("this-escape")
     public HudAPI(ExtensionHUD extension) {
         this.extension = extension;
 

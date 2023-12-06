@@ -83,6 +83,7 @@ public class TutorialProxyServer {
     private Map<String, TutorialPage> pages = new HashMap<>();
     private Server server;
 
+    @SuppressWarnings("this-escape")
     public TutorialProxyServer(ExtensionHUD extension, ExtensionNetwork extensionNetwork) {
         this.extension = extension;
         this.extensionNetwork = extensionNetwork;

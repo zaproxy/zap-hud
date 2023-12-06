@@ -61,6 +61,7 @@ public class OptionsHudPanel extends AbstractParamPanel {
     private JCheckBox skipTutorialTasks = null;
     private JButton resetTutorialTasks = null;
 
+    @SuppressWarnings("this-escape")
     public OptionsHudPanel(ExtensionHUD extension) {
         super();
         setName(NAME);

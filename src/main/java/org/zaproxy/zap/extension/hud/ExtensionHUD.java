@@ -114,7 +114,7 @@ public class ExtensionHUD extends ExtensionAdaptor
     private ImageIcon mainIcon;
     private OverlayIcon inScopeOnlyIcon;
 
-    private HudAPI api = new HudAPI(this);
+    private HudAPI api;
 
     private ScriptType hudScriptType;
 
@@ -145,6 +145,7 @@ public class ExtensionHUD extends ExtensionAdaptor
     public void hook(ExtensionHook extensionHook) {
         super.hook(extensionHook);
 
+        api = new HudAPI(this);
         this.api.addApiOptions(getHudParam());
         extensionHook.addApiImplementor(this.api);
         extensionHook.addApiImplementor(this.api.getHudFileProxy());

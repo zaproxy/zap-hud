@@ -43,6 +43,7 @@ public class ZapDownloadWeekly extends DefaultTask {
     private final Property<File> into;
     private final Property<String> zapVersions;
 
+    @SuppressWarnings("this-escape")
     public ZapDownloadWeekly() {
         ObjectFactory objects = getProject().getObjects();
         into = objects.property(File.class);

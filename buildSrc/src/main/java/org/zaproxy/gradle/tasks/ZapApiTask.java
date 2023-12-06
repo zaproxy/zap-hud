@@ -37,6 +37,7 @@ public class ZapApiTask extends DefaultTask {
     private final Property<Integer> port;
     private final Property<String> apiKey;
 
+    @SuppressWarnings("this-escape")
     public ZapApiTask() {
         ObjectFactory objects = getProject().getObjects();
         address = objects.property(String.class);

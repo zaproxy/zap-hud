@@ -34,6 +34,7 @@ public class AlertNotificationsPage extends TutorialAlertsPage {
         super(tutorialProxyServer);
     }
 
+    @SuppressWarnings("this-escape")
     public AlertNotificationsPage(TutorialProxyServer tutorialProxyServer, TutorialPage prev) {
         super(tutorialProxyServer, prev);
         this.setTaskCompleted(false);
