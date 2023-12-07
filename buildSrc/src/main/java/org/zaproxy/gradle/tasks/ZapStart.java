@@ -58,6 +58,7 @@ public class ZapStart extends ZapApiTask {
     private final ListProperty<String> args;
     private final Property<Integer> connectionTimeout;
 
+    @SuppressWarnings("this-escape")
     public ZapStart() {
         ObjectFactory objects = getProject().getObjects();
         installDir = objects.property(File.class);

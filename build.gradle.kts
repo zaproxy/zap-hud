@@ -15,14 +15,14 @@ import org.zaproxy.gradle.tasks.ZapStart
 plugins {
     `java-library`
     jacoco
-    id("org.zaproxy.add-on") version "0.9.0"
+    id("org.zaproxy.add-on") version "0.10.0"
     id("org.zaproxy.crowdin") version "0.3.1"
-    id("com.diffplug.spotless") version "6.20.0"
-    id("com.github.ben-manes.versions") version "0.47.0"
-    id("com.github.node-gradle.node") version "5.0.0"
+    id("com.diffplug.spotless")
+    id("org.zaproxy.common")
+    id("com.github.ben-manes.versions") version "0.50.0"
+    id("com.github.node-gradle.node")
 }
 
-apply(from = "$rootDir/gradle/compile.gradle.kts")
 apply(from = "$rootDir/gradle/ci.gradle.kts")
 
 repositories {
@@ -175,11 +175,16 @@ fun sourcesWithoutLibs(extension: String) =
     }
 
 spotless {
-    java {
-        licenseHeaderFile("gradle/spotless/license.java")
-
-        googleJavaFormat("1.17.0").aosp()
-    }
+    format("properties", {
+        targetExclude(
+            ".gradle/**",
+            ".sonarcloud.properties",
+            "buildSrc/**",
+            "**/*Messages_*.properties",
+            "**/gradle.properties",
+            "**/gradle-wrapper.properties",
+        )
+    })
 
     kotlinGradle {
         ktlint()

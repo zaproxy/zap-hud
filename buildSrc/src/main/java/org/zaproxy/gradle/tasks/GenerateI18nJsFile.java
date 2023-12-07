@@ -85,6 +85,7 @@ public class GenerateI18nJsFile extends DefaultTask {
     private final Property<Boolean> reviewMode;
     private final RegularFileProperty i18nJsFile;
 
+    @SuppressWarnings("this-escape")
     public GenerateI18nJsFile() {
         ObjectFactory objects = getProject().getObjects();
         bundleName = objects.property(String.class);
