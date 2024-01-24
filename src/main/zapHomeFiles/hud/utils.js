@@ -15,6 +15,7 @@ class NoClientIdError extends Error {}
 
 /* exported utils */
 
+// Here utils is using an IIFE so that it is executed as soon as the file is loaded.
 const utils = (function () {
 	/*
 	 * Utility Functions
@@ -734,6 +735,40 @@ const utils = (function () {
 		return dateObject.toISOString().slice(11, 23);
 	}
 
+	module.exports = {
+		parseRequestHeader,
+		parseResponseHeader,
+		isFromTrustedOrigin,
+		parseDomainFromUrl,
+		getParameter,
+		isHUDInitialized,
+		initializeHUD,
+		loadFrame,
+		saveFrame,
+		registerTool,
+		registerTools,
+		loadTool,
+		writeTool,
+		loadPanelTools,
+		loadAllTools,
+		addToolToPanel,
+		removeToolFromPanel,
+		messageFrame,
+		messageAllTabs,
+		getAllClients,
+		getWindowVisibilityState,
+		messageWindow,
+		sortToolsByPosition,
+		configureButtonHtml,
+		getUpgradedDomain,
+		getUpgradedUrl,
+		errorHandler,
+		getZapFilePath,
+		getZapImagePath,
+		zapApiErrorDialog,
+		log,
+		timestampToTimeString
+	};
 	return {
 		parseRequestHeader,
 		parseResponseHeader,
