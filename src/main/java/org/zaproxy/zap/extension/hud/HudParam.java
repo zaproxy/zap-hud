@@ -256,7 +256,7 @@ public class HudParam extends VersionedAbstractParam {
         baseDirectory =
                 getString(
                         PARAM_BASE_DIRECTORY, Constant.getZapHome() + ExtensionHUD.DIRECTORY_NAME);
-        enabledForDesktop = getBoolean(PARAM_ENABLED_DESKTOP, true);
+        enabledForDesktop = getBoolean(PARAM_ENABLED_DESKTOP, false);
         enabledForDaemon = getBoolean(PARAM_ENABLED_DAEMON, false);
         developmentMode = getBoolean(PARAM_DEV_MODE, false);
         // TODO default allowUnsafeEval to false once the HUD works without it set
