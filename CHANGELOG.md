@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- Update minimum ZAP version to 2.15.0.
 - Disable the HUD by default - it still works but its flaky, and currently not a focus for us.
 
 ## [0.18.0] - 2023-10-12
