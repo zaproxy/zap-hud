@@ -15,11 +15,11 @@ import org.zaproxy.gradle.tasks.ZapStart
 plugins {
     `java-library`
     jacoco
-    id("org.zaproxy.add-on") version "0.10.0"
+    id("org.zaproxy.add-on") version "0.11.0"
     id("org.zaproxy.crowdin") version "0.4.0"
     id("com.diffplug.spotless")
     id("org.zaproxy.common")
-    id("com.github.ben-manes.versions") version "0.50.0"
+    id("com.github.ben-manes.versions") version "0.51.0"
     id("com.github.node-gradle.node")
 }
 
@@ -41,8 +41,28 @@ val testResultsDir = layout.buildDirectory.dir("reports/tests/test").get()
 val zapPort = 8999
 // Use a key just to make sure the HUD works with one
 val zapApiKey = "password123"
-val hudDevArgs = listOf("-config", "hud.enabledForDesktop=true", "-config", "hud.enabledForDaemon=true", "-config", "hud.devMode=true", "-config", "hud.unsafeEval=true")
-val zapCmdlineOpts = listOf("-silent", "-config", "hud.tutorialPort=9998", "-config", "hud.tutorialTestMode=true", "-config", "hud.showWelcomeScreen=false", "-daemon") + hudDevArgs
+val hudDevArgs =
+    listOf(
+        "-config",
+        "hud.enabledForDesktop=true",
+        "-config",
+        "hud.enabledForDaemon=true",
+        "-config",
+        "hud.devMode=true",
+        "-config",
+        "hud.unsafeEval=true",
+    )
+val zapCmdlineOpts =
+    listOf(
+        "-silent",
+        "-config",
+        "hud.tutorialPort=9998",
+        "-config",
+        "hud.tutorialTestMode=true",
+        "-config",
+        "hud.showWelcomeScreen=false",
+        "-daemon",
+    ) + hudDevArgs
 
 zapAddOn {
     addOnId.set("hud")
@@ -101,7 +121,7 @@ crowdin {
 
 node {
     download.set(true)
-    version.set("19.7.0")
+    version.set("20.13.0")
 }
 
 val copyNpmDeps by tasks.registering(Copy::class) {
@@ -143,13 +163,13 @@ dependencies {
     compileOnly("org.zaproxy.addon:network:0.1.0")
     compileOnly(files(fileTree("lib").files))
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testImplementation("io.github.bonigarcia:selenium-jupiter:4.3.6")
-    testImplementation("org.seleniumhq.selenium:selenium-java:4.10.0")
+    testImplementation("org.seleniumhq.selenium:selenium-java:4.21.0")
     testImplementation("org.hamcrest:hamcrest-all:1.3")
-    testImplementation("org.mockito:mockito-core:5.4.0")
+    testImplementation("org.mockito:mockito-core:5.12.0")
     testImplementation("org.zaproxy.addon:network:0.1.0")
     testImplementation(files(fileTree("lib").files))
 }
@@ -361,7 +381,7 @@ tasks.withType<Test>().configureEach {
     systemProperties.putAll(
         mapOf(
             "wdm.chromeDriverVersion" to "83.0.4103.39",
-            "wdm.geckoDriverVersion" to "0.32.1",
+            "wdm.geckoDriverVersion" to "0.34.0",
             "wdm.forceCache" to "true",
         ),
     )
