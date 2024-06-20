@@ -47,7 +47,7 @@ const Break = (function () {
 				utils.zapApiErrorDialog(tabId, error);
 				throw error;
 			})
-			.then(response => {
+			.then(_response => {
 				utils.loadTool(NAME)
 					.then(tool => {
 						tool.isRunning = true;
@@ -68,7 +68,7 @@ const Break = (function () {
 				utils.zapApiErrorDialog(tabId, error);
 				throw error;
 			})
-			.then(response => {
+			.then(_response => {
 				utils.loadTool(NAME)
 					.then(tool => {
 						tool.isRunning = false;
@@ -136,15 +136,15 @@ const Break = (function () {
 
 		utils.getAllClients('display')
 			.then(clients => {
-				const isFirefox = this.navigator.userAgent.indexOf('Firefox') > -1;
+				const isFirefox = this.navigator.userAgent.includes('Firefox');
 				let r = false;
 
 				if (isFirefox) {
-					for (let i = 0; i < clients.length; i++) {
-						if (clients[i].visibilityState === 'visible') {
+					clients.forEach(client => {
+						if (client.visibilityState === 'visible') {
 							r = true;
 						}
-					}
+					});
 				} else if (clients.length > 0) {
 					r = true;
 				}
@@ -198,15 +198,15 @@ const Break = (function () {
 	function showBreakWebSocketDisplay(data) {
 		utils.getAllClients('display')
 			.then(clients => {
-				const isFirefox = this.navigator.userAgent.indexOf('Firefox') > -1;
+				const isFirefox = this.navigator.userAgent.includes('Firefox');
 				let r = false;
 
 				if (isFirefox) {
-					for (let i = 0; i < clients.length; i++) {
-						if (clients[i].visibilityState === 'visible') {
+					clients.forEach(client => {
+						if (client.visibilityState === 'visible') {
 							r = true;
 						}
-					}
+					});
 				} else if (clients.length > 0) {
 					r = true;
 				}
@@ -266,7 +266,7 @@ const Break = (function () {
 			.catch(utils.errorHandler);
 	}
 
-	self.addEventListener('activate', event => {
+	self.addEventListener('activate', _event => {
 		initializeStorage();
 		registerForZapEvents('org.zaproxy.zap.extension.brk.BreakEventPublisher');
 	});

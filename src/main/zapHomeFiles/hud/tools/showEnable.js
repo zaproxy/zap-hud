@@ -39,10 +39,10 @@ const ShowEnable = (function () {
 	function switchState() {
 		checkIsRunning()
 			.then(isRunning => {
-				if (!isRunning) {
-					switchOn();
-				} else {
+				if (isRunning) {
 					switchOff();
+				} else {
+					switchOn();
 				}
 			})
 			.catch(utils.errorHandler);
@@ -106,7 +106,7 @@ const ShowEnable = (function () {
 			.catch(utils.errorHandler);
 	}
 
-	self.addEventListener('activate', event => {
+	self.addEventListener('activate', _event => {
 		initializeStorage();
 	});
 

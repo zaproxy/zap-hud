@@ -39,20 +39,20 @@ const Scope = (function () {
 			.then(isInScope => {
 				const config = {};
 
-				if (!isInScope) {
+				if (isInScope) {
+					config.text = DIALOG.IN;
+					config.buttons = [
+						{text: I18n.t('common_remove'),
+							id: 'remove'},
+						{text: I18n.t('common_cancel'),
+							id: 'cancel'}
+					];
+				} else {
 					config.title = LABEL;
 					config.text = DIALOG.OUT;
 					config.buttons = [
 						{text: I18n.t('common_add'),
 							id: 'add'},
-						{text: I18n.t('common_cancel'),
-							id: 'cancel'}
-					];
-				} else {
-					config.text = DIALOG.IN;
-					config.buttons = [
-						{text: I18n.t('common_remove'),
-							id: 'remove'},
 						{text: I18n.t('common_cancel'),
 							id: 'cancel'}
 					];
@@ -107,7 +107,7 @@ const Scope = (function () {
 						utils.zapApiErrorDialog(tabId, error);
 						throw error;
 					})
-					.then(response => {
+					.then(_response => {
 						utils.messageAllTabs(tool.panel, {action: 'broadcastUpdate', context: {domain}, tool: {name: NAME, data: DATA.IN, icon: ICONS.IN, label: LABEL}});
 						return utils.writeTool(tool);
 					})
@@ -125,7 +125,7 @@ const Scope = (function () {
 				utils.zapApiErrorDialog(tabId, error);
 				throw error;
 			})
-			.then(response => {
+			.then(_response => {
 				// Remove from list and save
 				utils.loadTool(NAME)
 					.then(tool => {
@@ -169,7 +169,7 @@ const Scope = (function () {
 			.catch(utils.errorHandler);
 	}
 
-	self.addEventListener('activate', event => {
+	self.addEventListener('activate', _event => {
 		initializeStorage();
 	});
 

@@ -38,19 +38,19 @@ const Attack = (function () {
 			.then(isRunning => {
 				const config = {};
 
-				if (!isRunning) {
-					config.text = DIALOG.OFF;
-					config.buttons = [
-						{text: I18n.t('common_turn_on'),
-							id: 'turnon'},
-						{text: I18n.t('common_cancel'),
-							id: 'cancel'}
-					];
-				} else {
+				if (isRunning) {
 					config.text = DIALOG.ON;
 					config.buttons = [
 						{text: I18n.t('common_turn_off'),
 							id: 'turnoff'},
+						{text: I18n.t('common_cancel'),
+							id: 'cancel'}
+					];
+				} else {
+					config.text = DIALOG.OFF;
+					config.buttons = [
+						{text: I18n.t('common_turn_on'),
+							id: 'turnon'},
 						{text: I18n.t('common_cancel'),
 							id: 'cancel'}
 					];
@@ -76,7 +76,7 @@ const Attack = (function () {
 				utils.zapApiErrorDialog(tabId, error);
 				throw error;
 			})
-			.then(response => {
+			.then(_response => {
 				utils.loadTool(NAME)
 					.then(tool => {
 						tool.isRunning = true;
@@ -98,7 +98,7 @@ const Attack = (function () {
 				utils.zapApiErrorDialog(tabId, error);
 				throw error;
 			})
-			.then(response => {
+			.then(_response => {
 				utils.loadTool(NAME)
 					.then(tool => {
 						tool.isRunning = false;
@@ -155,7 +155,7 @@ const Attack = (function () {
 			.catch(utils.errorHandler);
 	}
 
-	self.addEventListener('activate', event => {
+	self.addEventListener('activate', _event => {
 		initializeStorage();
 	});
 
