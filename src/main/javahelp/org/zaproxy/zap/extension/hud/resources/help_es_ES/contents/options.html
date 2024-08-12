@@ -5,41 +5,41 @@
 <TITLE>Options HUD screen</TITLE>
 </HEAD>
 <BODY>
-	<H1>Options HUD screen</H1>
+	<H1>Opciones de la pantalla HUD</H1>
 
 	<h2>Enable when using the ZAP Desktop</h2>
 	
-	When set the HUD will be injected into HTML responses when the ZAP Desktop is used. This defaults to true.
+	Cuando se configura, el HUD se inyectará en las respuestas HTML cuando se use ZAP Desktop. El valor predeterminado es verdadero
 
-	<h2>Enable when using ZAP in daemon mode</h2>
+	<h2>Habilitar al usar ZAP en modo daemon</h2>
 	
-	When set the HUD will be injected into HTML responses when ZAP is started in daemon or 'headless' mode. 
-	This defaults to false as many people use ZAP for automation, injecting the HUD would not help and could cause
-	existing tests to break.
+	Cuando se configura, el HUD se inyectará en las respuestas HTML cuando ZAP se inicie en modo daemon o "headless". 
+	El valor predeterminado está en falso, ya que muchas personas usan ZAP para automatización; inyectar el HUD no ayudaría y podría provocar que las pruebas existentes fallen.
 
-	<h2>Show the HUD welcome screen when a browser is opened</h2>
+	<h2>Mostrar la pantalla de bienvenida del HUD cuando se abre un navegador</h2>
 	
-	When set the HUD Welcome screen, which includes a link to the tutorial, will be shown whenever a browser that is proxying through ZAP is opened.
-	The welcome screen includes an option to not show the screen again, if that is selected then this is the only
-	way to make the welcome screen appear again.
+	Cuando se configura, la pantalla de bienvenida del HUD, que incluye un enlace al tutorial, se mostrará siempre que se abra un navegador que esté haciendo proxy a través de ZAP.
+	La pantalla de bienvenida incluye una opción para no volver a mostrar la pantalla. Si se selecciona esta opción, esta es la única
+manera de hacer que la pantalla de bienvenida vuelva a aparecer.
 
-	<h2>Enable the HUD only for URLs that are in scope</h2>
+	<h2>Habilitar el HUD solo para las URL que están dentro del alcance</h2>
 	
-	If selected then only URLs flagged as 'in scope' in ZAP will have the HUD injected into them.
-	The plan is to expose this option via the HUD, but until that time if the option is enabled then you will
-	need to add URLs to the scope via the ZAP Desktop.
+	Si se selecciona, solo las URL marcadas como "dentro del alcance" en ZAP tendrán el HUD inyectado en ellas.
+	El plan es exponer esta opción a través del HUD, pero hasta ese momento, si la opción está habilitada, tendrás que agregar las URLs al alcance a través de ZAP Desktop.
 	<p>
-	When this option is selected then the HUD icon in the desktop toolbar will have a small 'target' overlay on the 
-	bottom right hand side.
+	Cuando se selecciona esta opción, el ícono del HUD en la barra de herramientas del escritorio tendrá una pequeña superposición de "objetivo" en la parte inferior derecha.
 
-	<h2>Enable on-domain messages</h2>
+	<h2>Habilitar mensajes en el dominio</h2>
 	
-	Allow messages to be sent from the target domain to the ZAP domain. This is needed for features such as showing the
-	number of hidden fields and displaying the alert associated with a specific field. 
-	If you think that the target domain could be malicious then you can turn this option off. 
-	The HUD does not trust any messages from the target domain but a malicious site could potentially do mildly annoying things such as 
-	causing ZAP alerts to be displayed unexpectedly. 
-	You will need to restart your browser after changing this setting in order for it to take effect.
+	Permitir que se envíen mensajes desde el dominio de destino al dominio ZAP.
+Esto es necesario para funciones como mostrar la cantidad de campos ocultos y mostrar la alerta asociada con un campo específico.
+Si cree que el dominio de destino podría ser malicioso, puede desactivar esta opción.
+El HUD no confía en ningún mensaje del dominio de destino, pero un sitio malicioso podría hacer cosas ligeramente molestas, como hacer que se muestren alertas ZAP inesperadamente.
+Deberá reiniciar su navegador después de cambiar esta configuración para que surta efecto. Esto es necesario para funciones como mostrar la cantidad de campos ocultos y mostrar la alerta asociada a un campo específico. 
+	
+Si cree que el dominio de destino podría ser malicioso, puede desactivar esta opción. 
+	El HUD no confía en ningún mensaje del dominio de destino, pero un sitio malicioso podría hacer cosas ligeramente molestas, como hacer que se muestren alertas ZAP inesperadamente 
+	Deberá reiniciar su navegador después de cambiar esta configuración para que surta efecto.
 
 	<h2>Remove CSP from target pages</h2>
 	
@@ -70,7 +70,7 @@
 
 	<h2>Reset tutorial tasks</h2>
 	
-	Clicking on this button will reset the tasks so that you will be able to take them again.
+	Al hacer clic en este botón se restablecerán las tareas para que puedas realizarlas nuevamente.
 
 	<h2>See also</h2>
 	<table>
