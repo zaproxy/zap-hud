@@ -60,6 +60,7 @@ import org.zaproxy.zap.extension.script.ScriptWrapper;
 import org.zaproxy.zap.extension.websocket.ExtensionWebSocket;
 import org.zaproxy.zap.utils.DesktopUtils;
 import org.zaproxy.zap.utils.DisplayUtils;
+import org.zaproxy.zap.utils.Stats;
 import org.zaproxy.zap.view.OverlayIcon;
 import org.zaproxy.zap.view.ZapMenuItem;
 import org.zaproxy.zap.view.ZapToggleButton;
@@ -368,6 +369,7 @@ public class ExtensionHUD extends ExtensionAdaptor
                         hudEnabledForDesktop = hudButton.isSelected();
                         getHudParam().setEnabledForDesktop(hudEnabledForDesktop);
                         setZapCanGetFocus(!hudEnabledForDesktop);
+                        Stats.incCounter("stats.ui.maintoolbar.button.hud");
                     });
         }
         return hudButton;
