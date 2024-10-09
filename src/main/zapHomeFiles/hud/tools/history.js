@@ -141,7 +141,7 @@ const History = (function () {
 		utils.writeTool(tool);
 	});
 
-	self.addEventListener('activate', event => {
+	self.addEventListener('activate', _event => {
 		initializeStorage();
 		registerForZapEvents('org.parosproxy.paros.extension.history.ProxyListenerLogEventPublisher');
 	});
