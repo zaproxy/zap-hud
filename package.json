@@ -98,7 +98,7 @@
   "dependencies": {
     "localforage": "^1.10.0",
     "vue": "^2.7.15",
-    "vue-i18n": "^8.27.2"
+    "vue-i18n": "^10.0.5"
   },
   "devDependencies": {
     "ava": "^5.3.1",
