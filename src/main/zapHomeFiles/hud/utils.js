@@ -735,7 +735,9 @@ const utils = (function () {
 		return dateObject.toISOString().slice(11, 23);
 	}
 
-	module.exports = {
+	if (typeof module == 'object') // This if check is for unit tests as they work in Node environment only because module.exports is not supported in browser
+	{
+			module.exports = {
 		parseRequestHeader,
 		parseResponseHeader,
 		isFromTrustedOrigin,
@@ -769,6 +771,7 @@ const utils = (function () {
 		log,
 		timestampToTimeString
 	};
+	}
 	return {
 		parseRequestHeader,
 		parseResponseHeader,
