@@ -127,8 +127,8 @@ const utils = (function () {
 		// Split the hostname into parts
 		const parts = hostname.split('.');
 
-    	// If the hostname has more than two parts, return the last two parts as the domain
-    	if (parts.length > 2) {
+		// If the hostname has more than two parts, return the last two parts as the domain
+		if (parts.length > 2) {
 			return parts.slice(-2).join('.');
 		}
 
@@ -741,40 +741,40 @@ const utils = (function () {
 		return dateObject.toISOString().slice(11, 23);
 	}
 
-	if (typeof module === 'object'){ // This if check is for unit tests as they work in Node environment only because module.exports is not supported in browser
+	if (typeof module === 'object') { // This if check is for unit tests as they work in Node environment only because module.exports is not supported in browser
 		module.exports = {
-				parseRequestHeader,
-				parseResponseHeader,
-				isFromTrustedOrigin,
-				parseDomainFromUrl,
-				getParameter,
-				isHUDInitialized,
-				initializeHUD,
-				loadFrame,
-				saveFrame,
-				registerTool,
-				registerTools,
-				loadTool,
-				writeTool,
-				loadPanelTools,
-				loadAllTools,
-				addToolToPanel,
-				removeToolFromPanel,
-				messageFrame,
-				messageAllTabs,
-				getAllClients,
-				getWindowVisibilityState,
-				messageWindow,
-				sortToolsByPosition,
-				configureButtonHtml,
-				getUpgradedDomain,
-				getUpgradedUrl,
-				errorHandler,
-				getZapFilePath,
-				getZapImagePath,
-				zapApiErrorDialog,
-				log,
-				timestampToTimeString
+			parseRequestHeader,
+			parseResponseHeader,
+			isFromTrustedOrigin,
+			parseDomainFromUrl,
+			getParameter,
+			isHUDInitialized,
+			initializeHUD,
+			loadFrame,
+			saveFrame,
+			registerTool,
+			registerTools,
+			loadTool,
+			writeTool,
+			loadPanelTools,
+			loadAllTools,
+			addToolToPanel,
+			removeToolFromPanel,
+			messageFrame,
+			messageAllTabs,
+			getAllClients,
+			getWindowVisibilityState,
+			messageWindow,
+			sortToolsByPosition,
+			configureButtonHtml,
+			getUpgradedDomain,
+			getUpgradedUrl,
+			errorHandler,
+			getZapFilePath,
+			getZapImagePath,
+			zapApiErrorDialog,
+			log,
+			timestampToTimeString
 		};
 	}
 
