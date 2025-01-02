@@ -43,27 +43,27 @@ const utils = (function () {
 	function parseRequestHeader(headerText) {
 		const header = {};
 
-		header.method = headerText.substring(0, headerText.indexOf(' '));
-		headerText = headerText.substring(headerText.indexOf(' ') + 1);
+		header.method = headerText.slice(0, Math.max(0, headerText.indexOf(' ')));
+		headerText = headerText.slice(Math.max(0, headerText.indexOf(' ') + 1));
 
-		header.uri = headerText.substring(0, headerText.indexOf(' '));
-		headerText = headerText.substring(headerText.indexOf(' ') + 1);
+		header.uri = headerText.slice(0, Math.max(0, headerText.indexOf(' ')));
+		headerText = headerText.slice(Math.max(0, headerText.indexOf(' ') + 1));
 
-		header.version = headerText.substring(0, headerText.indexOf('\r'));
-		headerText = headerText.substring(headerText.indexOf('\n') + 1);
+		header.version = headerText.slice(0, Math.max(0, headerText.indexOf('\r')));
+		headerText = headerText.slice(Math.max(0, headerText.indexOf('\n') + 1));
 
 		header.fields = {};
 		while (headerText !== '') {
-			const field = headerText.substring(0, headerText.indexOf(':'));
-			headerText = headerText.substring(headerText.indexOf(':') + 2);
+			const field = headerText.slice(0, Math.max(0, headerText.indexOf(':')));
+			headerText = headerText.slice(Math.max(0, headerText.indexOf(':') + 2));
 			let value;
 
-			if (headerText.indexOf('\n') < 0) {
+			if (!headerText.includes('\n')) {
 				value = headerText;
 				headerText = '';
 			} else {
-				value = headerText.substring(0, headerText.indexOf('\n'));
-				headerText = headerText.substring(headerText.indexOf('\n') + 1);
+				value = headerText.slice(0, Math.max(0, headerText.indexOf('\n')));
+				headerText = headerText.slice(Math.max(0, headerText.indexOf('\n') + 1));
 			}
 
 			header.fields[field] = value;
@@ -78,22 +78,22 @@ const utils = (function () {
 	function parseResponseHeader(headerText) {
 		const header = {};
 
-		header.version = headerText.substring(0, headerText.indexOf(' '));
-		headerText = headerText.substring(headerText.indexOf(' ') + 1);
+		header.version = headerText.slice(0, Math.max(0, headerText.indexOf(' ')));
+		headerText = headerText.slice(Math.max(0, headerText.indexOf(' ') + 1));
 
-		header.status = headerText.substring(0, headerText.indexOf(' '));
-		headerText = headerText.substring(headerText.indexOf(' ') + 1);
+		header.status = headerText.slice(0, Math.max(0, headerText.indexOf(' ')));
+		headerText = headerText.slice(Math.max(0, headerText.indexOf(' ') + 1));
 
-		header.reason = headerText.substring(0, headerText.indexOf(' '));
-		headerText = headerText.substring(headerText.indexOf(' ') + 1);
+		header.reason = headerText.slice(0, Math.max(0, headerText.indexOf(' ')));
+		headerText = headerText.slice(Math.max(0, headerText.indexOf(' ') + 1));
 
 		header.fields = {};
 		while (headerText !== '') {
-			const field = headerText.substring(0, headerText.indexOf(':'));
-			headerText = headerText.substring(headerText.indexOf(':') + 2);
+			const field = headerText.slice(0, Math.max(0, headerText.indexOf(':')));
+			headerText = headerText.slice(Math.max(0, headerText.indexOf(':') + 2));
 
-			const value = headerText.substring(0, headerText.indexOf('\n'));
-			headerText = headerText.substring(headerText.indexOf('\n') + 1);
+			const value = headerText.slice(0, Math.max(0, headerText.indexOf('\n')));
+			headerText = headerText.slice(Math.max(0, headerText.indexOf('\n') + 1));
 
 			header.fields[field] = value;
 		}
@@ -121,22 +121,22 @@ const utils = (function () {
 		hostname = hostname.split('?')[0];
 		hostname = hostname.split('#')[0];
 
-		 // Remove port if present
-    	hostname = hostname.split(':')[0];
+		// Remove port if present
+		hostname = hostname.split(':')[0];
 
 		// Split the hostname into parts
-    	const parts = hostname.split('.');
+		const parts = hostname.split('.');
 
     	// If the hostname has more than two parts, return the last two parts as the domain
     	if (parts.length > 2) {
-        return parts.slice(-2).join('.');
-    }
+			return parts.slice(-2).join('.');
+		}
 
 		return hostname;
 	}
 
 	function hasScheme(url) {
-		return url.indexOf('://') > -1;
+		return url.includes('://');
 	}
 
 	/*
@@ -163,7 +163,7 @@ const utils = (function () {
 	 * Initialize all of the info that will be stored in indexeddb.
 	 */
 	function initializeHUD(leftTools, rightTools, drawer) {
-		if (IS_DEV_MODE && leftTools.indexOf('hudErrors') < 0) {
+		if (IS_DEV_MODE && !leftTools.includes('hudErrors')) {
 			// Always add the error tool in dev mode
 			leftTools.push('hudErrors');
 		}
@@ -206,8 +206,8 @@ const utils = (function () {
 	function setDefaultTools(leftTools, rightTools) {
 		const promises = [];
 
-		for (let i = 0; i < leftTools.length; i++) {
-			loadTool(leftTools[i])
+		for (const [i, leftTool] of leftTools.entries()) {
+			loadTool(leftTool)
 				.then(tool => {
 					if (!tool) {
 						log(LOG_ERROR, 'utils.setDefaultTools', 'Failed to load tool.', tool.name);
@@ -223,8 +223,8 @@ const utils = (function () {
 				.catch(errorHandler);
 		}
 
-		for (let i = 0; i < rightTools.length; i++) {
-			loadTool(rightTools[i])
+		for (const [i, rightTool] of rightTools.entries()) {
+			loadTool(rightTool)
 				.then(tool => {
 					if (!tool) {
 						log(LOG_ERROR, 'utils.setDefaultTools', 'Failed to load tool.', tool.name);
@@ -441,8 +441,7 @@ const utils = (function () {
 	function messageFrame(tabId, frameId, message) {
 		return clients.matchAll({includeUncontrolled: true})
 			.then(clients => {
-				for (let i = 0; i < clients.length; i++) {
-					const client = clients[i];
+				for (const client of clients) {
 					const parameters = new URL(client.url).searchParams;
 
 					const tid = parameters.get('tabId');
@@ -480,8 +479,7 @@ const utils = (function () {
 			.then(clients => {
 				const frameClients = [];
 
-				for (let i = 0; i < clients.length; i++) {
-					const client = clients[i];
+				for (const client of clients) {
 					const parameters = new URL(client.url).searchParams;
 
 					const fid = parameters.get('frameId');
@@ -500,9 +498,7 @@ const utils = (function () {
 			})
 			.then(clients => {
 				return new Promise(((resolve, reject) => {
-					for (let i = 0; i < clients.length; i++) {
-						const client = clients[i];
-
+					for (const client of clients) {
 						const channel = new MessageChannel();
 						channel.port1.start();
 						channel.port2.start();
@@ -535,8 +531,7 @@ const utils = (function () {
 			.then(clients => {
 				const frameClients = [];
 
-				for (let i = 0; i < clients.length; i++) {
-					const client = clients[i];
+				for (const client of clients) {
 					const parameters = new URL(client.url).searchParams;
 
 					const fid = parameters.get('frameId');
@@ -666,7 +661,7 @@ const utils = (function () {
 					scheme = 'http';
 				}
 
-				return scheme + '://' + domain + url.substring(url.indexOf(domain) + domain.length);
+				return scheme + '://' + domain + url.slice(Math.max(0, url.indexOf(domain) + domain.length));
 			})
 			.catch(errorHandler);
 	}
@@ -681,7 +676,7 @@ const utils = (function () {
 			// Construct the stack trace
 			const lines = error.stack.split('\n').slice(0, -1);
 			lines.forEach(line => {
-				const functionName = line.substring(0, line.indexOf('/'));
+				const functionName = line.slice(0, Math.max(0, line.indexOf('/')));
 				const urlAndLineNo = line.substring(line.indexOf('http'), line.length - 1);
 				const parts = urlAndLineNo.split(':');
 				let url = parts[0] + ':' + parts[1];
@@ -746,43 +741,43 @@ const utils = (function () {
 		return dateObject.toISOString().slice(11, 23);
 	}
 
-	if (typeof module == 'object') // This if check is for unit tests as they work in Node environment only because module.exports is not supported in browser
-	{
-			module.exports = {
-		parseRequestHeader,
-		parseResponseHeader,
-		isFromTrustedOrigin,
-		parseDomainFromUrl,
-		getParameter,
-		isHUDInitialized,
-		initializeHUD,
-		loadFrame,
-		saveFrame,
-		registerTool,
-		registerTools,
-		loadTool,
-		writeTool,
-		loadPanelTools,
-		loadAllTools,
-		addToolToPanel,
-		removeToolFromPanel,
-		messageFrame,
-		messageAllTabs,
-		getAllClients,
-		getWindowVisibilityState,
-		messageWindow,
-		sortToolsByPosition,
-		configureButtonHtml,
-		getUpgradedDomain,
-		getUpgradedUrl,
-		errorHandler,
-		getZapFilePath,
-		getZapImagePath,
-		zapApiErrorDialog,
-		log,
-		timestampToTimeString
-	};
+	if (typeof module === 'object'){ // This if check is for unit tests as they work in Node environment only because module.exports is not supported in browser
+		module.exports = {
+				parseRequestHeader,
+				parseResponseHeader,
+				isFromTrustedOrigin,
+				parseDomainFromUrl,
+				getParameter,
+				isHUDInitialized,
+				initializeHUD,
+				loadFrame,
+				saveFrame,
+				registerTool,
+				registerTools,
+				loadTool,
+				writeTool,
+				loadPanelTools,
+				loadAllTools,
+				addToolToPanel,
+				removeToolFromPanel,
+				messageFrame,
+				messageAllTabs,
+				getAllClients,
+				getWindowVisibilityState,
+				messageWindow,
+				sortToolsByPosition,
+				configureButtonHtml,
+				getUpgradedDomain,
+				getUpgradedUrl,
+				errorHandler,
+				getZapFilePath,
+				getZapImagePath,
+				zapApiErrorDialog,
+				log,
+				timestampToTimeString
+		};
 	}
+
 	return {
 		parseRequestHeader,
 		parseResponseHeader,
