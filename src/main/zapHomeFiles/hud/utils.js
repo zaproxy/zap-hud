@@ -121,11 +121,11 @@ const utils = (function () {
 		hostname = hostname.split('?')[0];
 		hostname = hostname.split('#')[0];
 
-		 // Remove port if present
-    	hostname = hostname.split(':')[0];
+		// Remove port if present
+		hostname = hostname.split(':')[0];
 
 		// Split the hostname into parts
-    	const parts = hostname.split('.');
+		const parts = hostname.split('.');
 
 		// If the hostname has more than two parts, return the last two parts as the domain
 		if (parts.length > 2) {
@@ -782,6 +782,7 @@ const utils = (function () {
 			timestampToTimeString
 		};
 	}
+
 	return {
 		parseRequestHeader,
 		parseResponseHeader,
