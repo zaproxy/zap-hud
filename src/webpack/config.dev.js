@@ -12,11 +12,6 @@ module.exports = {
 	resolveLoader: {
 		alias: {'zap-loader': path.join(__dirname, 'loaders/zap-loader.js')}
 	},
-	resolve: {
-		alias: {
-			vue: "@vue/compat",
-		}
-	},
 	module: {
 		rules: [
 			{

@@ -97,8 +97,7 @@
   "homepage": "https://github.com/zaproxy/zap-hud/wiki",
   "dependencies": {
     "localforage": "^1.10.0",
-    "vue": "^3.1.0",
-    "@vue/compat": "^3.1.0",
+    "vue": "^2.7.14",
     "vue-i18n": "^8.27.2"
   },
   "devDependencies": {
