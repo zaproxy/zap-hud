@@ -13,7 +13,7 @@ But it also needs a non trivial amount of maintenance and we just don’t have e
 If you would like to get involved please get in touch via the [ZAP HUD Group](https://groups.google.com/group/zaproxy-hud).
 
 In order to keep maintaining the HUD we do not actually need anyone with Java experience - we have that covered.
-We need someone with good Java Script experience and the confidence to dive into non trivial browser issues.
+We need someone with good JavaScript experience and the confidence to dive into non trivial browser issues.
 
 The HUD is a very unconventional project, and does unusual things in order to get around browser security features.
 Browser changes often break the HUD in strange ways.
