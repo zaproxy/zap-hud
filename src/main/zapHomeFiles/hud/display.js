@@ -27,7 +27,7 @@ Vue.component('modal', {
 		close() {
 			this.$emit('close');
 		},
-		afterLeave(element) {
+		afterLeave(_element) {
 			if (!app.keepShowing) {
 				app.backStack = [];
 				hideDisplayFrame();
@@ -402,13 +402,13 @@ Vue.component('http-message-modal', {
 			let header = '';
 			let body = '';
 
-			if (!this.response.isReadonly) {
-				header = this.response.header;
-				body = this.response.body;
-			} else {
+			if (this.response.isReadonly) {
 				method = this.request.method;
 				header = this.request.header;
 				body = this.request.body;
+			} else {
+				header = this.response.header;
+				body = this.response.body;
 			}
 
 			return {method, header, body};
@@ -529,7 +529,7 @@ Vue.component('history-message-modal', {
 			}, [channel.port2]);
 		},
 		ascanRequest() {
-			const request = this.request;
+			const {request} = this;
 			this.$emit('close');
 			navigator.serviceWorker.controller.postMessage(
 				{
@@ -582,7 +582,7 @@ Vue.component('ws-message-modal', {
 	},
 	computed: {
 		currentMessage() {
-			const payload = this.payload;
+			const {payload} = this;
 			return {payload};
 		}
 	}
@@ -734,10 +734,9 @@ Vue.component('site-tree-node', {
 			channel.port1.addEventListener('message', event => {
 				// Remove the ..loading.. child
 				Vue.set(treeNode.model, 'children', []);
-				for (let i = 0; i < event.data.childNodes.length; i++) {
-					const child = event.data.childNodes[i];
+				event.data.childNodes.forEach(child => {
 					treeNode.addChild(child.name, child.method, child.isLeaf, child.hrefId);
-				}
+				});
 			});
 
 			navigator.serviceWorker.controller.postMessage({
@@ -753,7 +752,7 @@ Vue.component('site-tree-node', {
 			if ((name.match(/\//g) || []).length > 2) {
 				// If there are more than 2 slashes just show last url element
 				// The first 2 slashes will be http(s)://...
-				name = name.substring(name.lastIndexOf('/') + 1);
+				name = name.slice(name.lastIndexOf('/') + 1);
 			}
 
 			if (isLeaf) {
@@ -919,8 +918,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 navigator.serviceWorker.addEventListener('message', event => {
-	const action = event.data.action;
-	const config = event.data.config;
+	const {data: {action}} = event;
+	const {data: {config}} = event;
 	const port = event.ports[0];
 	let show;
 

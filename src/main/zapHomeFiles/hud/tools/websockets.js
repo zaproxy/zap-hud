@@ -98,7 +98,7 @@ const WebSockets = (function () {
 		}
 	});
 
-	self.addEventListener('activate', event => {
+	self.addEventListener('activate', _event => {
 		initializeStorage();
 		registerForZapEvents('org.zaproxy.zap.extension.websocket.WebSocketEventPublisher');
 	});

@@ -97,7 +97,7 @@ function initWebSockets() {
 			self.dispatchEvent(ev);
 		} else if ('id' in jevent && 'response' in jevent) {
 			const pFunctions = webSocketCallbacks[jevent.id];
-			const response = jevent.response;
+			const {response} = jevent;
 			if ('code' in response && 'message' in response) {
 				// These always indicate a failure
 				const error = new Error(I18n.t('error_with_message', [response.message]));
@@ -234,6 +234,7 @@ self.addEventListener('error', utils.errorHandler);
 self.addEventListener('hud.log', logHandler);
 self.addEventListener('hud.backup', backupHandler);
 
+// eslint-disable-next-line no-unused-vars
 function registerForZapEvents(publisher) {
 	apiCall('event', 'register', publisher);
 }
