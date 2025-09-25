@@ -15,6 +15,7 @@ class NoClientIdError extends Error {}
 
 /* exported utils */
 
+// Here utils is using an IIFE so that it is executed as soon as the file is loaded.
 const utils = (function () {
 	/*
 	 * Utility Functions
@@ -119,6 +120,17 @@ const utils = (function () {
 		// Find & remove "?" & "#"
 		hostname = hostname.split('?')[0];
 		hostname = hostname.split('#')[0];
+
+		// Remove port if present
+		hostname = hostname.split(':')[0];
+
+		// Split the hostname into parts
+		const parts = hostname.split('.');
+
+		// If the hostname has more than two parts, return the last two parts as the domain
+		if (parts.length > 2) {
+			return parts.slice(-2).join('.');
+		}
 
 		return hostname;
 	}
@@ -732,6 +744,43 @@ const utils = (function () {
 	function timestampToTimeString(timestamp) {
 		const dateObject = new Date(Number(timestamp));
 		return dateObject.toISOString().slice(11, 23);
+	}
+
+	if (typeof module === 'object') { // This if check is for unit tests as they work in Node environment only because module.exports is not supported in browser
+		module.exports = {
+			parseRequestHeader,
+			parseResponseHeader,
+			isFromTrustedOrigin,
+			parseDomainFromUrl,
+			getParameter,
+			isHUDInitialized,
+			initializeHUD,
+			loadFrame,
+			saveFrame,
+			registerTool,
+			registerTools,
+			loadTool,
+			writeTool,
+			loadPanelTools,
+			loadAllTools,
+			addToolToPanel,
+			removeToolFromPanel,
+			messageFrame,
+			messageAllTabs,
+			getAllClients,
+			getWindowVisibilityState,
+			messageWindow,
+			sortToolsByPosition,
+			configureButtonHtml,
+			getUpgradedDomain,
+			getUpgradedUrl,
+			errorHandler,
+			getZapFilePath,
+			getZapImagePath,
+			zapApiErrorDialog,
+			log,
+			timestampToTimeString
+		};
 	}
 
 	return {
