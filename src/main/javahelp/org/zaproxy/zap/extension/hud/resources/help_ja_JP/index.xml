@@ -3,5 +3,5 @@
 <index version="2.0">
     <!-- index entries are merged (sorted) into core index -->
 	<indexitem text="HUD" target="addon.hud"/>
-    <indexitem text="HUD Options" target="addon.hud.options"/>
+    <indexitem text="HUD オプション" target="addon.hud.options"/>
 </index>
