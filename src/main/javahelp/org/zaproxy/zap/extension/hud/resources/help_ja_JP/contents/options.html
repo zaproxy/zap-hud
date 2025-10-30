@@ -2,82 +2,76 @@
 <HTML>
 <HEAD>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
-<TITLE>Options HUD screen</TITLE>
+<TITLE>オプション - HUD画面</TITLE>
 </HEAD>
 <BODY>
-	<H1>Options HUD screen</H1>
+	<H1>オプション - HUD画面</H1>
 
-	<h2>Enable when using the ZAP Desktop</h2>
+	<h2>ZAP デスクトップ使用時に有効にする</h2>
 	
-	When set the HUD will be injected into HTML responses when the ZAP Desktop is used. This defaults to true.
+	設定されている場合、HUDはZAPデスクトップの使用時にHTMLレスポンスに挿入されます。 デフォルトは true です。
 
-	<h2>Enable when using ZAP in daemon mode</h2>
+	<h2>ZAPをデーモンモードで使用する際に有効にする</h2>
 	
-	When set the HUD will be injected into HTML responses when ZAP is started in daemon or 'headless' mode. 
-	This defaults to false as many people use ZAP for automation, injecting the HUD would not help and could cause
-	existing tests to break.
+	設定されている場合、ZAPがデーモンモードまたは「ヘッドレス」モードで起動されたときにHUDはHTMLレスポンスに挿入されます。 
+	多くの人が自動化のためにZAPを使用するため、HUDの挿入は役に立たず、既存のテストを中断させる可能性があるため、デフォルトは false です。
 
-	<h2>Show the HUD welcome screen when a browser is opened</h2>
+	<h2>ブラウザを開いたときにHUDのウェルカム画面を表示する</h2>
 	
-	When set the HUD Welcome screen, which includes a link to the tutorial, will be shown whenever a browser that is proxying through ZAP is opened.
-	The welcome screen includes an option to not show the screen again, if that is selected then this is the only
-	way to make the welcome screen appear again.
+	設定されている場合、ZAPをプロキシとして使用しているブラウザが開かれるたびに、チュートリアルへのリンクを含むHUDウェルカム画面が表示されます。
+	ウェルカム画面には、この画面を再度表示しないようにするオプションが含まれており、それが選択されている場合は、この設定でのみウェルカム画面を再度表示できるようになります。
 
-	<h2>Enable the HUD only for URLs that are in scope</h2>
+	<h2>スコープ内のURLに対してのみHUDを有効にする</h2>
 	
-	If selected then only URLs flagged as 'in scope' in ZAP will have the HUD injected into them.
-	The plan is to expose this option via the HUD, but until that time if the option is enabled then you will
-	need to add URLs to the scope via the ZAP Desktop.
+	選択されている場合、ZAPで「スコープ内」としてフラグが付けられたURLに対してのみHUDが挿入されます。
+	このオプションはHUD経由で公開する予定ですが、それまでの間、このオプションが有効な場合は、ZAPデスクトップからスコープにURLを追加する必要があります。
 	<p>
-	When this option is selected then the HUD icon in the desktop toolbar will have a small 'target' overlay on the 
-	bottom right hand side.
+	このオプションが選択されている場合、デスクトップツールバーのHUDアイコンの右下隅に小さな「ターゲット」オーバーレイが表示されます。
 
-	<h2>Enable on-domain messages</h2>
+	<h2>オンドメインメッセージを有効にする</h2>
 	
-	Allow messages to be sent from the target domain to the ZAP domain. This is needed for features such as showing the
-	number of hidden fields and displaying the alert associated with a specific field. 
-	If you think that the target domain could be malicious then you can turn this option off. 
-	The HUD does not trust any messages from the target domain but a malicious site could potentially do mildly annoying things such as 
-	causing ZAP alerts to be displayed unexpectedly. 
-	You will need to restart your browser after changing this setting in order for it to take effect.
+	ターゲットドメインからZAPドメインへメッセージが送信されることを許可します。 これは、非表示フィールドの数を表示したり、特定のフィールドに関連付けられたアラートを表示したりするなどの機能に必要です。 
+	ターゲットドメインが悪意のある可能性があると思われる場合は、このオプションをオフにできます。 
+	HUDはターゲットドメインからのいかなるメッセージも信頼しませんが、悪意のあるサイトが、ZAPアラートを予期せず表示させるなど、軽度ではあるものの迷惑な行為を引き起こす可能性があります。 
+	この設定を変更した後、有効にするにはブラウザを再起動する必要があります。
 
-	<h2>Remove CSP from target pages</h2>
+	<h2>ターゲットページからCSPを削除する</h2>
 	
-	The HUD will not currently work if a strong CSP policy is used in target web sites. 
-	By default ZAP will strip off the CSP, turning this option off may well cause the HUD to break.
+	ターゲットWebサイトで強力なCSPポリシーが使用されている場合、HUDは現在機能しません。 
+	デフォルトではZAPはCSPを削除しますが、このオプションをオフにすると、HUDが機能しなくなる可能性が高くなります。
 
-	<h2>Development mode</h2>
+	<h2>開発モード</h2>
 	
-	If set then various options are set that can be useful when debugging the HUD, including:
+	設定されている場合、HUDのデバッグ時に役立つ様々なオプションが設定されます：
 	<UL>
-	<li>Setting the client side debug level to DEBUG</li>
-	<li>Sending the client side logging to the ZAP Output tab</li>
-	<li>Adding the 'HUD Errors' tool which shows any errors logged</li>
+	<li>クライアントサイドのデバッグレベルを DEBUG に設定する</li>
+	<li>クライアントサイドのロギングをZAPの出力タブに送信する</li>
+	<li>ログに記録されたすべてのエラーを表示する「HUDエラー」ツールを追加する</li>
 	</UL>
 
-	<h2>Base directory</h2>
+	<h2>ベースディレクトリ</h2>
 	
-	This should not be changed at this time.
+	現時点では、これを変更する必要はありません。
 
-	<h2>Allow unsafe-evals</h2>
+	<h2>unsafe-evals を許可</h2>
 	
-	This is currently required in order for the HUD to work. 
-	In the future the plan is to only require this when actually developing the HUD.
+	これは現在、HUDが機能するために必須です。 
+	将来的には、実際にHUDを開発しているときにのみ必要となるよう計画されています。
 
-	<h2>Skip tutorial tasks</h2>
+	<h2>チュートリアルタスクをスキップする</h2>
 	
-	Setting this option allows you to view all of the tutorial pages without passing the tasks.
+	このオプションを設定すると、タスクを完了せずにすべてのチュートリアルページを表示できます。
 
-	<h2>Reset tutorial tasks</h2>
+	<h2>チュートリアルタスクをリセット</h2>
 	
-	Clicking on this button will reset the tasks so that you will be able to take them again.
+	このボタンをクリックすると、タスクがリセットされ、再度実行することができるようになります。
 
 	<h2>関連情報</h2>
 	<table>
 		<tr>
 			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 			<td><a href="hud.html">HUD</a></td>
-			<td>for an overview of the HUD add-on</td>
+			<td>HUDアドオンの概要について</td>
 		</tr>
 	</table>
 
