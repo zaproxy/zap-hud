@@ -4,6 +4,11 @@ const path = require('path');
 const {VueLoaderPlugin} = require('vue-loader');
 
 module.exports = {
+	resolve: {
+    alias: {
+      vue: '@vue/compat'
+    }
+  },
 	mode: 'development',
 	entry: [
 		'./src/main/zapHomeFiles/hud/serviceworker.js',
