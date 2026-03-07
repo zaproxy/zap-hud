@@ -883,6 +883,14 @@ document.addEventListener('DOMContentLoaded', () => {
 	tabId = parameters.get('tabId');
 
 	/* Vue app */
+	document.addEventListener("DOMContentLoaded", function () {
+
+  const appElement = document.getElementById("app");
+
+  if (!appElement) {
+    console.warn("ZAP HUD: #app element not found, delaying initialization.");
+    return;
+  }
 	app = new Vue({
 		i18n: I18n.i18n,
 		el: '#app',
