@@ -1,15 +1,15 @@
-import test from 'ava';
+const test = require('ava');
+const utils = require('../../../src/main/zapHomeFiles/hud/utils.js');
 
 // TODO: use clean build system
 // Dynamically load utils functions from utils.js
 // <dirty-hack>
-const fs = require('fs');
+// const fs = require('fs');
 
-const CODE_PATH = './src/main/zapHomeFiles/hud/utils.js';
-const jsCode = fs.readFileSync(CODE_PATH, 'utf-8');
-global.eval(jsCode);
+// const CODE_PATH = './src/main/zapHomeFiles/hud/utils.js';
+// const jsCode = fs.readFileSync(CODE_PATH, 'utf-8');
+// global.eval(jsCode);
 // </dirty-hack>
-
 test('sortToolsByPosition result are in descending order', t => {
 	const tools = [{
 		position: 3,
