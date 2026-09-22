@@ -55,7 +55,7 @@
       "no-unsanitized"
     ],
     "rules": {
-      "no-negated-condition": "warn",
+      "no-negated-condition": "error",
       "no-unsanitized/method": [
         "error",
         {
@@ -76,13 +76,13 @@
           }
         }
       ],
-      "no-unused-vars": "warn",
-      "prefer-destructuring": "warn",
-      "unicorn/no-for-loop": "warn",
-      "unicorn/prefer-includes": "warn",
-      "unicorn/prefer-string-slice": "warn",
+      "no-unused-vars": "error",
+      "prefer-destructuring": "error",
+      "unicorn/no-for-loop": "error",
+      "unicorn/prefer-includes": "error",
+      "unicorn/prefer-string-slice": "error",
       "unicorn/filename-case": "warn",
-      "unicorn/prefer-query-selector": "warn"
+      "unicorn/prefer-query-selector": "error"
     }
   },
   "repository": {

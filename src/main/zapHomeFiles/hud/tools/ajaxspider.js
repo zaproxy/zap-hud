@@ -49,19 +49,19 @@ const AjaxSpider = (function () {
 				config.buttons = [{text: I18n.t('common_cancel'), id: 'cancel'}];
 				config.status = '';
 
-				if (!isRunning) {
-					config.status = 'stopped';
-					if (!isInScope) {
-						config.text = DIALOG.START_ADD_SCOPE_1 + domain + DIALOG.START_ADD_SCOPE_2 + domain + DIALOG.START_ADD_SCOPE_3;
-						config.buttons.unshift({text: I18n.t('common_start'), id: 'start-add-to-scope'});
-					} else {
-						config.text = DIALOG.START_1 + domain + DIALOG.START_2;
-						config.buttons.unshift({text: I18n.t('common_start'), id: 'start'});
-					}
-				} else {
+				if (isRunning) {
 					config.status = 'running';
 					config.text = DIALOG.STOP_1 + tool.runningScope[0] + DIALOG.STOP_2;
 					config.buttons.unshift({text: I18n.t('common_stop'), id: 'stop'});
+				} else {
+					config.status = 'stopped';
+					if (isInScope) {
+						config.text = DIALOG.START_1 + domain + DIALOG.START_2;
+						config.buttons.unshift({text: I18n.t('common_start'), id: 'start'});
+					} else {
+						config.text = DIALOG.START_ADD_SCOPE_1 + domain + DIALOG.START_ADD_SCOPE_2 + domain + DIALOG.START_ADD_SCOPE_3;
+						config.buttons.unshift({text: I18n.t('common_start'), id: 'start-add-to-scope'});
+					}
 				}
 
 				return config;
@@ -89,7 +89,7 @@ const AjaxSpider = (function () {
 		utils.getUpgradedUrl(url)
 			.then(upgradedUrl => {
 				apiCallWithResponse('ajaxSpider', 'action', 'setOptionBrowserId', {String: browserId});
-				apiCallWithResponse('ajaxSpider', 'action', 'scan', {url: upgradedUrl}).then(response => {
+				apiCallWithResponse('ajaxSpider', 'action', 'scan', {url: upgradedUrl}).then(_response => {
 					spiderStarted(tabId, upgradedUrl);
 				})
 					.catch(error => {
@@ -114,7 +114,7 @@ const AjaxSpider = (function () {
 	}
 
 	function stopSpider(tabId) {
-		apiCallWithResponse('ajaxSpider', 'action', 'stop').then(response => {
+		apiCallWithResponse('ajaxSpider', 'action', 'stop').then(_response => {
 			spiderStopped(tabId);
 		})
 			.catch(error => {
@@ -122,7 +122,7 @@ const AjaxSpider = (function () {
 			});
 	}
 
-	function spiderStopped(tabId) {
+	function spiderStopped(_tabId) {
 		utils.loadTool(NAME)
 			.then(tool => {
 				tool.isRunning = false;
@@ -177,7 +177,7 @@ const AjaxSpider = (function () {
 			.catch(utils.errorHandler);
 	}
 
-	self.addEventListener('activate', event => {
+	self.addEventListener('activate', _event => {
 		initializeStorage();
 		registerForZapEvents('org.zaproxy.zap.extension.spiderAjax.SpiderEventPublisher');
 	});

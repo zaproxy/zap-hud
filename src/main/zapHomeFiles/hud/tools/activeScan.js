@@ -51,17 +51,15 @@ const ActiveScan = (function () {
 				const config = {};
 				config.buttons = [{text: I18n.t('common_cancel'), id: 'cancel'}];
 
-				if (!isRunning) {
-					if (!isInScope) {
-						config.text = DIALOG.START_ADD_SCOPE_1 + domain + DIALOG.START_ADD_SCOPE_2 + domain + DIALOG.START_ADD_SCOPE_3;
-						config.buttons.unshift({text: I18n.t('common_start'), id: 'start-add-to-scope'});
-					} else {
-						config.text = DIALOG.START_1 + domain + DIALOG.START_2;
-						config.buttons.unshift({text: I18n.t('common_start'), id: 'start'});
-					}
-				} else {
+				if (isRunning) {
 					config.text = DIALOG.STOP_1 + tool.runningScope[0] + DIALOG.STOP_2;
 					config.buttons.unshift({text: I18n.t('common_stop'), id: 'stop'});
+				} else if (isInScope) {
+					config.text = DIALOG.START_1 + domain + DIALOG.START_2;
+					config.buttons.unshift({text: I18n.t('common_start'), id: 'start'});
+				} else {
+					config.text = DIALOG.START_ADD_SCOPE_1 + domain + DIALOG.START_ADD_SCOPE_2 + domain + DIALOG.START_ADD_SCOPE_3;
+					config.buttons.unshift({text: I18n.t('common_start'), id: 'start-add-to-scope'});
 				}
 
 				return config;
@@ -150,10 +148,10 @@ const ActiveScan = (function () {
 	function checkIsRunning(tabId) {
 		return new Promise(resolve => {
 			utils.loadTool(NAME).then(tool => {
-				if (tabId !== undefined) {
-					resolve(tool.runningTabId === tabId);
-				} else {
+				if (tabId === undefined) {
 					resolve(tool.isRunning);
+				} else {
+					resolve(tool.runningTabId === tabId);
 				}
 			});
 		});
@@ -207,7 +205,7 @@ const ActiveScan = (function () {
 			.catch(utils.errorHandler);
 	}
 
-	self.addEventListener('activate', event => {
+	self.addEventListener('activate', _event => {
 		initializeStorage();
 		registerForZapEvents(ACTIVE_SCAN_EVENT);
 	});

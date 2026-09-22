@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 const alertUtils = (function () {
 	function showSiteAlerts(tabId, title, target, alertRisk) {
 		// Note that theres no need to load any tool data here
@@ -39,14 +40,14 @@ const alertUtils = (function () {
 
 	function flattenAlerts(alerts) {
 		const json = {};
-		for (let i = 0; i < alerts.length; i++) {
-			const alert = alerts[i];
+
+		alerts.forEach(alert => {
 			for (const key in alert) {
 				if (Object.prototype.hasOwnProperty.call(alert, key)) {
 					json[key] = alert[key];
 				}
 			}
-		}
+		});
 
 		return json;
 	}
@@ -69,7 +70,7 @@ const alertUtils = (function () {
 
 				if (target.indexOf('?') > 0) {
 					// Remove any url params
-					target = target.substring(0, target.indexOf('?'));
+					target = target.slice(0, target.indexOf('?'));
 				}
 
 				return apiCallWithResponse('alert', 'view', 'alertsByRisk', {url: target, recurse: 'false'});

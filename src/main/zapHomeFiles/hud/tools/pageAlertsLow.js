@@ -42,7 +42,7 @@ const PageAlertsLow = (function () {
 		alertUtils.showOptions(tabId, NAME, LABEL);
 	}
 
-	self.addEventListener('activate', event => {
+	self.addEventListener('activate', _event => {
 		initializeStorage();
 	});
 

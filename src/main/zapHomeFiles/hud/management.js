@@ -15,7 +15,6 @@ const ZAP_SHARED_SECRET = '<<ZAP_SHARED_SECRET>>';
 
 let app;
 let tabId = '';
-let frameId = '';
 const urlParameter = utils.getParameter(document.location.href, 'url');
 const context = {
 	url: urlParameter,
@@ -56,7 +55,6 @@ function showTutorial() {
 document.addEventListener('DOMContentLoaded', () => {
 	const parameters = new URL(document.location).searchParams;
 
-	frameId = parameters.get('frameId');
 	tabId = parameters.get('tabId');
 
 	app = new Vue({

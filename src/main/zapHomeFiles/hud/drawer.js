@@ -1,4 +1,5 @@
 // App is the main Vue object controlling everything
+
 let app;
 const eventBus = new Vue();
 let frameId = '';
@@ -55,7 +56,7 @@ Vue.component('history', {
 					return re.test(message.url);
 				}
 
-				return message.url.indexOf(self.filter) >= 0;
+				return message.url.includes(self.filter);
 			});
 		}
 	},
@@ -72,12 +73,12 @@ Vue.component('history', {
 	},
 	watch: {
 		regexEnabled() {
-			this.isRegExError = !this.regexEnabled ? false : this.isRegExError;
+			this.isRegExError = this.regexEnabled ? this.isRegExError : false;
 		},
 		filteredMessages() {
 			this.$nextTick(function () {
 				const visibleMessages = document.querySelectorAll('#history-messages .message-tr');
-				this.hiddenMessageCount = (!this.messages) ? 0 : this.messages.length - visibleMessages.length;
+				this.hiddenMessageCount = this.messages ? this.messages.length - visibleMessages.length : 0;
 				this.historyItemsFiltered();
 			});
 		}
@@ -104,7 +105,7 @@ Vue.component('history', {
 		if (this.messages.length > 0) {
 			const lastMessage = this.messages[this.messages.length - 1];
 			const lastid = 'message-tr-' + lastMessage.id;
-			const lastIdElement = document.getElementById(lastid);
+			const lastIdElement = document.querySelector('#' + lastid);
 
 			if (lastIdElement) {
 				lastIdElement.scrollIntoView({block: 'end', behavior: 'smooth'});
@@ -169,7 +170,7 @@ Vue.component('websockets', {
 					return re.test(message.messageSummary);
 				}
 
-				return message.messageSummary.indexOf(self.filter) >= 0;
+				return message.messageSummary.includes(self.filter);
 			});
 		}
 	},
@@ -186,12 +187,12 @@ Vue.component('websockets', {
 	},
 	watch: {
 		regexEnabled() {
-			this.isRegExError = !this.regexEnabled ? false : this.isRegExError;
+			this.isRegExError = this.regexEnabled ? this.isRegExError : false;
 		},
 		filteredMessages() {
 			this.$nextTick(function () {
 				const visibleMessages = document.querySelectorAll('#websockets-messages .message-tr');
-				this.hiddenMessageCount = (!this.messages) ? 0 : this.messages.length - visibleMessages.length;
+				this.hiddenMessageCount = this.messages ? this.messages.length - visibleMessages.length : 0;
 				this.websocketsItemsFiltered();
 			});
 		}
@@ -315,10 +316,10 @@ Vue.component('tabs', {
 			})
 			.catch(utils.errorHandler);
 
-		eventBus.$on('showTabs', data => {
+		eventBus.$on('showTabs', _data => {
 			this.tabsVisible = true;
 		});
-		eventBus.$on('hideTabs', data => {
+		eventBus.$on('hideTabs', _data => {
 			this.tabsVisible = false;
 			if (this.isOpen) {
 				this.closeDrawer();
@@ -431,7 +432,7 @@ Vue.component('drawer-button-showhide', {
 		showHud() {
 			this.isHudVisible = true;
 			localforage.setItem('settings.isHudVisible', true)
-				.then(function (value) {
+				.then(function (_value) {
 					this.icon = utils.getZapImagePath('radar.png');
 					parent.postMessage({tabId, frameId, action: 'showHudPanels'}, context.url);
 					eventBus.$emit('showTabs', {});
@@ -441,7 +442,7 @@ Vue.component('drawer-button-showhide', {
 		hideHud() {
 			this.isHudVisible = false;
 			localforage.setItem('settings.isHudVisible', false)
-				.then(function (value) {
+				.then(function (_value) {
 					this.icon = utils.getZapImagePath('radar-grey.png');
 					parent.postMessage({tabId, frameId, action: 'hideHudPanels'}, context.url);
 					eventBus.$emit('hideTabs', {});
@@ -477,6 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	tabId = parameters.get('tabId');
 
 	/* Vue app */
+	// eslint-disable-next-line no-unused-vars
 	app = new Vue({
 		i18n: I18n.i18n,
 		el: '#app',
@@ -485,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 navigator.serviceWorker.addEventListener('message', event => {
-	const action = event.data.action;
+	const {data: {action}} = event;
 	const port = event.ports[0];
 
 	switch (action) {
